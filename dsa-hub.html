@@ -1,0 +1,1065 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>DSA Visualizer Hub — Interactive Dry Runs</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Sora:wght@300;400;600;700;800&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0d0f14;
+      --surface: #13161d;
+      --surface2: #1a1e28;
+      --surface3: #212638;
+      --border: rgba(255,255,255,0.07);
+      --border-mid: rgba(255,255,255,0.12);
+      --text: #e8eaf0;
+      --text-muted: #6b7280;
+      --text-dim: #3d4251;
+      --accent: #7c6ef5;
+      --accent-glow: rgba(124,110,245,0.18);
+      --green: #34d399;
+      --amber: #fbbf24;
+      --blue: #60a5fa;
+      --purple: #c084fc;
+      --orange: #fb923c;
+      --teal: #2dd4bf;
+      --rose: #f472b6;
+      --cyan: #22d3ee;
+      --red: #f87171;
+      --emerald: #10b981;
+      --mono: 'JetBrains Mono', monospace;
+      --sans: 'Sora', sans-serif;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--sans);
+      font-size: 15px;
+      line-height: 1.6;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(124,110,245,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(124,110,245,0.03) 1px, transparent 1px);
+      background-size: 44px 44px;
+      pointer-events: none;
+      z-index: 0;
+      animation: gridShift 50s linear infinite;
+    }
+
+    @keyframes gridShift {
+      from { background-position: 0 0; }
+      to   { background-position: 44px 44px; }
+    }
+
+    body::after {
+      content: '';
+      position: fixed;
+      top: -20%;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 900px;
+      height: 500px;
+      background: radial-gradient(ellipse, rgba(124,110,245,0.07) 0%, transparent 70%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .page {
+      position: relative;
+      z-index: 1;
+      max-width: 1060px;
+      margin: 0 auto;
+      padding: 4rem 1.5rem 6rem;
+    }
+
+    /* HEADER */
+    header {
+      text-align: center;
+      margin-bottom: 3.5rem;
+      animation: fadeUp .7s ease both;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-family: var(--mono);
+      font-size: 10px;
+      font-weight: 500;
+      letter-spacing: .16em;
+      text-transform: uppercase;
+      color: var(--accent);
+      background: var(--accent-glow);
+      border: 1px solid rgba(124,110,245,0.25);
+      padding: 5px 16px;
+      border-radius: 100px;
+      margin-bottom: 1.5rem;
+    }
+
+    .eyebrow-dot {
+      width: 5px; height: 5px; border-radius: 50%;
+      background: var(--accent);
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%,100% { opacity:1; transform:scale(1); }
+      50%      { opacity:.3; transform:scale(.6); }
+    }
+
+    h1 {
+      font-size: clamp(2.2rem, 6vw, 3.8rem);
+      font-weight: 800;
+      line-height: 1.08;
+      letter-spacing: -.04em;
+      margin-bottom: 1.1rem;
+    }
+
+    .h1-line1 { display: block; color: var(--text); }
+    .h1-line2 {
+      display: block;
+      background: linear-gradient(115deg, #7c6ef5 0%, #22d3ee 50%, #34d399 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .header-sub {
+      font-size: 15px;
+      color: var(--text-muted);
+      max-width: 520px;
+      margin: 0 auto 2.5rem;
+      line-height: 1.8;
+    }
+
+    .stats {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 2.5rem;
+      flex-wrap: wrap;
+      padding-top: 2rem;
+      border-top: 1px solid var(--border);
+    }
+
+    .stat { text-align: center; }
+    .stat-num {
+      display: block;
+      font-family: var(--mono);
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: var(--text);
+      line-height: 1;
+      margin-bottom: 4px;
+    }
+    .stat-label {
+      font-family: var(--mono);
+      font-size: 10px;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+    }
+    .stat-sep { width: 1px; height: 36px; background: var(--border-mid); }
+
+    /* FEATURES ROW */
+    .features-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 10px;
+      margin-bottom: 3rem;
+      animation: fadeUp .7s ease .08s both;
+    }
+
+    .feature-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px 16px;
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+    }
+
+    .feature-icon { font-size: 18px; flex-shrink: 0; margin-top: 1px; }
+    .feature-text h4 { font-size: 12px; font-weight: 700; color: var(--text); margin-bottom: 3px; }
+    .feature-text p { font-size: 11px; color: var(--text-muted); line-height: 1.5; font-family: var(--mono); }
+
+    /* SEARCH */
+    .search-wrap {
+      max-width: 480px;
+      margin: 0 auto 3rem;
+      position: relative;
+      animation: fadeUp .7s ease .1s both;
+    }
+
+    .search-icon {
+      position: absolute; left: 16px; top: 50%; transform: translateY(-50%);
+      font-size: 13px; color: var(--text-dim); pointer-events: none;
+    }
+
+    .search-input {
+      width: 100%;
+      padding: 12px 18px 12px 42px;
+      background: var(--surface);
+      border: 1px solid var(--border-mid);
+      border-radius: 12px;
+      color: var(--text);
+      font-family: var(--mono);
+      font-size: 13px;
+      outline: none;
+      transition: border-color .2s, box-shadow .2s;
+    }
+    .search-input::placeholder { color: var(--text-dim); }
+    .search-input:focus {
+      border-color: rgba(124,110,245,0.45);
+      box-shadow: 0 0 0 3px rgba(124,110,245,0.09);
+    }
+
+    .section-label {
+      font-family: var(--mono);
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      margin-bottom: 1.2rem;
+    }
+
+    /* TOPIC TABS */
+    .topics-row {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 2.8rem;
+      animation: fadeUp .7s ease .15s both;
+    }
+
+    .topic-tab {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 18px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      cursor: pointer;
+      transition: all .18s;
+      font-family: var(--mono);
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-muted);
+      letter-spacing: .02em;
+      user-select: none;
+    }
+
+    .topic-tab:hover { border-color: var(--border-mid); color: var(--text); transform: translateY(-2px); }
+
+    .topic-tab[data-topic="trees"].active      { background:rgba(34,211,238,0.08);  border-color:rgba(34,211,238,0.35);  color:var(--cyan);   transform:translateY(-2px); }
+    .topic-tab[data-topic="bst"].active        { background:rgba(16,185,129,0.08);  border-color:rgba(16,185,129,0.35);  color:var(--emerald);transform:translateY(-2px); }
+    .topic-tab[data-topic="arrays"].active     { background:rgba(52,211,153,0.08);  border-color:rgba(52,211,153,0.35);  color:var(--green);  transform:translateY(-2px); }
+    .topic-tab[data-topic="strings"].active    { background:rgba(244,114,182,0.08); border-color:rgba(244,114,182,0.35); color:var(--rose);   transform:translateY(-2px); }
+    .topic-tab[data-topic="hashmap"].active    { background:rgba(251,191,36,0.08);  border-color:rgba(251,191,36,0.35);  color:var(--amber);  transform:translateY(-2px); }
+    .topic-tab[data-topic="bsearch"].active    { background:rgba(96,165,250,0.08);  border-color:rgba(96,165,250,0.35);  color:var(--blue);   transform:translateY(-2px); }
+    .topic-tab[data-topic="graph"].active      { background:rgba(251,146,60,0.08);  border-color:rgba(251,146,60,0.35);  color:var(--orange); transform:translateY(-2px); }
+    .topic-tab[data-topic="dp"].active         { background:rgba(192,132,252,0.08); border-color:rgba(192,132,252,0.35); color:var(--purple); transform:translateY(-2px); }
+    .topic-tab[data-topic="stack"].active      { background:rgba(248,113,113,0.08); border-color:rgba(248,113,113,0.35); color:var(--red);    transform:translateY(-2px); }
+
+    .tab-icon { font-size: 15px; }
+
+    .tab-badge {
+      font-size: 9px;
+      font-weight: 700;
+      padding: 2px 7px;
+      border-radius: 5px;
+      background: var(--surface3);
+      color: var(--text-dim);
+      min-width: 18px;
+      text-align: center;
+    }
+    .topic-tab.active .tab-badge { background: rgba(255,255,255,0.1); color: inherit; }
+
+    /* ── BST PROPERTY CALLOUT ── */
+    .bst-callout {
+      display: flex;
+      align-items: flex-start;
+      gap: 16px;
+      background: rgba(16,185,129,0.06);
+      border: 1px solid rgba(16,185,129,0.2);
+      border-left: 3px solid var(--emerald);
+      border-radius: 12px;
+      padding: 16px 20px;
+      margin-bottom: 2.2rem;
+      animation: fadeUp .4s ease both;
+    }
+
+    .bst-callout-icon { font-size: 22px; flex-shrink: 0; margin-top: 2px; }
+
+    .bst-callout-content { flex: 1; }
+    .bst-callout-title { font-family: var(--mono); font-size: 11px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--emerald); margin-bottom: 6px; }
+    .bst-callout-body { font-family: var(--mono); font-size: 12px; color: var(--text-muted); line-height: 1.7; }
+    .bst-callout-body code { color: var(--emerald); background: rgba(16,185,129,0.1); padding: 1px 5px; border-radius: 4px; }
+
+    /* CARDS SECTION */
+    .cards-section { animation: fadeUp .4s ease both; }
+
+    .cards-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      margin-bottom: 1.5rem;
+      gap: 12px;
+    }
+
+    .cards-header-inner { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+
+    .topic-title {
+      font-size: 1.4rem;
+      font-weight: 700;
+      letter-spacing: -.02em;
+      color: var(--text);
+    }
+
+    .topic-count-badge {
+      font-family: var(--mono);
+      font-size: 11px;
+      font-weight: 700;
+      padding: 3px 10px;
+      border-radius: 6px;
+    }
+
+    .topic-description {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 4px;
+      font-family: var(--mono);
+    }
+
+    /* CARDS GRID */
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 18px;
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      overflow: hidden;
+      text-decoration: none;
+      color: inherit;
+      display: flex;
+      flex-direction: column;
+      transition: border-color .2s, transform .22s cubic-bezier(.34,1.3,.64,1), box-shadow .2s;
+      position: relative;
+      animation: cardIn .35s ease both;
+    }
+
+    .card:nth-child(1){animation-delay:.04s} .card:nth-child(2){animation-delay:.09s}
+    .card:nth-child(3){animation-delay:.14s} .card:nth-child(4){animation-delay:.19s}
+    .card:nth-child(5){animation-delay:.24s} .card:nth-child(6){animation-delay:.29s}
+    .card:nth-child(7){animation-delay:.34s} .card:nth-child(8){animation-delay:.39s}
+    .card:nth-child(9){animation-delay:.44s} .card:nth-child(10){animation-delay:.49s}
+    .card:nth-child(11){animation-delay:.54s}
+
+    .card:hover { transform: translateY(-5px); box-shadow: 0 22px 64px rgba(0,0,0,0.45); }
+    .card[data-c="blue"]:hover    { border-color: rgba(96,165,250,0.4); }
+    .card[data-c="purple"]:hover  { border-color: rgba(192,132,252,0.4); }
+    .card[data-c="orange"]:hover  { border-color: rgba(251,146,60,0.4); }
+    .card[data-c="teal"]:hover    { border-color: rgba(45,212,191,0.4); }
+    .card[data-c="green"]:hover   { border-color: rgba(52,211,153,0.4); }
+    .card[data-c="rose"]:hover    { border-color: rgba(244,114,182,0.4); }
+    .card[data-c="cyan"]:hover    { border-color: rgba(34,211,238,0.4); }
+    .card[data-c="emerald"]:hover { border-color: rgba(16,185,129,0.4); }
+
+    .card-tree {
+      padding: 22px 22px 0;
+      height: 148px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .card-tree svg { width: 100%; height: 100%; }
+
+    .diff-badge {
+      position: absolute;
+      top: 14px; right: 14px;
+      font-family: var(--mono);
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      padding: 3px 9px;
+      border-radius: 5px;
+    }
+    .diff-easy   { background:rgba(52,211,153,0.15);  color:#34d399; border:1px solid rgba(52,211,153,0.25); }
+    .diff-medium { background:rgba(251,191,36,0.15);  color:#fbbf24; border:1px solid rgba(251,191,36,0.25); }
+    .diff-hard   { background:rgba(248,113,113,0.15); color:#f87171; border:1px solid rgba(248,113,113,0.25); }
+
+    .card-body {
+      padding: 16px 22px 22px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .card-tag {
+      font-family: var(--mono);
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+
+    .card-title {
+      font-size: 1.05rem;
+      font-weight: 700;
+      letter-spacing: -.02em;
+      color: var(--text);
+      margin-bottom: 7px;
+      line-height: 1.25;
+    }
+
+    .card-desc {
+      font-size: 12px;
+      color: var(--text-muted);
+      line-height: 1.7;
+      flex: 1;
+      margin-bottom: 10px;
+    }
+
+    .card-desc code {
+      font-family: var(--mono);
+      font-size: 10px;
+      color: var(--accent);
+      background: var(--surface2);
+      padding: 1px 5px;
+      border-radius: 4px;
+    }
+
+    .card-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+      margin-bottom: 14px;
+    }
+
+    .pill {
+      font-family: var(--mono);
+      font-size: 10px;
+      padding: 3px 9px;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      background: var(--surface2);
+      color: var(--text-muted);
+    }
+
+    .pill.accent {
+      border-color: rgba(124,110,245,0.3);
+      background: var(--accent-glow);
+      color: var(--accent);
+    }
+
+    .pill.emerald-pill {
+      border-color: rgba(16,185,129,0.3);
+      background: rgba(16,185,129,0.08);
+      color: var(--emerald);
+    }
+
+    .card-cta {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .card-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-family: var(--mono);
+      font-size: 11px;
+      font-weight: 600;
+      padding: 8px 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      letter-spacing: .03em;
+      transition: opacity .15s, transform .1s;
+      border: none;
+      text-decoration: none;
+    }
+
+    .card-btn:hover { opacity: .85; transform: scale(1.02); }
+
+    .step-count {
+      font-family: var(--mono);
+      font-size: 10px;
+      color: var(--text-dim);
+    }
+
+    /* EMPTY STATE */
+    .empty-state {
+      grid-column: 1 / -1;
+      text-align: center;
+      padding: 5rem 2rem;
+      background: var(--surface);
+      border: 1px dashed var(--border-mid);
+      border-radius: 20px;
+    }
+
+    .empty-icon { font-size: 36px; margin-bottom: 16px; }
+    .empty-title { font-size: 15px; font-weight: 700; color: var(--text-muted); margin-bottom: 10px; }
+    .empty-desc { font-family: var(--mono); font-size: 11px; color: var(--text-dim); line-height: 2; }
+
+    /* HOW TO */
+    .how-to {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 26px 30px;
+      margin-top: 3.5rem;
+      animation: fadeUp .7s ease .5s both;
+    }
+
+    .how-to-title {
+      font-family: var(--mono);
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      margin-bottom: 18px;
+    }
+
+    .how-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+      gap: 18px;
+    }
+
+    .how-icon { font-size: 19px; margin-bottom: 6px; }
+    .how-title-item { font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 4px; }
+    .how-desc { font-size: 12px; color: var(--text-muted); line-height: 1.65; }
+
+    kbd {
+      font-family: var(--mono);
+      font-size: 10px;
+      background: var(--surface3);
+      border: 1px solid var(--border-mid);
+      padding: 2px 6px;
+      border-radius: 4px;
+      color: var(--text);
+    }
+
+    /* PATTERN LEGEND */
+    .pattern-legend {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 26px 30px;
+      margin-top: 2rem;
+      animation: fadeUp .7s ease .55s both;
+    }
+
+    .legend-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 12px;
+      border-radius: 8px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+    }
+
+    .legend-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+    .legend-name { font-family: var(--mono); font-size: 11px; font-weight: 700; }
+    .legend-desc { font-family: var(--mono); font-size: 10px; color: var(--text-dim); margin-left: auto; }
+
+    footer {
+      text-align: center;
+      margin-top: 3.5rem;
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--text-dim);
+      animation: fadeUp .7s ease .6s both;
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(18px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes cardIn {
+      from { opacity: 0; transform: translateY(14px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    @media (max-width: 640px) {
+      .cards { grid-template-columns: 1fr; }
+      .topics-row { gap: 7px; }
+      .topic-tab { padding: 8px 12px; font-size: 11px; }
+      h1 { font-size: 2rem; }
+      .stats { gap: 1.5rem; }
+    }
+  </style>
+</head>
+<body>
+<div class="page">
+
+  <header>
+    <div class="eyebrow">
+      <span class="eyebrow-dot"></span>
+      Interactive DSA Dry Runs
+    </div>
+    <h1>
+      <span class="h1-line1">Pick a topic.</span>
+      <span class="h1-line2">Watch it think.</span>
+    </h1>
+    <p class="header-sub">
+      Step-by-step visualizers for classic DSA problems — problem statement, hints, approach, code, dry-run animation, multiple examples, and edge cases. All in one place.
+    </p>
+    <div class="stats">
+      <div class="stat"><span class="stat-num">16</span><span class="stat-label">Problems</span></div>
+      <div class="stat-sep"></div>
+      <div class="stat"><span class="stat-num">2</span><span class="stat-label">Tree Types</span></div>
+      <div class="stat-sep"></div>
+      <div class="stat"><span class="stat-num">Multi</span><span class="stat-label">Examples Each</span></div>
+      <div class="stat-sep"></div>
+      <div class="stat"><span class="stat-num">↔</span><span class="stat-label">Keyboard Nav</span></div>
+    </div>
+  </header>
+
+  <!-- What you get -->
+  <div class="features-row">
+    <div class="feature-card">
+      <span class="feature-icon">📋</span>
+      <div class="feature-text">
+        <h4>Problem Statement</h4>
+        <p>Clear explanation of what's asked + real examples</p>
+      </div>
+    </div>
+    <div class="feature-card">
+      <span class="feature-icon">💡</span>
+      <div class="feature-text">
+        <h4>Hints + Approach</h4>
+        <p>Guided hints to reach solution yourself</p>
+      </div>
+    </div>
+    <div class="feature-card">
+      <span class="feature-icon">🎯</span>
+      <div class="feature-text">
+        <h4>Pattern Recognition</h4>
+        <p>Know which pattern to reach for in any interview</p>
+      </div>
+    </div>
+    <div class="feature-card">
+      <span class="feature-icon">▶️</span>
+      <div class="feature-text">
+        <h4>Step-by-step Animation</h4>
+        <p>Multiple examples with Play/Prev/Next + auto-play</p>
+      </div>
+    </div>
+    <div class="feature-card">
+      <span class="feature-icon">⚠️</span>
+      <div class="feature-text">
+        <h4>Edge Cases</h4>
+        <p>Dedicated edge case examples — the classic gotchas</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="search-wrap">
+    <span class="search-icon">🔍</span>
+    <input class="search-input" id="search" type="text" placeholder="Search problems… (e.g. 'BFS', '#110', 'balanced', 'bounds')"/>
+  </div>
+
+  <p class="section-label">// choose a topic</p>
+
+  <!-- BST callout (shown only when BST is selected) -->
+  <div class="bst-callout" id="bst-callout" style="display:none">
+    <span class="bst-callout-icon">📐</span>
+    <div class="bst-callout-content">
+      <div class="bst-callout-title">BST Property</div>
+      <div class="bst-callout-body">For every node: <code>left subtree values &lt; node.val &lt; right subtree values</code>. This must hold for <strong>every single node</strong>, not just the root. The ordering is what makes BST search O(log n) in balanced trees.</div>
+    </div>
+  </div>
+
+  <!-- Single unified topic tabs row -->
+  <div class="topics-row" id="topics-row">
+    <button class="topic-tab active" data-topic="trees"><span class="tab-icon">🌳</span>Binary Tree<span class="tab-badge" id="badge-trees">11</span></button>
+    <button class="topic-tab" data-topic="bst"><span class="tab-icon">🌲</span>Binary Search Tree<span class="tab-badge" id="badge-bst">5</span></button>
+    <button class="topic-tab" data-topic="arrays"><span class="tab-icon">📦</span>Arrays<span class="tab-badge" id="badge-arrays">0</span></button>
+    <button class="topic-tab" data-topic="strings"><span class="tab-icon">🔤</span>Strings<span class="tab-badge" id="badge-strings">0</span></button>
+    <button class="topic-tab" data-topic="hashmap"><span class="tab-icon">🗂️</span>HashMap<span class="tab-badge" id="badge-hashmap">0</span></button>
+    <button class="topic-tab" data-topic="bsearch"><span class="tab-icon">🔎</span>Binary Search<span class="tab-badge" id="badge-bsearch">0</span></button>
+    <button class="topic-tab" data-topic="graph"><span class="tab-icon">🕸️</span>Graphs<span class="tab-badge" id="badge-graph">0</span></button>
+    <button class="topic-tab" data-topic="dp"><span class="tab-icon">📊</span>DP<span class="tab-badge" id="badge-dp">0</span></button>
+    <button class="topic-tab" data-topic="stack"><span class="tab-icon">📚</span>Stack & Queue<span class="tab-badge" id="badge-stack">0</span></button>
+  </div>
+
+  <!-- Cards section -->
+  <div class="cards-section" id="cards-section">
+    <div class="cards-header">
+      <div>
+        <div class="cards-header-inner">
+          <div class="topic-title" id="topic-title">Trees</div>
+          <span class="topic-count-badge" id="topic-count-badge" style="background:rgba(34,211,238,0.1);color:var(--cyan);border:1px solid rgba(34,211,238,0.2)">10 problems</span>
+        </div>
+        <div class="topic-description" id="topic-description">DFS · BFS · Recursion · Post-order · Pre-order · Height propagation</div>
+      </div>
+    </div>
+    <div class="cards" id="cards-grid"></div>
+  </div>
+
+  <!-- How to use -->
+  <div class="how-to">
+    <div class="how-to-title">// how to use each visualizer</div>
+    <div class="how-grid">
+      <div><div class="how-icon">📖</div><div class="how-title-item">Read first</div><div class="how-desc">Problem statement → Intuition → Hints. Try to solve before watching the dry run.</div></div>
+      <div><div class="how-icon">🎯</div><div class="how-title-item">Spot the pattern</div><div class="how-desc">Each problem maps to a pattern. Solve the pattern, solve the problem family.</div></div>
+      <div><div class="how-icon">▶️</div><div class="how-title-item">Watch dry run</div><div class="how-desc">Use <kbd>→</kbd> to step through. Switch examples to see edge cases.</div></div>
+      <div><div class="how-icon">🔁</div><div class="how-title-item">Revisit & revise</div><div class="how-desc">Use the revision section at the bottom — edge cases, best solution, complexity.</div></div>
+    </div>
+  </div>
+
+  <!-- Pattern legend -->
+  <div class="pattern-legend">
+    <div class="how-to-title">// pattern map — learn one, recognize many</div>
+    <div class="legend-grid">
+      <div class="legend-item"><span class="legend-dot" style="background:#fb923c"></span><span class="legend-name" style="color:#fb923c">Post-order DFS</span><span class="legend-desc">bottom-up</span></div>
+      <div class="legend-item"><span class="legend-dot" style="background:#60a5fa"></span><span class="legend-name" style="color:#60a5fa">BFS Level-order</span><span class="legend-desc">queue drain</span></div>
+      <div class="legend-item"><span class="legend-dot" style="background:#f472b6"></span><span class="legend-name" style="color:#f472b6">Pre-order DFS</span><span class="legend-desc">root first</span></div>
+      <div class="legend-item"><span class="legend-dot" style="background:#34d399"></span><span class="legend-name" style="color:#34d399">Serialization</span><span class="legend-desc">string encode</span></div>
+      <div class="legend-item"><span class="legend-dot" style="background:#7c6ef5"></span><span class="legend-name" style="color:#7c6ef5">Count Propagation</span><span class="legend-desc">bubble signal</span></div>
+      <div class="legend-item"><span class="legend-dot" style="background:#fbbf24"></span><span class="legend-name" style="color:#fbbf24">Closure Variable</span><span class="legend-desc">global capture</span></div>
+      <div class="legend-item"><span class="legend-dot" style="background:#10b981"></span><span class="legend-name" style="color:#10b981">Bound Propagation</span><span class="legend-desc">BST corridor</span></div>
+    </div>
+  </div>
+
+  <footer><p>Built with vanilla HTML · CSS · JS &nbsp;·&nbsp; No frameworks &nbsp;·&nbsp; 16 problems · Multiple examples each</p></footer>
+
+</div>
+
+<script>
+// ─── DATA ─────────────────────────────────────────────────────────────────
+
+const TOPICS = {
+  trees: {
+    label: "Binary Trees", icon: "🌳",
+    color: "var(--cyan)",
+    badgeStyle: "background:rgba(34,211,238,0.1);color:var(--cyan);border:1px solid rgba(34,211,238,0.2)",
+    description: "DFS · BFS · Recursion · Post-order · Pre-order · Height propagation",
+    problems: [
+      {
+        num:"#110", title:"Balanced Binary Tree", href:"binary-tree/balanced-tree-visualizer.html",
+        color:"blue", tagColor:"var(--blue)",
+        btnStyle:"background:rgba(96,165,250,0.12);color:var(--blue);border:1px solid rgba(96,165,250,0.25)",
+        diff:"easy", steps:"10+",
+        pattern:"Post-order DFS", patternColor:"#fb923c", patternBg:"rgba(251,146,60,0.1)",
+        desc:"Trace how <code>isBalanced</code> recurses post-order, propagates heights, and checks the |L−R| ≤ 1 condition at every node.",
+        pills:["O(n)","Post-order DFS","Height propagation","Closure var"],
+        kw:"balanced height recursion isbalanced",
+        svg:`<svg viewBox="0 0 300 130"><line x1="150" y1="32" x2="90" y2="72" stroke="#1e2231" stroke-width="2"/><line x1="150" y1="32" x2="220" y2="72" stroke="#1e2231" stroke-width="2"/><line x1="76" y1="90" x2="46" y2="118" stroke="#1e2231" stroke-width="2"/><line x1="104" y1="90" x2="128" y2="118" stroke="#1e2231" stroke-width="2"/><circle cx="150" cy="24" r="20" fill="#1a1e28" stroke="#60a5fa" stroke-width="2"/><text x="150" y="28" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="12" font-weight="700" fill="#60a5fa">1</text><circle cx="90" cy="80" r="18" fill="#13161d" stroke="#3d4251" stroke-width="1.5"/><text x="90" y="84" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="12" font-weight="700" fill="#6b7280">2</text><circle cx="220" cy="80" r="18" fill="#13161d" stroke="#3d4251" stroke-width="1.5"/><text x="220" y="84" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="12" font-weight="700" fill="#6b7280">3</text><circle cx="44" cy="120" r="15" fill="#13161d" stroke="#3d4251" stroke-width="1.5"/><text x="44" y="124" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="11" font-weight="700" fill="#6b7280">4</text><circle cx="130" cy="120" r="15" fill="#13161d" stroke="#3d4251" stroke-width="1.5"/><text x="130" y="124" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="11" font-weight="700" fill="#6b7280">5</text><text x="172" y="18" font-family="'JetBrains Mono',monospace" font-size="9" fill="#7c6ef5">h=3</text><text x="110" y="72" font-family="'JetBrains Mono',monospace" font-size="9" fill="#7c6ef5">h=2</text><text x="240" y="72" font-family="'JetBrains Mono',monospace" font-size="9" fill="#7c6ef5">h=1</text></svg>`
+      },
+      {
+        num:"#543", title:"Diameter of Binary Tree", href:"binary-tree/diameter-of-binary-tree.html",
+        color:"purple", tagColor:"var(--purple)",
+        btnStyle:"background:rgba(192,132,252,0.12);color:var(--purple);border:1px solid rgba(192,132,252,0.25)",
+        diff:"easy", steps:"12+",
+        pattern:"Post-order DFS + Closure", patternColor:"#fb923c", patternBg:"rgba(251,146,60,0.1)",
+        desc:"Watch how <code>maxDiameter</code> is updated at every node — the widest path doesn't always pass through the root.",
+        pills:["O(n)","Post-order DFS","leftD + rightD","Global max"],
+        kw:"diameter depth longest path maxdiameter",
+        svg:`<svg viewBox="0 0 300 130"><line x1="200" y1="30" x2="130" y2="68" stroke="#1e2231" stroke-width="2"/><line x1="118" y1="86" x2="76" y2="110" stroke="#1e2231" stroke-width="2"/><line x1="142" y1="86" x2="180" y2="110" stroke="#1e2231" stroke-width="2"/><circle cx="200" cy="22" r="18" fill="#13161d" stroke="#3d4251" stroke-width="1.5"/><text x="200" y="26" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="12" font-weight="700" fill="#6b7280">1</text><circle cx="130" cy="78" r="18" fill="#1a2030" stroke="#c084fc" stroke-width="2"/><text x="130" y="82" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="12" font-weight="700" fill="#c084fc">2</text><circle cx="76" cy="118" r="14" fill="#1a1030" stroke="#c084fc" stroke-width="1.5"/><text x="76" y="122" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="11" font-weight="700" fill="#c084fc">3</text><circle cx="180" cy="118" r="14" fill="#1a1030" stroke="#c084fc" stroke-width="1.5"/><text x="180" y="122" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="11" font-weight="700" fill="#c084fc">4</text><text x="95" y="62" font-family="'JetBrains Mono',monospace" font-size="9" fill="#c084fc" opacity=".8">diam=4</text></svg>`
+      },
+      {
+        num:"#100", title:"Same Tree", href:"binary-tree/same-tree-visualizer.html",
+        color:"teal", tagColor:"var(--teal)",
+        btnStyle:"background:rgba(45,212,191,0.12);color:var(--teal);border:1px solid rgba(45,212,191,0.25)",
+        diff:"easy", steps:"10+",
+        pattern:"Pre-order DFS + Short-circuit", patternColor:"#f472b6", patternBg:"rgba(244,114,182,0.1)",
+        desc:"Watch two trees traversed simultaneously — node-pair by node-pair — with short-circuit <code>&&</code> stopping recursion early on any mismatch.",
+        pills:["O(n)","Pre-order DFS","Short-circuit &&","Two trees"],
+        kw:"same identical recursion pre-order",
+        svg:`<svg viewBox="0 0 300 130"><line x1="72" y1="30" x2="44" y2="72" stroke="#1e2231" stroke-width="2"/><line x1="72" y1="30" x2="104" y2="72" stroke="#1e2231" stroke-width="2"/><circle cx="72" cy="22" r="18" fill="#1a2035" stroke="#60a5fa" stroke-width="1.5"/><text x="72" y="26" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="11" font-weight="700" fill="#60a5fa">1</text><circle cx="42" cy="80" r="15" fill="#13161d" stroke="#3d4251" stroke-width="1.5"/><text x="42" y="84" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="11" font-weight="700" fill="#6b7280">2</text><circle cx="104" cy="80" r="15" fill="#13161d" stroke="#3d4251" stroke-width="1.5"/><text x="104" y="84" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="11" font-weight="700" fill="#6b7280">3</text><text x="20" y="16" font-family="'JetBrains Mono',monospace" font-size="9" fill="#60a5fa">p</text><text x="150" y="50" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="16" fill="#34d399" font-weight="700">=</text><line x1="222" y1="30" x2="194" y2="72" stroke="#1e2231" stroke-width="2"/><line x1="222" y1="30" x2="254" y2="72" stroke="#1e2231" stroke-width="2"/><circle cx="222" cy="22" r="18" fill="#131d1e" stroke="#2dd4bf" stroke-width="1.5"/><text x="222" y="26" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="11" font-weight="700" fill="#2dd4bf">1</text><circle cx="192" cy="80" r="15" fill="#13161d" stroke="#3d4251" stroke-width="1.5"/><text x="192" y="84" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="11" font-weight="700" fill="#6b7280">2</text><circle cx="254" cy="80" r="15" fill="#13161d" stroke="#3d4251" stroke-width="1.5"/><text x="254" y="84" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="11" font-weight="700" fill="#6b7280">3</text><text x="168" y="16" font-family="'JetBrains Mono',monospace" font-size="9" fill="#2dd4bf">q</text></svg>`
+      },
+      {
+        num:"#572", title:"Subtree of Another Tree", href:"binary-tree/subtree-of-another-tree.html",
+        color:"green", tagColor:"var(--green)",
+        btnStyle:"background:rgba(52,211,153,0.12);color:var(--green);border:1px solid rgba(52,211,153,0.25)",
+        diff:"easy", steps:"15+",
+        pattern:"Serialization + String Match", patternColor:"#34d399", patternBg:"rgba(52,211,153,0.1)",
+        desc:"See how both trees are <code>serialized</code> into strings token by token, then checked with a single <code>.includes()</code> call.",
+        pills:["O(m·n)","Serialization","Pre-order DFS","-prefix trick"],
+        kw:"subtree serialization string includes substring match",
+        svg:`<svg viewBox="0 0 300 130"><line x1="96" y1="28" x2="58" y2="65" stroke="#1e2231" stroke-width="2"/><line x1="96" y1="28" x2="136" y2="65" stroke="#1e2231" stroke-width="2"/><line x1="46" y1="83" x2="26" y2="114" stroke="#1e2231" stroke-width="2"/><line x1="70" y1="83" x2="90" y2="114" stroke="#1e2231" stroke-width="2"/><rect x="10" y="54" width="108" height="68" rx="8" fill="none" stroke="#2dd4bf" stroke-width="1.5" stroke-dasharray="4 3" opacity=".75"/><circle cx="96" cy="22" r="18" fill="#1a1e28" stroke="#60a5fa" stroke-width="1.5"/><text x="96" y="26" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="11" font-weight="700" fill="#60a5fa">3</text><circle cx="56" cy="75" r="16" fill="#0f1a1a" stroke="#2dd4bf" stroke-width="2"/><text x="56" y="79" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="11" font-weight="700" fill="#2dd4bf">4</text><circle cx="138" cy="75" r="16" fill="#13161d" stroke="#3d4251" stroke-width="1.5"/><text x="138" y="79" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="11" font-weight="700" fill="#6b7280">5</text><circle cx="24" cy="116" r="12" fill="#0f1a1a" stroke="#2dd4bf" stroke-width="1.5"/><text x="24" y="120" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="10" font-weight="700" fill="#2dd4bf">1</text><circle cx="92" cy="116" r="12" fill="#0f1a1a" stroke="#2dd4bf" stroke-width="1.5"/><text x="92" y="120" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="10" font-weight="700" fill="#2dd4bf">2</text></svg>`
+      },
+      {
+        num:"#236", title:"Lowest Common Ancestor", href:"binary-tree/lca-visualizer.html",
+        color:"rose", tagColor:"var(--rose)",
+        btnStyle:"background:rgba(244,114,182,0.12);color:var(--rose);border:1px solid rgba(244,114,182,0.25)",
+        diff:"medium", steps:"12+",
+        pattern:"Post-order Count Propagation", patternColor:"#7c6ef5", patternBg:"rgba(124,110,245,0.1)",
+        desc:"Watch <code>postOrderTraversal</code> count {p, q} in each subtree. The first node where count hits <code>2</code> is the LCA.",
+        pills:["O(n)","Post-order DFS","Count propagation","!lca guard"],
+        kw:"lowest common ancestor count propagation lca",
+        svg:`<svg viewBox="0 0 300 130"><line x1="150" y1="28" x2="90" y2="64" stroke="#1e2231" stroke-width="2"/><line x1="150" y1="28" x2="220" y2="64" stroke="#1e2231" stroke-width="2"/><line x1="78" y1="80" x2="50" y2="108" stroke="#1e2231" stroke-width="2"/><line x1="102" y1="80" x2="128" y2="108" stroke="#1e2231" stroke-width="2"/><circle cx="150" cy="20" r="17" fill="#13161d" stroke="#3d4251" stroke-width="1.5"/><text x="150" y="24" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="11" font-weight="700" fill="#6b7280">3</text><circle cx="90" cy="72" r="17" fill="#1a1520" stroke="#f472b6" stroke-width="2"/><text x="90" y="76" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="11" font-weight="700" fill="#f472b6">5</text><circle cx="220" cy="72" r="17" fill="#13161d" stroke="#3d4251" stroke-width="1.5"/><text x="220" y="76" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="11" font-weight="700" fill="#6b7280">1</text><circle cx="48" cy="112" r="13" fill="#13161d" stroke="#3d4251" stroke-width="1.5"/><text x="48" y="116" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="10" font-weight="700" fill="#6b7280">6</text><circle cx="128" cy="112" r="13" fill="#13161d" stroke="#3d4251" stroke-width="1.5"/><text x="128" y="116" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="10" font-weight="700" fill="#6b7280">2</text><text x="56" y="50" font-family="'JetBrains Mono',monospace" font-size="8" fill="#f472b6" opacity=".9">LCA=5</text></svg>`
+      },
+      {
+        num:"#103", title:"Zigzag Level Order", href:"binary-tree/zigzag-level-order.html",
+        color:"orange", tagColor:"var(--orange)",
+        btnStyle:"background:rgba(251,146,60,0.12);color:var(--orange);border:1px solid rgba(251,146,60,0.25)",
+        diff:"medium", steps:"13+",
+        pattern:"BFS Level-order + Alternating Insert", patternColor:"#60a5fa", patternBg:"rgba(96,165,250,0.1)",
+        desc:"Watch BFS alternate between <code>push</code> and <code>unshift</code> to build the snake-like output — no array reversal needed.",
+        pills:["O(n)","BFS Queue","push / unshift","Level snapshot"],
+        kw:"zigzag level BFS queue snake alternating unshift push",
+        svg:`<svg viewBox="0 0 300 130"><line x1="150" y1="30" x2="90" y2="68" stroke="#1e2231" stroke-width="2"/><line x1="150" y1="30" x2="220" y2="68" stroke="#1e2231" stroke-width="2"/><circle cx="150" cy="24" r="20" fill="#1a1810" stroke="#fb923c" stroke-width="1.5"/><text x="150" y="28" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="12" font-weight="700" fill="#fb923c">1</text><circle cx="90" cy="78" r="17" fill="#13161d" stroke="#3d4251" stroke-width="1.5"/><text x="90" y="82" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="12" font-weight="700" fill="#6b7280">2</text><circle cx="218" cy="78" r="17" fill="#13161d" stroke="#3d4251" stroke-width="1.5"/><text x="218" y="82" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="12" font-weight="700" fill="#6b7280">3</text><text x="270" y="28" font-family="'JetBrains Mono',monospace" font-size="8" fill="#60a5fa">[1]</text><text x="10" y="82" font-family="'JetBrains Mono',monospace" font-size="8" fill="#fb923c">[3,2]</text></svg>`
+      },
+      {
+        num:"#199", title:"Binary Tree Right Side View", href:"binary-tree/right-side-view.html",
+        color:"cyan", tagColor:"var(--cyan)",
+        btnStyle:"background:rgba(34,211,238,0.12);color:var(--cyan);border:1px solid rgba(34,211,238,0.25)",
+        diff:"medium", steps:"12+",
+        pattern:"BFS Level-order + Last Node Capture", patternColor:"#60a5fa", patternBg:"rgba(96,165,250,0.1)",
+        desc:"Watch BFS drain level by level. At each level, only the last node (<code>i == len-1</code>) is visible from the right — that's what we collect.",
+        pills:["O(n)","BFS Queue","len snapshot","i == len-1"],
+        kw:"right side view BFS level last node visible",
+        svg:`<svg viewBox="0 0 300 130"><line x1="120" y1="28" x2="72" y2="65" stroke="#1e2231" stroke-width="2"/><line x1="120" y1="28" x2="170" y2="65" stroke="#1e2231" stroke-width="2"/><circle cx="120" cy="20" r="18" fill="#1a1e28" stroke="#22d3ee" stroke-width="2"/><text x="120" y="24" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="11" font-weight="700" fill="#22d3ee">1</text><circle cx="70" cy="74" r="16" fill="#13161d" stroke="#3d4251" stroke-width="1.5"/><text x="70" y="78" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="11" font-weight="700" fill="#6b7280">2</text><circle cx="172" cy="74" r="16" fill="#13161d" stroke="#22d3ee" stroke-width="2"/><text x="172" y="78" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="11" font-weight="700" fill="#22d3ee">3</text><text x="8" y="50" font-family="'JetBrains Mono',monospace" font-size="8" fill="#22d3ee">[1,3,4]</text></svg>`
+      },
+      {
+        num:"#111", title:"Minimum Depth of Binary Tree", href:"binary-tree/min-depth-binary-tree.html",
+        color:"teal", tagColor:"var(--teal)",
+        btnStyle:"background:rgba(45,212,191,0.12);color:var(--teal);border:1px solid rgba(45,212,191,0.25)",
+        diff:"easy", steps:"13+",
+        pattern:"BFS Early Exit on First Leaf", patternColor:"#60a5fa", patternBg:"rgba(96,165,250,0.1)",
+        desc:"Watch BFS find the shallowest leaf. Classic gotcha: a node with one child is <strong>NOT</strong> a leaf. First leaf found = answer, stop immediately.",
+        pills:["O(n)","BFS early exit","Leaf = both null","depth starts at 1"],
+        kw:"minimum depth BFS leaf shallowest gotcha one child",
+        svg:`<svg viewBox="0 0 300 130"><line x1="150" y1="30" x2="90" y2="68" stroke="#1e2231" stroke-width="2"/><line x1="150" y1="30" x2="220" y2="68" stroke="#1e2231" stroke-width="2"/><circle cx="150" cy="22" r="20" fill="#1a1e28" stroke="#2dd4bf" stroke-width="2"/><text x="150" y="26" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="12" font-weight="700" fill="#2dd4bf">3</text><circle cx="90" cy="78" r="18" fill="#0f1f16" stroke="#34d399" stroke-width="2.5"/><text x="90" y="82" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="12" font-weight="700" fill="#34d399">9</text><text x="48" y="64" font-family="'JetBrains Mono',monospace" font-size="8" fill="#34d399">← leaf!</text></svg>`
+      },
+      {
+        num:"#124", title:"Binary Tree Max Path Sum", href:"binary-tree/max-path-sum.html",
+        color:"orange", tagColor:"var(--orange)",
+        btnStyle:"background:rgba(251,146,60,0.12);color:var(--orange);border:1px solid rgba(251,146,60,0.25)",
+        diff:"hard", steps:"13+",
+        pattern:"Post-order DFS + Negative Pruning", patternColor:"#fb923c", patternBg:"rgba(251,146,60,0.1)",
+        desc:"At every node: <code>left + curr + right</code> is the candidate path. But only ONE arm goes upward. <code>Math.max(0,...)</code> prunes negative subtrees.",
+        pills:["O(n)","Post-order DFS","Math.max(0,...)","Two roles per node"],
+        kw:"max path sum post order negative prune maxsum",
+        svg:`<svg viewBox="0 0 300 130"><line x1="150" y1="30" x2="90" y2="68" stroke="#1e2231" stroke-width="2"/><line x1="150" y1="30" x2="220" y2="68" stroke="#1e2231" stroke-width="2"/><circle cx="150" cy="22" r="20" fill="#13161d" stroke="#3d4251" stroke-width="1.5"/><text x="150" y="26" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="11" font-weight="700" fill="#6b7280">-10</text><circle cx="90" cy="78" r="18" fill="#13161d" stroke="#3d4251" stroke-width="1.5"/><text x="90" y="82" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="12" font-weight="700" fill="#6b7280">9</text><circle cx="218" cy="78" r="18" fill="#1a1808" stroke="#fb923c" stroke-width="2"/><text x="218" y="82" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="12" font-weight="700" fill="#fb923c">20</text><text x="230" y="62" font-family="'JetBrains Mono',monospace" font-size="8" fill="#fb923c">↑ peak=42</text></svg>`
+      },
+      {
+        num:"#1448", title:"Count Good Nodes in Binary Tree", href:"binary-tree/good-nodes.html",
+        color:"green", tagColor:"#a3e635",
+        btnStyle:"background:rgba(163,230,53,0.1);color:#a3e635;border:1px solid rgba(163,230,53,0.25)",
+        diff:"medium", steps:"8+",
+        pattern:"Pre-order DFS + Path Max Propagation", patternColor:"#a3e635", patternBg:"rgba(163,230,53,0.1)",
+        desc:"Watch <code>maximumSoFar</code> travel down each path like a high-score bar. A node is <strong>good</strong> if its value ≥ every ancestor on its path. Seed with <code>-Infinity</code> so root always qualifies.",
+        pills:["O(n)","Pre-order DFS","Path max","Closure counter"],
+        kw:"good nodes count path maximum pre-order closure maxSoFar infinity bar",
+        svg:`<svg viewBox="0 0 300 135"><line x1="150" y1="28" x2="88" y2="68" stroke="#1e2231" stroke-width="2"/><line x1="150" y1="28" x2="218" y2="68" stroke="#1e2231" stroke-width="2"/><line x1="75" y1="86" x2="48" y2="114" stroke="#1e2231" stroke-width="2"/><line x1="204" y1="86" x2="180" y2="114" stroke="#1e2231" stroke-width="2"/><line x1="232" y1="86" x2="256" y2="114" stroke="#1e2231" stroke-width="2"/><circle cx="150" cy="20" r="22" fill="#0d1f0f" stroke="#a3e635" stroke-width="2.5"/><text x="150" y="24" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="13" font-weight="700" fill="#a3e635">3</text><circle cx="86" cy="78" r="20" fill="#1f0d0d" stroke="#f87171" stroke-width="2"/><text x="86" y="82" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="13" font-weight="700" fill="#f87171">1</text><circle cx="220" cy="78" r="20" fill="#0d1f0f" stroke="#a3e635" stroke-width="2.5"/><text x="220" y="82" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="13" font-weight="700" fill="#a3e635">4</text><circle cx="46" cy="118" r="16" fill="#0d1f0f" stroke="#a3e635" stroke-width="2"/><text x="46" y="122" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="11" font-weight="700" fill="#a3e635">3</text><circle cx="178" cy="118" r="16" fill="#1f0d0d" stroke="#f87171" stroke-width="1.5"/><text x="178" y="122" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="11" font-weight="700" fill="#f87171">1</text><circle cx="258" cy="118" r="16" fill="#0d1f0f" stroke="#a3e635" stroke-width="2"/><text x="258" y="122" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="11" font-weight="700" fill="#a3e635">5</text><text x="4" y="10" font-family="'JetBrains Mono',monospace" font-size="8" fill="#a3e635">4 good nodes ✓</text><text x="154" y="10" font-family="'JetBrains Mono',monospace" font-size="8" fill="#fbbf24">max bar↓</text></svg>`
+      },
+    ]
+  },
+
+  // BST topic
+  bst: {
+    label: "Binary Search Trees", icon: "🌲",
+    color: "var(--emerald)",
+    badgeStyle: "background:rgba(16,185,129,0.1);color:var(--emerald);border:1px solid rgba(16,185,129,0.2)",
+    description: "BST Property · Bound Propagation · In-order Traversal · Search / Insert / Delete",
+    problems: [
+      {
+        num:"#98", title:"Validate Binary Search Tree", href:"binary-search-tree/valid-bst.html",
+        color:"emerald", tagColor:"var(--emerald)",
+        btnStyle:"background:rgba(16,185,129,0.12);color:var(--emerald);border:1px solid rgba(16,185,129,0.25)",
+        diff:"medium", steps:"8+",
+        pattern:"Pre-order DFS + Bound Propagation", patternColor:"#10b981", patternBg:"rgba(16,185,129,0.1)",
+        desc:"Watch how a valid range [min, max] is passed down to every node. Going left tightens the max; going right tightens the min. Any violation returns false instantly.",
+        pills:["O(n)","Pre-order DFS","Bound corridor","±Infinity start"],
+        kw:"valid bst validate bounds min max pre-order ancestor",
+        svg:`<svg viewBox="0 0 300 130"><line x1="150" y1="30" x2="90" y2="70" stroke="#1e2231" stroke-width="2"/><line x1="150" y1="30" x2="220" y2="70" stroke="#1e2231" stroke-width="2"/><line x1="78" y1="88" x2="54" y2="114" stroke="#1e2231" stroke-width="2"/><line x1="102" y1="88" x2="122" y2="114" stroke="#1e2231" stroke-width="2"/><circle cx="150" cy="22" r="22" fill="#0f1d14" stroke="#10b981" stroke-width="2"/><text x="150" y="26" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="13" font-weight="700" fill="#10b981">5</text><circle cx="88" cy="78" r="20" fill="#13161d" stroke="#3d4251" stroke-width="1.5"/><text x="88" y="82" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="12" font-weight="700" fill="#6b7280">3</text><circle cx="222" cy="78" r="20" fill="#13161d" stroke="#3d4251" stroke-width="1.5"/><text x="222" y="82" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="12" font-weight="700" fill="#6b7280">7</text><circle cx="52" cy="116" r="16" fill="#13161d" stroke="#3d4251" stroke-width="1.5"/><text x="52" y="120" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="11" font-weight="700" fill="#6b7280">1</text><circle cx="122" cy="116" r="16" fill="#13161d" stroke="#3d4251" stroke-width="1.5"/><text x="122" y="120" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="11" font-weight="700" fill="#6b7280">4</text><text x="8" y="30" font-family="'JetBrains Mono',monospace" font-size="8" fill="#10b981">(-∞,+∞)</text><text x="8" y="78" font-family="'JetBrains Mono',monospace" font-size="8" fill="#60a5fa">(-∞,5)</text><text x="234" y="68" font-family="'JetBrains Mono',monospace" font-size="8" fill="#fbbf24">(5,+∞)</text></svg>`
+      },
+      {
+        num:"#700", title:"Search in a Binary Search Tree", href:"binary-search-tree/search-bst.html",
+        color:"emerald", tagColor:"var(--emerald)",
+        btnStyle:"background:rgba(16,185,129,0.12);color:var(--emerald);border:1px solid rgba(16,185,129,0.25)",
+        diff:"easy", steps:"6+",
+        pattern:"BST Binary Search — Eliminate Half Each Step", patternColor:"#10b981", patternBg:"rgba(16,185,129,0.1)",
+        desc:"Watch the BST superpower in action — at every node one comparison tells you exactly which subtree to follow. The other half is eliminated entirely, never visited.",
+        pills:["O(log n)","BST search","Ternary direction","Prune half"],
+        kw:"search bst find node target val left right binary search tree",
+        svg:`<svg viewBox="0 0 300 130"><line x1="150" y1="30" x2="90" y2="72" stroke="#1e2231" stroke-width="2"/><line x1="150" y1="30" x2="220" y2="72" stroke="#1e2231" stroke-width="2"/><line x1="77" y1="90" x2="55" y2="115" stroke="#1e2231" stroke-width="2"/><line x1="103" y1="90" x2="125" y2="115" stroke="#1e2231" stroke-width="2"/><circle cx="150" cy="22" r="20" fill="#13161d" stroke="#3d4251" stroke-width="1.5"/><text x="150" y="26" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="12" font-weight="700" fill="#6b7280">4</text><circle cx="88" cy="80" r="18" fill="#0b2416" stroke="#10b981" stroke-width="2.5"/><text x="88" y="84" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="12" font-weight="700" fill="#10b981">2</text><circle cx="220" cy="80" r="18" fill="#0d0f14" stroke="#1e2231" stroke-width="1.5" opacity=".3"/><text x="220" y="84" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="12" font-weight="700" fill="#2a2f3e" opacity=".3">7</text><circle cx="53" cy="117" r="14" fill="#0b2416" stroke="#10b981" stroke-width="1.5"/><text x="53" y="121" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="11" font-weight="700" fill="#10b981">1</text><circle cx="127" cy="117" r="14" fill="#0b2416" stroke="#10b981" stroke-width="1.5"/><text x="127" y="121" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="11" font-weight="700" fill="#10b981">3</text><text x="190" y="62" font-family="'JetBrains Mono',monospace" font-size="9" fill="#2a2f3e" opacity=".3">pruned</text><text x="55" y="65" font-family="'JetBrains Mono',monospace" font-size="9" fill="#10b981">found!</text></svg>`
+      },
+      {
+        num:"#235", title:"LCA of a Binary Search Tree", href:"binary-search-tree/lca-bst.html",
+        color:"emerald", tagColor:"var(--emerald)",
+        btnStyle:"background:rgba(16,185,129,0.12);color:var(--emerald);border:1px solid rgba(16,185,129,0.25)",
+        diff:"medium", steps:"7+",
+        pattern:"BST Split Detection", patternColor:"#10b981", patternBg:"rgba(16,185,129,0.1)",
+        desc:"Watch how the BST ordering instantly reveals the LCA. Both smaller? Go left. Both larger? Go right. Otherwise — you're at the split point. That node IS the LCA.",
+        pills:["O(log n)","BST ordering","Split detection","Pre-order DFS"],
+        kw:"lca lowest common ancestor bst split detection ordering",
+        svg:`<svg viewBox="0 0 300 130"><line x1="150" y1="28" x2="88" y2="68" stroke="#1e2231" stroke-width="2"/><line x1="150" y1="28" x2="218" y2="68" stroke="#1e2231" stroke-width="2"/><line x1="76" y1="86" x2="50" y2="112" stroke="#1e2231" stroke-width="2"/><line x1="100" y1="86" x2="124" y2="112" stroke="#1e2231" stroke-width="2"/><circle cx="150" cy="20" r="20" fill="#0c1d14" stroke="#10b981" stroke-width="2.5"/><text x="150" y="24" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="13" font-weight="700" fill="#10b981">6</text><circle cx="86" cy="78" r="18" fill="#1a1520" stroke="#f472b6" stroke-width="2"/><text x="86" y="82" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="13" font-weight="700" fill="#f472b6">2</text><circle cx="220" cy="78" r="18" fill="#1e1a08" stroke="#fbbf24" stroke-width="2"/><text x="220" y="82" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="13" font-weight="700" fill="#fbbf24">8</text><circle cx="48" cy="116" r="14" fill="#13161d" stroke="#3d4251" stroke-width="1.5"/><text x="48" y="120" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="11" font-weight="700" fill="#6b7280">0</text><circle cx="126" cy="116" r="14" fill="#13161d" stroke="#3d4251" stroke-width="1.5"/><text x="126" y="120" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="11" font-weight="700" fill="#6b7280">4</text><text x="4" y="18" font-family="'JetBrains Mono',monospace" font-size="8" fill="#10b981">LCA!</text><text x="4" y="76" font-family="'JetBrains Mono',monospace" font-size="8" fill="#f472b6">p</text><text x="230" y="66" font-family="'JetBrains Mono',monospace" font-size="8" fill="#fbbf24">q</text><text x="158" y="10" font-family="'JetBrains Mono',monospace" font-size="8" fill="#10b981">2&lt;6&lt;8→SPLIT</text></svg>`
+      },
+      {
+        num:"#701", title:"Insert into a Binary Search Tree", href:"binary-search-tree/insert-into-bst.html",
+        color:"emerald", tagColor:"var(--emerald)",
+        btnStyle:"background:rgba(16,185,129,0.12);color:var(--emerald);border:1px solid rgba(16,185,129,0.25)",
+        diff:"medium", steps:"7+",
+        pattern:"BST Navigation + return root Stitch", patternColor:"#10b981", patternBg:"rgba(16,185,129,0.1)",
+        desc:"Navigate like BST search to find the only valid null slot. Create the node there. The <code>return root</code> on every call stitches the new leaf into the tree on the way back up.",
+        pills:["O(log n)","BST navigation","return root","Insert at null"],
+        kw:"insert bst new node return root stitch leaf navigation",
+        svg:`<svg viewBox="0 0 300 130"><line x1="150" y1="28" x2="90" y2="66" stroke="#1e2231" stroke-width="2"/><line x1="150" y1="28" x2="216" y2="66" stroke="#1e2231" stroke-width="2"/><line x1="76" y1="84" x2="50" y2="110" stroke="#1e2231" stroke-width="2"/><line x1="104" y1="84" x2="128" y2="110" stroke="#1e2231" stroke-width="2"/><line x1="202" y1="84" x2="178" y2="110" stroke="#fbbf24" stroke-width="2" stroke-dasharray="4 3"/><circle cx="150" cy="20" r="20" fill="#13161d" stroke="#3d4251" stroke-width="1.5"/><text x="150" y="24" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="13" font-weight="700" fill="#6b7280">4</text><circle cx="88" cy="76" r="18" fill="#13161d" stroke="#3d4251" stroke-width="1.5"/><text x="88" y="80" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="13" font-weight="700" fill="#6b7280">2</text><circle cx="218" cy="76" r="18" fill="#13161d" stroke="#3d4251" stroke-width="1.5"/><text x="218" y="80" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="13" font-weight="700" fill="#6b7280">7</text><circle cx="48" cy="114" r="14" fill="#13161d" stroke="#3d4251" stroke-width="1.5"/><text x="48" y="118" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="11" font-weight="700" fill="#6b7280">1</text><circle cx="130" cy="114" r="14" fill="#13161d" stroke="#3d4251" stroke-width="1.5"/><text x="130" y="118" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="11" font-weight="700" fill="#6b7280">3</text><circle cx="176" cy="114" r="14" fill="#1e1a08" stroke="#fbbf24" stroke-width="2.5"/><text x="176" y="118" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="11" font-weight="700" fill="#fbbf24">5</text><text x="180" y="104" font-family="'JetBrains Mono',monospace" font-size="8" fill="#fbbf24">★ new!</text></svg>`
+      },
+      {
+        num:"#230", title:"Kth Smallest Element in a BST", href:"binary-search-tree/kth-smallest-bst.html",
+        color:"emerald", tagColor:"var(--emerald)",
+        btnStyle:"background:rgba(16,185,129,0.12);color:var(--emerald);border:1px solid rgba(16,185,129,0.25)",
+        diff:"medium", steps:"7+",
+        pattern:"In-order DFS + Counter + Early Exit", patternColor:"#10b981", patternBg:"rgba(16,185,129,0.1)",
+        desc:"In-order traversal of a BST visits nodes in ascending sorted order. Decrement a counter at each visit. When it hits zero, that node is the kth smallest. Early exit stops all recursion.",
+        pills:["O(k+h)","In-order DFS","Count-down","Early exit"],
+        kw:"kth smallest inorder bst counter ascending sorted early exit closure",
+        svg:`<svg viewBox="0 0 300 130"><line x1="150" y1="28" x2="88" y2="68" stroke="#1e2231" stroke-width="2"/><line x1="150" y1="28" x2="218" y2="68" stroke="#1e2231" stroke-width="2"/><line x1="76" y1="86" x2="50" y2="112" stroke="#1e2231" stroke-width="2"/><line x1="100" y1="86" x2="124" y2="112" stroke="#1e2231" stroke-width="2"/><circle cx="150" cy="20" r="20" fill="#13161d" stroke="#3d4251" stroke-width="1.5"/><text x="150" y="24" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="13" font-weight="700" fill="#6b7280">5</text><circle cx="86" cy="78" r="18" fill="#0b2416" stroke="#10b981" stroke-width="2.5"/><text x="86" y="82" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="13" font-weight="700" fill="#10b981">3</text><circle cx="220" cy="78" r="18" fill="#13161d" stroke="#3d4251" stroke-width="1.5"/><text x="220" y="82" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="13" font-weight="700" fill="#6b7280">6</text><circle cx="48" cy="116" r="14" fill="#13161d" stroke="#3d4251" stroke-width="1.5"/><text x="48" y="120" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="11" font-weight="700" fill="#6b7280">2</text><circle cx="126" cy="116" r="14" fill="#13161d" stroke="#3d4251" stroke-width="1.5"/><text x="126" y="120" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="11" font-weight="700" fill="#6b7280">4</text><text x="4" y="18" font-family="'JetBrains Mono',monospace" font-size="8" fill="#34d399">in-order→</text><text x="4" y="28" font-family="'JetBrains Mono',monospace" font-size="8" fill="#34d399">2,3,4,5,6</text><text x="60" y="64" font-family="'JetBrains Mono',monospace" font-size="8" fill="#fbbf24">k=2→stops!</text></svg>`
+      }
+    ]
+  },
+
+  // Other topics (BT section)
+  arrays:  { label:"Arrays",              icon:"📦", color:"var(--green)",  badgeStyle:"background:rgba(52,211,153,0.1);color:var(--green);border:1px solid rgba(52,211,153,0.2)",    description:"Two Pointer · Sliding Window · Kadane's Algorithm · Prefix Sums", problems:[] },
+  strings: { label:"Strings",             icon:"🔤", color:"var(--rose)",   badgeStyle:"background:rgba(244,114,182,0.1);color:var(--rose);border:1px solid rgba(244,114,182,0.2)",  description:"Sliding Window · Two Pointer · Anagram · Palindrome",            problems:[] },
+  hashmap: { label:"HashMap / HashSet",   icon:"🗂️", color:"var(--amber)",  badgeStyle:"background:rgba(251,191,36,0.1);color:var(--amber);border:1px solid rgba(251,191,36,0.2)",  description:"Frequency Count · Lookup · Two Sum patterns",                    problems:[] },
+  bsearch: { label:"Binary Search",       icon:"🔎", color:"var(--blue)",   badgeStyle:"background:rgba(96,165,250,0.1);color:var(--blue);border:1px solid rgba(96,165,250,0.2)",   description:"O(log n) · Sorted arrays · Rotated arrays · Boundary search",    problems:[] },
+  graph:   { label:"Graphs",              icon:"🕸️", color:"var(--orange)", badgeStyle:"background:rgba(251,146,60,0.1);color:var(--orange);border:1px solid rgba(251,146,60,0.2)", description:"BFS · DFS · Union Find · Topological Sort",                      problems:[] },
+  dp:      { label:"Dynamic Programming", icon:"📊", color:"var(--purple)", badgeStyle:"background:rgba(192,132,252,0.1);color:var(--purple);border:1px solid rgba(192,132,252,0.2)",description:"Memoization · Tabulation · 1D & 2D DP · Knapsack",               problems:[] },
+  stack:   { label:"Stack & Queue",       icon:"📚", color:"var(--red)",    badgeStyle:"background:rgba(248,113,113,0.1);color:var(--red);border:1px solid rgba(248,113,113,0.2)",  description:"Monotonic Stack · Min Stack · Deque · Priority Queue",           problems:[] },
+};
+
+// ─── STATE ─────────────────────────────────────────────────────────────────
+let activeTopic = "trees";
+let searchQuery = "";
+
+// ─── RENDER ────────────────────────────────────────────────────────────────
+function renderCards(topicKey, query) {
+  const data = TOPICS[topicKey];
+  const grid = document.getElementById("cards-grid");
+  const titleEl = document.getElementById("topic-title");
+  const badgeEl = document.getElementById("topic-count-badge");
+  const descEl  = document.getElementById("topic-description");
+
+  let problems = data.problems;
+  if (query) {
+    problems = problems.filter(p =>
+      (p.title+" "+p.num+" "+p.kw+" "+p.pills.join(" ")+" "+(p.pattern||"")).toLowerCase().includes(query.toLowerCase())
+    );
+  }
+
+  titleEl.textContent = data.label;
+  badgeEl.setAttribute("style", data.badgeStyle);
+  badgeEl.textContent = problems.length + (problems.length === 1 ? " problem" : " problems");
+  descEl.textContent = data.description;
+
+  if (problems.length === 0) {
+    const isSearch = query.length > 0;
+    grid.innerHTML = `<div class="empty-state">
+      <div class="empty-icon">${isSearch ? "🔍" : data.icon}</div>
+      <div class="empty-title">${isSearch ? `No results for "${query}"` : "Problems coming soon"}</div>
+      <div class="empty-desc">${isSearch
+        ? `Try a different keyword, or <a href="#" onclick="document.getElementById('search').value='';handleSearch();return false" style="color:var(--accent);text-decoration:none">clear the search</a>.`
+        : `${data.label} visualizers are being built.<br/>Solve a problem and it will appear here.`}</div>
+    </div>`;
+    return;
+  }
+
+  const firstPill = topicKey === "bst" ? "emerald-pill" : "accent";
+
+  grid.innerHTML = problems.map(p => `
+    <a class="card" data-c="${p.color}" href="${p.href}">
+      <div class="card-tree">${p.svg}</div>
+      <span class="diff-badge diff-${p.diff}">${p.diff === "easy" ? "Easy" : p.diff === "medium" ? "Medium" : "Hard"}</span>
+      <div class="card-body">
+        <div class="card-tag" style="color:${p.tagColor}">LeetCode ${p.num}</div>
+        <div class="card-title">${p.title}</div>
+        <p class="card-desc">${p.desc}</p>
+        <div class="card-meta">
+          ${p.pills.map((pill,i) => `<span class="pill${i===0?" "+firstPill:""}">${pill}</span>`).join("")}
+        </div>
+        <div class="card-cta">
+          <button class="card-btn" style="${p.btnStyle}">Open visualizer →</button>
+          <span class="step-count" style="color:${p.patternColor};font-size:10px;font-family:var(--mono)">🎯 ${p.pattern}</span>
+        </div>
+      </div>
+    </a>`).join("");
+}
+
+// ─── TOPIC TABS ────────────────────────────────────────────────────────────
+document.getElementById("topics-row").addEventListener("click", e => {
+  const tab = e.target.closest(".topic-tab");
+  if (!tab) return;
+  document.querySelectorAll("#topics-row .topic-tab").forEach(t => t.classList.remove("active"));
+  tab.classList.add("active");
+  activeTopic = tab.dataset.topic;
+
+  // Show BST callout only when BST tab is active
+  document.getElementById("bst-callout").style.display = activeTopic === "bst" ? "flex" : "none";
+
+  const section = document.getElementById("cards-section");
+  section.style.animation = "none"; section.offsetHeight;
+  section.style.animation = "fadeUp .35s ease both";
+  renderCards(activeTopic, searchQuery);
+});
+
+// ─── SEARCH ────────────────────────────────────────────────────────────────
+function handleSearch() {
+  searchQuery = document.getElementById("search").value.trim();
+  if (searchQuery) {
+    let best = activeTopic, bestCount = -1;
+    Object.entries(TOPICS).forEach(([k, d]) => {
+      const n = d.problems.filter(p =>
+        (p.title+" "+p.num+" "+p.kw+" "+p.pills.join(" ")+" "+(p.pattern||"")).toLowerCase().includes(searchQuery.toLowerCase())
+      ).length;
+      if (n > bestCount) { bestCount = n; best = k; }
+    });
+    if (bestCount > 0 && best !== activeTopic) {
+      document.querySelectorAll("#topics-row .topic-tab").forEach(t => t.classList.remove("active"));
+      const tab = document.querySelector(`#topics-row .topic-tab[data-topic="${best}"]`);
+      if (tab) tab.classList.add("active");
+      activeTopic = best;
+      document.getElementById("bst-callout").style.display = activeTopic === "bst" ? "flex" : "none";
+    }
+  }
+  renderCards(activeTopic, searchQuery);
+}
+
+document.getElementById("search").addEventListener("input", handleSearch);
+
+// ─── INIT ───────────────────────────────────────────────────────────────────
+renderCards("trees", "");
+</script>
+</body>
+</html>

@@ -1,0 +1,869 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Search in a Binary Search Tree — Interactive Dry Run</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Sora:wght@300;400;600;700&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #0d0f14; --surface: #13161d; --surface2: #1a1e28; --surface3: #212638;
+      --border: rgba(255,255,255,0.07); --border-mid: rgba(255,255,255,0.12);
+      --text: #e8eaf0; --text-muted: #6b7280; --text-dim: #3d4251;
+      --accent: #7c6ef5; --accent-glow: rgba(124,110,245,0.25);
+      --green: #34d399; --green-bg: rgba(52,211,153,0.1);
+      --amber: #fbbf24; --amber-bg: rgba(251,191,36,0.12);
+      --blue: #60a5fa; --blue-bg: rgba(96,165,250,0.1);
+      --red: #f87171; --red-bg: rgba(248,113,113,0.12);
+      --emerald: #10b981; --emerald-bg: rgba(16,185,129,0.1);
+      --mono: 'JetBrains Mono', monospace; --sans: 'Sora', sans-serif;
+    }
+    html { scroll-behavior: smooth; }
+    body { background: var(--bg); color: var(--text); font-family: var(--sans); font-size: 15px; line-height: 1.6; min-height: 100vh; overflow-x: hidden; }
+    body::before { content: ''; position: fixed; inset: 0; background-image: linear-gradient(rgba(16,185,129,0.025) 1px, transparent 1px), linear-gradient(90deg, rgba(16,185,129,0.025) 1px, transparent 1px); background-size: 40px 40px; pointer-events: none; z-index: 0; }
+    .page { position: relative; z-index: 1; max-width: 1000px; margin: 0 auto; padding: 3rem 1.5rem 5rem; }
+
+    .back-nav { display: inline-flex; align-items: center; gap: 8px; font-family: var(--mono); font-size: 12px; color: var(--text-muted); text-decoration: none; padding: 7px 14px 7px 10px; border-radius: 8px; border: 1px solid var(--border); background: var(--surface); margin-bottom: 2rem; transition: all .15s; }
+    .back-nav:hover { border-color: var(--border-mid); color: var(--text); }
+
+    header { margin-bottom: 2rem; animation: fadeUp .6s ease both; }
+    .tag { display: inline-block; font-family: var(--mono); font-size: 11px; font-weight: 500; letter-spacing: .12em; text-transform: uppercase; color: var(--emerald); background: var(--emerald-bg); border: 1px solid rgba(16,185,129,0.3); padding: 4px 12px; border-radius: 100px; margin-bottom: 1.2rem; }
+    h1 { font-size: clamp(1.8rem, 5vw, 2.8rem); font-weight: 700; line-height: 1.15; color: var(--text); margin-bottom: .8rem; letter-spacing: -.02em; }
+    h1 span { color: var(--emerald); }
+    .subtitle { font-size: 15px; color: var(--text-muted); max-width: 580px; line-height: 1.7; }
+
+    .pattern-banner { display: flex; align-items: flex-start; gap: 16px; background: var(--emerald-bg); border: 1px solid rgba(16,185,129,0.25); border-left: 3px solid var(--emerald); border-radius: 10px; padding: 14px 18px; margin-bottom: 2rem; animation: fadeUp .6s ease .03s both; flex-wrap: wrap; }
+    .pattern-label { font-family: var(--mono); font-size: 10px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--text-dim); margin-bottom: 4px; }
+    .pattern-name { font-family: var(--mono); font-size: 13px; font-weight: 700; color: var(--emerald); }
+    .pattern-desc { font-family: var(--mono); font-size: 12px; color: var(--text-muted); flex: 1; min-width: 200px; line-height: 1.7; }
+    .pattern-solves { font-family: var(--mono); font-size: 11px; color: var(--text-dim); }
+    .pattern-solves span { color: var(--emerald); }
+
+    .problem-section { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; margin-bottom: 2rem; animation: fadeUp .6s ease .04s both; }
+    .section-header { display: flex; align-items: center; gap: 10px; padding: 14px 20px; border-bottom: 1px solid var(--border); background: var(--surface2); }
+    .section-header-title { font-family: var(--mono); font-size: 11px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--text-muted); }
+    .section-body { padding: 20px; }
+    .section-body p { font-size: 13px; color: var(--text-muted); line-height: 1.75; margin-bottom: 10px; }
+    .section-body p:last-child { margin-bottom: 0; }
+    .section-body p strong { color: var(--text); }
+    .section-body code { font-family: var(--mono); font-size: 11px; background: var(--surface2); padding: 1px 6px; border-radius: 4px; color: var(--accent); }
+
+    .bst-rule { background: var(--emerald-bg); border: 1px solid rgba(16,185,129,0.2); border-radius: 10px; padding: 14px 18px; margin-bottom: 14px; font-family: var(--mono); font-size: 12px; color: var(--text-muted); line-height: 1.75; }
+    .bst-rule strong { color: var(--emerald); }
+
+    .io-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 14px; }
+    .io-card { background: var(--surface2); border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; }
+    .io-label { font-family: var(--mono); font-size: 10px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--text-dim); margin-bottom: 8px; }
+    .io-row { display: flex; justify-content: space-between; font-family: var(--mono); font-size: 12px; padding: 4px 0; border-bottom: 1px solid var(--border); color: var(--text-muted); }
+    .io-row:last-child { border-bottom: none; }
+    .io-found { color: var(--emerald); font-weight: 700; }
+    .io-null { color: var(--red); font-weight: 700; }
+
+    .hints-grid { display: flex; flex-direction: column; gap: 10px; }
+    .hint-step { display: flex; gap: 12px; align-items: flex-start; }
+    .hint-num { font-family: var(--mono); font-size: 11px; font-weight: 700; color: var(--emerald); background: var(--emerald-bg); border: 1px solid rgba(16,185,129,0.25); padding: 3px 8px; border-radius: 6px; flex-shrink: 0; margin-top: 2px; min-width: 28px; text-align: center; }
+    .hint-text { font-size: 13px; color: var(--text-muted); line-height: 1.7; }
+    .hint-text code { font-family: var(--mono); font-size: 11px; background: var(--surface2); padding: 1px 5px; border-radius: 4px; color: var(--accent); }
+    .hint-text strong { color: var(--text); }
+
+    .code-block { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; margin-bottom: 2rem; animation: fadeUp .6s ease .1s both; }
+    .code-header { display: flex; align-items: center; gap: 8px; padding: 12px 16px; border-bottom: 1px solid var(--border); background: var(--surface2); }
+    .code-header span { font-family: var(--mono); font-size: 12px; color: var(--text-muted); }
+    .dots { display: flex; gap: 6px; }
+    .dot { width: 10px; height: 10px; border-radius: 50%; }
+    .dot-r { background: #ff5f57; } .dot-y { background: #ffbd2e; } .dot-g { background: #28c940; }
+    pre { padding: 1.25rem 1.5rem; overflow-x: auto; font-family: var(--mono); font-size: 13px; line-height: 1.8; color: #c9d1d9; }
+    .kw { color: #ff79c6; } .fn { color: #50fa7b; } .cm { color: #6272a4; font-style: italic; } .num { color: #bd93f9; } .var { color: #8be9fd; }
+    .hl { background: rgba(16,185,129,0.12); border-radius: 3px; padding: 0 3px; }
+
+    .section-label { font-family: var(--mono); font-size: 11px; font-weight: 500; letter-spacing: .1em; text-transform: uppercase; color: var(--text-dim); margin-bottom: 1rem; margin-top: 2.5rem; }
+
+    .examples-row { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 1.5rem; animation: fadeUp .6s ease .15s both; }
+    .ex-btn { display: inline-flex; align-items: center; gap: 8px; padding: 9px 16px; border-radius: 10px; border: 1px solid var(--border); background: var(--surface); cursor: pointer; transition: all .18s; font-family: var(--mono); font-size: 12px; font-weight: 600; color: var(--text-muted); user-select: none; }
+    .ex-btn:hover { border-color: var(--border-mid); color: var(--text); transform: translateY(-1px); }
+    .ex-btn.active { background: var(--emerald-bg); border-color: rgba(16,185,129,0.4); color: var(--emerald); transform: translateY(-1px); }
+    .ex-badge { font-size: 9px; font-weight: 700; padding: 2px 7px; border-radius: 5px; background: var(--surface3); color: var(--text-dim); }
+    .ex-btn.active .ex-badge { background: rgba(255,255,255,0.1); color: inherit; }
+
+    .viz-card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; overflow: hidden; animation: fadeUp .6s ease .2s both; }
+    .progress-bar-wrap { height: 3px; background: var(--border); }
+    .progress-bar-inner { height: 100%; background: linear-gradient(90deg, var(--emerald), #34d399); transition: width .35s cubic-bezier(.4,0,.2,1); border-radius: 0 2px 2px 0; }
+    .controls { display: flex; align-items: center; gap: 10px; padding: 14px 20px; border-bottom: 1px solid var(--border); background: var(--surface2); flex-wrap: wrap; }
+    .btn { display: inline-flex; align-items: center; gap: 6px; font-family: var(--mono); font-size: 12px; font-weight: 500; padding: 7px 16px; border-radius: 8px; border: 1px solid var(--border-mid); background: var(--surface3); color: var(--text); cursor: pointer; transition: all .15s; }
+    .btn:hover:not(:disabled) { background: var(--emerald-bg); border-color: var(--emerald); color: var(--emerald); }
+    .btn:disabled { opacity: .3; cursor: default; }
+    .btn-play-active { background: var(--emerald-bg) !important; border-color: rgba(16,185,129,0.4) !important; color: var(--emerald) !important; }
+    .btn-reset { background: var(--red-bg) !important; border-color: rgba(248,113,113,0.3) !important; color: var(--red) !important; }
+    .step-info { flex: 1; font-size: 13px; color: var(--text-muted); font-family: var(--mono); }
+    kbd { font-size: 10px; background: var(--surface3); border: 1px solid var(--border-mid); padding: 2px 5px; border-radius: 4px; color: var(--text-muted); font-family: var(--mono); }
+    .result-badge { font-family: var(--mono); font-size: 11px; font-weight: 700; letter-spacing: .06em; padding: 4px 12px; border-radius: 100px; text-transform: uppercase; }
+    .badge-found { background: var(--emerald-bg); color: var(--emerald); border: 1px solid rgba(16,185,129,0.3); }
+    .badge-null  { background: var(--red-bg); color: var(--red); border: 1px solid rgba(248,113,113,0.25); }
+
+    .step-desc { padding: 12px 20px; font-size: 13px; color: var(--text-muted); background: var(--surface2); border-bottom: 1px solid var(--border); font-family: var(--mono); min-height: 44px; line-height: 1.6; }
+    .step-desc em  { color: var(--amber); font-style: normal; }
+    .step-desc .ok { color: var(--emerald); font-weight: 600; }
+    .step-desc .go-left  { color: var(--blue); font-weight: 600; }
+    .step-desc .go-right { color: var(--amber); font-weight: 600; }
+    .step-desc .miss { color: var(--red); font-weight: 600; }
+
+    /* Main grid */
+    .main-grid { display: grid; grid-template-columns: 1fr 320px; }
+    .tree-panel { padding: 24px; border-right: 1px solid var(--border); }
+    .panel-label { font-family: var(--mono); font-size: 10px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--text-dim); margin-bottom: 12px; }
+    #tree-svg { width: 100%; }
+
+    /* Direction indicator */
+    .direction-panel { padding: 14px 16px; border-bottom: 1px solid var(--border); }
+    .direction-display { display: flex; align-items: center; justify-content: center; gap: 10px; background: var(--surface2); border: 1px solid var(--border-mid); border-radius: 10px; padding: 10px 14px; font-family: var(--mono); font-size: 12px; min-height: 42px; }
+    .dir-left  { color: var(--blue); font-weight: 700; }
+    .dir-right { color: var(--amber); font-weight: 700; }
+    .dir-found { color: var(--emerald); font-weight: 700; }
+    .dir-null  { color: var(--red); font-weight: 700; }
+    .dir-neutral { color: var(--text-dim); }
+
+    /* Call stack */
+    .stack-panel { padding: 14px 16px; border-bottom: 1px solid var(--border); }
+    .call-stack { display: flex; flex-direction: column-reverse; gap: 4px; min-height: 60px; }
+    .frame { padding: 5px 10px; border-radius: 6px; font-size: 10px; font-family: var(--mono); border: 1px solid var(--border); background: var(--surface2); color: var(--text-muted); transition: all .2s; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .frame.active   { border-color: rgba(16,185,129,0.4); background: var(--emerald-bg); color: var(--emerald); }
+    .frame.ret-found{ border-color: rgba(52,211,153,0.3); background: var(--green-bg); color: var(--green); }
+    .frame.ret-null { border-color: rgba(248,113,113,0.3); background: var(--red-bg); color: var(--red); }
+
+    .vars-panel { padding: 14px 16px; border-bottom: 1px solid var(--border); }
+    .var-row { display: flex; justify-content: space-between; align-items: center; padding: 4px 0; border-bottom: 1px solid var(--border); font-size: 12px; }
+    .var-row:last-child { border-bottom: none; }
+    .var-name { font-family: var(--mono); color: var(--text-muted); font-size: 11px; }
+    .var-val { font-family: var(--mono); font-weight: 700; color: var(--amber); font-size: 11px; }
+    .var-val.g  { color: var(--green); }
+    .var-val.em { color: var(--emerald); }
+    .var-val.r  { color: var(--red); }
+    .var-val.b  { color: var(--blue); }
+    .var-val.d  { color: var(--text-dim); }
+
+    .log-panel { padding: 14px 16px; flex: 1; }
+    .log { font-size: 11px; font-family: var(--mono); line-height: 1.9; color: var(--text-dim); max-height: 160px; overflow-y: auto; }
+    .log::-webkit-scrollbar { width: 4px; }
+    .log::-webkit-scrollbar-thumb { background: var(--border-mid); border-radius: 2px; }
+    .entry.hl    { color: var(--text); }
+    .entry.found { color: var(--emerald); font-weight: 600; }
+    .entry.left  { color: var(--blue); }
+    .entry.right { color: var(--amber); }
+    .entry.miss  { color: var(--red); }
+
+    /* Revision */
+    .revision-section { margin-top: 2.5rem; animation: fadeUp .6s ease .3s both; }
+    .explain-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-bottom: 16px; }
+    .explain-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 16px 18px; }
+    .explain-card .icon { font-size: 18px; margin-bottom: 8px; }
+    .explain-card h3 { font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 6px; }
+    .explain-card p { font-size: 12px; color: var(--text-muted); line-height: 1.7; }
+    .explain-card code { font-family: var(--mono); font-size: 11px; background: var(--surface2); padding: 1px 5px; border-radius: 4px; color: var(--accent); }
+
+    .mental-model { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; margin-bottom: 16px; }
+    .mm-header { display: flex; align-items: center; gap: 8px; padding: 12px 18px; border-bottom: 1px solid var(--border); background: var(--surface2); }
+    .mm-title { font-family: var(--mono); font-size: 11px; font-weight: 700; color: var(--amber); }
+    .mm-body { padding: 18px; display: flex; flex-direction: column; gap: 10px; }
+    .mm-item { display: flex; gap: 10px; align-items: flex-start; }
+    .mm-b { font-family: var(--mono); font-size: 12px; color: var(--amber); font-weight: 700; flex-shrink: 0; margin-top: 2px; }
+    .mm-t { font-size: 13px; color: var(--text-muted); line-height: 1.7; }
+    .mm-t strong { color: var(--text); }
+    .mm-t code { font-family: var(--mono); font-size: 11px; background: var(--surface2); padding: 1px 5px; border-radius: 4px; color: var(--accent); }
+
+    .edge-cases-card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; margin-bottom: 16px; }
+    .ec-header { display: flex; align-items: center; gap: 8px; padding: 12px 18px; border-bottom: 1px solid var(--border); background: var(--surface2); }
+    .ec-title { font-family: var(--mono); font-size: 11px; font-weight: 700; color: var(--red); }
+    .el { display: flex; flex-direction: column; }
+    .ei { display: flex; gap: 12px; align-items: flex-start; padding: 12px 18px; border-bottom: 1px solid var(--border); }
+    .ei:last-child { border-bottom: none; }
+    .el-w { font-family: var(--mono); font-size: 9px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; padding: 3px 8px; border-radius: 5px; flex-shrink: 0; margin-top: 2px; }
+    .el-w.w  { background: var(--red-bg); color: var(--red); border: 1px solid rgba(248,113,113,0.25); }
+    .el-w.ok { background: var(--green-bg); color: var(--green); border: 1px solid rgba(52,211,153,0.25); }
+    .et { font-size: 12px; color: var(--text-muted); line-height: 1.65; }
+    .et code { font-family: var(--mono); font-size: 11px; background: var(--surface2); padding: 1px 5px; border-radius: 4px; color: var(--accent); }
+
+    .best-solution { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; margin-bottom: 16px; }
+    .bs-header { display: flex; align-items: center; justify-content: space-between; padding: 12px 18px; border-bottom: 1px solid var(--border); background: var(--surface2); flex-wrap: wrap; gap: 8px; }
+    .bs-title { font-family: var(--mono); font-size: 11px; font-weight: 700; color: var(--green); }
+    .sol-pills { display: flex; gap: 6px; flex-wrap: wrap; }
+    .sol-pill { font-family: var(--mono); font-size: 10px; padding: 3px 9px; border-radius: 6px; background: var(--surface3); border: 1px solid var(--border-mid); color: var(--text-muted); }
+    .complexity { display: flex; gap: 10px; margin-top: 1.5rem; flex-wrap: wrap; }
+    .cpill { font-family: var(--mono); font-size: 12px; padding: 6px 14px; border-radius: 8px; border: 1px solid var(--border); background: var(--surface); }
+    .cpill strong { color: var(--accent); font-weight: 700; }
+
+    /* Side panel wrapper */
+    .side-panel { display: flex; flex-direction: column; }
+
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+    @media (max-width: 680px) { .main-grid { grid-template-columns: 1fr; } .tree-panel { border-right: none; border-bottom: 1px solid var(--border); } .io-grid { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+<div class="page">
+
+  <a class="back-nav" href="../dsa-hub.html">← All problems</a>
+
+  <header>
+    <div class="tag">LeetCode #700 · BST · Algorithm Dry Run</div>
+    <h1><span>Search</span> in a Binary Search Tree</h1>
+    <p class="subtitle">Step-by-step trace of <code style="font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--accent);background:var(--surface);padding:2px 7px;border-radius:5px;">searchBST</code> — watch how the BST ordering property lets us eliminate entire subtrees at each step, making search O(log n).</p>
+  </header>
+
+  <div class="pattern-banner">
+    <div>
+      <div class="pattern-label">Pattern</div>
+      <div class="pattern-name">🎯 BST Binary Search — Eliminate Half at Every Step</div>
+    </div>
+    <div class="pattern-desc">At every node: if target is smaller, go left (ignore right). If larger, go right (ignore left). The BST ordering makes this safe.</div>
+    <div class="pattern-solves">Same pattern unlocks: <span>#701 Insert into BST · #98 Validate BST · #270 Closest BST Value</span></div>
+  </div>
+
+  <div class="problem-section" style="animation: fadeUp .6s ease .04s both">
+    <div class="section-header"><span style="font-size:16px">📋</span><span class="section-header-title">Problem Statement</span></div>
+    <div class="section-body">
+      <div class="bst-rule">
+        <strong>BST Superpower:</strong> Because left subtree values are always smaller and right subtree values are always larger, you never need to search <em>both</em> sides. One comparison tells you exactly where to go — eliminating half the tree every step.
+      </div>
+      <p>Given the root of a BST and an integer <code>val</code>, find the node in the BST where <code>node.val === val</code> and return the <strong>subtree rooted at that node</strong>. If no such node exists, return <code>null</code>.</p>
+
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;margin-top:16px">
+        <!-- Found: [4,2,7,1,3], val=2 → subtree [2,1,3] -->
+        <div style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;overflow:hidden">
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 14px;border-bottom:1px solid var(--border)">
+            <span style="font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--text-dim)">search val=2</span>
+            <span style="font-family:var(--mono);font-size:11px;font-weight:700;padding:2px 10px;border-radius:5px;background:rgba(16,185,129,.12);color:#10b981;border:1px solid rgba(16,185,129,.25)">subtree [2,1,3]</span>
+          </div>
+          <div style="padding:12px;display:flex;justify-content:center">
+            <svg viewBox="0 0 200 130" style="max-height:110px;width:100%">
+              <line x1="90" y1="26" x2="50" y2="58" stroke="#1e2231" stroke-width="1.5"/>
+              <line x1="90" y1="26" x2="140" y2="58" stroke="#1e2231" stroke-width="1.5"/>
+              <line x1="38" y1="76" x2="22" y2="104" stroke="#1e2231" stroke-width="1.5"/>
+              <line x1="62" y1="76" x2="78" y2="104" stroke="#1e2231" stroke-width="1.5"/>
+              <circle cx="90" cy="18" r="18" fill="#13161d" stroke="#2a2f3e" stroke-width="1.5"/>
+              <text x="90" y="22" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="13" font-weight="700" fill="#6b7280">4</text>
+              <circle cx="48" cy="68" r="18" fill="#0b2416" stroke="#10b981" stroke-width="2.5"/>
+              <text x="48" y="72" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="13" font-weight="700" fill="#10b981">2</text>
+              <circle cx="142" cy="68" r="18" fill="#13161d" stroke="#2a2f3e" stroke-width="1.5" opacity=".3"/>
+              <text x="142" y="72" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="13" font-weight="700" fill="#2a2f3e" opacity=".3">7</text>
+              <circle cx="20" cy="108" r="14" fill="#0b2416" stroke="#10b981" stroke-width="2"/>
+              <text x="20" y="112" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="11" font-weight="700" fill="#10b981">1</text>
+              <circle cx="80" cy="108" r="14" fill="#0b2416" stroke="#10b981" stroke-width="2"/>
+              <text x="80" y="112" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="11" font-weight="700" fill="#10b981">3</text>
+              <text x="110" y="14" font-family="'JetBrains Mono',monospace" font-size="8" fill="#3d4251">4 &gt; 2 → go left</text>
+              <text x="4" y="68" font-family="'JetBrains Mono',monospace" font-size="8" fill="#10b981">found!</text>
+              <text x="140" y="54" font-family="'JetBrains Mono',monospace" font-size="8" fill="#3d4251">pruned</text>
+            </svg>
+          </div>
+        </div>
+        <!-- Not found: [4,2,7,1,3], val=5 → null -->
+        <div style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;overflow:hidden">
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 14px;border-bottom:1px solid var(--border)">
+            <span style="font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--text-dim)">search val=5</span>
+            <span style="font-family:var(--mono);font-size:11px;font-weight:700;padding:2px 10px;border-radius:5px;background:rgba(248,113,113,.12);color:#f87171;border:1px solid rgba(248,113,113,.25)">null — not found</span>
+          </div>
+          <div style="padding:12px;display:flex;justify-content:center">
+            <svg viewBox="0 0 200 120" style="max-height:100px;width:100%">
+              <line x1="90" y1="26" x2="50" y2="58" stroke="#1e2231" stroke-width="1.5"/>
+              <line x1="90" y1="26" x2="140" y2="58" stroke="#1e2231" stroke-width="1.5"/>
+              <circle cx="90" cy="18" r="18" fill="#13161d" stroke="#2a2f3e" stroke-width="1.5"/>
+              <text x="90" y="22" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="13" font-weight="700" fill="#6b7280">4</text>
+              <circle cx="48" cy="68" r="18" fill="#13161d" stroke="#2a2f3e" stroke-width="1.5" opacity=".3"/>
+              <text x="48" y="72" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="13" font-weight="700" fill="#2a2f3e" opacity=".3">2</text>
+              <circle cx="142" cy="68" r="18" fill="#1a2030" stroke="#60a5fa" stroke-width="2"/>
+              <text x="142" y="72" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="13" font-weight="700" fill="#60a5fa">7</text>
+              <text x="100" y="14" font-family="'JetBrains Mono',monospace" font-size="8" fill="#3d4251">4 &lt; 5 → go right</text>
+              <text x="4" y="62" font-family="'JetBrains Mono',monospace" font-size="8" fill="#3d4251">pruned</text>
+              <text x="152" y="54" font-family="'JetBrains Mono',monospace" font-size="8" fill="#60a5fa">7 &gt; 5 → go left</text>
+              <text x="136" y="88" font-family="'JetBrains Mono',monospace" font-size="8" fill="#f87171">→ null (not found)</text>
+            </svg>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="problem-section" style="animation: fadeUp .6s ease .05s both">
+    <div class="section-header"><span style="font-size:16px">💡</span><span class="section-header-title">Intuition + Hints</span></div>
+    <div class="section-body">
+      <div class="hints-grid">
+        <div class="hint-step"><span class="hint-num">1</span><div class="hint-text"><strong>Base cases first.</strong> If <code>root</code> is null, the value doesn't exist — return null. If <code>root.val === val</code>, found it — return <code>root</code> (the whole subtree, not just the value).</div></div>
+        <div class="hint-step"><span class="hint-num">2</span><div class="hint-text"><strong>Use the BST property.</strong> If <code>root.val > val</code>, the target can ONLY be in the left subtree — the right side is all bigger, so skip it entirely.
+          <div style="margin-top:10px">
+            <svg viewBox="0 0 260 80" style="max-height:70px;width:100%;border-radius:8px;background:var(--surface2);padding:4px">
+              <line x1="80" y1="22" x2="44" y2="50" stroke="#1e2231" stroke-width="1.5"/>
+              <line x1="80" y1="22" x2="122" y2="50" stroke="#1e2231" stroke-width="1.5"/>
+              <circle cx="80" cy="14" r="16" fill="#1a2030" stroke="#60a5fa" stroke-width="2"/>
+              <text x="80" y="18" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="11" font-weight="700" fill="#60a5fa">8</text>
+              <circle cx="42" cy="60" r="14" fill="#0b2416" stroke="#10b981" stroke-width="2"/>
+              <text x="42" y="64" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="11" font-weight="700" fill="#10b981">3</text>
+              <circle cx="124" cy="60" r="14" fill="#0d0f14" stroke="#1e2231" stroke-width="1.5" opacity=".3"/>
+              <text x="124" y="64" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="11" font-weight="700" fill="#2a2f3e" opacity=".3">12</text>
+              <text x="4" y="14" font-family="'JetBrains Mono',monospace" font-size="8" fill="#60a5fa">search 3:</text>
+              <text x="4" y="24" font-family="'JetBrains Mono',monospace" font-size="8" fill="#60a5fa">8 &gt; 3 → go left</text>
+              <text x="4" y="34" font-family="'JetBrains Mono',monospace" font-size="8" fill="#3d4251">right side (12):</text>
+              <text x="4" y="44" font-family="'JetBrains Mono',monospace" font-size="8" fill="#3d4251">all &gt; 8 &gt; 3 → skip!</text>
+              <text x="148" y="30" font-family="'JetBrains Mono',monospace" font-size="8" fill="#3d4251">right = pruned,</text>
+              <text x="148" y="40" font-family="'JetBrains Mono',monospace" font-size="8" fill="#3d4251">never visited</text>
+              <text x="42" y="46" font-family="'JetBrains Mono',monospace" font-size="8" fill="#10b981">found!</text>
+            </svg>
+          </div>
+        </div></div>
+        <div class="hint-step"><span class="hint-num">3</span><div class="hint-text"><strong>Mirror logic.</strong> If <code>root.val &lt; val</code>, target can ONLY be in the right subtree. One comparison, one direction, no backtracking.</div></div>
+        <div class="hint-step"><span class="hint-num">4</span><div class="hint-text">The ternary <code>root.val > val ? searchBST(root.left, val) : searchBST(root.right, val)</code> is the whole algorithm. Clean and elegant.</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header"><div class="dots"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div></div><span>searchBST.js</span></div>
+    <pre><span class="kw">var</span> <span class="fn">searchBST</span> = <span class="kw">function</span>(<span class="var">root</span>, <span class="var">val</span>) {
+  <span class="kw">if</span>(!<span class="var">root</span>) <span class="kw">return</span> <span class="var">root</span>                <span class="cm">// ① null → not found</span>
+  <span class="kw">if</span>(<span class="var">root</span>.val == <span class="var">val</span>) <span class="kw">return</span> <span class="var">root</span>       <span class="cm">// ② exact match → return subtree</span>
+
+  <span class="hl"><span class="kw">return</span> <span class="var">root</span>.val > <span class="var">val</span>
+    ? <span class="fn">searchBST</span>(<span class="var">root</span>.left, <span class="var">val</span>)         <span class="cm">// ③ curr too big → go LEFT</span>
+    : <span class="fn">searchBST</span>(<span class="var">root</span>.right, <span class="var">val</span>)</span>        <span class="cm">// ④ curr too small → go RIGHT</span>
+};</pre>
+  </div>
+
+  <p class="section-label">// Interactive dry run — choose an example</p>
+
+  <div class="examples-row" id="examples-row">
+    <button class="ex-btn active" data-ex="0">Example 1 <span class="ex-badge">Found — val=2</span></button>
+    <button class="ex-btn" data-ex="1">Example 2 <span class="ex-badge">Not Found — val=5</span></button>
+    <button class="ex-btn" data-ex="2">Example 3 <span class="ex-badge">Found at Root</span></button>
+    <button class="ex-btn" data-ex="3">Example 4 <span class="ex-badge">Deep Search</span></button>
+  </div>
+
+  <div class="viz-card">
+    <div class="progress-bar-wrap"><div class="progress-bar-inner" id="prog" style="width:10%"></div></div>
+    <div class="controls">
+      <button class="btn" id="btn-prev" onclick="move(-1)" disabled>← Prev</button>
+      <button class="btn btn-play-active" id="btn-play" onclick="togglePlay()">▶ Play</button>
+      <button class="btn" id="btn-next" onclick="move(1)">Next →</button>
+      <button class="btn btn-reset" onclick="reset()">↺ Reset</button>
+      <span class="step-info" id="step-label">Step 1 / ?</span>
+      <span style="font-family:var(--mono);font-size:11px;color:var(--text-dim);display:flex;gap:4px;align-items:center"><kbd>←</kbd><kbd>→</kbd></span>
+      <span class="result-badge" id="ans-badge" style="display:none">—</span>
+    </div>
+    <div class="step-desc" id="step-desc">Loading...</div>
+    <div class="main-grid">
+      <div class="tree-panel">
+        <div class="panel-label" id="tree-panel-label">// BST — [4, 2, 7, 1, 3] · searching for val = 2</div>
+        <svg id="tree-svg" viewBox="0 0 460 280"></svg>
+      </div>
+      <div class="side-panel">
+        <div class="direction-panel">
+          <div class="panel-label">// decision at current node</div>
+          <div class="direction-display" id="dir-display">
+            <span class="dir-neutral">— waiting —</span>
+          </div>
+        </div>
+        <div class="stack-panel">
+          <div class="panel-label">// call stack</div>
+          <div class="call-stack" id="stack"></div>
+        </div>
+        <div class="vars-panel">
+          <div class="panel-label">// variables</div>
+          <div class="var-row"><span class="var-name">root.val</span>  <span class="var-val em" id="v-rv">—</span></div>
+          <div class="var-row"><span class="var-name">val (target)</span><span class="var-val b"  id="v-val">—</span></div>
+          <div class="var-row"><span class="var-name">comparison</span><span class="var-val"     id="v-cmp">—</span></div>
+          <div class="var-row"><span class="var-name">returns</span>   <span class="var-val g"    id="v-ret">—</span></div>
+        </div>
+        <div class="log-panel">
+          <div class="panel-label">// execution log</div>
+          <div class="log" id="log"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Revision -->
+  <div class="revision-section">
+    <p class="section-label">// revision — lock this in</p>
+
+    <div class="mental-model">
+      <div class="mm-header"><span style="font-size:16px">🧠</span><span class="mm-title">Mental Model — Think of a Phone Book</span></div>
+      <div class="mm-body">
+        <div class="mm-item"><span class="mm-b">▸</span><div class="mm-t"><strong>A BST is a sorted phone book.</strong> You don't scan every name — you open to the middle and immediately decide: go left (earlier in alphabet) or go right (later). Each check eliminates half the remaining entries.</div></div>
+        <div class="mm-item"><span class="mm-b">▸</span><div class="mm-t"><strong>The ternary is everything.</strong> <code>root.val > val ? go left : go right</code>. One comparison, one recursive call, no backtracking, no branching. The BST property guarantees you'll never need the other side.</div></div>
+        <div class="mm-item"><span class="mm-b">▸</span><div class="mm-t"><strong>Return the node, not the value.</strong> The problem asks for the subtree rooted at the found node. When you find the match, return <code>root</code> (the whole node), not <code>root.val</code>.</div></div>
+        <div class="mm-item"><span class="mm-b">▸</span><div class="mm-t"><strong>Why <code>return root</code> for null?</strong> Writing <code>if(!root) return root</code> is the same as <code>return null</code> — but it's idiomatic JS for "return whatever root is". Both work identically.</div></div>
+      </div>
+    </div>
+
+    <div class="explain-grid">
+      <div class="explain-card"><div class="icon">🛑</div><h3>Base case: null</h3><p>Reached a null node — we fell off the tree without finding the value. The target doesn't exist. Return null.</p></div>
+      <div class="explain-card"><div class="icon">✅</div><h3>Base case: match</h3><p><code>root.val === val</code> — found it! Return the entire node (<code>root</code>), which is the subtree rooted there.</p></div>
+      <div class="explain-card"><div class="icon">⬅️</div><h3>Go left</h3><p>When <code>root.val > val</code>: target is smaller, so it MUST be in the left subtree. The entire right side can be safely ignored.</p></div>
+      <div class="explain-card"><div class="icon">➡️</div><h3>Go right</h3><p>When <code>root.val &lt; val</code>: target is larger, so it MUST be in the right subtree. The entire left side can be safely ignored.</p></div>
+    </div>
+
+    <div class="edge-cases-card">
+      <div class="ec-header"><span style="font-size:16px">⚠️</span><span class="ec-title">Edge Cases</span></div>
+      <div class="el">
+        <div class="ei"><span class="el-w w">empty</span><span class="et"><strong>Empty tree:</strong> <code>root = null</code>. The first <code>if(!root)</code> fires immediately and returns null. Handles it without any extra code.</span></div>
+        <div class="ei"><span class="el-w w">not found</span><span class="et"><strong>Value not in tree:</strong> You keep recursing until you hit null. The null base case returns null, which propagates back up through every <code>return searchBST(...)</code> call.</span></div>
+        <div class="ei"><span class="el-w ok">root is target</span><span class="et"><strong>Target is the root itself:</strong> <code>root.val === val</code> matches immediately on the first call. Returns the entire original tree — perfect, that's the subtree rooted at root.</span></div>
+        <div class="ei"><span class="el-w ok">complexity</span><span class="et"><strong>O(log n) vs O(n):</strong> Balanced BST → O(log n) because you halve the search space each step. Skewed/unbalanced BST (like a linked list) → O(n) worst case. Same algorithm, different tree shape.</span></div>
+      </div>
+    </div>
+
+    <div class="best-solution">
+      <div class="bs-header">
+        <span class="bs-title">✦ Clean solution for revision</span>
+        <div class="sol-pills"><span class="sol-pill">O(log n) avg</span><span class="sol-pill">O(h) space</span><span class="sol-pill">BST search</span><span class="sol-pill">Tail recursion</span></div>
+      </div>
+      <pre><span class="kw">var</span> <span class="fn">searchBST</span> = <span class="kw">function</span>(<span class="var">root</span>, <span class="var">val</span>) {
+  <span class="kw">if</span>(!<span class="var">root</span>)              <span class="kw">return</span> <span class="var">root</span>  <span class="cm">// null → not found</span>
+  <span class="kw">if</span>(<span class="var">root</span>.val == <span class="var">val</span>)   <span class="kw">return</span> <span class="var">root</span>  <span class="cm">// found it → return subtree</span>
+  <span class="kw">return</span> <span class="var">root</span>.val > <span class="var">val</span>
+    ? <span class="fn">searchBST</span>(<span class="var">root</span>.left,  <span class="var">val</span>)     <span class="cm">// too big → go left</span>
+    : <span class="fn">searchBST</span>(<span class="var">root</span>.right, <span class="var">val</span>)     <span class="cm">// too small → go right</span>
+};
+
+<span class="cm">// KEY INSIGHT: BST property eliminates half the tree at every step
+// Never need to search both children — one comparison decides everything
+// Returns the whole subtree rooted at found node, not just the value</span></pre>
+    </div>
+
+    <div class="complexity">
+      <div class="cpill">Time: <strong>O(log n)</strong> balanced tree</div>
+      <div class="cpill">Time: <strong>O(n)</strong> skewed tree</div>
+      <div class="cpill">Space: <strong>O(h)</strong> recursion stack</div>
+      <div class="cpill">Pattern: <strong>BST binary search</strong></div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ─── EXAMPLES ─────────────────────────────────────────────────────────────
+
+const EXAMPLES = [
+  {
+    /*  BST: [4, 2, 7, 1, 3], val = 2
+            4
+           / \
+          2    7
+         / \
+        1    3
+       Path: 4 → 2 (found!)
+    */
+    label: "[4,2,7,1,3], val=2 — Found",
+    treeLabel: "[4, 2, 7, 1, 3]",
+    searchVal: 2,
+    found: true,
+    foundId: "n2",
+    svgViewBox: "0 0 460 260",
+    nodes: [
+      {id:"n4", val:4, cx:230, cy:48, r:28},
+      {id:"n2", val:2, cx:110, cy:140, r:26},
+      {id:"n7", val:7, cx:360, cy:140, r:26},
+      {id:"n1", val:1, cx:50,  cy:225, r:22},
+      {id:"n3", val:3, cx:180, cy:225, r:22},
+    ],
+    edges:[
+      {x1:208,y1:62, x2:133,y2:124},
+      {x1:252,y1:62, x2:337,y2:124},
+      {x1:93, y1:158,x2:66,  y2:208},
+      {x1:127,y1:158,x2:163, y2:208},
+    ],
+    steps: [
+      {
+        desc: 'Call <em>searchBST(root=4, val=2)</em>. root is not null. Is root.val == 2? No, 4 ≠ 2.',
+        active:"n4", found:null, pruned:[],
+        stack:["searchBST(root=4, val=2)"],
+        rv:"4", val:"2", cmp:"4 ≠ 2", ret:"—",
+        dir:'<span class="dir-neutral">4 ≠ 2 — check direction...</span>',
+        log:[{t:"→ searchBST(root=4, val=2)",h:true},{t:"  root.val(4) == val(2)? No"}]
+      },
+      {
+        desc: '<em>root.val(4) > val(2)</em> → target is smaller → <span class="go-left">go LEFT</span>. Right subtree (7) is skipped entirely — it can only have values > 4.',
+        active:"n4", found:null, pruned:["n7","n1r","n3r"],
+        stack:["searchBST(root=4, val=2)"],
+        rv:"4", val:"2", cmp:"4 > 2 → LEFT", ret:"—",
+        dir:'<span class="dir-left">← root.val(4) &gt; val(2) → go LEFT</span>',
+        log:[{t:"→ searchBST(root=4, val=2)"},{t:"  4 > 2 → go LEFT (skip right subtree)",h:true}]
+      },
+      {
+        desc: 'Recurse left → <em>searchBST(root=2, val=2)</em>. Check: root.val(2) == val(2)? <span class="ok">YES! Found it!</span>',
+        active:"n2", found:null, pruned:["n7"],
+        stack:["searchBST(root=4, val=2)","searchBST(root=2, val=2)"],
+        rv:"2", val:"2", cmp:"2 == 2 ✓", ret:"node(2)",
+        dir:'<span class="dir-found">✓ root.val(2) === val(2) — FOUND!</span>',
+        log:[{t:"  → searchBST(root=2, val=2)",h:true},{t:"  root.val(2) == val(2)? YES!",h:true},{t:"  return root (node 2 + subtree)"}]
+      },
+      {
+        desc: '🎯 <span class="ok">Return node(2)</span> — the entire subtree rooted at 2, which contains [2, 1, 3]. This propagates back up through the call stack.',
+        active:null, found:"n2", pruned:["n7"],
+        stack:[],
+        rv:"2", val:"2", cmp:"2 == 2 ✓", ret:"node(2) → [2,1,3]",
+        dir:'<span class="dir-found">✓ Returning subtree [2, 1, 3]</span>',
+        log:[{t:"  ← node 2 found! returns node(2)"},{t:"← searchBST returns node(2) ✓",h:true},{t:"  Subtree: [2, 1, 3]"}],
+        final:true, answerFound:true, answerText:"Found → subtree [2,1,3]"
+      }
+    ]
+  },
+
+  {
+    /*  BST: [4, 2, 7, 1, 3], val = 5
+            4
+           / \
+          2    7
+         / \
+        1    3
+       Path: 4 → 7 → null (not found)
+    */
+    label: "[4,2,7,1,3], val=5 — Not Found",
+    treeLabel: "[4, 2, 7, 1, 3]",
+    searchVal: 5,
+    found: false,
+    svgViewBox: "0 0 460 260",
+    nodes: [
+      {id:"n4", val:4, cx:230, cy:48, r:28},
+      {id:"n2", val:2, cx:110, cy:140, r:26},
+      {id:"n7", val:7, cx:360, cy:140, r:26},
+      {id:"n1", val:1, cx:50,  cy:225, r:22},
+      {id:"n3", val:3, cx:180, cy:225, r:22},
+    ],
+    edges:[
+      {x1:208,y1:62, x2:133,y2:124},
+      {x1:252,y1:62, x2:337,y2:124},
+      {x1:93, y1:158,x2:66,  y2:208},
+      {x1:127,y1:158,x2:163, y2:208},
+    ],
+    steps: [
+      {
+        desc: 'Call <em>searchBST(root=4, val=5)</em>. root is not null. Is root.val == 5? No, 4 ≠ 5.',
+        active:"n4", found:null, pruned:[],
+        stack:["searchBST(root=4, val=5)"],
+        rv:"4", val:"5", cmp:"4 ≠ 5", ret:"—",
+        dir:'<span class="dir-neutral">4 ≠ 5 — check direction...</span>',
+        log:[{t:"→ searchBST(root=4, val=5)",h:true},{t:"  root.val(4) == val(5)? No"}]
+      },
+      {
+        desc: '<em>root.val(4) < val(5)</em> → target is larger → <span class="go-right">go RIGHT</span>. Left subtree (2,1,3) is entirely skipped — all values there are < 4 < 5.',
+        active:"n4", found:null, pruned:["n2","n1","n3"],
+        stack:["searchBST(root=4, val=5)"],
+        rv:"4", val:"5", cmp:"4 < 5 → RIGHT", ret:"—",
+        dir:'<span class="dir-right">→ root.val(4) &lt; val(5) → go RIGHT</span>',
+        log:[{t:"→ searchBST(root=4, val=5)"},{t:"  4 < 5 → go RIGHT (skip left subtree)",h:true}]
+      },
+      {
+        desc: 'Recurse right → <em>searchBST(root=7, val=5)</em>. Is root.val == 5? No, 7 ≠ 5.',
+        active:"n7", found:null, pruned:["n2","n1","n3"],
+        stack:["searchBST(root=4, val=5)","searchBST(root=7, val=5)"],
+        rv:"7", val:"5", cmp:"7 ≠ 5", ret:"—",
+        dir:'<span class="dir-neutral">7 ≠ 5 — check direction...</span>',
+        log:[{t:"  → searchBST(root=7, val=5)",h:true},{t:"  root.val(7) == val(5)? No"}]
+      },
+      {
+        desc: '<em>root.val(7) > val(5)</em> → <span class="go-left">go LEFT</span>. But node 7 has no left child → null!',
+        active:"n7", found:null, pruned:["n2","n1","n3"],
+        stack:["searchBST(root=4, val=5)","searchBST(root=7, val=5)","searchBST(null, val=5)"],
+        rv:"7", val:"5", cmp:"7 > 5 → LEFT", ret:"—",
+        dir:'<span class="dir-left">← root.val(7) &gt; val(5) → go LEFT → but null!</span>',
+        log:[{t:"  → searchBST(root=7, val=5)"},{t:"  7 > 5 → go LEFT",h:true},{t:"  node 7 has no left child → null"}]
+      },
+      {
+        desc: '<em>searchBST(null, 5)</em>: <code>!root</code> is true → return null. <span class="miss">Value 5 not in tree!</span>',
+        active:null, found:null, pruned:["n2","n1","n3"],
+        stack:[],
+        rv:"null", val:"5", cmp:"!root → null", ret:"null",
+        dir:'<span class="dir-null">✗ root is null → return null (not found)</span>',
+        log:[{t:"  → searchBST(null, 5)"},{t:"  !root is true → return null",h:true},{t:"← searchBST returns null ✗",h:true}],
+        final:true, answerFound:false, answerText:"Not found → null"
+      }
+    ]
+  },
+
+  {
+    /*  BST: [2, 1, 3], val = 2 — found at root immediately
+    */
+    label: "[2,1,3], val=2 — Found at Root",
+    treeLabel: "[2, 1, 3]",
+    searchVal: 2,
+    found: true,
+    foundId: "n2r",
+    svgViewBox: "0 0 460 200",
+    nodes: [
+      {id:"n2r", val:2, cx:230, cy:60, r:30},
+      {id:"n1r", val:1, cx:120, cy:155, r:26},
+      {id:"n3r", val:3, cx:340, cy:155, r:26},
+    ],
+    edges:[
+      {x1:207,y1:76, x2:143,y2:138},
+      {x1:253,y1:76, x2:317,y2:138},
+    ],
+    steps: [
+      {
+        desc: 'Call <em>searchBST(root=2, val=2)</em>. First check: root is not null. Second check: <span class="ok">root.val(2) == val(2) — IMMEDIATE MATCH!</span>',
+        active:"n2r", found:null, pruned:[],
+        stack:["searchBST(root=2, val=2)"],
+        rv:"2", val:"2", cmp:"2 == 2 ✓", ret:"—",
+        dir:'<span class="dir-found">✓ root.val(2) === val(2) — found on first check!</span>',
+        log:[{t:"→ searchBST(root=2, val=2)",h:true},{t:"  root.val(2) == val(2)? YES!",h:true}]
+      },
+      {
+        desc: '🎯 <span class="ok">Return root immediately</span> — the entire tree [2,1,3]. No need to recurse at all! Best case O(1).',
+        active:null, found:"n2r", pruned:[],
+        stack:[],
+        rv:"2", val:"2", cmp:"2 == 2 ✓", ret:"node(2) = entire tree",
+        dir:'<span class="dir-found">✓ Returning entire tree [2, 1, 3]</span>',
+        log:[{t:"  root.val(2) == val(2) → return root",h:true},{t:"← Returns [2, 1, 3] — the whole tree ✓"}],
+        final:true, answerFound:true, answerText:"Found at root → [2,1,3]"
+      }
+    ]
+  },
+
+  {
+    /*  BST: [8, 3, 10, 1, 6, null, 14, null, null, 4, 7], val = 6
+             8
+            / \
+           3    10
+          / \     \
+         1    6    14
+             / \
+            4    7
+       Path: 8 → 3 → 6 (found!)
+    */
+    label: "Deep BST, val=6 — Three Hops",
+    treeLabel: "[8, 3, 10, 1, 6, null, 14]",
+    searchVal: 6,
+    found: true,
+    foundId: "n6d",
+    svgViewBox: "0 0 500 290",
+    nodes: [
+      {id:"n8",  val:8,  cx:250, cy:44,  r:26},
+      {id:"n3",  val:3,  cx:130, cy:125, r:24},
+      {id:"n10", val:10, cx:380, cy:125, r:24},
+      {id:"n1",  val:1,  cx:60,  cy:205, r:22},
+      {id:"n6d", val:6,  cx:200, cy:205, r:22},
+      {id:"n14", val:14, cx:440, cy:205, r:22},
+      {id:"n4",  val:4,  cx:148, cy:275, r:18},
+      {id:"n7",  val:7,  cx:252, cy:275, r:18},
+    ],
+    edges:[
+      {x1:228,y1:57, x2:152,y2:110},
+      {x1:272,y1:57, x2:357,y2:110},
+      {x1:113,y1:142,x2:76,  y2:188},
+      {x1:147,y1:142,x2:184, y2:188},
+      {x1:397,y1:142,x2:429, y2:188},
+      {x1:186,y1:220,x2:157, y2:260},
+      {x1:214,y1:220,x2:244, y2:260},
+    ],
+    steps: [
+      {
+        desc: 'Call <em>searchBST(root=8, val=6)</em>. 8 ≠ 6.',
+        active:"n8", found:null, pruned:[],
+        stack:["searchBST(8, val=6)"],
+        rv:"8", val:"6", cmp:"8 ≠ 6", ret:"—",
+        dir:'<span class="dir-neutral">8 ≠ 6 — check direction...</span>',
+        log:[{t:"→ searchBST(root=8, val=6)",h:true},{t:"  8 ≠ 6"}]
+      },
+      {
+        desc: '<em>8 > 6</em> → <span class="go-left">go LEFT</span>. Right subtree (10, 14) skipped — all values there are > 8 > 6.',
+        active:"n8", found:null, pruned:["n10","n14"],
+        stack:["searchBST(8, val=6)"],
+        rv:"8", val:"6", cmp:"8 > 6 → LEFT", ret:"—",
+        dir:'<span class="dir-left">← 8 &gt; 6 → go LEFT (skip 10, 14)</span>',
+        log:[{t:"  8 > 6 → go LEFT",h:true},{t:"  right subtree (10, 14) eliminated"}]
+      },
+      {
+        desc: 'Recurse left → <em>searchBST(root=3, val=6)</em>. 3 ≠ 6.',
+        active:"n3", found:null, pruned:["n10","n14"],
+        stack:["searchBST(8, val=6)","searchBST(3, val=6)"],
+        rv:"3", val:"6", cmp:"3 ≠ 6", ret:"—",
+        dir:'<span class="dir-neutral">3 ≠ 6 — check direction...</span>',
+        log:[{t:"  → searchBST(root=3, val=6)",h:true},{t:"  3 ≠ 6"}]
+      },
+      {
+        desc: '<em>3 < 6</em> → <span class="go-right">go RIGHT</span>. Left subtree (1) skipped — all values there are < 3 < 6.',
+        active:"n3", found:null, pruned:["n10","n14","n1"],
+        stack:["searchBST(8, val=6)","searchBST(3, val=6)"],
+        rv:"3", val:"6", cmp:"3 < 6 → RIGHT", ret:"—",
+        dir:'<span class="dir-right">→ 3 &lt; 6 → go RIGHT (skip node 1)</span>',
+        log:[{t:"  3 < 6 → go RIGHT",h:true},{t:"  left subtree (node 1) eliminated"}]
+      },
+      {
+        desc: 'Recurse right → <em>searchBST(root=6, val=6)</em>. <span class="ok">6 == 6 — FOUND!</span>',
+        active:"n6d", found:null, pruned:["n10","n14","n1"],
+        stack:["searchBST(8, val=6)","searchBST(3, val=6)","searchBST(6, val=6)"],
+        rv:"6", val:"6", cmp:"6 == 6 ✓", ret:"node(6)",
+        dir:'<span class="dir-found">✓ 6 === 6 — FOUND in 3 hops!</span>',
+        log:[{t:"  → searchBST(root=6, val=6)",h:true},{t:"  6 == 6 → FOUND!",h:true}]
+      },
+      {
+        desc: '🎯 <span class="ok">Return node(6)</span> with its entire subtree [6, 4, 7]. Only visited 3 nodes out of 8 — the BST eliminated 5 nodes without checking them!',
+        active:null, found:"n6d", pruned:["n10","n14","n1"],
+        stack:[],
+        rv:"6", val:"6", cmp:"6 == 6 ✓", ret:"node(6) → [6,4,7]",
+        dir:'<span class="dir-found">✓ Returning subtree [6, 4, 7]</span>',
+        log:[{t:"  return node(6) with subtree [6,4,7]",h:true},{t:"← searchBST returns [6, 4, 7] ✓"}],
+        final:true, answerFound:true, answerText:"Found → subtree [6,4,7]"
+      }
+    ]
+  }
+];
+
+// ─── STATE ─────────────────────────────────────────────────────────────────
+let exIdx = 0, cur = 0, playTimer = null;
+const getEx = () => EXAMPLES[exIdx];
+const getSteps = () => getEx().steps;
+
+// ─── RENDER SVG ────────────────────────────────────────────────────────────
+function renderSVG(ex, step) {
+  const svg = document.getElementById("tree-svg");
+  svg.setAttribute("viewBox", ex.svgViewBox);
+  const prunedSet = new Set(step.pruned || []);
+
+  let html = "";
+
+  // Draw edges
+  ex.edges.forEach(e => {
+    html += `<line x1="${e.x1}" y1="${e.y1}" x2="${e.x2}" y2="${e.y2}" stroke="#1e2231" stroke-width="2"/>`;
+  });
+
+  // Draw nodes
+  ex.nodes.forEach(n => {
+    let fill = "#13161d", stroke = "#2a2f3e", sw = "1.5", tf = "#6b7280", opacity = "1";
+
+    if (n.id === step.found) {
+      // Final found state
+      fill = "#0b2416"; stroke = "#10b981"; sw = "3"; tf = "#10b981";
+    } else if (n.id === step.active) {
+      fill = "#0f1d14"; stroke = "#10b981"; sw = "2.5"; tf = "#10b981";
+    } else if (prunedSet.has(n.id)) {
+      // Pruned/eliminated — dim them
+      fill = "#0e1018"; stroke = "#1e2231"; sw = "1"; tf = "#2a2f3e"; opacity = "0.35";
+    }
+
+    html += `<g opacity="${opacity}">
+      <circle cx="${n.cx}" cy="${n.cy}" r="${n.r}" fill="${fill}" stroke="${stroke}" stroke-width="${sw}" style="transition:all .25s"/>
+      <text x="${n.cx}" y="${n.cy+4}" text-anchor="middle" dominant-baseline="middle"
+        font-family="'JetBrains Mono',monospace"
+        font-size="${String(n.val).length > 2 ? 10 : n.r > 24 ? 14 : 12}"
+        font-weight="700" fill="${tf}" style="transition:fill .25s">${n.val}</text>
+    </g>`;
+  });
+
+  // Glow ring around found node
+  if (step.found) {
+    const nd = ex.nodes.find(n => n.id === step.found);
+    if (nd) {
+      html += `<circle cx="${nd.cx}" cy="${nd.cy}" r="${nd.r + 10}" fill="none" stroke="rgba(16,185,129,0.25)" stroke-width="5"/>`;
+    }
+  }
+
+  svg.innerHTML = html;
+}
+
+// ─── RENDER STEP ───────────────────────────────────────────────────────────
+function renderStep(step) {
+  const ex = getEx();
+  renderSVG(ex, step);
+
+  // Direction display
+  document.getElementById("dir-display").innerHTML = step.dir;
+
+  // Call stack
+  const stackEl = document.getElementById("stack");
+  let sh = step.stack.map((f, i) => {
+    const isTop = i === step.stack.length - 1;
+    return `<div class="frame ${isTop ? "active" : ""}">${f}</div>`;
+  }).join("");
+  if (!step.stack.length && step.ret !== "—") {
+    const cls = step.ret.startsWith("null") ? "ret-null" : "ret-found";
+    sh = `<div class="frame ${cls}">← returned ${step.ret}</div>`;
+  }
+  stackEl.innerHTML = sh;
+
+  // Vars
+  document.getElementById("v-rv").textContent  = step.rv;
+  document.getElementById("v-val").textContent = step.val;
+  const cmpEl = document.getElementById("v-cmp");
+  cmpEl.className = step.cmp.includes("✓") ? "var-val g" : step.cmp.includes("null") ? "var-val r" : "var-val";
+  cmpEl.textContent = step.cmp;
+  const retEl = document.getElementById("v-ret");
+  retEl.className = step.ret.startsWith("null") ? "var-val r" : step.ret === "—" ? "var-val d" : "var-val em";
+  retEl.textContent = step.ret;
+
+  // Log
+  const logEl = document.getElementById("log");
+  logEl.innerHTML = step.log.map(e =>
+    `<div class="entry${e.h ? " hl" : ""}">${e.t}</div>`
+  ).join("");
+  logEl.scrollTop = logEl.scrollHeight;
+
+  // Step meta
+  const steps = getSteps();
+  document.getElementById("step-label").textContent = `Step ${cur + 1} / ${steps.length}`;
+  document.getElementById("step-desc").innerHTML = step.desc;
+  document.getElementById("prog").style.width = ((cur + 1) / steps.length * 100) + "%";
+
+  // Answer badge
+  const badge = document.getElementById("ans-badge");
+  if (step.final) {
+    badge.style.display = "inline-block";
+    badge.className = step.answerFound ? "result-badge badge-found" : "result-badge badge-null";
+    badge.textContent = step.answerText;
+  } else {
+    badge.style.display = "none";
+  }
+
+  document.getElementById("btn-prev").disabled = cur === 0;
+  document.getElementById("btn-next").disabled = cur === steps.length - 1;
+}
+
+// ─── NAVIGATION ────────────────────────────────────────────────────────────
+function move(d) {
+  cur = Math.max(0, Math.min(getSteps().length - 1, cur + d));
+  renderStep(getSteps()[cur]);
+}
+
+function reset() { cur = 0; stopPlay(); renderStep(getSteps()[0]); }
+
+function loadExample(idx) {
+  exIdx = idx; cur = 0; stopPlay();
+  const ex = EXAMPLES[idx];
+  document.getElementById("tree-panel-label").textContent =
+    `// BST — ${ex.treeLabel} · searching for val = ${ex.searchVal}`;
+  renderStep(getSteps()[0]);
+}
+
+document.getElementById("examples-row").addEventListener("click", e => {
+  const btn = e.target.closest(".ex-btn");
+  if (!btn) return;
+  document.querySelectorAll(".ex-btn").forEach(b => b.classList.remove("active"));
+  btn.classList.add("active");
+  loadExample(parseInt(btn.dataset.ex));
+});
+
+document.addEventListener("keydown", e => {
+  if (e.key === "ArrowRight" || e.key === "ArrowDown") move(1);
+  if (e.key === "ArrowLeft"  || e.key === "ArrowUp")   move(-1);
+});
+
+function stopPlay() {
+  if (playTimer) { clearInterval(playTimer); playTimer = null; }
+  const btn = document.getElementById("btn-play");
+  btn.textContent = "▶ Play"; btn.classList.add("btn-play-active");
+}
+
+function togglePlay() {
+  const btn = document.getElementById("btn-play");
+  if (playTimer) { stopPlay(); return; }
+  btn.textContent = "⏸ Pause"; btn.classList.add("btn-play-active");
+  playTimer = setInterval(() => {
+    if (cur >= getSteps().length - 1) { stopPlay(); return; }
+    move(1);
+  }, 1500);
+}
+
+loadExample(0);
+</script>
+</body>
+</html>

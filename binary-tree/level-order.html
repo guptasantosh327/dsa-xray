@@ -1,0 +1,1032 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Binary Tree Level Order — Interactive Dry Run</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Sora:wght@300;400;600;700&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #0d0f14; --surface: #13161d; --surface2: #1a1e28; --surface3: #212638;
+      --border: rgba(255,255,255,0.07); --border-mid: rgba(255,255,255,0.12);
+      --text: #e8eaf0; --text-muted: #6b7280; --text-dim: #3d4251;
+      --accent: #7c6ef5; --accent-glow: rgba(124,110,245,0.25);
+      --green: #34d399; --green-bg: rgba(52,211,153,0.1);
+      --amber: #fbbf24; --amber-bg: rgba(251,191,36,0.12);
+      --blue: #60a5fa; --blue-bg: rgba(96,165,250,0.1);
+      --red: #f87171; --red-bg: rgba(248,113,113,0.12);
+      --cyan: #22d3ee; --cyan-bg: rgba(34,211,238,0.10);
+      --orange: #fb923c; --orange-bg: rgba(251,146,60,0.12);
+      --mono: 'JetBrains Mono', monospace; --sans: 'Sora', sans-serif;
+
+      /* Level colours */
+      --l0: #60a5fa; --l0-bg: rgba(96,165,250,0.10); --l0-border: rgba(96,165,250,0.30);
+      --l1: #fb923c; --l1-bg: rgba(251,146,60,0.10);  --l1-border: rgba(251,146,60,0.30);
+      --l2: #34d399; --l2-bg: rgba(52,211,153,0.10);  --l2-border: rgba(52,211,153,0.30);
+      --l3: #c084fc; --l3-bg: rgba(192,132,252,0.10); --l3-border: rgba(192,132,252,0.30);
+    }
+
+    html { scroll-behavior: smooth; }
+    body { background: var(--bg); color: var(--text); font-family: var(--sans); font-size: 15px; line-height: 1.6; min-height: 100vh; overflow-x: hidden; }
+    body::before { content: ''; position: fixed; inset: 0; background-image: linear-gradient(rgba(96,165,250,0.025) 1px, transparent 1px), linear-gradient(90deg, rgba(96,165,250,0.025) 1px, transparent 1px); background-size: 40px 40px; pointer-events: none; z-index: 0; }
+    .page { position: relative; z-index: 1; max-width: 1040px; margin: 0 auto; padding: 3rem 1.5rem 5rem; }
+
+    .back-nav { display: inline-flex; align-items: center; gap: 8px; font-family: var(--mono); font-size: 12px; color: var(--text-muted); text-decoration: none; padding: 7px 14px 7px 10px; border-radius: 8px; border: 1px solid var(--border); background: var(--surface); margin-bottom: 2rem; transition: all .15s; }
+    .back-nav:hover { border-color: var(--border-mid); color: var(--text); }
+
+    header { margin-bottom: 2rem; animation: fadeUp .6s ease both; }
+    .tag { display: inline-block; font-family: var(--mono); font-size: 11px; font-weight: 500; letter-spacing: .12em; text-transform: uppercase; color: var(--blue); background: var(--blue-bg); border: 1px solid rgba(96,165,250,0.3); padding: 4px 12px; border-radius: 100px; margin-bottom: 1.2rem; }
+    h1 { font-size: clamp(1.8rem, 5vw, 2.8rem); font-weight: 700; line-height: 1.15; color: var(--text); margin-bottom: .8rem; letter-spacing: -.02em; }
+    h1 span { color: var(--blue); }
+    .subtitle { font-size: 15px; color: var(--text-muted); max-width: 640px; line-height: 1.7; }
+
+    /* PATTERN BANNER */
+    .pattern-banner { display: flex; align-items: flex-start; gap: 16px; background: var(--blue-bg); border: 1px solid rgba(96,165,250,0.25); border-left: 3px solid var(--blue); border-radius: 10px; padding: 14px 18px; margin-bottom: 2rem; animation: fadeUp .6s ease .03s both; flex-wrap: wrap; }
+    .pattern-label { font-family: var(--mono); font-size: 10px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--text-dim); margin-bottom: 4px; }
+    .pattern-name { font-family: var(--mono); font-size: 13px; font-weight: 700; color: var(--blue); }
+    .pattern-desc { font-family: var(--mono); font-size: 12px; color: var(--text-muted); flex: 1; min-width: 200px; line-height: 1.7; }
+    .pattern-solves { font-family: var(--mono); font-size: 11px; color: var(--text-dim); }
+    .pattern-solves span { color: var(--blue); }
+
+    /* SECTIONS */
+    .prob-section { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; margin-bottom: 2rem; animation: fadeUp .6s ease .04s both; }
+    .prob-section-hdr { display: flex; align-items: center; gap: 10px; padding: 14px 20px; border-bottom: 1px solid var(--border); background: var(--surface2); }
+    .prob-section-title { font-family: var(--mono); font-size: 11px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--text-muted); }
+    .prob-body { padding: 20px; }
+    .prob-body p { font-size: 13px; color: var(--text-muted); line-height: 1.75; margin-bottom: 10px; }
+    .prob-body p:last-child { margin-bottom: 0; }
+    .prob-body p strong { color: var(--text); }
+    .prob-body code { font-family: var(--mono); font-size: 11px; background: var(--surface2); padding: 1px 6px; border-radius: 4px; color: var(--accent); }
+
+    /* HINTS */
+    .hints-list { display: flex; flex-direction: column; gap: 10px; }
+    .hint-row { display: flex; gap: 12px; align-items: flex-start; }
+    .hint-badge { font-family: var(--mono); font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 6px; flex-shrink: 0; margin-top: 2px; min-width: 28px; text-align: center; color: var(--blue); background: var(--blue-bg); border: 1px solid rgba(96,165,250,0.25); }
+    .hint-body { font-size: 13px; color: var(--text-muted); line-height: 1.7; }
+    .hint-body code { font-family: var(--mono); font-size: 11px; background: var(--surface2); padding: 1px 5px; border-radius: 4px; color: var(--accent); }
+    .hint-body strong { color: var(--text); }
+    .intuition-box { background: var(--blue-bg); border: 1px solid rgba(96,165,250,0.2); border-radius: 10px; padding: 16px 18px; margin-top: 14px; }
+    .intuition-box p { font-size: 13px; color: var(--text-muted); line-height: 1.75; }
+    .intuition-box p strong { color: var(--blue); }
+
+    /* KEY INSIGHT */
+    .key-insight { background: var(--amber-bg); border: 1px solid rgba(251,191,36,0.2); border-left: 3px solid var(--amber); border-radius: 10px; padding: 14px 18px; margin-bottom: 2rem; font-size: 13px; color: var(--text-muted); font-family: var(--mono); animation: fadeUp .6s ease .05s both; line-height: 1.7; }
+    .key-insight strong { color: var(--amber); }
+
+    /* SVG examples */
+    .svg-example-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; margin-top: 16px; }
+    .svg-ex-card { background: var(--surface2); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+    .svg-ex-header { display: flex; align-items: center; justify-content: space-between; padding: 8px 14px; border-bottom: 1px solid var(--border); }
+    .svg-ex-label { font-family: var(--mono); font-size: 10px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--text-dim); }
+    .svg-ex-result { font-family: var(--mono); font-size: 11px; font-weight: 700; padding: 2px 10px; border-radius: 5px; background: var(--blue-bg); color: var(--blue); border: 1px solid rgba(96,165,250,0.25); }
+    .svg-ex-body { padding: 12px; display: flex; justify-content: center; align-items: center; min-height: 90px; }
+    .svg-ex-body svg { max-height: 120px; width: 100%; }
+
+    /* CODE BLOCK */
+    .code-block { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; margin-bottom: 2rem; animation: fadeUp .6s ease .1s both; }
+    .code-header { display: flex; align-items: center; gap: 8px; padding: 12px 16px; border-bottom: 1px solid var(--border); background: var(--surface2); }
+    .code-header span { font-family: var(--mono); font-size: 12px; color: var(--text-muted); }
+    .dots { display: flex; gap: 6px; }
+    .dot { width: 10px; height: 10px; border-radius: 50%; }
+    .dot-r { background: #ff5f57; } .dot-y { background: #ffbd2e; } .dot-g { background: #28c940; }
+    pre { padding: 1.25rem 1.5rem; overflow-x: auto; font-family: var(--mono); font-size: 13px; line-height: 1.8; color: #c9d1d9; }
+    .kw { color: #ff79c6; } .fn { color: #50fa7b; } .cm { color: #6272a4; font-style: italic; } .num { color: #bd93f9; } .var { color: #8be9fd; } .hl { background: rgba(96,165,250,0.14); border-radius: 3px; padding: 0 3px; }
+
+    .section-label { font-family: var(--mono); font-size: 11px; font-weight: 500; letter-spacing: .1em; text-transform: uppercase; color: var(--text-dim); margin-bottom: 1rem; margin-top: 2.5rem; }
+
+    /* EXAMPLE SELECTOR */
+    .examples-row { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 1.5rem; }
+    .ex-btn { display: inline-flex; align-items: center; gap: 8px; padding: 9px 16px; border-radius: 10px; border: 1px solid var(--border); background: var(--surface); cursor: pointer; transition: all .18s; font-family: var(--mono); font-size: 12px; font-weight: 600; color: var(--text-muted); user-select: none; }
+    .ex-btn:hover { border-color: var(--border-mid); color: var(--text); transform: translateY(-1px); }
+    .ex-btn.active { background: var(--blue-bg); border-color: rgba(96,165,250,0.4); color: var(--blue); transform: translateY(-1px); }
+    .ex-badge { font-size: 9px; font-weight: 700; padding: 2px 7px; border-radius: 5px; background: var(--surface3); color: var(--text-dim); }
+    .ex-btn.active .ex-badge { background: rgba(255,255,255,0.1); color: inherit; }
+
+    /* VIZ CARD */
+    .viz-card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; overflow: hidden; animation: fadeUp .6s ease .2s both; }
+    .progress-bar-wrap { height: 3px; background: var(--border); }
+    .progress-bar-inner { height: 100%; background: linear-gradient(90deg, var(--blue), var(--cyan)); transition: width .35s cubic-bezier(.4,0,.2,1); border-radius: 0 2px 2px 0; }
+    .controls { display: flex; align-items: center; gap: 10px; padding: 14px 20px; border-bottom: 1px solid var(--border); background: var(--surface2); flex-wrap: wrap; }
+    .btn { display: inline-flex; align-items: center; gap: 6px; font-family: var(--mono); font-size: 12px; font-weight: 500; padding: 7px 16px; border-radius: 8px; border: 1px solid var(--border-mid); background: var(--surface3); color: var(--text); cursor: pointer; transition: all .15s; }
+    .btn:hover:not(:disabled) { background: var(--blue-bg); border-color: var(--blue); color: var(--blue); }
+    .btn:disabled { opacity: .3; cursor: default; }
+    .btn-play { background: var(--blue-bg) !important; border-color: rgba(96,165,250,0.4) !important; color: var(--blue) !important; }
+    .btn-reset { background: var(--red-bg) !important; border-color: rgba(248,113,113,0.3) !important; color: var(--red) !important; }
+    .step-info { flex: 1; font-size: 13px; color: var(--text-muted); font-family: var(--mono); }
+    kbd { font-size: 10px; background: var(--surface3); border: 1px solid var(--border-mid); padding: 2px 5px; border-radius: 4px; color: var(--text-muted); font-family: var(--mono); }
+    .result-badge { font-family: var(--mono); font-size: 11px; font-weight: 700; letter-spacing: .06em; padding: 4px 12px; border-radius: 100px; background: var(--green-bg); color: var(--green); border: 1px solid rgba(52,211,153,0.3); }
+
+    /* STEP DESC */
+    .step-desc { padding: 12px 20px; font-size: 13px; color: var(--text-muted); background: var(--surface2); border-bottom: 1px solid var(--border); font-family: var(--mono); min-height: 44px; line-height: 1.6; }
+    .step-desc em { color: var(--amber); font-style: normal; }
+    .step-desc .ok { color: var(--green); font-weight: 600; }
+    .step-desc .snap { color: var(--cyan); font-weight: 700; }
+    .step-desc .enq { color: var(--orange); font-weight: 600; }
+    .step-desc .done { color: var(--green); font-weight: 700; }
+
+    /* MAIN GRID — tree left, panels right */
+    .main-grid { display: grid; grid-template-columns: 1fr 330px; }
+    .left-col { border-right: 1px solid var(--border); display: flex; flex-direction: column; }
+
+    /* Tree panel */
+    .tree-panel { padding: 20px; border-bottom: 1px solid var(--border); }
+    .panel-label { font-family: var(--mono); font-size: 10px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--text-dim); margin-bottom: 10px; }
+
+    /* Queue display */
+    .queue-panel { padding: 14px 20px; border-bottom: 1px solid var(--border); }
+    .queue-row { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; min-height: 44px; }
+    .queue-front { font-family: var(--mono); font-size: 11px; color: var(--text-dim); margin-right: 2px; }
+    .q-node { display: inline-flex; align-items: center; justify-content: center; min-width: 36px; height: 36px; padding: 0 8px; border-radius: 8px; font-family: var(--mono); font-size: 13px; font-weight: 700; border: 1px solid var(--border-mid); background: var(--surface2); color: var(--text-muted); transition: all .25s; }
+    .q-node.current { background: var(--amber-bg); border-color: rgba(251,191,36,0.5); color: var(--amber); box-shadow: 0 0 10px rgba(251,191,36,0.2); }
+    .q-dot { font-family: var(--mono); font-size: 11px; color: var(--text-dim); }
+
+    /* Colour the queue nodes by level */
+    .q-l0 { background: var(--l0-bg); border-color: var(--l0-border); color: var(--l0); }
+    .q-l1 { background: var(--l1-bg); border-color: var(--l1-border); color: var(--l1); }
+    .q-l2 { background: var(--l2-bg); border-color: var(--l2-border); color: var(--l2); }
+    .q-l3 { background: var(--l3-bg); border-color: var(--l3-border); color: var(--l3); }
+
+    /* Level array being built */
+    .level-panel { padding: 14px 20px; }
+    .level-tag { font-family: var(--mono); font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 4px; margin-left: 6px; }
+    .level-row { display: flex; align-items: center; gap: 6px; min-height: 40px; flex-wrap: wrap; }
+    .lv-cell { display: inline-flex; align-items: center; justify-content: center; min-width: 36px; height: 36px; padding: 0 8px; border-radius: 8px; font-family: var(--mono); font-size: 13px; font-weight: 700; transition: all .3s; animation: popIn .3s cubic-bezier(.34,1.56,.64,1) both; }
+    .lv-l0 { background: var(--l0-bg); border: 1px solid var(--l0-border); color: var(--l0); }
+    .lv-l1 { background: var(--l1-bg); border: 1px solid var(--l1-border); color: var(--l1); }
+    .lv-l2 { background: var(--l2-bg); border: 1px solid var(--l2-border); color: var(--l2); }
+    .lv-l3 { background: var(--l3-bg); border: 1px solid var(--l3-border); color: var(--l3); }
+
+    @keyframes popIn { from { transform: scale(0.4); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+    /* Answer rows */
+    .ans-section { padding: 14px 20px; border-top: 1px solid var(--border); }
+    .ans-rows { display: flex; flex-direction: column; gap: 8px; }
+    .ans-row { display: flex; align-items: center; gap: 6px; }
+    .ans-level-lbl { font-family: var(--mono); font-size: 10px; color: var(--text-dim); min-width: 32px; }
+    .ans-cells { display: flex; gap: 4px; }
+    .ans-cell { display: inline-flex; align-items: center; justify-content: center; min-width: 28px; height: 28px; padding: 0 6px; border-radius: 6px; font-family: var(--mono); font-size: 12px; font-weight: 700; }
+
+    /* SIDE PANEL */
+    .side-panel { display: flex; flex-direction: column; }
+
+    /* Vars */
+    .vars-panel { padding: 14px 16px; border-bottom: 1px solid var(--border); }
+    .var-row { display: flex; justify-content: space-between; align-items: center; padding: 4px 0; border-bottom: 1px solid var(--border); font-size: 12px; }
+    .var-row:last-child { border-bottom: none; }
+    .var-name { font-family: var(--mono); color: var(--text-muted); font-size: 11px; }
+    .var-val { font-family: var(--mono); font-weight: 700; color: var(--amber); font-size: 11px; }
+    .var-val.b  { color: var(--blue); }
+    .var-val.g  { color: var(--green); }
+    .var-val.o  { color: var(--orange); }
+    .var-val.c  { color: var(--cyan); }
+    .var-val.d  { color: var(--text-dim); }
+
+    /* Call stack */
+    .stack-panel { padding: 14px 16px; border-bottom: 1px solid var(--border); }
+    .call-stack { display: flex; flex-direction: column-reverse; gap: 4px; min-height: 48px; }
+    .frame { padding: 5px 10px; border-radius: 6px; font-size: 10px; font-family: var(--mono); border: 1px solid var(--border); background: var(--surface2); color: var(--text-muted); transition: all .2s; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .frame.active { border-color: rgba(96,165,250,0.4); background: var(--blue-bg); color: var(--blue); }
+
+    /* Log */
+    .log-panel { padding: 14px 16px; flex: 1; }
+    .log { font-size: 11px; font-family: var(--mono); line-height: 1.9; color: var(--text-dim); max-height: 220px; overflow-y: auto; }
+    .log::-webkit-scrollbar { width: 4px; }
+    .log::-webkit-scrollbar-thumb { background: var(--border-mid); border-radius: 2px; }
+    .entry.hl { color: var(--text); }
+    .entry.snap { color: var(--cyan); }
+    .entry.enq { color: var(--orange); }
+    .entry.push { color: var(--blue); }
+    .entry.done { color: var(--green); font-weight: 600; }
+
+    /* REVISION */
+    .revision-section { margin-top: 2.5rem; animation: fadeUp .6s ease .3s both; }
+    .explain-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-bottom: 16px; }
+    .explain-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 16px 18px; }
+    .explain-card .icon { font-size: 18px; margin-bottom: 8px; }
+    .explain-card h3 { font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 6px; }
+    .explain-card p { font-size: 12px; color: var(--text-muted); line-height: 1.7; }
+    .explain-card code { font-family: var(--mono); font-size: 11px; background: var(--surface2); padding: 1px 5px; border-radius: 4px; color: var(--accent); }
+
+    .mental-model { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; margin-bottom: 16px; }
+    .mm-header { display: flex; align-items: center; gap: 8px; padding: 12px 18px; border-bottom: 1px solid var(--border); background: var(--surface2); }
+    .mm-title { font-family: var(--mono); font-size: 11px; font-weight: 700; color: var(--amber); }
+    .mm-body { padding: 18px; display: flex; flex-direction: column; gap: 10px; }
+    .mm-item { display: flex; gap: 10px; align-items: flex-start; }
+    .mm-b { font-family: var(--mono); font-size: 12px; color: var(--amber); font-weight: 700; flex-shrink: 0; margin-top: 2px; }
+    .mm-t { font-size: 13px; color: var(--text-muted); line-height: 1.7; }
+    .mm-t strong { color: var(--text); } .mm-t code { font-family: var(--mono); font-size: 11px; background: var(--surface2); padding: 1px 5px; border-radius: 4px; color: var(--accent); }
+
+    .edge-cases-card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; margin-bottom: 16px; }
+    .ec-header { display: flex; align-items: center; gap: 8px; padding: 12px 18px; border-bottom: 1px solid var(--border); background: var(--surface2); font-family: var(--mono); font-size: 11px; font-weight: 700; color: var(--red); }
+    .el { display: flex; flex-direction: column; }
+    .ei { display: flex; gap: 12px; align-items: flex-start; padding: 12px 18px; border-bottom: 1px solid var(--border); }
+    .ei:last-child { border-bottom: none; }
+    .el-w { font-family: var(--mono); font-size: 9px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; padding: 3px 8px; border-radius: 5px; flex-shrink: 0; margin-top: 2px; }
+    .el-w.w { background: var(--red-bg); color: var(--red); border: 1px solid rgba(248,113,113,0.25); }
+    .el-w.ok { background: var(--green-bg); color: var(--green); border: 1px solid rgba(52,211,153,0.25); }
+    .et { font-size: 12px; color: var(--text-muted); line-height: 1.65; }
+    .et code { font-family: var(--mono); font-size: 11px; background: var(--surface2); padding: 1px 5px; border-radius: 4px; color: var(--accent); }
+
+    .best-solution { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; margin-bottom: 16px; }
+    .bs-header { display: flex; align-items: center; justify-content: space-between; padding: 12px 18px; border-bottom: 1px solid var(--border); background: var(--surface2); flex-wrap: wrap; gap: 8px; }
+    .bs-title { font-family: var(--mono); font-size: 11px; font-weight: 700; color: var(--green); }
+    .sol-pills { display: flex; gap: 6px; flex-wrap: wrap; }
+    .sol-pill { font-family: var(--mono); font-size: 10px; padding: 3px 9px; border-radius: 6px; background: var(--surface3); border: 1px solid var(--border-mid); color: var(--text-muted); }
+
+    .complexity { display: flex; gap: 10px; margin-top: 1.5rem; flex-wrap: wrap; }
+    .cpill { font-family: var(--mono); font-size: 12px; padding: 6px 14px; border-radius: 8px; border: 1px solid var(--border); background: var(--surface); }
+    .cpill strong { color: var(--accent); font-weight: 700; }
+
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+    @media (max-width: 720px) { .main-grid { grid-template-columns: 1fr; } .left-col { border-right: none; border-bottom: 1px solid var(--border); } }
+  </style>
+</head>
+<body>
+<div class="page">
+
+  <a class="back-nav" href="../dsa-hub.html">← All problems</a>
+
+  <header>
+    <div class="tag">LeetCode #102 · Algorithm Dry Run</div>
+    <h1>Binary Tree <span>Level Order</span> Traversal</h1>
+    <p class="subtitle">Step-by-step BFS trace of <code style="font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--accent);background:var(--surface);padding:2px 7px;border-radius:5px;">levelOrder</code> — watch the queue drain floor by floor, and see exactly why the <code style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--cyan);background:var(--surface);padding:2px 6px;border-radius:5px;">len snapshot</code> is the whole trick.</p>
+  </header>
+
+  <div class="pattern-banner">
+    <div>
+      <div class="pattern-label">Pattern</div>
+      <div class="pattern-name">🎯 BFS Level-order + len Snapshot</div>
+    </div>
+    <div class="pattern-desc">Seed the queue with root. At the start of every level, snapshot <code>len = queue.length</code>. Process exactly <code>len</code> nodes. Their children land in the queue but belong to the NEXT level — safely separated.</div>
+    <div class="pattern-solves">Same pattern unlocks: <span>#103 Zigzag Level Order · #199 Right Side View · #111 Min Depth · #515 Max Row Value</span></div>
+  </div>
+
+  <!-- PROBLEM STATEMENT -->
+  <div class="prob-section">
+    <div class="prob-section-hdr"><span style="font-size:16px">📋</span><span class="prob-section-title">Problem Statement</span></div>
+    <div class="prob-body">
+      <p>Given the root of a binary tree, return the <strong>level order traversal</strong> of its node values — a list of lists where each inner list holds all values at that depth, ordered left to right.</p>
+      <p>Think of it as: take a floor-by-floor photograph of the tree. Each photo contains every node on that floor, left to right. Return all the photos.</p>
+      <div class="svg-example-grid">
+        <div class="svg-ex-card">
+          <div class="svg-ex-header"><span class="svg-ex-label">Tree [3,9,20,null,null,15,7]</span><span class="svg-ex-result">[[3],[9,20],[15,7]]</span></div>
+          <div class="svg-ex-body">
+            <svg viewBox="0 0 260 135">
+              <line x1="130" y1="26" x2="74" y2="66" stroke="#1e2231" stroke-width="1.5"/>
+              <line x1="130" y1="26" x2="196" y2="66" stroke="#1e2231" stroke-width="1.5"/>
+              <line x1="180" y1="84" x2="158" y2="112" stroke="#1e2231" stroke-width="1.5"/>
+              <line x1="212" y1="84" x2="234" y2="112" stroke="#1e2231" stroke-width="1.5"/>
+              <circle cx="130" cy="18" r="22" fill="#0e1a24" stroke="#60a5fa" stroke-width="2"/><text x="130" y="22" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="13" font-weight="700" fill="#60a5fa">3</text>
+              <circle cx="72" cy="76" r="20" fill="#1a1408" stroke="#fb923c" stroke-width="2"/><text x="72" y="80" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="13" font-weight="700" fill="#fb923c">9</text>
+              <circle cx="198" cy="76" r="20" fill="#1a1408" stroke="#fb923c" stroke-width="2"/><text x="198" y="80" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="13" font-weight="700" fill="#fb923c">20</text>
+              <circle cx="156" cy="116" r="16" fill="#0f1a14" stroke="#34d399" stroke-width="2"/><text x="156" y="120" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="11" font-weight="700" fill="#34d399">15</text>
+              <circle cx="236" cy="116" r="16" fill="#0f1a14" stroke="#34d399" stroke-width="2"/><text x="236" y="120" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="11" font-weight="700" fill="#34d399">7</text>
+              <text x="4" y="16" font-family="'JetBrains Mono',monospace" font-size="8" fill="#60a5fa">L0</text>
+              <text x="4" y="76" font-family="'JetBrains Mono',monospace" font-size="8" fill="#fb923c">L1</text>
+              <text x="4" y="118" font-family="'JetBrains Mono',monospace" font-size="8" fill="#34d399">L2</text>
+            </svg>
+          </div>
+        </div>
+        <div class="svg-ex-card">
+          <div class="svg-ex-header"><span class="svg-ex-label">Tree [1,2,3,4,5,6,7]</span><span class="svg-ex-result">[[1],[2,3],[4,5,6,7]]</span></div>
+          <div class="svg-ex-body">
+            <svg viewBox="0 0 260 130">
+              <line x1="130" y1="22" x2="78" y2="58" stroke="#1e2231" stroke-width="1.5"/>
+              <line x1="130" y1="22" x2="184" y2="58" stroke="#1e2231" stroke-width="1.5"/>
+              <line x1="66" y1="76" x2="40" y2="106" stroke="#1e2231" stroke-width="1.5"/>
+              <line x1="90" y1="76" x2="112" y2="106" stroke="#1e2231" stroke-width="1.5"/>
+              <line x1="170" y1="76" x2="148" y2="106" stroke="#1e2231" stroke-width="1.5"/>
+              <line x1="196" y1="76" x2="220" y2="106" stroke="#1e2231" stroke-width="1.5"/>
+              <circle cx="130" cy="14" r="20" fill="#0e1a24" stroke="#60a5fa" stroke-width="2"/><text x="130" y="18" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="13" font-weight="700" fill="#60a5fa">1</text>
+              <circle cx="76" cy="68" r="18" fill="#1a1408" stroke="#fb923c" stroke-width="2"/><text x="76" y="72" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="13" font-weight="700" fill="#fb923c">2</text>
+              <circle cx="186" cy="68" r="18" fill="#1a1408" stroke="#fb923c" stroke-width="2"/><text x="186" y="72" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="13" font-weight="700" fill="#fb923c">3</text>
+              <circle cx="38" cy="110" r="14" fill="#0f1a14" stroke="#34d399" stroke-width="2"/><text x="38" y="114" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="11" font-weight="700" fill="#34d399">4</text>
+              <circle cx="114" cy="110" r="14" fill="#0f1a14" stroke="#34d399" stroke-width="2"/><text x="114" y="114" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="11" font-weight="700" fill="#34d399">5</text>
+              <circle cx="148" cy="110" r="14" fill="#0f1a14" stroke="#34d399" stroke-width="2"/><text x="148" y="114" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="11" font-weight="700" fill="#34d399">6</text>
+              <circle cx="222" cy="110" r="14" fill="#0f1a14" stroke="#34d399" stroke-width="2"/><text x="222" y="114" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="11" font-weight="700" fill="#34d399">7</text>
+            </svg>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- HINTS -->
+  <div class="prob-section">
+    <div class="prob-section-hdr"><span style="font-size:16px">💡</span><span class="prob-section-title">Intuition + Hints</span></div>
+    <div class="prob-body">
+      <div class="hints-list">
+        <div class="hint-row">
+          <span class="hint-badge">1</span>
+          <div class="hint-body"><strong>Start with BFS.</strong> A queue naturally gives you nodes level by level — all level-0 nodes come out before level-1, etc. This is the exact order you need.</div>
+        </div>
+        <div class="hint-row">
+          <span class="hint-badge">2</span>
+          <div class="hint-body"><strong>The len snapshot is the whole trick.</strong> Before processing a level, save <code>let levelLength = queue.length</code>. This number tells you exactly how many nodes belong to the current level. Children added during the loop won't inflate it.</div>
+        </div>
+        <div class="hint-row">
+          <span class="hint-badge">3</span>
+          <div class="hint-body"><strong>Process exactly levelLength nodes.</strong> <code>for (let i = 0; i &lt; levelLength; i++)</code>. Dequeue, push val into <code>level[]</code>, enqueue children. After the loop, push <code>level</code> into <code>ans</code>.</div>
+        </div>
+        <div class="hint-row">
+          <span class="hint-badge">4</span>
+          <div class="hint-body"><strong>Empty tree guard first.</strong> <code>if (!root) return []</code>. Without this, you'd try to enqueue null and the first shift would give you null.left → crash.</div>
+        </div>
+      </div>
+      <div class="intuition-box">
+        <p><strong>Why does the len snapshot isolate a level?</strong> At the moment you save <code>levelLength</code>, the queue holds exactly this level's nodes. As you process them you push their children — but those go to the back. The loop stops at <code>levelLength</code>, never touching those children. They'll be processed in the next outer iteration, which will snapshot a fresh <code>levelLength</code> for them.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="key-insight">
+    ⚡ <strong>The one-line mental model:</strong> <code>let levelLength = queue.length</code> taken at the right moment is the entire "level isolation" mechanism. Everything else — the for loop, the level array, pushing to ans — is just bookkeeping around that one crucial snapshot.
+  </div>
+
+  <!-- CODE -->
+  <div class="code-block">
+    <div class="code-header"><div class="dots"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div></div><span>levelOrder.js</span></div>
+    <pre><span class="kw">var</span> <span class="fn">levelOrder</span> = <span class="kw">function</span>(<span class="var">root</span>) {
+  <span class="kw">if</span>(!<span class="var">root</span>) <span class="kw">return</span> []                  <span class="cm">// edge case: empty tree</span>
+  <span class="kw">let</span> <span class="var">queue</span> = [<span class="var">root</span>]
+  <span class="kw">let</span> <span class="var">ans</span> = []
+
+  <span class="kw">while</span>(<span class="var">queue</span>.length) {
+    <span class="kw">let</span> <span class="var">level</span> = []
+    <span class="hl"><span class="kw">let</span> <span class="var">levelLength</span> = <span class="var">queue</span>.length;     <span class="cm">// ← THE SNAPSHOT — isolates this level</span></span>
+
+    <span class="kw">for</span>(<span class="kw">let</span> <span class="var">i</span> = <span class="num">0</span>; <span class="var">i</span> &lt; <span class="var">levelLength</span>; <span class="var">i</span>++) {
+      <span class="kw">let</span> <span class="var">curr</span> = <span class="var">queue</span>.<span class="fn">shift</span>()           <span class="cm">// dequeue from front</span>
+      <span class="kw">if</span>(<span class="var">curr</span>.left)  <span class="var">queue</span>.<span class="fn">push</span>(<span class="var">curr</span>.left)   <span class="cm">// next level's nodes</span>
+      <span class="kw">if</span>(<span class="var">curr</span>.right) <span class="var">queue</span>.<span class="fn">push</span>(<span class="var">curr</span>.right)
+      <span class="var">level</span>.<span class="fn">push</span>(<span class="var">curr</span>.val)               <span class="cm">// collect this level's values</span>
+    }
+
+    <span class="var">ans</span>.<span class="fn">push</span>(<span class="var">level</span>)                      <span class="cm">// seal this level into the answer</span>
+  }
+  <span class="kw">return</span> <span class="var">ans</span>
+};</pre>
+  </div>
+
+  <p class="section-label">// Interactive dry run — choose an example</p>
+  <div class="examples-row" id="examples-row">
+    <button class="ex-btn active" data-ex="0">Example 1 <span class="ex-badge">3 Levels</span></button>
+    <button class="ex-btn" data-ex="1">Example 2 <span class="ex-badge">Full Binary</span></button>
+    <button class="ex-btn" data-ex="2">Example 3 <span class="ex-badge">Single Node</span></button>
+    <button class="ex-btn" data-ex="3">Example 4 <span class="ex-badge">Left-skewed</span></button>
+  </div>
+
+  <div class="viz-card">
+    <div class="progress-bar-wrap"><div class="progress-bar-inner" id="prog" style="width:5%"></div></div>
+    <div class="controls">
+      <button class="btn" id="btn-prev" onclick="move(-1)" disabled>← Prev</button>
+      <button class="btn btn-play" id="btn-play" onclick="togglePlay()">▶ Play</button>
+      <button class="btn" id="btn-next" onclick="move(1)">Next →</button>
+      <button class="btn btn-reset" onclick="reset()">↺ Reset</button>
+      <span class="step-info" id="step-label">Step 1 / ?</span>
+      <span style="font-family:var(--mono);font-size:11px;color:var(--text-dim);display:flex;gap:4px;align-items:center"><kbd>←</kbd><kbd>→</kbd></span>
+      <span class="result-badge" id="ans-badge" style="display:none">✓ Done</span>
+    </div>
+    <div class="step-desc" id="step-desc">Loading...</div>
+
+    <div class="main-grid">
+      <div class="left-col">
+        <!-- Tree SVG -->
+        <div class="tree-panel">
+          <div class="panel-label" id="tree-label">// binary tree</div>
+          <svg id="tree-svg" viewBox="0 0 500 260" width="100%"></svg>
+        </div>
+
+        <!-- Queue -->
+        <div class="queue-panel">
+          <div class="panel-label">// BFS queue &nbsp;<span style="color:var(--text-dim);font-weight:400;text-transform:none;letter-spacing:0">(front → back)</span></div>
+          <div class="queue-row" id="queue-row"><span class="queue-front">front →</span></div>
+        </div>
+
+        <!-- Current level array being built -->
+        <div class="level-panel">
+          <div class="panel-label">// level[] being built this iteration &nbsp;<span class="level-tag" id="level-tag">Level 0</span></div>
+          <div class="level-row" id="level-row"></div>
+        </div>
+
+        <!-- Answer so far -->
+        <div class="ans-section">
+          <div class="panel-label">// ans[] — completed levels</div>
+          <div class="ans-rows" id="ans-rows"></div>
+        </div>
+      </div>
+
+      <!-- SIDE PANEL -->
+      <div class="side-panel">
+        <div class="vars-panel">
+          <div class="panel-label">// variables</div>
+          <div class="var-row"><span class="var-name">queue.length</span><span class="var-val b"  id="v-qlen">1</span></div>
+          <div class="var-row"><span class="var-name">levelLength</span> <span class="var-val c"  id="v-ll">—</span></div>
+          <div class="var-row"><span class="var-name">i</span>           <span class="var-val"    id="v-i">—</span></div>
+          <div class="var-row"><span class="var-name">curr.val</span>    <span class="var-val o"  id="v-curr">—</span></div>
+          <div class="var-row"><span class="var-name">level[]</span>     <span class="var-val b"  id="v-level">[]</span></div>
+          <div class="var-row"><span class="var-name">ans.length</span>  <span class="var-val g"  id="v-anslen">0</span></div>
+        </div>
+
+        <div class="stack-panel">
+          <div class="panel-label">// loop state</div>
+          <div class="call-stack" id="stack"></div>
+        </div>
+
+        <div class="log-panel">
+          <div class="panel-label">// execution log</div>
+          <div class="log" id="log"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- REVISION -->
+  <div class="revision-section">
+    <p class="section-label">// revision — lock this in</p>
+
+    <div class="mental-model">
+      <div class="mm-header"><span style="font-size:16px">🧠</span><span class="mm-title">Mental Model — Floor-by-Floor Photography</span></div>
+      <div class="mm-body">
+        <div class="mm-item"><span class="mm-b">▸</span><div class="mm-t"><strong>The queue is already sorted by level.</strong> All level-0 nodes sit ahead of all level-1 nodes, which sit ahead of all level-2 nodes. BFS gives you this for free.</div></div>
+        <div class="mm-item"><span class="mm-b">▸</span><div class="mm-t"><strong>The <code>levelLength</code> snapshot is a gate.</strong> It counts exactly how many nodes belong to the current floor. The loop processes exactly that many, then stops. Whatever was added behind them belongs to the next floor.</div></div>
+        <div class="mm-item"><span class="mm-b">▸</span><div class="mm-t"><strong>One outer-loop iteration = one level.</strong> Every pass through the while loop produces exactly one inner array. <code>ans.push(level)</code> seals that floor forever before moving to the next.</div></div>
+        <div class="mm-item"><span class="mm-b">▸</span><div class="mm-t"><strong>The template is reusable.</strong> Almost every BFS-on-trees problem uses this same skeleton. Change what you do <em>inside</em> the inner loop (last node only? max value? alternating direction?) and you get #199, #515, #103.</div></div>
+      </div>
+    </div>
+
+    <div class="explain-grid">
+      <div class="explain-card"><div class="icon">📸</div><h3>len snapshot</h3><p><code>levelLength = queue.length</code> taken BEFORE the inner loop. This freezes the count of the current level's nodes so the loop doesn't over-run into next level's children.</p></div>
+      <div class="explain-card"><div class="icon">🔄</div><h3>Queue mechanics</h3><p><code>shift()</code> dequeues from the front — takes the oldest node. <code>push()</code> appends to the back — children go behind the current level's remaining nodes.</p></div>
+      <div class="explain-card"><div class="icon">📦</div><h3>One array per level</h3><p>A fresh <code>level = []</code> at the top of each outer iteration. Collect all values for this floor, then <code>ans.push(level)</code> when the inner loop finishes.</p></div>
+      <div class="explain-card"><div class="icon">🛑</div><h3>Empty tree guard</h3><p><code>if (!root) return []</code> must come first. Without it, the queue starts as <code>[null]</code> and shift returns null — accessing <code>null.left</code> crashes immediately.</p></div>
+    </div>
+
+    <div class="edge-cases-card">
+      <div class="ec-header"><span style="font-size:16px">⚠️</span>Edge Cases</div>
+      <div class="el">
+        <div class="ei"><span class="el-w w">null root</span><span class="et"><strong>Empty tree:</strong> <code>if(!root) return []</code>. Without this guard you'd seed the queue with null. The while loop runs, shift returns null, then <code>null.left</code> throws a TypeError.</span></div>
+        <div class="ei"><span class="el-w w">single node</span><span class="et"><strong>Single node tree:</strong> One outer iteration. levelLength=1. Dequeue root, no children to enqueue. level=[root.val]. ans=[[root.val]]. Queue is now empty → loop ends. Correct.</span></div>
+        <div class="ei"><span class="el-w ok">skewed</span><span class="et"><strong>Skewed tree (all left or all right):</strong> Works perfectly. Each level has exactly 1 node, so levelLength=1 on every iteration. You get [[1],[2],[3],...] — one node per inner array.</span></div>
+        <div class="ei"><span class="el-w ok">snapshot timing</span><span class="et"><strong>Must snapshot BEFORE the inner loop starts.</strong> If you put <code>let levelLength = queue.length</code> inside the for condition, it recalculates every iteration (children added = wrong count). Snapshot once, use for the whole level.</span></div>
+      </div>
+    </div>
+
+    <div class="best-solution">
+      <div class="bs-header">
+        <span class="bs-title">✦ Clean solution for revision</span>
+        <div class="sol-pills"><span class="sol-pill">O(n) time</span><span class="sol-pill">O(n) space</span><span class="sol-pill">BFS queue</span><span class="sol-pill">len snapshot</span></div>
+      </div>
+      <pre><span class="kw">var</span> <span class="fn">levelOrder</span> = <span class="kw">function</span>(<span class="var">root</span>) {
+  <span class="kw">if</span>(!<span class="var">root</span>) <span class="kw">return</span> [];
+  <span class="kw">let</span> <span class="var">queue</span> = [<span class="var">root</span>], <span class="var">ans</span> = [];
+
+  <span class="kw">while</span>(<span class="var">queue</span>.length) {
+    <span class="kw">let</span> <span class="var">level</span> = [];
+    <span class="kw">let</span> <span class="var">len</span> = <span class="var">queue</span>.length;              <span class="cm">// ← snapshot BEFORE loop</span>
+
+    <span class="kw">for</span>(<span class="kw">let</span> <span class="var">i</span> = <span class="num">0</span>; <span class="var">i</span> &lt; <span class="var">len</span>; <span class="var">i</span>++) {
+      <span class="kw">let</span> <span class="var">curr</span> = <span class="var">queue</span>.<span class="fn">shift</span>();
+      <span class="var">level</span>.<span class="fn">push</span>(<span class="var">curr</span>.val);
+      <span class="kw">if</span>(<span class="var">curr</span>.left)  <span class="var">queue</span>.<span class="fn">push</span>(<span class="var">curr</span>.left);
+      <span class="kw">if</span>(<span class="var">curr</span>.right) <span class="var">queue</span>.<span class="fn">push</span>(<span class="var">curr</span>.right);
+    }
+
+    <span class="var">ans</span>.<span class="fn">push</span>(<span class="var">level</span>);
+  }
+  <span class="kw">return</span> <span class="var">ans</span>;
+};
+<span class="cm">// Template: BFS + len snapshot + one level[] per outer iteration
+// Modify the inner loop to get zigzag, right-view, max-per-row, etc.</span></pre>
+    </div>
+
+    <div class="complexity">
+      <div class="cpill">Time: <strong>O(n)</strong> — every node visited once</div>
+      <div class="cpill">Space: <strong>O(n)</strong> — queue holds one full level max</div>
+      <div class="cpill">Output: <strong>O(n)</strong> — all n values stored in ans</div>
+      <div class="cpill">Pattern: <strong>BFS level-order</strong></div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ─── LEVEL COLOURS ────────────────────────────────────────────────────────
+const LEVEL_COLORS = [
+  { node:'#60a5fa', nodeBg:'rgba(96,165,250,0.12)', nodeStroke:'rgba(96,165,250,0.5)', cls:'l0', tagBg:'rgba(96,165,250,0.12)', tagColor:'#60a5fa', tagBorder:'rgba(96,165,250,0.3)' },
+  { node:'#fb923c', nodeBg:'rgba(251,146,60,0.12)',  nodeStroke:'rgba(251,146,60,0.5)',  cls:'l1', tagBg:'rgba(251,146,60,0.12)',  tagColor:'#fb923c', tagBorder:'rgba(251,146,60,0.3)' },
+  { node:'#34d399', nodeBg:'rgba(52,211,153,0.12)',  nodeStroke:'rgba(52,211,153,0.5)',  cls:'l2', tagBg:'rgba(52,211,153,0.12)',  tagColor:'#34d399', tagBorder:'rgba(52,211,153,0.3)' },
+  { node:'#c084fc', nodeBg:'rgba(192,132,252,0.12)', nodeStroke:'rgba(192,132,252,0.5)', cls:'l3', tagBg:'rgba(192,132,252,0.12)', tagColor:'#c084fc', tagBorder:'rgba(192,132,252,0.3)' },
+];
+const LC = (l) => LEVEL_COLORS[Math.min(l, LEVEL_COLORS.length - 1)];
+
+// ─── EXAMPLES ─────────────────────────────────────────────────────────────
+const EXAMPLES = [
+  {
+    /*
+      Tree:    3
+              / \
+             9   20
+                /  \
+               15    7
+    */
+    label:"[3,9,20,null,null,15,7]",
+    svgViewBox:"0 0 500 255",
+    nodes:[
+      {id:"n3",  val:3,  cx:250, cy:40,  r:26, level:0},
+      {id:"n9",  val:9,  cx:120, cy:126, r:24, level:1},
+      {id:"n20", val:20, cx:390, cy:126, r:24, level:1},
+      {id:"n15", val:15, cx:312, cy:210, r:21, level:2},
+      {id:"n7",  val:7,  cx:468, cy:210, r:21, level:2},
+    ],
+    edges:[
+      {x1:228,y1:54, x2:143,y2:110},
+      {x1:272,y1:54, x2:367,y2:110},
+      {x1:374,y1:144,x2:328,y2:193},
+      {x1:406,y1:144,x2:452,y2:193},
+    ],
+    steps:[
+      {
+        desc:'Initialize: <em>queue=[3]</em>, ans=[]. BFS begins. Root enters the queue.',
+        activeNode:null, processingNode:null,
+        queue:[{v:3,l:0}], levelArr:[], ans:[], currentLevel:0,
+        stack:["while(queue.length)"],
+        qlen:"1", ll:"—", i:"—", curr:"—", levelStr:"[]", anslen:"0",
+        log:[{t:"levelOrder([3,9,20,null,null,15,7])",h:true},{t:"queue=[3]  ans=[]"}]
+      },
+      {
+        desc:'Level 0 starts. <span class="snap">levelLength = queue.length = 1</span>. Snapshot taken — exactly 1 node belongs to this level.',
+        activeNode:"n3", processingNode:null,
+        queue:[{v:3,l:0}], levelArr:[], ans:[], currentLevel:0,
+        stack:["while → Level 0","  len=1 ← SNAPSHOT"],
+        qlen:"1", ll:"1", i:"—", curr:"—", levelStr:"[]", anslen:"0",
+        log:[{t:"─── Level 0 ───  queue.length=1",h:true},{t:"levelLength = 1  ← snapshot taken",cls:"snap"}]
+      },
+      {
+        desc:'i=0: Dequeue <em>curr=3</em>. Enqueue left(9) and right(20). <span class="enq">level.push(3)</span>.',
+        activeNode:null, processingNode:"n3",
+        queue:[{v:9,l:1},{v:20,l:1}], levelArr:[{v:3,l:0}], ans:[], currentLevel:0,
+        stack:["while → Level 0","  i=0  curr=3"],
+        qlen:"2", ll:"1", i:"0", curr:"3", levelStr:"[3]", anslen:"0",
+        log:[{t:"  i=0: shift() → curr=3"},{t:"  enqueue left(9), right(20)",cls:"enq"},{t:"  level.push(3) → level=[3]",h:true}]
+      },
+      {
+        desc:'Inner loop done (i reached levelLength=1). <span class="ok">ans.push([3])</span>. Level 0 complete.',
+        activeNode:null, processingNode:null,
+        queue:[{v:9,l:1},{v:20,l:1}], levelArr:[], ans:[{vals:[3],l:0}], currentLevel:1,
+        stack:["while → Level 0 done"],
+        qlen:"2", ll:"1", i:"—", curr:"—", levelStr:"[]", anslen:"1",
+        log:[{t:"  inner loop done (i=1 = levelLength)"},{t:"  ans.push([3]) → ans=[[3]]",h:true,cls:"done"}]
+      },
+      {
+        desc:'Level 1 starts. <span class="snap">levelLength = queue.length = 2</span>. Two nodes belong to this level.',
+        activeNode:"n9", processingNode:null,
+        queue:[{v:9,l:1},{v:20,l:1}], levelArr:[], ans:[{vals:[3],l:0}], currentLevel:1,
+        stack:["while → Level 1","  len=2 ← SNAPSHOT"],
+        qlen:"2", ll:"2", i:"—", curr:"—", levelStr:"[]", anslen:"1",
+        log:[{t:"─── Level 1 ───  queue.length=2",h:true},{t:"levelLength = 2  ← snapshot",cls:"snap"}]
+      },
+      {
+        desc:'i=0: Dequeue <em>curr=9</em>. No children. <span class="enq">level.push(9)</span>.',
+        activeNode:null, processingNode:"n9",
+        queue:[{v:20,l:1}], levelArr:[{v:9,l:1}], ans:[{vals:[3],l:0}], currentLevel:1,
+        stack:["while → Level 1","  i=0  curr=9"],
+        qlen:"1", ll:"2", i:"0", curr:"9", levelStr:"[9]", anslen:"1",
+        log:[{t:"  i=0: shift() → curr=9"},{t:"  no children (leaf node)"},{t:"  level.push(9) → level=[9]",h:true}]
+      },
+      {
+        desc:'i=1: Dequeue <em>curr=20</em>. Enqueue left(15) and right(7). <span class="enq">level.push(20)</span>.',
+        activeNode:null, processingNode:"n20",
+        queue:[{v:15,l:2},{v:7,l:2}], levelArr:[{v:9,l:1},{v:20,l:1}], ans:[{vals:[3],l:0}], currentLevel:1,
+        stack:["while → Level 1","  i=1  curr=20"],
+        qlen:"2", ll:"2", i:"1", curr:"20", levelStr:"[9,20]", anslen:"1",
+        log:[{t:"  i=1: shift() → curr=20"},{t:"  enqueue left(15), right(7)",cls:"enq"},{t:"  level.push(20) → level=[9,20]",h:true}]
+      },
+      {
+        desc:'Inner loop done. <span class="ok">ans.push([9,20])</span>. Level 1 complete.',
+        activeNode:null, processingNode:null,
+        queue:[{v:15,l:2},{v:7,l:2}], levelArr:[], ans:[{vals:[3],l:0},{vals:[9,20],l:1}], currentLevel:2,
+        stack:["while → Level 1 done"],
+        qlen:"2", ll:"2", i:"—", curr:"—", levelStr:"[]", anslen:"2",
+        log:[{t:"  inner loop done (i=2 = levelLength)"},{t:"  ans.push([9,20]) → ans=[[3],[9,20]]",h:true,cls:"done"}]
+      },
+      {
+        desc:'Level 2 starts. <span class="snap">levelLength = queue.length = 2</span>.',
+        activeNode:"n15", processingNode:null,
+        queue:[{v:15,l:2},{v:7,l:2}], levelArr:[], ans:[{vals:[3],l:0},{vals:[9,20],l:1}], currentLevel:2,
+        stack:["while → Level 2","  len=2 ← SNAPSHOT"],
+        qlen:"2", ll:"2", i:"—", curr:"—", levelStr:"[]", anslen:"2",
+        log:[{t:"─── Level 2 ───  queue.length=2",h:true},{t:"levelLength = 2  ← snapshot",cls:"snap"}]
+      },
+      {
+        desc:'i=0: Dequeue <em>curr=15</em>. Leaf. level.push(15).',
+        activeNode:null, processingNode:"n15",
+        queue:[{v:7,l:2}], levelArr:[{v:15,l:2}], ans:[{vals:[3],l:0},{vals:[9,20],l:1}], currentLevel:2,
+        stack:["while → Level 2","  i=0  curr=15"],
+        qlen:"1", ll:"2", i:"0", curr:"15", levelStr:"[15]", anslen:"2",
+        log:[{t:"  i=0: shift() → curr=15  (leaf)"},{t:"  level.push(15) → level=[15]",h:true}]
+      },
+      {
+        desc:'i=1: Dequeue <em>curr=7</em>. Leaf. level.push(7). Queue is now empty.',
+        activeNode:null, processingNode:"n7",
+        queue:[], levelArr:[{v:15,l:2},{v:7,l:2}], ans:[{vals:[3],l:0},{vals:[9,20],l:1}], currentLevel:2,
+        stack:["while → Level 2","  i=1  curr=7"],
+        qlen:"0", ll:"2", i:"1", curr:"7", levelStr:"[15,7]", anslen:"2",
+        log:[{t:"  i=1: shift() → curr=7  (leaf)"},{t:"  level.push(7) → level=[15,7]",h:true}]
+      },
+      {
+        desc:'🎉 Inner loop done. <span class="ok">ans.push([15,7])</span>. Queue empty → while loop ends. <span class="done">Return [[3],[9,20],[15,7]] ✓</span>',
+        activeNode:null, processingNode:null,
+        queue:[], levelArr:[], ans:[{vals:[3],l:0},{vals:[9,20],l:1},{vals:[15,7],l:2}], currentLevel:2,
+        stack:["done ✓"],
+        qlen:"0", ll:"2", i:"—", curr:"—", levelStr:"[]", anslen:"3",
+        log:[{t:"  ans.push([15,7]) → ans=[[3],[9,20],[15,7]]",h:true,cls:"done"},{t:"queue.length = 0 → loop ends"},{t:"return [[3],[9,20],[15,7]] ✓",h:true,cls:"done"}],
+        final:true, ansText:"[[3],[9,20],[15,7]]"
+      }
+    ]
+  },
+
+  {
+    /*
+      Tree:    1
+              / \
+             2    3
+            / \  / \
+           4   5 6   7
+    */
+    label:"[1,2,3,4,5,6,7]",
+    svgViewBox:"0 0 500 265",
+    nodes:[
+      {id:"n1",val:1,cx:250,cy:38,r:26,level:0},
+      {id:"n2",val:2,cx:130,cy:120,r:24,level:1},
+      {id:"n3",val:3,cx:375,cy:120,r:24,level:1},
+      {id:"n4",val:4,cx:60, cy:205,r:21,level:2},
+      {id:"n5",val:5,cx:200,cy:205,r:21,level:2},
+      {id:"n6",val:6,cx:308,cy:205,r:21,level:2},
+      {id:"n7",val:7,cx:446,cy:205,r:21,level:2},
+    ],
+    edges:[
+      {x1:228,y1:52,x2:153,y2:104},{x1:272,y1:52,x2:352,y2:104},
+      {x1:112,y1:138,x2:76, y2:188},{x1:148,y1:138,x2:182,y2:188},
+      {x1:356,y1:138,x2:324,y2:188},{x1:390,y1:138,x2:430,y2:188},
+    ],
+    steps:[
+      {
+        desc:'Initialize: <em>queue=[1]</em>. BFS begins.',
+        activeNode:"n1",processingNode:null,
+        queue:[{v:1,l:0}],levelArr:[],ans:[],currentLevel:0,
+        stack:["while(queue.length)"],
+        qlen:"1",ll:"—",i:"—",curr:"—",levelStr:"[]",anslen:"0",
+        log:[{t:"levelOrder([1,2,3,4,5,6,7])",h:true},{t:"queue=[1]  ans=[]"}]
+      },
+      {
+        desc:'Level 0. <span class="snap">levelLength=1</span>. Dequeue <em>1</em>, enqueue 2,3. <span class="ok">ans.push([1])</span>.',
+        activeNode:null,processingNode:"n1",
+        queue:[{v:2,l:1},{v:3,l:1}],levelArr:[],ans:[{vals:[1],l:0}],currentLevel:1,
+        stack:["while → Level 0 done"],
+        qlen:"2",ll:"1",i:"0",curr:"1",levelStr:"[]",anslen:"1",
+        log:[{t:"─── Level 0 ─── len=1",h:true},{t:"  dequeue 1 → enqueue 2,3  level=[1]",cls:"enq"},{t:"  ans.push([1]) ✓",cls:"done"}]
+      },
+      {
+        desc:'Level 1. <span class="snap">levelLength=2</span>. Snapshot seals nodes 2 and 3 as this level.',
+        activeNode:"n2",processingNode:null,
+        queue:[{v:2,l:1},{v:3,l:1}],levelArr:[],ans:[{vals:[1],l:0}],currentLevel:1,
+        stack:["while → Level 1","  len=2 ← SNAPSHOT"],
+        qlen:"2",ll:"2",i:"—",curr:"—",levelStr:"[]",anslen:"1",
+        log:[{t:"─── Level 1 ─── queue=[2,3]  len=2",h:true},{t:"levelLength=2 ← snapshot",cls:"snap"}]
+      },
+      {
+        desc:'i=0: Dequeue <em>2</em>. Enqueue 4,5. level=[2]. &nbsp; i=1: Dequeue <em>3</em>. Enqueue 6,7. level=[2,3].',
+        activeNode:null,processingNode:"n3",
+        queue:[{v:4,l:2},{v:5,l:2},{v:6,l:2},{v:7,l:2}],levelArr:[{v:2,l:1},{v:3,l:1}],ans:[{vals:[1],l:0}],currentLevel:1,
+        stack:["while → Level 1","  i=1  curr=3"],
+        qlen:"4",ll:"2",i:"1",curr:"3",levelStr:"[2,3]",anslen:"1",
+        log:[{t:"  i=0: dequeue 2 → enqueue 4,5  level=[2]",cls:"enq"},{t:"  i=1: dequeue 3 → enqueue 6,7  level=[2,3]",h:true}]
+      },
+      {
+        desc:'Level 1 done. <span class="ok">ans.push([2,3])</span>. Queue now holds all level-2 nodes: [4,5,6,7].',
+        activeNode:null,processingNode:null,
+        queue:[{v:4,l:2},{v:5,l:2},{v:6,l:2},{v:7,l:2}],levelArr:[],ans:[{vals:[1],l:0},{vals:[2,3],l:1}],currentLevel:2,
+        stack:["while → Level 1 done"],
+        qlen:"4",ll:"2",i:"—",curr:"—",levelStr:"[]",anslen:"2",
+        log:[{t:"  ans.push([2,3]) → ans=[[1],[2,3]]",h:true,cls:"done"}]
+      },
+      {
+        desc:'Level 2. <span class="snap">levelLength=4</span>. Four leaves to process — no children to enqueue.',
+        activeNode:"n4",processingNode:null,
+        queue:[{v:4,l:2},{v:5,l:2},{v:6,l:2},{v:7,l:2}],levelArr:[],ans:[{vals:[1],l:0},{vals:[2,3],l:1}],currentLevel:2,
+        stack:["while → Level 2","  len=4 ← SNAPSHOT"],
+        qlen:"4",ll:"4",i:"—",curr:"—",levelStr:"[]",anslen:"2",
+        log:[{t:"─── Level 2 ─── queue=[4,5,6,7]  len=4",h:true},{t:"levelLength=4 ← snapshot",cls:"snap"}]
+      },
+      {
+        desc:'Process all four leaves in order. level=[4,5,6,7]. Queue drains to empty.',
+        activeNode:null,processingNode:"n7",
+        queue:[],levelArr:[{v:4,l:2},{v:5,l:2},{v:6,l:2},{v:7,l:2}],ans:[{vals:[1],l:0},{vals:[2,3],l:1}],currentLevel:2,
+        stack:["while → Level 2","  i=3  curr=7"],
+        qlen:"0",ll:"4",i:"3",curr:"7",levelStr:"[4,5,6,7]",anslen:"2",
+        log:[{t:"  dequeue 4,5,6,7 (all leaves)  level=[4,5,6,7]",h:true}]
+      },
+      {
+        desc:'🎉 <span class="ok">ans.push([4,5,6,7])</span>. Queue empty. <span class="done">Return [[1],[2,3],[4,5,6,7]] ✓</span>',
+        activeNode:null,processingNode:null,
+        queue:[],levelArr:[],ans:[{vals:[1],l:0},{vals:[2,3],l:1},{vals:[4,5,6,7],l:2}],currentLevel:2,
+        stack:["done ✓"],
+        qlen:"0",ll:"4",i:"—",curr:"—",levelStr:"[]",anslen:"3",
+        log:[{t:"  ans.push([4,5,6,7]) → ans=[[1],[2,3],[4,5,6,7]]",h:true,cls:"done"},{t:"queue empty → return [[1],[2,3],[4,5,6,7]] ✓",cls:"done"}],
+        final:true, ansText:"[[1],[2,3],[4,5,6,7]]"
+      }
+    ]
+  },
+
+  {
+    label:"[7] — Single Node",
+    svgViewBox:"0 0 500 180",
+    nodes:[{id:"n7",val:7,cx:250,cy:80,r:30,level:0}],
+    edges:[],
+    steps:[
+      {
+        desc:'Single node tree. Initialize: <em>queue=[7]</em>.',
+        activeNode:"n7",processingNode:null,
+        queue:[{v:7,l:0}],levelArr:[],ans:[],currentLevel:0,
+        stack:["while(queue.length)"],
+        qlen:"1",ll:"—",i:"—",curr:"—",levelStr:"[]",anslen:"0",
+        log:[{t:"Single node tree: [7]",h:true},{t:"queue=[7]  ans=[]"}]
+      },
+      {
+        desc:'Level 0. <span class="snap">levelLength=1</span>. Dequeue <em>7</em>. No children — nothing enqueued. level.push(7).',
+        activeNode:null,processingNode:"n7",
+        queue:[],levelArr:[{v:7,l:0}],ans:[],currentLevel:0,
+        stack:["while → Level 0","  i=0  curr=7"],
+        qlen:"0",ll:"1",i:"0",curr:"7",levelStr:"[7]",anslen:"0",
+        log:[{t:"─── Level 0 ─── len=1",h:true},{t:"  dequeue 7  no children  level=[7]"}]
+      },
+      {
+        desc:'🎉 <span class="ok">ans.push([7])</span>. Queue empty. <span class="done">Return [[7]] ✓</span>',
+        activeNode:null,processingNode:null,
+        queue:[],levelArr:[],ans:[{vals:[7],l:0}],currentLevel:0,
+        stack:["done ✓"],
+        qlen:"0",ll:"1",i:"—",curr:"—",levelStr:"[]",anslen:"1",
+        log:[{t:"  ans.push([7]) → ans=[[7]]",h:true,cls:"done"},{t:"return [[7]] ✓",cls:"done"}],
+        final:true, ansText:"[[7]]"
+      }
+    ]
+  },
+
+  {
+    /*
+      Tree:   1
+             /
+            2
+           /
+          3
+         /
+        4
+    */
+    label:"[1,2,null,3,null,4] — Left-skewed",
+    svgViewBox:"0 0 500 270",
+    nodes:[
+      {id:"n1",val:1,cx:300,cy:40, r:26,level:0},
+      {id:"n2",val:2,cx:200,cy:120,r:24,level:1},
+      {id:"n3",val:3,cx:115,cy:198,r:22,level:2},
+      {id:"n4",val:4,cx:50, cy:262,r:19,level:3},
+    ],
+    edges:[
+      {x1:279,y1:54, x2:222,y2:104},
+      {x1:181,y1:138,x2:132,y2:181},
+      {x1:99, y1:216,x2:62,  y2:247},
+    ],
+    steps:[
+      {
+        desc:'Left-skewed tree — one node per level. Initialize: <em>queue=[1]</em>.',
+        activeNode:"n1",processingNode:null,
+        queue:[{v:1,l:0}],levelArr:[],ans:[],currentLevel:0,
+        stack:["while(queue.length)"],
+        qlen:"1",ll:"—",i:"—",curr:"—",levelStr:"[]",anslen:"0",
+        log:[{t:"Left-skewed [1,2,null,3,null,4]",h:true},{t:"Each level has exactly 1 node → levelLength=1 every time"}]
+      },
+      {
+        desc:'Level 0. <span class="snap">levelLength=1</span>. Dequeue <em>1</em>. Enqueue left(2). <span class="ok">ans.push([1])</span>.',
+        activeNode:null,processingNode:"n1",
+        queue:[{v:2,l:1}],levelArr:[],ans:[{vals:[1],l:0}],currentLevel:1,
+        stack:["while → Level 0 done"],
+        qlen:"1",ll:"1",i:"0",curr:"1",levelStr:"[]",anslen:"1",
+        log:[{t:"─── Level 0 ─── len=1",h:true},{t:"  dequeue 1 → enqueue left(2)  level=[1]",cls:"enq"},{t:"  ans.push([1]) ✓",cls:"done"}]
+      },
+      {
+        desc:'Level 1. <span class="snap">levelLength=1</span>. Dequeue <em>2</em>. Enqueue left(3). <span class="ok">ans.push([2])</span>.',
+        activeNode:null,processingNode:"n2",
+        queue:[{v:3,l:2}],levelArr:[],ans:[{vals:[1],l:0},{vals:[2],l:1}],currentLevel:2,
+        stack:["while → Level 1 done"],
+        qlen:"1",ll:"1",i:"0",curr:"2",levelStr:"[]",anslen:"2",
+        log:[{t:"─── Level 1 ─── len=1",h:true},{t:"  dequeue 2 → enqueue left(3)  level=[2]",cls:"enq"},{t:"  ans.push([2]) ✓",cls:"done"}]
+      },
+      {
+        desc:'Level 2. <span class="snap">levelLength=1</span>. Dequeue <em>3</em>. Enqueue left(4). <span class="ok">ans.push([3])</span>.',
+        activeNode:null,processingNode:"n3",
+        queue:[{v:4,l:3}],levelArr:[],ans:[{vals:[1],l:0},{vals:[2],l:1},{vals:[3],l:2}],currentLevel:3,
+        stack:["while → Level 2 done"],
+        qlen:"1",ll:"1",i:"0",curr:"3",levelStr:"[]",anslen:"3",
+        log:[{t:"─── Level 2 ─── len=1",h:true},{t:"  dequeue 3 → enqueue left(4)  level=[3]",cls:"enq"},{t:"  ans.push([3]) ✓",cls:"done"}]
+      },
+      {
+        desc:'Level 3. <span class="snap">levelLength=1</span>. Dequeue <em>4</em>. Leaf — no children. Queue empties.',
+        activeNode:null,processingNode:"n4",
+        queue:[],levelArr:[{v:4,l:3}],ans:[{vals:[1],l:0},{vals:[2],l:1},{vals:[3],l:2}],currentLevel:3,
+        stack:["while → Level 3","  i=0  curr=4"],
+        qlen:"0",ll:"1",i:"0",curr:"4",levelStr:"[4]",anslen:"3",
+        log:[{t:"─── Level 3 ─── len=1",h:true},{t:"  dequeue 4 (leaf) → no children  level=[4]"}]
+      },
+      {
+        desc:'🎉 <span class="ok">ans.push([4])</span>. Queue empty. <span class="done">Return [[1],[2],[3],[4]] ✓</span> — each level had exactly 1 node, so levelLength was always 1.',
+        activeNode:null,processingNode:null,
+        queue:[],levelArr:[],ans:[{vals:[1],l:0},{vals:[2],l:1},{vals:[3],l:2},{vals:[4],l:3}],currentLevel:3,
+        stack:["done ✓"],
+        qlen:"0",ll:"1",i:"—",curr:"—",levelStr:"[]",anslen:"4",
+        log:[{t:"  ans.push([4]) → ans=[[1],[2],[3],[4]]",h:true,cls:"done"},{t:"return [[1],[2],[3],[4]] ✓",cls:"done"}],
+        final:true, ansText:"[[1],[2],[3],[4]]"
+      }
+    ]
+  }
+];
+
+// ─── STATE ─────────────────────────────────────────────────────────────────
+let exIdx = 0, cur = 0, playTimer = null;
+const getEx    = () => EXAMPLES[exIdx];
+const getSteps = () => getEx().steps;
+
+// ─── RENDER SVG ────────────────────────────────────────────────────────────
+function renderSVG(ex, step) {
+  const svg = document.getElementById("tree-svg");
+  svg.setAttribute("viewBox", ex.svgViewBox);
+  let html = "";
+
+  ex.edges.forEach(e =>
+    html += `<line x1="${e.x1}" y1="${e.y1}" x2="${e.x2}" y2="${e.y2}" stroke="#1e2231" stroke-width="2"/>`
+  );
+
+  ex.nodes.forEach(n => {
+    const lc = LC(n.level);
+    let fill = "#13161d", stroke = "#2a2f3e", sw = "1.5", tf = "#3d4251";
+
+    if (n.id === step.processingNode) {
+      fill = "#1e1a08"; stroke = "#fbbf24"; sw = "2.5"; tf = "#fbbf24";
+    } else if (n.id === step.activeNode) {
+      fill = lc.nodeBg; stroke = lc.nodeStroke; sw = "2"; tf = lc.node;
+    } else {
+      // colour by level if it's already been processed or is in queue
+      const inQueue = step.queue.some(q => q.v === n.val && q.l === n.level);
+      const inLevel = step.levelArr.some(q => q.v === n.val && q.l === n.level);
+      const inAns   = step.ans.some(a => a.l === n.level);
+      if (inQueue || inLevel || inAns) {
+        fill = lc.nodeBg; stroke = lc.nodeStroke; sw = "2"; tf = lc.node;
+      }
+    }
+
+    html += `<g><circle cx="${n.cx}" cy="${n.cy}" r="${n.r}" fill="${fill}" stroke="${stroke}" stroke-width="${sw}" style="transition:all .2s"/>
+      <text x="${n.cx}" y="${n.cy+4}" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="${n.r>24?14:12}" font-weight="700" fill="${tf}" style="transition:fill .2s">${n.val}</text></g>`;
+  });
+
+  svg.innerHTML = html;
+}
+
+// ─── RENDER QUEUE ──────────────────────────────────────────────────────────
+function renderQueue(queue) {
+  const el = document.getElementById("queue-row");
+  if (!queue.length) {
+    el.innerHTML = '<span class="queue-front">front →</span><span style="font-family:var(--mono);font-size:11px;color:var(--text-dim);margin-left:8px">[ empty ]</span>';
+    return;
+  }
+  let html = '<span class="queue-front">front →</span>';
+  queue.forEach((q, i) => {
+    html += `<div class="q-node q-l${q.l}">${q.v}</div>`;
+    if (i < queue.length - 1) html += '<span class="q-dot">·</span>';
+  });
+  el.innerHTML = html;
+}
+
+// ─── RENDER LEVEL ARR ──────────────────────────────────────────────────────
+function renderLevelArr(levelArr, currentLevel) {
+  const el = document.getElementById("level-row");
+  const tag = document.getElementById("level-tag");
+  const lc = LC(currentLevel);
+  tag.textContent = `Level ${currentLevel}`;
+  tag.style.cssText = `background:${lc.tagBg};color:${lc.tagColor};border:1px solid ${lc.tagBorder};font-family:var(--mono);font-size:10px;font-weight:700;padding:2px 8px;border-radius:4px;margin-left:6px;`;
+
+  if (!levelArr.length) {
+    el.innerHTML = '<span style="font-family:var(--mono);font-size:11px;color:var(--text-dim)">[ ]</span>';
+    return;
+  }
+  el.innerHTML = levelArr.map(q =>
+    `<div class="lv-cell lv-l${q.l}">${q.v}</div>`
+  ).join('<span style="font-family:var(--mono);font-size:11px;color:var(--text-dim);margin:0 2px">,</span>');
+}
+
+// ─── RENDER ANS ────────────────────────────────────────────────────────────
+function renderAns(ans) {
+  const el = document.getElementById("ans-rows");
+  if (!ans.length) { el.innerHTML = '<span style="font-family:var(--mono);font-size:11px;color:var(--text-dim)">[ ]</span>'; return; }
+  el.innerHTML = ans.map(a => {
+    const lc = LC(a.l);
+    return `<div class="ans-row">
+      <span class="ans-level-lbl">L${a.l}:</span>
+      <div class="ans-cells">${a.vals.map(v => `<div class="ans-cell" style="background:${lc.tagBg};border:1px solid ${lc.tagBorder};color:${lc.tagColor}">${v}</div>`).join("")}</div>
+    </div>`;
+  }).join("");
+}
+
+// ─── RENDER STEP ───────────────────────────────────────────────────────────
+function renderStep(step) {
+  const ex = getEx();
+  renderSVG(ex, step);
+  renderQueue(step.queue);
+  renderLevelArr(step.levelArr, step.currentLevel);
+  renderAns(step.ans);
+
+  // Stack
+  const stackEl = document.getElementById("stack");
+  stackEl.innerHTML = step.stack.map((f, i) =>
+    `<div class="frame ${i === step.stack.length - 1 ? "active" : ""}">${f}</div>`
+  ).join("");
+
+  // Vars
+  document.getElementById("v-qlen").textContent  = step.qlen;
+  document.getElementById("v-ll").textContent    = step.ll;
+  document.getElementById("v-i").textContent     = step.i;
+  document.getElementById("v-curr").textContent  = step.curr;
+  document.getElementById("v-level").textContent = step.levelStr;
+  document.getElementById("v-anslen").textContent= step.anslen;
+
+  // Log
+  const logEl = document.getElementById("log");
+  logEl.innerHTML = step.log.map(e => {
+    let cls = e.cls || "";
+    if (e.h) cls = "hl";
+    return `<div class="entry ${cls}">${e.t}</div>`;
+  }).join("");
+  logEl.scrollTop = logEl.scrollHeight;
+
+  // Meta
+  const steps = getSteps();
+  document.getElementById("step-label").textContent = `Step ${cur + 1} / ${steps.length}`;
+  document.getElementById("step-desc").innerHTML = step.desc;
+  document.getElementById("prog").style.width = ((cur + 1) / steps.length * 100) + "%";
+
+  const badge = document.getElementById("ans-badge");
+  if (step.final) { badge.style.display = "inline-block"; badge.textContent = "✓ " + step.ansText; }
+  else badge.style.display = "none";
+
+  document.getElementById("btn-prev").disabled = cur === 0;
+  document.getElementById("btn-next").disabled = cur === steps.length - 1;
+}
+
+// ─── NAVIGATION ────────────────────────────────────────────────────────────
+function move(d) {
+  cur = Math.max(0, Math.min(getSteps().length - 1, cur + d));
+  renderStep(getSteps()[cur]);
+}
+
+function reset() { cur = 0; stopPlay(); renderStep(getSteps()[0]); }
+
+function loadExample(idx) {
+  exIdx = idx; cur = 0; stopPlay();
+  document.getElementById("tree-label").textContent = `// binary tree — ${getEx().label}`;
+  renderStep(getSteps()[0]);
+}
+
+document.getElementById("examples-row").addEventListener("click", e => {
+  const btn = e.target.closest(".ex-btn");
+  if (!btn) return;
+  document.querySelectorAll(".ex-btn").forEach(b => b.classList.remove("active"));
+  btn.classList.add("active");
+  loadExample(parseInt(btn.dataset.ex));
+});
+
+document.addEventListener("keydown", e => {
+  if (e.key === "ArrowRight" || e.key === "ArrowDown") move(1);
+  if (e.key === "ArrowLeft"  || e.key === "ArrowUp")   move(-1);
+});
+
+function stopPlay() {
+  if (playTimer) { clearInterval(playTimer); playTimer = null; }
+  const btn = document.getElementById("btn-play");
+  btn.textContent = "▶ Play"; btn.classList.add("btn-play");
+}
+
+function togglePlay() {
+  const btn = document.getElementById("btn-play");
+  if (playTimer) { stopPlay(); return; }
+  btn.textContent = "⏸ Pause"; btn.classList.add("btn-play");
+  playTimer = setInterval(() => {
+    if (cur >= getSteps().length - 1) { stopPlay(); return; }
+    move(1);
+  }, 1500);
+}
+
+loadExample(0);
+</script>
+</body>
+</html>

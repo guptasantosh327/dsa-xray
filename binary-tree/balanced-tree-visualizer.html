@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Balanced Binary Tree — Interactive Dry Run</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Sora:wght@300;400;600;700&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #0d0f14; --surface: #13161d; --surface2: #1a1e28; --surface3: #212638;
+      --border: rgba(255,255,255,0.07); --border-mid: rgba(255,255,255,0.12);
+      --text: #e8eaf0; --text-muted: #6b7280; --text-dim: #3d4251;
+      --accent: #7c6ef5; --accent-glow: rgba(124,110,245,0.25);
+      --green: #34d399; --green-bg: rgba(52,211,153,0.1);
+      --amber: #fbbf24; --amber-bg: rgba(251,191,36,0.12);
+      --blue: #60a5fa; --blue-bg: rgba(96,165,250,0.1);
+      --red: #f87171; --red-bg: rgba(248,113,113,0.12);
+      --purple: #c084fc; --purple-bg: rgba(192,132,252,0.1);
+      --orange: #fb923c; --orange-bg: rgba(251,146,60,0.12);
+      --mono: 'JetBrains Mono', monospace; --sans: 'Sora', sans-serif;
+    }
+    html { scroll-behavior: smooth; }
+    body { background: var(--bg); color: var(--text); font-family: var(--sans); font-size: 15px; line-height: 1.6; min-height: 100vh; overflow-x: hidden; }
+    body::before { content: ''; position: fixed; inset: 0; background-image: linear-gradient(rgba(124,110,245,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(124,110,245,0.03) 1px, transparent 1px); background-size: 40px 40px; pointer-events: none; z-index: 0; }
+    .page { position: relative; z-index: 1; max-width: 980px; margin: 0 auto; padding: 3rem 1.5rem 5rem; }
+    .back-nav { display: inline-flex; align-items: center; gap: 8px; font-family: var(--mono); font-size: 12px; color: var(--text-muted); text-decoration: none; padding: 7px 14px 7px 10px; border-radius: 8px; border: 1px solid var(--border); background: var(--surface); margin-bottom: 2rem; transition: all .15s; }
+    .back-nav:hover { border-color: var(--border-mid); color: var(--text); }
+    header { margin-bottom: 2rem; animation: fadeUp .6s ease both; }
+    .tag { display: inline-block; font-family: var(--mono); font-size: 11px; font-weight: 500; letter-spacing: .12em; text-transform: uppercase; color: var(--blue); background: var(--blue-bg); border: 1px solid rgba(96,165,250,0.3); padding: 4px 12px; border-radius: 100px; margin-bottom: 1.2rem; }
+    h1 { font-size: clamp(1.8rem, 5vw, 2.8rem); font-weight: 700; line-height: 1.15; color: var(--text); margin-bottom: .8rem; letter-spacing: -.02em; }
+    h1 span { color: var(--blue); }
+    .subtitle { font-size: 15px; color: var(--text-muted); max-width: 620px; line-height: 1.7; }
+
+    .pattern-banner { display: flex; align-items: flex-start; gap: 16px; background: var(--blue-bg); border: 1px solid rgba(96,165,250,0.25); border-left: 3px solid var(--blue); border-radius: 10px; padding: 14px 18px; margin-bottom: 2rem; animation: fadeUp .6s ease .03s both; flex-wrap: wrap; }
+    .pattern-label { font-family: var(--mono); font-size: 10px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--text-dim); margin-bottom: 4px; }
+    .pattern-name { font-family: var(--mono); font-size: 13px; font-weight: 700; color: var(--blue); }
+    .pattern-desc { font-family: var(--mono); font-size: 12px; color: var(--text-muted); flex: 1; min-width: 200px; line-height: 1.7; }
+    .pattern-solves { font-family: var(--mono); font-size: 11px; color: var(--text-dim); }
+    .pattern-solves span { color: var(--blue); }
+
+    /* PROBLEM + HINTS SECTIONS */
+    .prob-section { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; margin-bottom: 2rem; animation: fadeUp .6s ease .04s both; }
+    .prob-section-hdr { display: flex; align-items: center; gap: 10px; padding: 14px 20px; border-bottom: 1px solid var(--border); background: var(--surface2); }
+    .prob-section-icon { font-size: 16px; }
+    .prob-section-title { font-family: var(--mono); font-size: 11px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--text-muted); }
+    .prob-body { padding: 20px; }
+    .prob-body p { font-size: 13px; color: var(--text-muted); line-height: 1.75; margin-bottom: 10px; }
+    .prob-body p:last-child { margin-bottom: 0; }
+    .prob-body p strong { color: var(--text); }
+    .prob-body code { font-family: var(--mono); font-size: 11px; background: var(--surface2); padding: 1px 6px; border-radius: 4px; color: var(--accent); }
+
+    .svg-example-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; margin-top: 16px; }
+    .svg-ex-card { background: var(--surface2); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+    .svg-ex-header { display: flex; align-items: center; justify-content: space-between; padding: 8px 14px; border-bottom: 1px solid var(--border); }
+    .svg-ex-label { font-family: var(--mono); font-size: 10px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--text-dim); }
+    .svg-ex-result { font-family: var(--mono); font-size: 11px; font-weight: 700; padding: 2px 10px; border-radius: 5px; }
+    .res-green { background: rgba(52,211,153,.12); color: #34d399; border: 1px solid rgba(52,211,153,.25); }
+    .res-red { background: rgba(248,113,113,.12); color: #f87171; border: 1px solid rgba(248,113,113,.25); }
+    .svg-ex-body { padding: 12px; display: flex; justify-content: center; align-items: center; min-height: 90px; }
+    .svg-ex-body svg { max-height: 120px; width: 100%; }
+
+    .hints-list { display: flex; flex-direction: column; gap: 10px; }
+    .hint-row { display: flex; gap: 12px; align-items: flex-start; }
+    .hint-badge { font-family: var(--mono); font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 6px; flex-shrink: 0; margin-top: 2px; min-width: 28px; text-align: center; color: var(--blue); background: var(--blue-bg); border: 1px solid rgba(96,165,250,0.25); }
+    .hint-body { font-size: 13px; color: var(--text-muted); line-height: 1.7; }
+    .hint-body code { font-family: var(--mono); font-size: 11px; background: var(--surface2); padding: 1px 5px; border-radius: 4px; color: var(--accent); }
+    .hint-body strong { color: var(--text); }
+    .intuition-box { background: var(--blue-bg); border: 1px solid rgba(96,165,250,0.2); border-radius: 10px; padding: 16px 18px; margin-top: 14px; }
+    .intuition-box p { font-size: 13px; color: var(--text-muted); line-height: 1.75; }
+    .intuition-box p strong { color: var(--blue); }
+
+    .key-insight { background: var(--amber-bg); border: 1px solid rgba(251,191,36,0.2); border-left: 3px solid var(--amber); border-radius: 10px; padding: 14px 18px; margin-bottom: 2rem; font-size: 13px; color: var(--text-muted); font-family: var(--mono); animation: fadeUp .6s ease .05s both; line-height: 1.7; }
+    .key-insight strong { color: var(--amber); }
+
+    /* Code */
+    .code-block { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; margin-bottom: 2rem; animation: fadeUp .6s ease .1s both; }
+    .code-header { display: flex; align-items: center; gap: 8px; padding: 12px 16px; border-bottom: 1px solid var(--border); background: var(--surface2); }
+    .code-header span { font-family: var(--mono); font-size: 12px; color: var(--text-muted); }
+    .dots { display: flex; gap: 6px; }
+    .dot { width: 10px; height: 10px; border-radius: 50%; }
+    .dot-r { background: #ff5f57; } .dot-y { background: #ffbd2e; } .dot-g { background: #28c940; }
+    pre { padding: 1.25rem 1.5rem; overflow-x: auto; font-family: var(--mono); font-size: 13px; line-height: 1.8; color: #c9d1d9; }
+    .kw { color: #ff79c6; } .fn { color: #50fa7b; } .cm { color: #6272a4; font-style: italic; } .num { color: #bd93f9; } .var { color: #8be9fd; } .hl { background: rgba(96,165,250,0.12); border-radius: 3px; padding: 0 3px; }
+
+    .section-label { font-family: var(--mono); font-size: 11px; font-weight: 500; letter-spacing: .1em; text-transform: uppercase; color: var(--text-dim); margin-bottom: 1rem; margin-top: 2.5rem; }
+
+    /* Example selector */
+    .examples-row { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 1.5rem; }
+    .ex-btn { display: inline-flex; align-items: center; gap: 8px; padding: 9px 16px; border-radius: 10px; border: 1px solid var(--border); background: var(--surface); cursor: pointer; transition: all .18s; font-family: var(--mono); font-size: 12px; font-weight: 600; color: var(--text-muted); user-select: none; }
+    .ex-btn:hover { border-color: var(--border-mid); color: var(--text); transform: translateY(-1px); }
+    .ex-btn.active { background: var(--blue-bg); border-color: rgba(96,165,250,0.4); color: var(--blue); transform: translateY(-1px); }
+    .ex-badge { font-size: 9px; font-weight: 700; padding: 2px 7px; border-radius: 5px; background: var(--surface3); color: var(--text-dim); }
+    .ex-btn.active .ex-badge { background: rgba(255,255,255,0.1); color: inherit; }
+
+    /* Viz card */
+    .viz-card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; overflow: hidden; animation: fadeUp .6s ease .2s both; }
+    .progress-bar-wrap { height: 3px; background: var(--border); }
+    .progress-bar-inner { height: 100%; background: linear-gradient(90deg, var(--blue), #60a5fa); transition: width .35s cubic-bezier(.4,0,.2,1); border-radius: 0 2px 2px 0; }
+    .controls { display: flex; align-items: center; gap: 10px; padding: 14px 20px; border-bottom: 1px solid var(--border); background: var(--surface2); flex-wrap: wrap; }
+    .btn { display: inline-flex; align-items: center; gap: 6px; font-family: var(--mono); font-size: 12px; font-weight: 500; padding: 7px 16px; border-radius: 8px; border: 1px solid var(--border-mid); background: var(--surface3); color: var(--text); cursor: pointer; transition: all .15s; }
+    .btn:hover:not(:disabled) { background: var(--blue-bg); border-color: var(--blue); color: var(--blue); }
+    .btn:disabled { opacity: .3; cursor: default; }
+    .btn-play { background: var(--blue-bg) !important; border-color: rgba(96,165,250,0.4) !important; color: var(--blue) !important; }
+    .btn-reset { background: var(--red-bg) !important; border-color: rgba(248,113,113,0.3) !important; color: var(--red) !important; }
+    .step-info { flex: 1; font-size: 13px; color: var(--text-muted); font-family: var(--mono); }
+    kbd { font-size: 10px; background: var(--surface3); border: 1px solid var(--border-mid); padding: 2px 5px; border-radius: 4px; color: var(--text-muted); font-family: var(--mono); }
+    .result-badge { font-family: var(--mono); font-size: 11px; font-weight: 700; letter-spacing: .06em; padding: 4px 12px; border-radius: 100px; text-transform: uppercase; }
+    .badge-balanced { background: var(--green-bg); color: var(--green); border: 1px solid rgba(52,211,153,0.3); }
+    .badge-unbalanced { background: var(--red-bg); color: var(--red); border: 1px solid rgba(248,113,113,0.3); }
+
+    .step-desc { padding: 12px 20px; font-size: 13px; color: var(--text-muted); background: var(--surface2); border-bottom: 1px solid var(--border); font-family: var(--mono); min-height: 44px; line-height: 1.6; }
+    .step-desc em { color: var(--amber); font-style: normal; }
+    .step-desc .ok { color: var(--green); font-weight: 600; }
+    .step-desc .fail { color: var(--red); font-weight: 600; }
+    .step-desc .hi { color: var(--blue); font-weight: 600; }
+
+    /* Main layout */
+    .main-grid { display: grid; grid-template-columns: 1fr 310px; }
+    .tree-panel { padding: 24px 20px; border-right: 1px solid var(--border); }
+    .panel-label { font-family: var(--mono); font-size: 10px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--text-dim); margin-bottom: 10px; }
+    #tree-svg { width: 100%; }
+
+    /* Side panel */
+    .side-panel { display: flex; flex-direction: column; }
+    .result-tracker { margin: 14px 16px 12px; padding: 12px 14px; background: var(--surface3); border: 1px solid var(--border-mid); border-radius: 10px; display: flex; align-items: center; justify-content: space-between; }
+    .result-label { font-family: var(--mono); font-size: 11px; color: var(--text-muted); }
+    .result-val { font-family: var(--mono); font-size: 14px; font-weight: 700; color: var(--text-dim); transition: color .3s, transform .2s; }
+    .result-val.balanced { color: var(--green); }
+    .result-val.unbalanced { color: var(--red); }
+    .result-val.updated { transform: scale(1.2); }
+
+    .stack-panel { padding: 14px 16px; border-bottom: 1px solid var(--border); }
+    .call-stack { display: flex; flex-direction: column-reverse; gap: 4px; min-height: 52px; }
+    .frame { padding: 5px 10px; border-radius: 6px; font-size: 10px; font-family: var(--mono); border: 1px solid var(--border); background: var(--surface2); color: var(--text-muted); transition: all .2s; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .frame.active { border-color: rgba(96,165,250,0.4); background: var(--blue-bg); color: var(--blue); }
+    .frame.returning { border-color: rgba(52,211,153,0.3); background: var(--green-bg); color: var(--green); }
+    .frame.invalid { border-color: rgba(248,113,113,0.3); background: var(--red-bg); color: var(--red); }
+
+    .vars-panel { padding: 14px 16px; border-bottom: 1px solid var(--border); }
+    .var-row { display: flex; justify-content: space-between; align-items: center; padding: 4px 0; border-bottom: 1px solid var(--border); font-size: 12px; }
+    .var-row:last-child { border-bottom: none; }
+    .var-name { font-family: var(--mono); color: var(--text-muted); font-size: 11px; }
+    .var-val { font-family: var(--mono); font-weight: 700; color: var(--amber); font-size: 11px; }
+    .var-val.g { color: var(--green); } .var-val.r { color: var(--red); } .var-val.b { color: var(--blue); } .var-val.d { color: var(--text-dim); }
+
+    .log-panel { padding: 14px 16px; flex: 1; }
+    .log { font-size: 11px; font-family: var(--mono); line-height: 1.9; color: var(--text-dim); max-height: 180px; overflow-y: auto; }
+    .log::-webkit-scrollbar { width: 4px; }
+    .log::-webkit-scrollbar-thumb { background: var(--border-mid); border-radius: 2px; }
+    .entry.hl { color: var(--text); } .entry.ok { color: var(--green); } .entry.fail { color: var(--red); }
+
+    /* Revision */
+    .revision-section { margin-top: 2.5rem; animation: fadeUp .6s ease .3s both; }
+    .explain-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-bottom: 16px; }
+    .explain-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 16px 18px; }
+    .explain-card .icon { font-size: 18px; margin-bottom: 8px; }
+    .explain-card h3 { font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 6px; }
+    .explain-card p { font-size: 12px; color: var(--text-muted); line-height: 1.7; }
+    .explain-card code { font-family: var(--mono); font-size: 11px; background: var(--surface2); padding: 1px 5px; border-radius: 4px; color: var(--accent); }
+
+    .mental-model { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; margin-bottom: 16px; }
+    .mental-model-header { display: flex; align-items: center; gap: 8px; padding: 12px 18px; border-bottom: 1px solid var(--border); background: var(--surface2); }
+    .mm-title { font-family: var(--mono); font-size: 11px; font-weight: 700; color: var(--amber); }
+    .mm-body { padding: 18px; display: flex; flex-direction: column; gap: 10px; }
+    .mm-item { display: flex; gap: 10px; align-items: flex-start; }
+    .mm-b { font-family: var(--mono); font-size: 12px; color: var(--amber); font-weight: 700; flex-shrink: 0; margin-top: 2px; }
+    .mm-t { font-size: 13px; color: var(--text-muted); line-height: 1.7; }
+    .mm-t strong { color: var(--text); } .mm-t code { font-family: var(--mono); font-size: 11px; background: var(--surface2); padding: 1px 5px; border-radius: 4px; color: var(--accent); }
+
+    .edge-cases-card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; margin-bottom: 16px; }
+    .ec-header { display: flex; align-items: center; gap: 8px; padding: 12px 18px; border-bottom: 1px solid var(--border); background: var(--surface2); }
+    .ec-title { font-family: var(--mono); font-size: 11px; font-weight: 700; color: var(--red); }
+    .el { display: flex; flex-direction: column; }
+    .ei { display: flex; gap: 12px; align-items: flex-start; padding: 12px 18px; border-bottom: 1px solid var(--border); }
+    .ei:last-child { border-bottom: none; }
+    .el-w { font-family: var(--mono); font-size: 9px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; padding: 3px 8px; border-radius: 5px; flex-shrink: 0; margin-top: 2px; }
+    .el-w.w { background: var(--red-bg); color: var(--red); border: 1px solid rgba(248,113,113,0.25); }
+    .el-w.ok { background: var(--green-bg); color: var(--green); border: 1px solid rgba(52,211,153,0.25); }
+    .et { font-size: 12px; color: var(--text-muted); line-height: 1.65; }
+    .et code { font-family: var(--mono); font-size: 11px; background: var(--surface2); padding: 1px 5px; border-radius: 4px; color: var(--accent); }
+
+    .best-solution { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; margin-bottom: 16px; }
+    .bs-header { display: flex; align-items: center; justify-content: space-between; padding: 12px 18px; border-bottom: 1px solid var(--border); background: var(--surface2); flex-wrap: wrap; gap: 8px; }
+    .bs-title { font-family: var(--mono); font-size: 11px; font-weight: 700; color: var(--green); }
+    .sol-pills { display: flex; gap: 6px; flex-wrap: wrap; }
+    .sol-pill { font-family: var(--mono); font-size: 10px; padding: 3px 9px; border-radius: 6px; background: var(--surface3); border: 1px solid var(--border-mid); color: var(--text-muted); }
+
+    .complexity { display: flex; gap: 10px; margin-top: 1.5rem; flex-wrap: wrap; }
+    .cpill { font-family: var(--mono); font-size: 12px; padding: 6px 14px; border-radius: 8px; border: 1px solid var(--border); background: var(--surface); }
+    .cpill strong { color: var(--accent); font-weight: 700; }
+
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+    @media (max-width: 680px) { .main-grid { grid-template-columns: 1fr; } .tree-panel { border-right: none; border-bottom: 1px solid var(--border); } }
+  </style>
+</head>
+<body>
+<div class="page">
+  <a class="back-nav" href="../dsa-hub.html">← All problems</a>
+
+  <header>
+    <div class="tag">LeetCode #110 · Algorithm Dry Run</div>
+    <h1><span>Balanced</span> Binary Tree</h1>
+    <p class="subtitle">Step-by-step trace of <code style="font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--accent);background:var(--surface);padding:2px 7px;border-radius:5px;">isBalanced</code> — watch heights bubble up post-order and the |left − right| ≤ 1 check fire at every node.</p>
+  </header>
+
+  <div class="pattern-banner">
+    <div>
+      <div class="pattern-label">Pattern</div>
+      <div class="pattern-name">🎯 Post-order DFS + Height Propagation + Early Exit</div>
+    </div>
+    <div class="pattern-desc">Return height from each node. Return -1 as a "poison" signal when any subtree is already unbalanced — propagate it upward to skip the rest.</div>
+    <div class="pattern-solves">Same pattern unlocks: <span>#543 Diameter · #124 Max Path Sum · #1448 Count Good Nodes</span></div>
+  </div>
+
+  <!-- PROBLEM STATEMENT -->
+  <div class="prob-section">
+    <div class="prob-section-hdr">
+      <span class="prob-section-icon">📋</span>
+      <span class="prob-section-title">Problem Statement</span>
+    </div>
+    <div class="prob-body">
+      <p>Given a binary tree, determine if it is <strong>height-balanced</strong>. A tree is balanced if, for <strong>every node</strong>, the heights of its left and right subtrees differ by at most 1.</p>
+      <p>⚠️ The balance condition must hold <em>at every single node</em> — not just the root. A tree can look balanced at the top but be lopsided deep inside.</p>
+      <div class="svg-example-grid">
+        <!-- Example 1: Balanced -->
+        <div class="svg-ex-card">
+          <div class="svg-ex-header">
+            <span class="svg-ex-label">Balanced — diff ≤ 1 everywhere</span>
+            <span class="svg-ex-result res-green">true ✓</span>
+          </div>
+          <div class="svg-ex-body">
+            <svg viewBox="0 0 220 140">
+              <line x1="110" y1="30" x2="62" y2="68" stroke="#1e2231" stroke-width="2"/>
+              <line x1="110" y1="30" x2="160" y2="68" stroke="#1e2231" stroke-width="2"/>
+              <line x1="50" y1="86" x2="30" y2="114" stroke="#1e2231" stroke-width="2"/>
+              <line x1="74" y1="86" x2="96" y2="114" stroke="#1e2231" stroke-width="2"/>
+              <circle cx="110" cy="22" r="22" fill="#1a1e28" stroke="#60a5fa" stroke-width="2"/>
+              <text x="110" y="26" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="13" font-weight="700" fill="#60a5fa">3</text>
+              <circle cx="60" cy="78" r="20" fill="#13161d" stroke="#2a2f3e" stroke-width="1.5"/>
+              <text x="60" y="82" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="13" font-weight="700" fill="#6b7280">9</text>
+              <circle cx="162" cy="78" r="20" fill="#13161d" stroke="#2a2f3e" stroke-width="1.5"/>
+              <text x="162" y="82" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="13" font-weight="700" fill="#6b7280">20</text>
+              <circle cx="28" cy="118" r="16" fill="#13161d" stroke="#2a2f3e" stroke-width="1.5"/>
+              <text x="28" y="122" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="11" font-weight="700" fill="#6b7280">15</text>
+              <circle cx="98" cy="118" r="16" fill="#13161d" stroke="#2a2f3e" stroke-width="1.5"/>
+              <text x="98" y="122" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="11" font-weight="700" fill="#6b7280">7</text>
+              <text x="4" y="20" font-family="'JetBrains Mono',monospace" font-size="8" fill="#60a5fa">h=3</text>
+              <text x="4" y="74" font-family="'JetBrains Mono',monospace" font-size="8" fill="#34d399">h=2</text>
+              <text x="172" y="74" font-family="'JetBrains Mono',monospace" font-size="8" fill="#34d399">h=1</text>
+              <text x="162" y="6" font-family="'JetBrains Mono',monospace" font-size="8" fill="#34d399">|2-1|=1 ✓</text>
+            </svg>
+          </div>
+        </div>
+        <!-- Example 2: Unbalanced -->
+        <div class="svg-ex-card">
+          <div class="svg-ex-header">
+            <span class="svg-ex-label">Unbalanced — node 1 has diff = 2</span>
+            <span class="svg-ex-result res-red">false ✗</span>
+          </div>
+          <div class="svg-ex-body">
+            <svg viewBox="0 0 200 140">
+              <line x1="100" y1="26" x2="60" y2="60" stroke="#1e2231" stroke-width="2"/>
+              <line x1="58" y1="78" x2="38" y2="108" stroke="#1e2231" stroke-width="2"/>
+              <line x1="72" y1="78" x2="90" y2="108" stroke="#1e2231" stroke-width="2"/>
+              <circle cx="100" cy="18" r="20" fill="#1e100e" stroke="#f87171" stroke-width="2"/>
+              <text x="100" y="22" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="13" font-weight="700" fill="#f87171">1</text>
+              <text x="122" y="14" font-family="'JetBrains Mono',monospace" font-size="8" fill="#f87171">|2-0|=2 ✗</text>
+              <circle cx="58" cy="68" r="20" fill="#13161d" stroke="#2a2f3e" stroke-width="1.5"/>
+              <text x="58" y="72" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="13" font-weight="700" fill="#6b7280">2</text>
+              <text x="6" y="58" font-family="'JetBrains Mono',monospace" font-size="8" fill="#fbbf24">h=2</text>
+              <circle cx="36" cy="112" r="16" fill="#13161d" stroke="#2a2f3e" stroke-width="1.5"/>
+              <text x="36" y="116" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="11" font-weight="700" fill="#6b7280">3</text>
+              <circle cx="92" cy="112" r="16" fill="#13161d" stroke="#2a2f3e" stroke-width="1.5"/>
+              <text x="92" y="116" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="11" font-weight="700" fill="#6b7280">4</text>
+              <text x="122" y="60" font-family="'JetBrains Mono',monospace" font-size="8" fill="#3d4251">null</text>
+              <text x="122" y="72" font-family="'JetBrains Mono',monospace" font-size="8" fill="#fbbf24">h=0</text>
+            </svg>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- INTUITION + HINTS -->
+  <div class="prob-section">
+    <div class="prob-section-hdr">
+      <span class="prob-section-icon">💡</span>
+      <span class="prob-section-title">Intuition + Hints — Think Before You Code</span>
+    </div>
+    <div class="prob-body">
+      <div class="hints-list">
+        <div class="hint-row">
+          <span class="hint-badge">1</span>
+          <div class="hint-body"><strong>What does every node need to know?</strong> To check balance, a node needs the <em>height</em> of both its children. Height = number of edges from that node to the deepest leaf below it.</div>
+        </div>
+        <div class="hint-row">
+          <span class="hint-badge">2</span>
+          <div class="hint-body"><strong>Use post-order (bottom-up).</strong> Children must compute their heights first. The parent can't check balance without knowing both children's heights. This is the DFS strategy: go to the leaves first, bubble up answers.</div>
+        </div>
+        <div class="hint-row">
+          <span class="hint-badge">3</span>
+          <div class="hint-body"><strong>The early exit trick — return -1 as "poison".</strong> If a child subtree is already unbalanced, why keep checking? Return <code>-1</code> as a special signal. Any ancestor that sees <code>-1</code> from a child immediately returns <code>-1</code> too — propagating the failure upward without any more work.</div>
+        </div>
+        <div class="hint-row">
+          <span class="hint-badge">4</span>
+          <div class="hint-body"><strong>Base case: null returns 0.</strong> A null node has height 0 and is trivially balanced. Leaf nodes get height 1 because <code>1 + max(0, 0) = 1</code>.</div>
+        </div>
+      </div>
+      <div class="intuition-box">
+        <p><strong>Mental model:</strong> Imagine each node "reports" its height upward. If a node discovers its children's heights differ by more than 1, it "sounds an alarm" by returning -1. Every ancestor immediately passes the alarm upward. Only if no alarm is ever sounded do we know the tree is balanced.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="key-insight">
+    ⚡ <strong>The two-role trick:</strong> The helper function does two different things at once — it <em>returns height</em> (the number we propagate upward) but also <em>checks balance</em> at every node. The return value -1 is a "poison pill" that short-circuits the entire recursion. Without this trick, you'd need O(n log n) with two separate passes.
+  </div>
+
+  <!-- CODE -->
+  <div class="code-block">
+    <div class="code-header"><div class="dots"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div></div><span>isBalanced.js</span></div>
+    <pre><span class="kw">var</span> <span class="fn">isBalanced</span> = <span class="kw">function</span>(<span class="var">root</span>) {
+  <span class="cm">// Returns height if balanced, -1 if unbalanced anywhere below</span>
+  <span class="kw">function</span> <span class="fn">checkHeight</span>(<span class="var">curr</span>) {
+    <span class="kw">if</span> (!<span class="var">curr</span>) <span class="kw">return</span> <span class="num">0</span>;            <span class="cm">// null → height 0, trivially balanced</span>
+
+    <span class="kw">let</span> <span class="var">leftH</span>  = <span class="fn">checkHeight</span>(<span class="var">curr</span>.left);
+    <span class="kw">if</span> (<span class="var">leftH</span>  === -<span class="num">1</span>) <span class="kw">return</span> -<span class="num">1</span>;   <span class="cm">// left already unbalanced → propagate poison</span>
+
+    <span class="kw">let</span> <span class="var">rightH</span> = <span class="fn">checkHeight</span>(<span class="var">curr</span>.right);
+    <span class="kw">if</span> (<span class="var">rightH</span> === -<span class="num">1</span>) <span class="kw">return</span> -<span class="num">1</span>;   <span class="cm">// right already unbalanced → propagate poison</span>
+
+    <span class="hl"><span class="kw">if</span> (Math.<span class="fn">abs</span>(<span class="var">leftH</span> - <span class="var">rightH</span>) > <span class="num">1</span>) <span class="kw">return</span> -<span class="num">1</span>;</span>  <span class="cm">// ← BALANCE CHECK</span>
+
+    <span class="kw">return</span> <span class="num">1</span> + Math.<span class="fn">max</span>(<span class="var">leftH</span>, <span class="var">rightH</span>); <span class="cm">// return true height to parent</span>
+  }
+
+  <span class="kw">return</span> <span class="fn">checkHeight</span>(<span class="var">root</span>) !== -<span class="num">1</span>;
+};</pre>
+  </div>
+
+  <p class="section-label">// Interactive dry run — choose an example</p>
+
+  <div class="examples-row" id="examples-row">
+    <button class="ex-btn active" data-ex="0">Example 1 <span class="ex-badge">Balanced ✓</span></button>
+    <button class="ex-btn" data-ex="1">Example 2 <span class="ex-badge">Unbalanced ✗</span></button>
+    <button class="ex-btn" data-ex="2">Example 3 <span class="ex-badge">Single Node</span></button>
+    <button class="ex-btn" data-ex="3">Example 4 <span class="ex-badge">Early Exit!</span></button>
+  </div>
+
+  <div class="viz-card">
+    <div class="progress-bar-wrap"><div class="progress-bar-inner" id="prog" style="width:5%"></div></div>
+    <div class="controls">
+      <button class="btn" id="btn-prev" onclick="move(-1)" disabled>← Prev</button>
+      <button class="btn btn-play" id="btn-play" onclick="togglePlay()">▶ Play</button>
+      <button class="btn" id="btn-next" onclick="move(1)">Next →</button>
+      <button class="btn btn-reset" onclick="reset()">↺ Reset</button>
+      <span class="step-info" id="step-label">Step 1 / ?</span>
+      <span style="font-family:var(--mono);font-size:11px;color:var(--text-dim);display:flex;gap:4px;align-items:center"><kbd>←</kbd><kbd>→</kbd></span>
+      <span class="result-badge" id="ans-badge" style="display:none">—</span>
+    </div>
+    <div class="step-desc" id="step-desc">Loading...</div>
+    <div class="main-grid">
+      <div class="tree-panel">
+        <div class="panel-label" id="tree-panel-label">// binary tree</div>
+        <svg id="tree-svg" viewBox="0 0 460 280" width="100%"></svg>
+      </div>
+      <div class="side-panel">
+        <div style="padding:14px 16px 0;">
+          <div class="panel-label">// overall result</div>
+          <div class="result-tracker">
+            <span class="result-label">isBalanced =</span>
+            <span class="result-val" id="result-display">?</span>
+          </div>
+        </div>
+        <div class="stack-panel">
+          <div class="panel-label">// call stack</div>
+          <div class="call-stack" id="stack"></div>
+        </div>
+        <div class="vars-panel">
+          <div class="panel-label">// local variables</div>
+          <div class="var-row"><span class="var-name">curr.val</span>  <span class="var-val d"  id="v-curr">—</span></div>
+          <div class="var-row"><span class="var-name">leftH</span>    <span class="var-val"    id="v-lh">—</span></div>
+          <div class="var-row"><span class="var-name">rightH</span>   <span class="var-val"    id="v-rh">—</span></div>
+          <div class="var-row"><span class="var-name">|L-R|</span>    <span class="var-val"    id="v-diff">—</span></div>
+          <div class="var-row"><span class="var-name">returns</span>  <span class="var-val g"   id="v-ret">—</span></div>
+        </div>
+        <div class="log-panel">
+          <div class="panel-label">// execution log</div>
+          <div class="log" id="log"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="revision-section">
+    <p class="section-label">// revision — lock this in</p>
+
+    <div class="mental-model">
+      <div class="mental-model-header"><span style="font-size:16px">🧠</span><span class="mm-title">Mental Model — 30-second recall</span></div>
+      <div class="mm-body">
+        <div class="mm-item"><span class="mm-b">▸</span><div class="mm-t"><strong>Post-order is mandatory.</strong> You need both children's heights before you can check the current node. Children run first, parent runs last. That's post-order.</div></div>
+        <div class="mm-item"><span class="mm-b">▸</span><div class="mm-t"><strong>-1 is the poison pill.</strong> The moment any subtree is unbalanced, return -1. Any ancestor that receives -1 must immediately return -1 without doing any checks. This gives O(n) instead of O(n log n).</div></div>
+        <div class="mm-item"><span class="mm-b">▸</span><div class="mm-t"><strong>Normal return = height.</strong> If everything is balanced, return <code>1 + max(leftH, rightH)</code>. This bubbles the height upward so the parent can use it.</div></div>
+        <div class="mm-item"><span class="mm-b">▸</span><div class="mm-t"><strong>Final answer:</strong> <code>checkHeight(root) !== -1</code>. If the top-level call returned -1, tree is unbalanced. Anything else means the tree is balanced and that value is the total height.</div></div>
+      </div>
+    </div>
+
+    <div class="explain-grid">
+      <div class="explain-card"><div class="icon">🌿</div><h3>Base case: null = 0</h3><p>Null nodes have height 0. This means leaf nodes naturally get height <code>1 + max(0, 0) = 1</code>. Correct!</p></div>
+      <div class="explain-card"><div class="icon">☠️</div><h3>-1 as poison pill</h3><p>Instead of a boolean flag, -1 IS the signal. It travels up the call stack like an alarm. No extra global variable needed.</p></div>
+      <div class="explain-card"><div class="icon">📏</div><h3>Balance check</h3><p><code>Math.abs(leftH - rightH) > 1</code> fires when heights differ by more than 1. Return -1 to signal the violation upward.</p></div>
+      <div class="explain-card"><div class="icon">⚡</div><h3>Early exit wins</h3><p>Once -1 is returned, all ancestor calls short-circuit. Worst case is still O(n), but large unbalanced trees exit much faster.</p></div>
+    </div>
+
+    <div class="edge-cases-card">
+      <div class="ec-header"><span style="font-size:16px">⚠️</span><span class="ec-title">Edge Cases</span></div>
+      <div class="el">
+        <div class="ei"><span class="el-w w">null</span><span class="et">Empty tree → <code>checkHeight(null)</code> returns 0. <code>0 !== -1</code> → true. An empty tree is balanced.</span></div>
+        <div class="ei"><span class="el-w w">single</span><span class="et">Single node → left=0, right=0. |0-0|=0 ≤ 1. Returns 1. <code>1 !== -1</code> → true. Always balanced.</span></div>
+        <div class="ei"><span class="el-w w">deep left</span><span class="et">A left-skewed chain of 3 nodes: root→left→left. At root: leftH=2, rightH=0. |2-0|=2 > 1 → returns -1. Unbalanced.</span></div>
+        <div class="ei"><span class="el-w ok">order</span><span class="et">Check left subtree FIRST. If it returns -1, skip the right subtree entirely. This is the early exit optimization.</span></div>
+      </div>
+    </div>
+
+    <div class="best-solution">
+      <div class="bs-header">
+        <span class="bs-title">✦ Clean solution for revision</span>
+        <div class="sol-pills"><span class="sol-pill">O(n) time</span><span class="sol-pill">O(h) space</span><span class="sol-pill">Post-order DFS</span><span class="sol-pill">-1 poison pill</span></div>
+      </div>
+      <pre><span class="kw">var</span> <span class="fn">isBalanced</span> = <span class="kw">function</span>(<span class="var">root</span>) {
+  <span class="kw">function</span> <span class="fn">check</span>(<span class="var">n</span>) {
+    <span class="kw">if</span> (!<span class="var">n</span>) <span class="kw">return</span> <span class="num">0</span>;                           <span class="cm">// null → height 0</span>
+    <span class="kw">let</span> <span class="var">l</span> = <span class="fn">check</span>(<span class="var">n</span>.left);  <span class="kw">if</span> (<span class="var">l</span> === -<span class="num">1</span>) <span class="kw">return</span> -<span class="num">1</span>; <span class="cm">// poison propagation</span>
+    <span class="kw">let</span> <span class="var">r</span> = <span class="fn">check</span>(<span class="var">n</span>.right); <span class="kw">if</span> (<span class="var">r</span> === -<span class="num">1</span>) <span class="kw">return</span> -<span class="num">1</span>;
+    <span class="kw">if</span> (Math.<span class="fn">abs</span>(<span class="var">l</span>-<span class="var">r</span>) > <span class="num">1</span>) <span class="kw">return</span> -<span class="num">1</span>;             <span class="cm">// balance violated</span>
+    <span class="kw">return</span> <span class="num">1</span> + Math.<span class="fn">max</span>(<span class="var">l</span>, <span class="var">r</span>);                    <span class="cm">// return true height</span>
+  }
+  <span class="kw">return</span> <span class="fn">check</span>(<span class="var">root</span>) !== -<span class="num">1</span>;
+};
+<span class="cm">// Pattern: Post-order DFS + -1 poison pill
+// checkHeight returns: actual height if balanced, -1 if unbalanced anywhere</span></pre>
+    </div>
+
+    <div class="complexity">
+      <div class="cpill">Time: <strong>O(n)</strong> — each node visited once</div>
+      <div class="cpill">Space: <strong>O(h)</strong> — call stack = tree height</div>
+      <div class="cpill">Pattern: <strong>post-order</strong> DFS</div>
+      <div class="cpill">Signal: <strong>-1 poison</strong> pill</div>
+    </div>
+  </div>
+</div>
+
+<script>
+const EXAMPLES = [
+  {
+    label:"[3,9,20,null,null,15,7] — Balanced",
+    treeLabel:"[3, 9, 20, null, null, 15, 7]",
+    answer:true,
+    svgViewBox:"0 0 460 250",
+    nodes:[
+      {id:"n3",  val:3,  cx:230, cy:38,  r:26},
+      {id:"n9",  val:9,  cx:110, cy:118, r:24},
+      {id:"n20", val:20, cx:360, cy:118, r:24},
+      {id:"n15", val:15, cx:290, cy:198, r:21},
+      {id:"n7",  val:7,  cx:430, cy:198, r:21},
+    ],
+    edges:[
+      {x1:210,y1:52, x2:130,y2:102},
+      {x1:250,y1:52, x2:340,y2:102},
+      {x1:344,y1:136,x2:306,y2:180},
+      {x1:376,y1:136,x2:414,y2:180},
+    ],
+    depthBadges:[
+      {id:"d3",x:260,y:28},{id:"d9",x:138,y:108},{id:"d20",x:388,y:108},
+      {id:"d15",x:315,y:188},{id:"d7",x:455,y:188}
+    ],
+    steps:[
+      {desc:'Call <em>checkHeight(3)</em> — root. Recurse left first.',active:"n3",ret:null,failNode:null,stack:["checkHeight(3)"],curr:"3",lh:"—",rh:"—",diff:"—",ret:"—",depths:{},result:"?",log:[{t:"→ checkHeight(3)",h:true}]},
+      {desc:'Recurse left → <em>checkHeight(9)</em>. Node 9 is a leaf.',active:"n9",ret:null,failNode:null,stack:["checkHeight(3)","checkHeight(9)"],curr:"9",lh:"—",rh:"—",diff:"—",ret:"—",depths:{},result:"?",log:[{t:"→ checkHeight(3)"},{t:"  → checkHeight(9)",h:true}]},
+      {desc:'Node 9: left=null→0, right=null→0. |0-0|=0 ≤ 1. Returns height <em>1</em>.',active:null,ret:"n9",failNode:null,stack:["checkHeight(3)"],curr:"9",lh:"0",rh:"0",diff:"0",ret:"1",depths:{d9:"h=1"},result:"?",log:[{t:"  → checkHeight(9)"},{t:"  l=0,r=0  |0-0|=0  ✓  returns 1",h:true}]},
+      {desc:'Back in 3: leftH=1. Recurse right → <em>checkHeight(20)</em>.',active:"n20",ret:null,failNode:null,stack:["checkHeight(3)","checkHeight(20)"],curr:"20",lh:"—",rh:"—",diff:"—",ret:"—",depths:{d9:"h=1"},result:"?",log:[{t:"  → checkHeight(3)"},{t:"  ← node 9 returned 1 (leftH=1)"},{t:"  → checkHeight(20)",h:true}]},
+      {desc:'In node 20: recurse left → <em>checkHeight(15)</em>.',active:"n15",ret:null,failNode:null,stack:["checkHeight(3)","checkHeight(20)","checkHeight(15)"],curr:"15",lh:"—",rh:"—",diff:"—",ret:"—",depths:{d9:"h=1"},result:"?",log:[{t:"  → checkHeight(20)"},{t:"    → checkHeight(15)",h:true}]},
+      {desc:'Node 15: leaf. Returns height <em>1</em>.',active:null,ret:"n15",failNode:null,stack:["checkHeight(3)","checkHeight(20)"],curr:"15",lh:"0",rh:"0",diff:"0",ret:"1",depths:{d9:"h=1",d15:"h=1"},result:"?",log:[{t:"    → checkHeight(15)"},{t:"    leaf → returns 1",h:true}]},
+      {desc:'In 20: leftH=1. Recurse right → <em>checkHeight(7)</em>.',active:"n7",ret:null,failNode:null,stack:["checkHeight(3)","checkHeight(20)","checkHeight(7)"],curr:"7",lh:"—",rh:"—",diff:"—",ret:"—",depths:{d9:"h=1",d15:"h=1"},result:"?",log:[{t:"  → checkHeight(20)"},{t:"    ← node 15 returned 1"},{t:"    → checkHeight(7)",h:true}]},
+      {desc:'Node 7: leaf. Returns height <em>1</em>.',active:null,ret:"n7",failNode:null,stack:["checkHeight(3)","checkHeight(20)"],curr:"7",lh:"0",rh:"0",diff:"0",ret:"1",depths:{d9:"h=1",d15:"h=1",d7:"h=1"},result:"?",log:[{t:"    → checkHeight(7)"},{t:"    leaf → returns 1",h:true}]},
+      {desc:'Node 20: leftH=1, rightH=1. |1-1|=0 ≤ 1. <span class="ok">✓ Balanced at node 20.</span> Returns height <em>2</em>.',active:null,ret:"n20",failNode:null,stack:["checkHeight(3)"],curr:"20",lh:"1",rh:"1",diff:"0",ret:"2",depths:{d9:"h=1",d15:"h=1",d7:"h=1",d20:"h=2"},result:"?",log:[{t:"  → checkHeight(20)"},{t:"  l=1,r=1  |1-1|=0 ✓  returns 2",h:true}]},
+      {desc:'🎯 Root 3: leftH=1 (node 9), rightH=2 (node 20). |1-2|=1 ≤ 1. <span class="ok">✓ Balanced at root!</span> Returns 3. <code>3 ≠ -1</code> → <span class="ok">isBalanced = true</span>',active:null,ret:"n3",failNode:null,stack:[],curr:"3",lh:"1",rh:"2",diff:"1",ret:"3",depths:{d9:"h=1",d15:"h=1",d7:"h=1",d20:"h=2",d3:"h=3"},result:"true",log:[{t:"→ checkHeight(3)"},{t:"l=1,r=2  |1-2|=1 ✓  returns 3",h:true},{t:"3 !== -1  →  isBalanced = true ✓",h:true}],final:true,isBalanced:true},
+    ]
+  },
+  {
+    label:"[1,2,2,3,3,null,null,4,4] — Unbalanced",
+    treeLabel:"[1, 2, 2, 3, 3, null, null, 4, 4]",
+    answer:false,
+    svgViewBox:"0 0 460 280",
+    nodes:[
+      {id:"n1",  val:1, cx:230, cy:34,  r:26},
+      {id:"n2a", val:2, cx:110, cy:112, r:24},
+      {id:"n2b", val:2, cx:360, cy:112, r:24},
+      {id:"n3a", val:3, cx:50,  cy:190, r:21},
+      {id:"n3b", val:3, cx:175, cy:190, r:21},
+      {id:"n4a", val:4, cx:24,  cy:260, r:18},
+      {id:"n4b", val:4, cx:80,  cy:260, r:18},
+    ],
+    edges:[
+      {x1:210,y1:48, x2:132,y2:96},
+      {x1:250,y1:48, x2:338,y2:96},
+      {x1:92, y1:130,x2:66, y2:174},
+      {x1:128,y1:130,x2:158,y2:174},
+      {x1:38, y1:208,x2:28, y2:245},
+      {x1:62, y1:208,x2:76, y2:245},
+    ],
+    depthBadges:[
+      {id:"d1",x:258,y:24},{id:"d2a",x:136,y:102},{id:"d2b",x:386,y:102},
+      {id:"d3a",x:74,y:182},{id:"d3b",x:200,y:182},
+      {id:"d4a",x:46,y:252},{id:"d4b",x:100,y:252}
+    ],
+    steps:[
+      {desc:'Call <em>checkHeight(1)</em> — root. Left subtree is deeper than right.',active:"n1",ret:null,failNode:null,stack:["checkHeight(1)"],curr:"1",lh:"—",rh:"—",diff:"—",ret:"—",depths:{},result:"?",log:[{t:"→ checkHeight(1)",h:true},{t:"  left subtree is 3 deep, right is 1 deep"}]},
+      {desc:'Recurse deep into left. Leaves 4,4 return 1 each.',active:null,ret:"n4a",failNode:null,stack:["checkHeight(1)","checkHeight(2a)","checkHeight(3a)"],curr:"4",lh:"0",rh:"0",diff:"0",ret:"1",depths:{d4a:"h=1",d4b:"h=1"},result:"?",log:[{t:"  → checkHeight(4) (left leaf)  returns 1",h:true},{t:"  → checkHeight(4) (right leaf) returns 1"}]},
+      {desc:'Node 3a: leftH=1, rightH=1. |1-1|=0 ≤ 1. Returns height <em>2</em>.',active:null,ret:"n3a",failNode:null,stack:["checkHeight(1)","checkHeight(2a)"],curr:"3",lh:"1",rh:"1",diff:"0",ret:"2",depths:{d4a:"h=1",d4b:"h=1",d3a:"h=2"},result:"?",log:[{t:"  → checkHeight(3a)"},{t:"  l=1,r=1  |1-1|=0 ✓  returns 2",h:true}]},
+      {desc:'Node 3b: leaf. Returns height <em>1</em>.',active:null,ret:"n3b",failNode:null,stack:["checkHeight(1)","checkHeight(2a)"],curr:"3",lh:"0",rh:"0",diff:"0",ret:"1",depths:{d4a:"h=1",d4b:"h=1",d3a:"h=2",d3b:"h=1"},result:"?",log:[{t:"  → checkHeight(3b)  leaf  returns 1",h:true}]},
+      {desc:'Node 2a: leftH=2, rightH=1. |2-1|=1 ≤ 1. Returns height <em>3</em>.',active:null,ret:"n2a",failNode:null,stack:["checkHeight(1)"],curr:"2",lh:"2",rh:"1",diff:"1",ret:"3",depths:{d4a:"h=1",d4b:"h=1",d3a:"h=2",d3b:"h=1",d2a:"h=3"},result:"?",log:[{t:"  → checkHeight(2a)"},{t:"  l=2,r=1  |2-1|=1 ✓  returns 3",h:true}]},
+      {desc:'Back in root 1: leftH=3. Recurse right → <em>checkHeight(2b)</em>. Node 2b has no children.',active:"n2b",ret:null,failNode:null,stack:["checkHeight(1)","checkHeight(2b)"],curr:"2",lh:"—",rh:"—",diff:"—",ret:"—",depths:{d4a:"h=1",d4b:"h=1",d3a:"h=2",d3b:"h=1",d2a:"h=3"},result:"?",log:[{t:"→ checkHeight(1)"},{t:"  ← left returned 3 (leftH=3)"},{t:"  → checkHeight(2b)",h:true}]},
+      {desc:'Node 2b: leaf. Returns height <em>1</em>.',active:null,ret:"n2b",failNode:null,stack:["checkHeight(1)"],curr:"2",lh:"0",rh:"0",diff:"0",ret:"1",depths:{d4a:"h=1",d4b:"h=1",d3a:"h=2",d3b:"h=1",d2a:"h=3",d2b:"h=1"},result:"?",log:[{t:"  → checkHeight(2b)  leaf  returns 1",h:true}]},
+      {desc:'🚨 Root 1: leftH=3, rightH=1. |3-1|=<span class="fail">2 > 1</span> — BALANCE VIOLATION! Returns <span class="fail">-1</span>. <code>-1 === -1</code> → <span class="fail">isBalanced = false</span>.',active:null,ret:null,failNode:"n1",stack:[],curr:"1",lh:"3",rh:"1",diff:"2 ✗",ret:"-1",depths:{d4a:"h=1",d4b:"h=1",d3a:"h=2",d3b:"h=1",d2a:"h=3",d2b:"h=1"},result:"false",log:[{t:"→ checkHeight(1)"},{t:"l=3,r=1  |3-1|=2 > 1 → returns -1",h:true},{t:"-1 === -1  →  isBalanced = false ✗",h:true}],final:true,isBalanced:false},
+    ]
+  },
+  {
+    label:"[7] — Single Node",
+    answer:true,
+    treeLabel:"[7]",
+    svgViewBox:"0 0 460 180",
+    nodes:[{id:"n7",val:7,cx:230,cy:80,r:32}],
+    edges:[],depthBadges:[{id:"d7",x:268,y:62}],
+    steps:[
+      {desc:'Single node. Call <em>checkHeight(7)</em>.',active:"n7",ret:null,failNode:null,stack:["checkHeight(7)"],curr:"7",lh:"—",rh:"—",diff:"—",ret:"—",depths:{},result:"?",log:[{t:"→ checkHeight(7)",h:true},{t:"  Single node — no children"}]},
+      {desc:'Node 7: left=null→0, right=null→0. |0-0|=0 ≤ 1. Returns <em>1</em>. <code>1 ≠ -1</code> → <span class="ok">isBalanced = true</span>.',active:null,ret:"n7",failNode:null,stack:[],curr:"7",lh:"0",rh:"0",diff:"0",ret:"1",depths:{d7:"h=1"},result:"true",log:[{t:"→ checkHeight(7)"},{t:"l=0,r=0  |0-0|=0 ✓  returns 1",h:true},{t:"1 !== -1  →  isBalanced = true ✓",h:true}],final:true,isBalanced:true},
+    ]
+  },
+  {
+    label:"[1,2,null,3] — Early Exit Demo",
+    answer:false,
+    treeLabel:"[1, 2, null, 3]",
+    svgViewBox:"0 0 460 260",
+    nodes:[
+      {id:"n1",val:1,cx:280,cy:40,r:26},
+      {id:"n2",val:2,cx:160,cy:120,r:24},
+      {id:"n3",val:3,cx:80, cy:198,r:21},
+    ],
+    edges:[
+      {x1:258,y1:54, x2:180,y2:104},
+      {x1:142,y1:138,x2:98,  y2:182},
+    ],
+    depthBadges:[
+      {id:"d1",x:310,y:30},{id:"d2",x:188,y:110},{id:"d3",x:106,y:190}
+    ],
+    steps:[
+      {desc:'Tree: root(1) → left(2) → left(3). A left-skewed chain of 3 nodes. Will fail at root: leftH=2 vs rightH=0.',active:"n1",ret:null,failNode:null,stack:["checkHeight(1)"],curr:"1",lh:"—",rh:"—",diff:"—",ret:"—",depths:{},result:"?",log:[{t:"→ checkHeight(1)",h:true},{t:"  Left chain: 1→2→3  will be unbalanced"}]},
+      {desc:'Recurse left → <em>checkHeight(2)</em>.',active:"n2",ret:null,failNode:null,stack:["checkHeight(1)","checkHeight(2)"],curr:"2",lh:"—",rh:"—",diff:"—",ret:"—",depths:{},result:"?",log:[{t:"  → checkHeight(2)",h:true}]},
+      {desc:'Recurse left of 2 → <em>checkHeight(3)</em>. Leaf node.',active:"n3",ret:null,failNode:null,stack:["checkHeight(1)","checkHeight(2)","checkHeight(3)"],curr:"3",lh:"—",rh:"—",diff:"—",ret:"—",depths:{},result:"?",log:[{t:"    → checkHeight(3)",h:true}]},
+      {desc:'Node 3: leaf. Returns height <em>1</em>.',active:null,ret:"n3",failNode:null,stack:["checkHeight(1)","checkHeight(2)"],curr:"3",lh:"0",rh:"0",diff:"0",ret:"1",depths:{d3:"h=1"},result:"?",log:[{t:"    leaf  returns 1",h:true}]},
+      {desc:'Node 2: leftH=1, rightH=0 (null). |1-0|=1 ≤ 1. <span class="ok">✓ Node 2 balanced.</span> Returns <em>2</em>.',active:null,ret:"n2",failNode:null,stack:["checkHeight(1)"],curr:"2",lh:"1",rh:"0",diff:"1",ret:"2",depths:{d3:"h=1",d2:"h=2"},result:"?",log:[{t:"  → checkHeight(2)"},{t:"  l=1,r=0  |1-0|=1 ✓  returns 2",h:true}]},
+      {desc:'🚨 Root 1: leftH=2, rightH=0 (null child). |2-0|=<span class="fail">2 > 1</span> — VIOLATION! Returns <span class="fail">-1</span>. <code>-1 === -1</code> → <span class="fail">isBalanced = false</span>. Note: right subtree was NEVER visited — early exit!',active:null,ret:null,failNode:"n1",stack:[],curr:"1",lh:"2",rh:"0",diff:"2 ✗",ret:"-1",depths:{d3:"h=1",d2:"h=2"},result:"false",log:[{t:"→ checkHeight(1)"},{t:"l=2,r=0  |2-0|=2 > 1  → returns -1",h:true},{t:"-1 === -1  →  isBalanced = false ✗",h:true},{t:"Right subtree (null) was never visited!"}],final:true,isBalanced:false},
+    ]
+  }
+];
+
+let exIdx=0, cur=0, playTimer=null;
+const getEx=()=>EXAMPLES[exIdx];
+const getSteps=()=>getEx().steps;
+
+function renderSVG(ex, step) {
+  const svg = document.getElementById("tree-svg");
+  svg.setAttribute("viewBox", ex.svgViewBox);
+  let html="";
+  ex.edges.forEach(e=>html+=`<line x1="${e.x1}" y1="${e.y1}" x2="${e.x2}" y2="${e.y2}" stroke="#1e2231" stroke-width="2"/>`);
+  ex.nodes.forEach(n=>{
+    let fill="#13161d",stroke="#2a2f3e",sw="1.5",tf="#6b7280";
+    if(n.id===step.active){fill="#1a2035";stroke="#60a5fa";sw="2.5";tf="#60a5fa";}
+    else if(n.id===step.ret){fill="#0f1f16";stroke="#34d399";sw="2.5";tf="#34d399";}
+    else if(n.id===step.failNode){fill="#1e0f0f";stroke="#f87171";sw="3";tf="#f87171";}
+    html+=`<g><circle cx="${n.cx}" cy="${n.cy}" r="${n.r}" fill="${fill}" stroke="${stroke}" stroke-width="${sw}" style="transition:all .2s"/><text x="${n.cx}" y="${n.cy+4}" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="${n.r>24?14:12}" font-weight="700" fill="${tf}">${n.val}</text></g>`;
+  });
+  (ex.depthBadges||[]).forEach(b=>{
+    const val=step.depths&&step.depths[b.id];
+    if(val)html+=`<text x="${b.x}" y="${b.y}" font-family="'JetBrains Mono',monospace" font-size="11" fill="#7c6ef5">${val}</text>`;
+  });
+  svg.innerHTML=html;
+}
+
+function renderStep(s) {
+  const ex=getEx();
+  renderSVG(ex,s);
+  const stackEl=document.getElementById("stack");
+  let sh=s.stack.map((f,i)=>`<div class="frame ${i===s.stack.length-1?s.ret==="-1"?"invalid":"active":""}">${f}</div>`).join("");
+  if(!s.stack.length&&(s.ret||s.failNode))sh=`<div class="frame ${s.ret==="-1"?"invalid":"returning"}">← returned ${s.ret}</div>`;
+  stackEl.innerHTML=sh;
+
+  document.getElementById("v-curr").textContent=s.curr;
+  document.getElementById("v-lh").textContent=s.lh;
+  document.getElementById("v-rh").textContent=s.rh;
+  const diffEl=document.getElementById("v-diff"); diffEl.textContent=s.diff; diffEl.className=`var-val ${s.diff&&s.diff.includes("✗")?"r":s.diff==="—"?"d":""}`;
+  const retEl=document.getElementById("v-ret"); retEl.textContent=s.ret; retEl.className=`var-val ${s.ret==="-1"?"r":s.ret==="—"?"d":"g"}`;
+
+  const resEl=document.getElementById("result-display");
+  resEl.textContent=s.result==="true"?"true":s.result==="false"?"false":"?";
+  resEl.className=`result-val${s.result==="true"?" balanced":s.result==="false"?" unbalanced":""}`;
+
+  const logEl=document.getElementById("log");
+  logEl.innerHTML=s.log.map(e=>`<div class="entry${e.h?" hl":""}">${e.t}</div>`).join("");
+  logEl.scrollTop=logEl.scrollHeight;
+
+  const steps=getSteps();
+  document.getElementById("step-label").textContent=`Step ${cur+1} / ${steps.length}`;
+  document.getElementById("step-desc").innerHTML=s.desc;
+  document.getElementById("prog").style.width=((cur+1)/steps.length*100)+"%";
+
+  const badge=document.getElementById("ans-badge");
+  if(s.final){
+    badge.style.display="inline-block";
+    badge.className=s.isBalanced?"result-badge badge-balanced":"result-badge badge-unbalanced";
+    badge.textContent=s.isBalanced?"✓ isBalanced = true":"✗ isBalanced = false";
+  }else badge.style.display="none";
+
+  document.getElementById("btn-prev").disabled=cur===0;
+  document.getElementById("btn-next").disabled=cur===steps.length-1;
+}
+
+function move(d){cur=Math.max(0,Math.min(getSteps().length-1,cur+d));renderStep(getSteps()[cur]);}
+function reset(){cur=0;stopPlay();renderStep(getSteps()[0]);}
+function loadExample(i){exIdx=i;cur=0;stopPlay();document.getElementById("tree-panel-label").textContent="// binary tree — "+getEx().treeLabel;renderStep(getSteps()[0]);}
+document.getElementById("examples-row").addEventListener("click",e=>{const b=e.target.closest(".ex-btn");if(!b)return;document.querySelectorAll(".ex-btn").forEach(x=>x.classList.remove("active"));b.classList.add("active");loadExample(parseInt(b.dataset.ex));});
+document.addEventListener("keydown",e=>{if(e.key==="ArrowRight"||e.key==="ArrowDown")move(1);if(e.key==="ArrowLeft"||e.key==="ArrowUp")move(-1);});
+function stopPlay(){if(playTimer){clearInterval(playTimer);playTimer=null;}const b=document.getElementById("btn-play");b.textContent="▶ Play";b.className="btn btn-play";}
+function togglePlay(){const b=document.getElementById("btn-play");if(playTimer){stopPlay();return;}b.textContent="⏸ Pause";b.className="btn btn-play";playTimer=setInterval(()=>{if(cur>=getSteps().length-1){stopPlay();return;}move(1);},1400);}
+loadExample(0);
+</script>
+</body>
+</html>

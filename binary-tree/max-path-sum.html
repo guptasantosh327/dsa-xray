@@ -1,0 +1,1359 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Max Path Sum — Interactive Dry Run</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Sora:wght@300;400;600;700&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0d0f14;
+      --surface: #13161d;
+      --surface2: #1a1e28;
+      --surface3: #212638;
+      --border: rgba(255,255,255,0.07);
+      --border-mid: rgba(255,255,255,0.12);
+      --text: #e8eaf0;
+      --text-muted: #6b7280;
+      --text-dim: #3d4251;
+      --accent: #7c6ef5;
+      --accent-glow: rgba(124,110,245,0.25);
+      --green: #34d399;
+      --green-bg: rgba(52,211,153,0.1);
+      --amber: #fbbf24;
+      --amber-bg: rgba(251,191,36,0.12);
+      --blue: #60a5fa;
+      --blue-bg: rgba(96,165,250,0.1);
+      --red: #f87171;
+      --red-bg: rgba(248,113,113,0.12);
+      --orange: #fb923c;
+      --orange-bg: rgba(251,146,60,0.12);
+      --purple: #c084fc;
+      --purple-bg: rgba(192,132,252,0.1);
+      --mono: 'JetBrains Mono', monospace;
+      --sans: 'Sora', sans-serif;
+    }
+
+    html { scroll-behavior: smooth; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--sans);
+      font-size: 15px;
+      line-height: 1.6;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(124,110,245,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(124,110,245,0.03) 1px, transparent 1px);
+      background-size: 40px 40px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .page {
+      position: relative; z-index: 1;
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 3rem 1.5rem 5rem;
+    }
+
+    .back-nav {
+      display: inline-flex; align-items: center; gap: 8px;
+      font-family: var(--mono); font-size: 12px;
+      color: var(--text-muted); text-decoration: none;
+      padding: 7px 14px 7px 10px; border-radius: 8px;
+      border: 1px solid var(--border); background: var(--surface);
+      margin-bottom: 2rem; transition: all .15s;
+    }
+    .back-nav:hover { border-color: var(--border-mid); color: var(--text); }
+
+    header { margin-bottom: 2.5rem; animation: fadeUp .6s ease both; }
+
+    .tag {
+      display: inline-block; font-family: var(--mono); font-size: 11px;
+      font-weight: 500; letter-spacing: .12em; text-transform: uppercase;
+      color: var(--orange); background: var(--orange-bg);
+      border: 1px solid rgba(251,146,60,0.3);
+      padding: 4px 12px; border-radius: 100px; margin-bottom: 1.2rem;
+    }
+
+    h1 {
+      font-size: clamp(1.8rem, 5vw, 2.8rem); font-weight: 700;
+      line-height: 1.15; color: var(--text); margin-bottom: .8rem;
+      letter-spacing: -.02em;
+    }
+    h1 span { color: var(--orange); }
+
+    .subtitle { font-size: 15px; color: var(--text-muted); max-width: 620px; line-height: 1.7; }
+
+    .insight-banner {
+      background: var(--orange-bg); border: 1px solid rgba(251,146,60,0.22);
+      border-left: 3px solid var(--orange); border-radius: 10px;
+      padding: 14px 18px; margin-bottom: 2rem; font-size: 13px;
+      color: var(--text-muted); font-family: var(--mono);
+      animation: fadeUp .6s ease .05s both; line-height: 1.7;
+    }
+    .insight-banner strong { color: var(--orange); }
+
+    /* EXAMPLE SELECTOR */
+    .examples-row {
+      display: flex; gap: 10px; flex-wrap: wrap;
+      margin-bottom: 2rem; animation: fadeUp .6s ease .07s both;
+    }
+
+    .ex-btn {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 10px 18px; border-radius: 12px;
+      border: 1px solid var(--border); background: var(--surface);
+      cursor: pointer; transition: all .18s;
+      font-family: var(--mono); font-size: 12px;
+      font-weight: 600; color: var(--text-muted); user-select: none;
+    }
+    .ex-btn:hover { border-color: var(--border-mid); color: var(--text); transform: translateY(-2px); }
+    .ex-btn.active {
+      background: var(--orange-bg); border-color: rgba(251,146,60,0.4);
+      color: var(--orange); transform: translateY(-2px);
+    }
+    .ex-badge {
+      font-size: 9px; font-weight: 700; padding: 2px 7px;
+      border-radius: 5px; background: var(--surface3); color: var(--text-dim);
+    }
+    .ex-btn.active .ex-badge { background: rgba(255,255,255,0.1); color: inherit; }
+
+    /* Code block */
+    .code-block {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 12px; overflow: hidden; margin-bottom: 2rem;
+      animation: fadeUp .6s ease .1s both;
+    }
+    .code-header {
+      display: flex; align-items: center; gap: 8px;
+      padding: 12px 16px; border-bottom: 1px solid var(--border);
+      background: var(--surface2);
+    }
+    .code-header span { font-family: var(--mono); font-size: 12px; color: var(--text-muted); }
+    .dots { display: flex; gap: 6px; }
+    .dot { width: 10px; height: 10px; border-radius: 50%; }
+    .dot-r { background: #ff5f57; } .dot-y { background: #ffbd2e; } .dot-g { background: #28c940; }
+    pre {
+      padding: 1.25rem 1.5rem; overflow-x: auto;
+      font-family: var(--mono); font-size: 13px; line-height: 1.9; color: #c9d1d9;
+    }
+    .kw { color: #ff79c6; } .fn { color: #50fa7b; } .cm { color: #6272a4; font-style: italic; }
+    .num { color: #bd93f9; } .var { color: #8be9fd; }
+    .hl { background: rgba(251,146,60,0.15); border-radius: 3px; padding: 0 3px; }
+
+    .section-label {
+      font-family: var(--mono); font-size: 11px; font-weight: 500;
+      letter-spacing: .1em; text-transform: uppercase; color: var(--text-dim);
+      margin-bottom: 1rem; margin-top: 2.5rem;
+    }
+
+    /* Visualizer */
+    .viz-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 16px; overflow: hidden; animation: fadeUp .6s ease .2s both;
+    }
+
+    .progress-bar-wrap { height: 3px; background: var(--border); }
+    .progress-bar-inner {
+      height: 100%;
+      background: linear-gradient(90deg, var(--orange), #fbbf24);
+      transition: width .35s cubic-bezier(.4,0,.2,1);
+      border-radius: 0 2px 2px 0;
+    }
+
+    .controls {
+      display: flex; align-items: center; gap: 10px;
+      padding: 14px 20px; border-bottom: 1px solid var(--border);
+      background: var(--surface2); flex-wrap: wrap;
+    }
+
+    .btn {
+      display: inline-flex; align-items: center; gap: 6px;
+      font-family: var(--mono); font-size: 12px; font-weight: 500;
+      padding: 7px 16px; border-radius: 8px; border: 1px solid var(--border-mid);
+      background: var(--surface3); color: var(--text); cursor: pointer;
+      transition: all .15s; letter-spacing: .02em;
+    }
+    .btn:hover:not(:disabled) { background: var(--accent-glow); border-color: var(--accent); color: var(--accent); }
+    .btn:disabled { opacity: .3; cursor: default; }
+    .btn-play-active {
+      background: var(--orange-bg) !important;
+      border-color: rgba(251,146,60,0.4) !important;
+      color: var(--orange) !important;
+    }
+
+    .step-info { flex: 1; font-size: 13px; color: var(--text-muted); font-family: var(--mono); }
+
+    kbd {
+      font-size: 10px; background: var(--surface3); border: 1px solid var(--border-mid);
+      padding: 2px 5px; border-radius: 4px; color: var(--text-muted); font-family: var(--mono);
+    }
+
+    .result-badge {
+      font-family: var(--mono); font-size: 11px; font-weight: 700;
+      letter-spacing: .06em; padding: 4px 12px; border-radius: 100px;
+    }
+    .badge-done { background: var(--green-bg); color: var(--green); border: 1px solid rgba(52,211,153,0.3); }
+
+    .step-desc {
+      padding: 12px 20px; font-size: 13px; color: var(--text-muted);
+      background: var(--surface2); border-bottom: 1px solid var(--border);
+      font-family: var(--mono); min-height: 44px; line-height: 1.6;
+    }
+    .step-desc em  { color: var(--amber); font-style: normal; }
+    .step-desc .ok { color: var(--green); font-weight: 600; }
+    .step-desc .hi { color: var(--orange); font-weight: 600; }
+    .step-desc .neg { color: var(--red); font-weight: 600; }
+
+    /* Layout */
+    .main-grid { display: grid; grid-template-columns: 1fr 310px; }
+    .tree-panel { padding: 24px 20px; border-right: 1px solid var(--border); }
+    .panel-label {
+      font-family: var(--mono); font-size: 10px; font-weight: 700;
+      letter-spacing: .12em; text-transform: uppercase; color: var(--text-dim);
+      margin-bottom: 10px;
+    }
+    #tree-svg { width: 100%; }
+
+    /* Side panel */
+    .side-panel { display: flex; flex-direction: column; }
+
+    /* maxSum tracker */
+    .maxsum-tracker {
+      margin: 14px 16px 12px;
+      padding: 12px 14px; background: var(--surface3);
+      border: 1px solid var(--border-mid); border-radius: 10px;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .maxsum-label { font-family: var(--mono); font-size: 11px; color: var(--text-muted); }
+    .maxsum-val {
+      font-family: var(--mono); font-size: 20px; font-weight: 700;
+      color: var(--text-dim); transition: color .3s, transform .2s;
+    }
+    .maxsum-val.updated { color: var(--green); transform: scale(1.3); }
+
+    .stack-panel { padding: 14px 16px; border-bottom: 1px solid var(--border); }
+    .call-stack { display: flex; flex-direction: column-reverse; gap: 4px; min-height: 50px; }
+    .frame {
+      padding: 5px 10px; border-radius: 6px; font-size: 10px;
+      font-family: var(--mono); border: 1px solid var(--border);
+      background: var(--surface2); color: var(--text-muted); transition: all .2s;
+    }
+    .frame.active { border-color: rgba(251,146,60,0.4); background: var(--orange-bg); color: var(--orange); }
+    .frame.returning { border-color: rgba(52,211,153,0.3); background: var(--green-bg); color: var(--green); }
+    .frame.pruned { border-color: rgba(248,113,113,0.3); background: var(--red-bg); color: var(--red); }
+
+    .vars-panel { padding: 14px 16px; border-bottom: 1px solid var(--border); }
+    .var-row {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 4px 0; border-bottom: 1px solid var(--border); font-size: 12px;
+    }
+    .var-row:last-child { border-bottom: none; }
+    .var-name { font-family: var(--mono); color: var(--text-muted); font-size: 11px; }
+    .var-val { font-family: var(--mono); font-weight: 700; color: var(--amber); font-size: 11px; }
+    .var-val.green { color: var(--green); }
+    .var-val.orange { color: var(--orange); }
+    .var-val.red { color: var(--red); }
+    .var-val.dim { color: var(--text-dim); }
+
+    .log-panel { padding: 14px 16px; flex: 1; }
+    .log {
+      font-size: 11px; font-family: var(--mono); line-height: 1.9;
+      color: var(--text-dim); max-height: 180px; overflow-y: auto;
+    }
+    .log::-webkit-scrollbar { width: 4px; }
+    .log::-webkit-scrollbar-thumb { background: var(--border-mid); border-radius: 2px; }
+    .entry.hl { color: var(--text); }
+    .entry.upd { color: var(--green); font-weight: 600; }
+    .entry.prune { color: var(--red); }
+    .entry.ret { color: var(--orange); }
+
+    /* Path highlight overlay */
+    .path-line { transition: stroke .3s, opacity .3s; }
+
+    /* Overview section */
+    .overview { margin-top: 2.5rem; animation: fadeUp .6s ease .25s both; }
+    .overview-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+    .overview-full { margin-bottom: 12px; }
+    .ov-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 14px; padding: 18px 20px; position: relative; overflow: hidden;
+    }
+    .ov-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; }
+    .ov-card.blue::before   { background: linear-gradient(90deg, var(--blue), transparent); }
+    .ov-card.green::before  { background: linear-gradient(90deg, var(--green), transparent); }
+    .ov-card.amber::before  { background: linear-gradient(90deg, var(--amber), transparent); }
+    .ov-card.red::before    { background: linear-gradient(90deg, var(--red), transparent); }
+    .ov-card.accent::before { background: linear-gradient(90deg, var(--accent), transparent); }
+    .ov-card.orange::before { background: linear-gradient(90deg, var(--orange), transparent); }
+    .ov-card-head { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+    .ov-icon { font-size: 16px; }
+    .ov-title { font-family: var(--mono); font-size: 10px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--text-muted); }
+    .ov-card p { font-size: 13px; color: var(--text-muted); line-height: 1.75; }
+    .ov-card p strong { color: var(--text); font-weight: 600; }
+    .ov-card code { font-family: var(--mono); font-size: 11px; background: var(--surface2); padding: 1px 6px; border-radius: 4px; color: var(--accent); }
+    .hint-list { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+    .hint-list li { display: flex; gap: 10px; align-items: flex-start; font-size: 13px; color: var(--text-muted); line-height: 1.65; }
+    .hint-list li .bullet { font-family: var(--mono); font-size: 10px; font-weight: 700; color: var(--accent); background: var(--accent-glow); border: 1px solid rgba(124,110,245,0.25); padding: 2px 7px; border-radius: 4px; flex-shrink: 0; margin-top: 2px; }
+    .hint-list li .bullet.green { color: var(--green); background: var(--green-bg); border-color: rgba(52,211,153,0.25); }
+    .hint-list li .bullet.amber { color: var(--amber); background: var(--amber-bg); border-color: rgba(251,191,36,0.25); }
+    .hint-list li .bullet.red { color: var(--red); background: var(--red-bg); border-color: rgba(248,113,113,0.25); }
+    .hint-list li .bullet.orange { color: var(--orange); background: var(--orange-bg); border-color: rgba(251,146,60,0.25); }
+    .edge-list { display: flex; flex-direction: column; gap: 8px; }
+    .edge-item { display: flex; gap: 10px; align-items: flex-start; }
+    .edge-label { font-family: var(--mono); font-size: 9px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; padding: 3px 8px; border-radius: 5px; flex-shrink: 0; margin-top: 2px; }
+    .edge-label.warn { background: var(--red-bg); color: var(--red); border: 1px solid rgba(248,113,113,0.25); }
+    .edge-label.ok { background: var(--green-bg); color: var(--green); border: 1px solid rgba(52,211,153,0.25); }
+    .edge-text { font-size: 12px; color: var(--text-muted); line-height: 1.65; }
+    .edge-text code { font-family: var(--mono); font-size: 11px; background: var(--surface2); padding: 1px 5px; border-radius: 4px; color: var(--accent); }
+    .best-solution { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; margin-bottom: 12px; }
+    .best-solution-header { display: flex; align-items: center; justify-content: space-between; padding: 12px 18px; border-bottom: 1px solid var(--border); background: var(--surface2); }
+    .best-solution-title { display: flex; align-items: center; gap: 8px; font-family: var(--mono); font-size: 11px; font-weight: 700; color: var(--green); letter-spacing: .08em; }
+    .best-solution-pills { display: flex; gap: 6px; }
+    .sol-pill { font-family: var(--mono); font-size: 10px; padding: 3px 9px; border-radius: 6px; background: var(--surface3); border: 1px solid var(--border-mid); color: var(--text-muted); }
+    .best-solution pre { padding: 1rem 1.25rem; font-size: 12px; line-height: 1.8; overflow-x: auto; }
+
+    .explanation { margin-top: 2.5rem; animation: fadeUp .6s ease .3s both; }
+    .explain-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 12px; }
+    .explain-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 16px 18px; }
+    .explain-card .icon { font-size: 18px; margin-bottom: 8px; }
+    .explain-card h3 { font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 6px; }
+    .explain-card p { font-size: 12px; color: var(--text-muted); line-height: 1.7; }
+    .explain-card code { font-family: var(--mono); font-size: 11px; background: var(--surface2); padding: 1px 5px; border-radius: 4px; color: var(--accent); }
+    .complexity { display: flex; gap: 10px; margin-top: 1.5rem; flex-wrap: wrap; }
+    .cpill { font-family: var(--mono); font-size: 12px; padding: 6px 14px; border-radius: 8px; border: 1px solid var(--border); background: var(--surface); }
+    .cpill strong { color: var(--accent); font-weight: 700; }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    @media (max-width: 700px) {
+      .main-grid { grid-template-columns: 1fr; }
+      .tree-panel { border-right: none; border-bottom: 1px solid var(--border); }
+      .overview-grid { grid-template-columns: 1fr; }
+    }
+  
+    /* ── NEW TOP SECTIONS ── */
+    .pattern-banner-new { display:flex; align-items:flex-start; gap:16px; border-left-width:3px; border-left-style:solid; border-radius:10px; padding:14px 18px; margin-bottom:2rem; flex-wrap:wrap; animation:fadeUp .6s ease .03s both; }
+    .pb-label  { font-family:var(--mono); font-size:10px; font-weight:700; letter-spacing:.12em; text-transform:uppercase; color:var(--text-dim); margin-bottom:4px; }
+    .pb-name   { font-family:var(--mono); font-size:13px; font-weight:700; }
+    .pb-desc   { font-family:var(--mono); font-size:12px; color:var(--text-muted); flex:1; min-width:200px; line-height:1.7; }
+    .pb-solves { font-family:var(--mono); font-size:11px; color:var(--text-dim); }
+
+    .prob-section { background:var(--surface); border:1px solid var(--border); border-radius:14px; overflow:hidden; margin-bottom:2rem; animation:fadeUp .6s ease .04s both; }
+    .prob-section-hdr { display:flex; align-items:center; gap:10px; padding:14px 20px; border-bottom:1px solid var(--border); background:var(--surface2); }
+    .prob-section-icon  { font-size:16px; }
+    .prob-section-title { font-family:var(--mono); font-size:11px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:var(--text-muted); }
+    .prob-body { padding:20px; }
+    .prob-body p { font-size:13px; color:var(--text-muted); line-height:1.75; margin-bottom:10px; }
+    .prob-body p:last-child { margin-bottom:0; }
+    .prob-body p strong { color:var(--text); }
+    .prob-body code { font-family:var(--mono); font-size:11px; background:var(--surface2); padding:1px 6px; border-radius:4px; color:var(--accent); }
+
+    /* SVG example grid — replaces array [x,y,z] notation */
+    .svg-example-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:14px; margin-top:16px; }
+    .svg-ex-card { background:var(--surface2); border:1px solid var(--border); border-radius:10px; overflow:hidden; }
+    .svg-ex-header { display:flex; align-items:center; justify-content:space-between; padding:8px 14px; border-bottom:1px solid var(--border); }
+    .svg-ex-label  { font-family:var(--mono); font-size:10px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:var(--text-dim); }
+    .svg-ex-result { font-family:var(--mono); font-size:11px; font-weight:700; padding:2px 10px; border-radius:5px; }
+    .res-green  { background:rgba(52,211,153,.12); color:#34d399; border:1px solid rgba(52,211,153,.25); }
+    .res-red    { background:rgba(248,113,113,.12); color:#f87171; border:1px solid rgba(248,113,113,.25); }
+    .res-blue   { background:rgba(96,165,250,.12);  color:#60a5fa; border:1px solid rgba(96,165,250,.25); }
+    .res-orange { background:rgba(251,146,60,.12);  color:#fb923c; border:1px solid rgba(251,146,60,.25); }
+    .res-purple { background:rgba(192,132,252,.12); color:#c084fc; border:1px solid rgba(192,132,252,.25); }
+    .svg-ex-body { padding:12px; display:flex; justify-content:center; align-items:center; min-height:90px; }
+    .svg-ex-body svg { max-height:120px; width:100%; }
+
+    /* Hints */
+    .hints-list-new { display:flex; flex-direction:column; gap:10px; }
+    .hint-row { display:flex; gap:12px; align-items:flex-start; }
+    .hint-badge { font-family:var(--mono); font-size:11px; font-weight:700; padding:3px 8px; border-radius:6px; flex-shrink:0; margin-top:2px; min-width:28px; text-align:center; }
+    .hint-body { font-size:13px; color:var(--text-muted); line-height:1.7; }
+    .hint-body code { font-family:var(--mono); font-size:11px; background:var(--surface2); padding:1px 5px; border-radius:4px; color:var(--accent); }
+    .hint-body strong { color:var(--text); }
+    .intuition-new { border-radius:10px; padding:16px 18px; margin-top:14px; }
+    .intuition-new p { font-size:13px; color:var(--text-muted); line-height:1.75; }
+
+  </style>
+</head>
+<body>
+<div class="page">
+
+  <a class="back-nav" href="../dsa-hub.html">← All visualizers</a>
+
+  <header>
+    <div class="tag">Algorithm Dry Run · LeetCode #124</div>
+    <h1>Binary Tree <span>Max Path Sum</span></h1>
+    <p class="subtitle">
+      Step-by-step trace of <code style="font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--accent);background:var(--surface);padding:2px 7px;border-radius:5px;">maxPathSum</code> — watch post-order counts bubble up. At every node, <code style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--orange)">left + curr + right</code> is a candidate. The deepest highest sum wins.
+    </p>
+  </header>
+
+  <div class="insight-banner">
+    ⚡ <strong>Key insight:</strong> At every node, the longest path <em>through that node</em> = <code style="color:var(--amber)">maxLeft + curr.val + maxRight</code>. But we can only extend <strong>one arm</strong> upward to our parent — we return <code style="color:var(--amber)">curr.val + Math.max(maxLeft, maxRight)</code>. And <code style="color:var(--red)">Math.max(0, ...)</code> prunes negative subtrees — better to skip them entirely than let them drag us down.
+  </div>
+
+  <div class="pattern-banner-new" style="background:rgba(251,146,60,.06);border:1px solid rgba(251,146,60,.25);border-left-color:#fb923c">
+    <div>
+      <div class="pb-label">Pattern</div>
+      <div class="pb-name" style="color:#fb923c">🎯 Post-order DFS + Negative Pruning + Two Roles Per Node</div>
+    </div>
+    <div class="pb-desc">At every node: evaluate <code>left + curr + right</code> as a complete path candidate (both arms), but only return <code>curr + max(left, right)</code> to the parent (one arm). <code>Math.max(0,...)</code> prunes negative arms.</div>
+    <div class="pb-solves">Same pattern unlocks:<br/><span style="color:#fb923c">#543 Diameter of Binary Tree · #687 Longest Univalue Path · #1372 Longest ZigZag Path</span></div>
+  </div>
+
+  <div class="prob-section">
+    <div class="prob-section-hdr">
+      <span class="prob-section-icon">📋</span>
+      <span class="prob-section-title">Problem Statement</span>
+    </div>
+    <div class="prob-body">
+      <p>Given a binary tree, find the <strong>maximum path sum</strong>. A path is any sequence of nodes connected by edges where each node appears at most once. The path does <strong>not</strong> need to pass through the root.</p>
+        <p>Node values can be <strong>negative</strong> — a shorter path sometimes beats a longer one!</p><div class="svg-example-grid">
+    <div class="svg-ex-card">
+      <div class="svg-ex-header">
+        <span class="svg-ex-label">[-10, 9, 20, null, null, 15, 7]</span>
+        <span class="svg-ex-result res-orange">42  (15→20→7)</span>
+      </div>
+      <div class="svg-ex-body"><svg viewBox="0 0 240 130"><line x1="120" y1="26" x2="66" y2="64" stroke="#1e2231" stroke-width="1.5"/><line x1="120" y1="26" x2="182" y2="64" stroke="#1e2231" stroke-width="1.5"/><line x1="168" y1="82" x2="146" y2="108" stroke="#1e2231" stroke-width="1.5"/><line x1="196" y1="82" x2="216" y2="108" stroke="#1e2231" stroke-width="1.5"/><circle cx="120" cy="18" r="24" fill="#13161d" stroke="#3d4251" stroke-width="1.5"/><text x="120" y="22" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="10" font-weight="700" fill="#6b7280">-10</text><circle cx="64" cy="74" r="20" fill="#13161d" stroke="#3d4251" stroke-width="1.5"/><text x="64" y="78" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="13" font-weight="700" fill="#6b7280">9</text><circle cx="184" cy="74" r="20" fill="#1a1808" stroke="#fb923c" stroke-width="2.5"/><text x="184" y="78" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="13" font-weight="700" fill="#fb923c">20</text><circle cx="144" cy="112" r="18" fill="#1a1808" stroke="#fb923c" stroke-width="2.5"/><text x="144" y="116" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="13" font-weight="700" fill="#fb923c">15</text><circle cx="218" cy="112" r="18" fill="#1a1808" stroke="#fb923c" stroke-width="2.5"/><text x="218" y="116" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="13" font-weight="700" fill="#fb923c">7</text><line x1="144" y1="98" x2="184" y2="60" stroke="#fb923c" stroke-width="2"/><line x1="184" y1="60" x2="218" y2="98" stroke="#fb923c" stroke-width="2"/><text x="4" y="104" font-family="'JetBrains Mono',monospace" font-size="9" fill="#fb923c">15+20+7=42</text></svg></div>
+    </div>
+    <div class="svg-ex-card">
+      <div class="svg-ex-header">
+        <span class="svg-ex-label">All negatives [-3, -1, -2]</span>
+        <span class="svg-ex-result res-orange">-1  (best node)</span>
+      </div>
+      <div class="svg-ex-body"><svg viewBox="0 0 200 110"><line x1="100" y1="26" x2="58" y2="64" stroke="#1e2231" stroke-width="1.5"/><line x1="100" y1="26" x2="148" y2="64" stroke="#1e2231" stroke-width="1.5"/><circle cx="100" cy="18" r="22" fill="#13161d" stroke="#3d4251" stroke-width="1.5"/><text x="100" y="22" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="13" font-weight="700" fill="#6b7280">-3</text><circle cx="56" cy="74" r="22" fill="#1a1808" stroke="#fb923c" stroke-width="2.5"/><text x="56" y="78" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="13" font-weight="700" fill="#fb923c">-1</text><circle cx="150" cy="74" r="22" fill="#13161d" stroke="#3d4251" stroke-width="1.5"/><text x="150" y="78" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="13" font-weight="700" fill="#6b7280">-2</text><text x="4" y="104" font-family="'JetBrains Mono',monospace" font-size="9" fill="#fb923c">best = single node -1</text></svg></div>
+    </div>
+  </div>
+    </div>
+  </div>
+
+  <div class="prob-section">
+    <div class="prob-section-hdr">
+      <span class="prob-section-icon">💡</span>
+      <span class="prob-section-title">Intuition + Hints</span>
+    </div>
+    <div class="prob-body">
+      <div class="hints-list-new">
+      <div class="hint-row">
+        <span class="hint-badge" style="color:#fb923c;background:rgba(251,146,60,.1);border:1px solid rgba(251,146,60,.25)">1</span>
+        <div class="hint-body"><strong>Every path bends at exactly one node.</strong> At the bend, the path uses <em>both</em> arms: <code>left + curr.val + right</code>. This is the candidate path sum at every node.</div>
+      </div>
+      <div class="hint-row">
+        <span class="hint-badge" style="color:#fb923c;background:rgba(251,146,60,.1);border:1px solid rgba(251,146,60,.25)">2</span>
+        <div class="hint-body"><strong>But only one arm goes upward.</strong> When reporting to a parent, a node can only be part of a single-direction path. So it returns <code>curr.val + Math.max(left, right)</code>.</div>
+      </div>
+      <div class="hint-row">
+        <span class="hint-badge" style="color:#fb923c;background:rgba(251,146,60,.1);border:1px solid rgba(251,146,60,.25)">3</span>
+        <div class="hint-body"><strong>Prune negatives with <code>Math.max(0, recurse(child))</code>.</strong> If a subtree returns negative, treat it as 0 — it's better to stop the path there than to drag the sum down.</div>
+      </div>
+      <div class="hint-row">
+        <span class="hint-badge" style="color:#fb923c;background:rgba(251,146,60,.1);border:1px solid rgba(251,146,60,.25)">4</span>
+        <div class="hint-body">Track the global answer with <code>let maxSum = -Infinity</code>. Start at -Infinity, not 0, so all-negative trees are handled correctly (the answer must include at least one node).</div>
+      </div>
+    </div><div class="intuition-new" style="background:rgba(251,146,60,.06);border:1px solid rgba(251,146,60,.2);margin-top:14px"><p><strong style="color:#fb923c">Core insight:</strong> Every node simultaneously plays two roles: as a <em>path peak</em> (evaluates both arms + self, updates global max) and as an <em>arm extender</em> (returns only its best single arm to its parent). Mixing these two calculations is the #1 mistake on this problem.</p></div>
+    </div>
+  </div>
+
+
+  <!-- Example selector -->
+  <p class="section-label">// choose an example</p>
+  <div class="examples-row" id="examples-row">
+    <button class="ex-btn active" data-ex="0">
+      Example 1 <span class="ex-badge">Mixed ±</span>
+    </button>
+    <button class="ex-btn" data-ex="1">
+      Example 2 <span class="ex-badge">All Neg</span>
+    </button>
+    <button class="ex-btn" data-ex="2">
+      Example 3 <span class="ex-badge">Single</span>
+    </button>
+    <button class="ex-btn" data-ex="3">
+      Example 4 <span class="ex-badge">Left Skew</span>
+    </button>
+    <button class="ex-btn" data-ex="4">
+      Example 5 <span class="ex-badge">Deep All-Neg</span>
+    </button>
+  </div>
+
+  <!-- Code block -->
+  <div class="code-block">
+    <div class="code-header">
+      <div class="dots"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div></div>
+      <span>maxPathSum.js</span>
+    </div>
+    <pre><span class="kw">var</span> <span class="fn">maxPathSum</span> = <span class="kw">function</span>(<span class="var">root</span>) {
+  <span class="kw">let</span> <span class="var">maxSum</span> = -Infinity;
+
+  <span class="kw">function</span> <span class="fn">getMaximumPath</span>(<span class="var">curr</span>) {
+    <span class="kw">if</span> (!<span class="var">curr</span>) <span class="kw">return</span> <span class="num">0</span>;                          <span class="cm">// null node → 0</span>
+
+    <span class="kw">let</span> <span class="var">maxLeft</span>  = Math.<span class="fn">max</span>(<span class="num">0</span>, <span class="fn">getMaximumPath</span>(<span class="var">curr</span>.left))   <span class="cm">// ← prune negatives</span>
+    <span class="kw">let</span> <span class="var">maxRight</span> = Math.<span class="fn">max</span>(<span class="num">0</span>, <span class="fn">getMaximumPath</span>(<span class="var">curr</span>.right))
+
+    <span class="hl"><span class="kw">let</span> <span class="var">currMax</span> = <span class="var">curr</span>.val + <span class="var">maxLeft</span> + <span class="var">maxRight</span>;  <span class="cm">// path through curr</span>
+    <span class="var">maxSum</span> = Math.<span class="fn">max</span>(<span class="var">currMax</span>, <span class="var">maxSum</span>);           <span class="cm">// update global max</span></span>
+
+    <span class="kw">return</span> <span class="var">curr</span>.val + Math.<span class="fn">max</span>(<span class="var">maxLeft</span>, <span class="var">maxRight</span>)  <span class="cm">// only ONE arm to parent</span>
+  }
+
+  <span class="fn">getMaximumPath</span>(<span class="var">root</span>);
+  <span class="kw">return</span> <span class="var">maxSum</span>;
+};</pre>
+  </div>
+
+  <p class="section-label" id="example-label">// Interactive dry run — Example 1: [-10, 9, 20, null, null, 15, 7]  →  answer: 42</p>
+
+  <!-- Visualizer -->
+  <div class="viz-card">
+    <div class="progress-bar-wrap">
+      <div class="progress-bar-inner" id="prog" style="width:5%"></div>
+    </div>
+
+    <div class="controls">
+      <button class="btn" id="btn-prev" onclick="move(-1)" disabled>← Prev</button>
+      <button class="btn" id="btn-play" onclick="togglePlay()">▶ Play</button>
+      <button class="btn" id="btn-next" onclick="move(1)">Next →</button>
+      <span class="step-info" id="step-label">Step 1 / ?</span>
+      <span style="font-family:var(--mono);font-size:11px;color:var(--text-dim);display:flex;gap:4px;align-items:center"><kbd>←</kbd><kbd>→</kbd></span>
+      <span class="result-badge badge-done" id="ans-badge" style="display:none">✓ maxSum = ?</span>
+    </div>
+
+    <div class="step-desc" id="step-desc">Loading...</div>
+
+    <div class="main-grid">
+      <div class="tree-panel">
+        <div class="panel-label">// binary tree</div>
+        <svg id="tree-svg" viewBox="0 0 520 300" width="100%"></svg>
+      </div>
+
+      <div class="side-panel">
+        <div style="padding:14px 16px 0;">
+          <div class="panel-label">// maxSum (closure variable)</div>
+          <div class="maxsum-tracker">
+            <span class="maxsum-label">maxSum =</span>
+            <span class="maxsum-val" id="maxsum-display">-∞</span>
+          </div>
+        </div>
+
+        <div class="stack-panel">
+          <div class="panel-label">// call stack</div>
+          <div class="call-stack" id="stack"></div>
+        </div>
+
+        <div class="vars-panel">
+          <div class="panel-label">// local variables</div>
+          <div class="var-row"><span class="var-name">curr.val</span>   <span class="var-val dim"    id="v-curr">—</span></div>
+          <div class="var-row"><span class="var-name">maxLeft</span>   <span class="var-val"        id="v-ml">—</span></div>
+          <div class="var-row"><span class="var-name">maxRight</span>  <span class="var-val"        id="v-mr">—</span></div>
+          <div class="var-row"><span class="var-name">currMax</span>   <span class="var-val orange"  id="v-cm">—</span></div>
+          <div class="var-row"><span class="var-name">returns →</span> <span class="var-val green"   id="v-ret">—</span></div>
+        </div>
+
+        <div class="log-panel">
+          <div class="panel-label">// execution log</div>
+          <div class="log" id="log"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Overview -->
+  <div class="overview">
+    <p class="section-label">// problem overview — everything you need for revision</p>
+
+    <div class="overview-grid">
+      <div class="ov-card blue">
+        <div class="ov-card-head"><span class="ov-icon">📋</span><span class="ov-title">What the problem is asking</span></div>
+        <p>Given a binary tree, find the <strong>maximum path sum</strong>. A path is any sequence of nodes where each pair is connected by an edge. The path doesn't need to pass through the root, and each node can appear <strong>at most once</strong>.</p>
+        <p style="margin-top:8px">Node values can be negative, so picking a shorter path might give a higher sum than a longer one.</p>
+      </div>
+      <div class="ov-card orange">
+        <div class="ov-card-head"><span class="ov-icon">💡</span><span class="ov-title">Core intuition</span></div>
+        <p>At every node, the <strong>best path through that node</strong> bends here: <code>maxLeft + curr.val + maxRight</code>. But when reporting to the parent, we can only send <strong>one arm</strong> — the better of left or right.</p>
+        <p style="margin-top:8px">Use <code>Math.max(0, ...)</code> to prune negative branches — never extend into a subtree that hurts your sum. Track the global max with a closure variable.</p>
+      </div>
+    </div>
+
+    <div class="overview-grid">
+      <div class="ov-card accent">
+        <div class="ov-card-head"><span class="ov-icon">🧩</span><span class="ov-title">Hints to reach the solution</span></div>
+        <ul class="hint-list">
+          <li><span class="bullet">1</span>Think bottom-up: what does each node need to <em>return</em> to its parent? The best single-arm extension: <code>curr.val + max(left, right)</code>.</li>
+          <li><span class="bullet">2</span>What does each node compute <em>for itself</em>? The path through it as the peak: <code>left + curr.val + right</code>. Compare this to <code>maxSum</code>.</li>
+          <li><span class="bullet orange">3</span>Use <code>Math.max(0, recurse(child))</code> — if a subtree is negative, treat it as 0 (skip it). Never let a bad subtree drag you down.</li>
+          <li><span class="bullet green">4</span>Closure variable <code>maxSum = -Infinity</code> captures the answer. Start at -Infinity (not 0!) because all nodes could be negative.</li>
+        </ul>
+      </div>
+      <div class="ov-card amber">
+        <div class="ov-card-head"><span class="ov-icon">⚡</span><span class="ov-title">Key trick / pattern</span></div>
+        <p><strong>Two roles per node:</strong> Every node simultaneously (1) <em>evaluates</em> the path through itself as the peak node (both arms + self), and (2) <em>reports</em> only its best single-arm extension upward. These two jobs need different calculations.</p>
+        <p style="margin-top:8px"><strong>Why -Infinity?</strong> If we initialize <code>maxSum = 0</code>, a tree with all negative values would incorrectly return 0. Starting at -Infinity ensures we always capture the actual best node/path.</p>
+        <p style="margin-top:8px"><strong>Why Math.max(0, ...)?</strong> If the left subtree returns -5, including it in our path subtracts 5 from our total. The <code>max(0, ...)</code> lets us "opt out" of bad subtrees entirely.</p>
+      </div>
+    </div>
+
+    <div class="overview-full">
+      <div class="ov-card red">
+        <div class="ov-card-head"><span class="ov-icon">⚠️</span><span class="ov-title">Edge cases to watch out for</span></div>
+        <div class="edge-list">
+          <div class="edge-item"><span class="edge-label warn">all neg</span><span class="edge-text"><strong>All negative values:</strong> The answer is the single largest (least negative) node. Initialize <code>maxSum = -Infinity</code>, not 0. The <code>Math.max(0, recurse)</code> prunes all children so every leaf returns to its parent with just its own value being evaluated.</span></div>
+          <div class="edge-item"><span class="edge-label warn">single</span><span class="edge-text"><strong>Single node:</strong> <svg viewBox="0 0 110 70" style="display:inline-block;vertical-align:middle;margin:0 4px;border-radius:6px;background:var(--surface2);padding:4px" width="120" height="70"><circle cx="55" cy="35" r="20" fill="#1a1808" stroke="#fb923c" stroke-width="2"/><text x="55" y="38" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="11" font-weight="700" fill="#fb923c">-5</text><text x="4" y="68" font-family="'JetBrains Mono',monospace" font-size="7" fill="#fb923c">ans=-5 (must pick 1)</text></svg> maxLeft=0, maxRight=0, currMax=node.val. Even if negative, <code>maxSum</code> updates to that value. Correct — you must always include at least one node.</span></div>
+          <div class="edge-item"><span class="edge-label warn">skewed</span><span class="edge-text"><strong>Skewed/linked-list tree:</strong> <svg viewBox="0 0 110 70" style="display:inline-block;vertical-align:middle;margin:0 4px;border-radius:6px;background:var(--surface2);padding:4px" width="120" height="70"><line x1="88" y1="12" x2="64" y2="32" stroke="#1e2231" stroke-width="1.5"/><line x1="64" y1="40" x2="44" y2="58" stroke="#1e2231" stroke-width="1.5"/><circle cx="88" cy="8" r="13" fill="#1a1808" stroke="#fb923c" stroke-width="2"/><text x="88" y="11" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="10" font-weight="700" fill="#fb923c">-1</text><circle cx="64" cy="36" r="13" fill="#13161d" stroke="#3d4251" stroke-width="1.5"/><text x="64" y="39" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="10" font-weight="700" fill="#6b7280">-2</text><circle cx="44" cy="62" r="13" fill="#13161d" stroke="#3d4251" stroke-width="1.5"/><text x="44" y="65" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="10" font-weight="700" fill="#6b7280">-3</text><text x="4" y="68" font-family="'JetBrains Mono',monospace" font-size="7" fill="#fb923c">ans=-1 (root only)</text></svg> The path goes straight down one side. At each node one arm is always 0 (null child), so <code>left+curr+right</code> reduces to just the single-direction path. The code handles this naturally.</span></div>
+          <div class="edge-item"><span class="edge-label ok">note</span><span class="edge-text"><strong>Path doesn't need to pass through root:</strong> The classic mistake. We update <code>maxSum</code> at EVERY node. The root might not be on the optimal path at all. This is why we use a closure variable, not just return from the root call.</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="overview-full">
+      <div class="best-solution">
+        <div class="best-solution-header">
+          <span class="best-solution-title">✦ Best solution for learning</span>
+          <div class="best-solution-pills">
+            <span class="sol-pill">O(n) time</span>
+            <span class="sol-pill">O(h) space</span>
+            <span class="sol-pill">Post-order DFS</span>
+            <span class="sol-pill">Closure variable</span>
+          </div>
+        </div>
+        <pre><span class="kw">var</span> <span class="fn">maxPathSum</span> = <span class="kw">function</span>(<span class="var">root</span>) {
+  <span class="kw">let</span> <span class="var">maxSum</span> = -Infinity;               <span class="cm">// -Infinity handles all-negative trees</span>
+
+  <span class="kw">function</span> <span class="fn">dfs</span>(<span class="var">curr</span>) {
+    <span class="kw">if</span> (!<span class="var">curr</span>) <span class="kw">return</span> <span class="num">0</span>;              <span class="cm">// null contributes 0</span>
+
+    <span class="kw">let</span> <span class="var">left</span>  = Math.<span class="fn">max</span>(<span class="num">0</span>, <span class="fn">dfs</span>(<span class="var">curr</span>.left));   <span class="cm">// prune if negative</span>
+    <span class="kw">let</span> <span class="var">right</span> = Math.<span class="fn">max</span>(<span class="num">0</span>, <span class="fn">dfs</span>(<span class="var">curr</span>.right));
+
+    <span class="cm">// This node as the "peak" of the path</span>
+    <span class="var">maxSum</span> = Math.<span class="fn">max</span>(<span class="var">maxSum</span>, <span class="var">curr</span>.val + <span class="var">left</span> + <span class="var">right</span>);
+
+    <span class="cm">// Only one arm goes up to the parent</span>
+    <span class="kw">return</span> <span class="var">curr</span>.val + Math.<span class="fn">max</span>(<span class="var">left</span>, <span class="var">right</span>);
+  }
+
+  <span class="fn">dfs</span>(<span class="var">root</span>);
+  <span class="kw">return</span> <span class="var">maxSum</span>;
+};
+
+<span class="cm">// KEY RULES:
+// 1. Math.max(0, recurse) → ignore negative subtrees
+// 2. currMax = left + curr + right → evaluate "bent" path at this node
+// 3. return curr + max(left, right) → only ONE arm goes to parent
+// 4. maxSum starts at -Infinity → handles all-negative inputs
+// 5. Update maxSum at EVERY node — answer may not be at root</span></pre>
+      </div>
+    </div>
+  </div>
+
+  <div class="explanation">
+    <p class="section-label">// how it works</p>
+    <div class="explain-grid">
+      <div class="explain-card">
+        <div class="icon">📬</div>
+        <h3>Two jobs per node</h3>
+        <p>Each node does two things: evaluates <code>left + self + right</code> as a complete path candidate, then returns only <code>self + max(left, right)</code> to its parent as one arm.</p>
+      </div>
+      <div class="explain-card">
+        <div class="icon">✂️</div>
+        <h3>Pruning negatives</h3>
+        <p><code>Math.max(0, recurse(child))</code> means if a subtree would make the path worse (negative return), we treat it as 0 — as if we simply didn't extend into it.</p>
+      </div>
+      <div class="explain-card">
+        <div class="icon">🎯</div>
+        <h3>The bend node</h3>
+        <p>Every path has one "peak" node where it bends. At that node, both arms are included. We check every single node as a candidate bend, capturing the global max.</p>
+      </div>
+      <div class="explain-card">
+        <div class="icon">🔁</div>
+        <h3>Post-order DFS</h3>
+        <p>Left → Right → Root. Children's values must be known before computing the parent's contribution. Information flows bottom-up through return values.</p>
+      </div>
+    </div>
+    <div class="complexity">
+      <div class="cpill">Time: <strong>O(n)</strong> — each node visited once</div>
+      <div class="cpill">Space: <strong>O(h)</strong> — call stack height</div>
+      <div class="cpill">Init: <strong>-Infinity</strong> (not 0!)</div>
+      <div class="cpill">Pattern: <strong>post-order DFS</strong></div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ─── EXAMPLE DEFINITIONS ──────────────────────────────────────────────────
+
+const EXAMPLES = [
+  {
+    label: "Example 1: [-10, 9, 20, null, null, 15, 7]",
+    answer: 42,
+    answerLabel: "maxSum = 42",
+    pathNodes: ["n20","n15","n7"],
+    /*
+        -10
+       /   \
+      9     20
+           /  \
+          15    7
+      Path: 15 → 20 → 7 = 42
+    */
+    svgLayout: {
+      nodes: [
+        { id:"n-10", val:-10, cx:260, cy:40,  r:28 },
+        { id:"n9",   val: 9,  cx:130, cy:120, r:26 },
+        { id:"n20",  val:20,  cx:390, cy:120, r:26 },
+        { id:"n15",  val:15,  cx:310, cy:200, r:23 },
+        { id:"n7",   val: 7,  cx:470, cy:200, r:23 },
+      ],
+      edges:[
+        {x1:237,y1:55, x2:152,y2:106},{x1:283,y1:55, x2:368,y2:106},
+        {x1:373,y1:140,x2:327,y2:182},{x1:407,y1:140,x2:453,y2:182},
+      ],
+      pathEdges:[
+        {x1:327,y1:182,x2:373,y2:142},{x1:407,y1:142,x2:453,y2:182}
+      ]
+    },
+    steps: [
+      {
+        desc:'Call <em>getMaximumPath(-10)</em> — entering root. Recursing left first.',
+        active:"n-10",returning:null,pathNodes:[],
+        stack:["getMaximumPath(-10)"],
+        curr:"-10",ml:"—",mr:"—",cm:"—",ret:"—",maxSum:"-∞",maxUpdated:false,
+        log:[{t:"→ getMaximumPath(-10)",h:true},{t:"  recursing left..."}]
+      },
+      {
+        desc:'Recurse left → <em>getMaximumPath(9)</em>. Node 9 is a leaf.',
+        active:"n9",returning:null,pathNodes:[],
+        stack:["getMaximumPath(-10)","getMaximumPath(9)"],
+        curr:"9",ml:"—",mr:"—",cm:"—",ret:"—",maxSum:"-∞",maxUpdated:false,
+        log:[{t:"→ getMaximumPath(-10)"},{t:"  → getMaximumPath(9)",h:true}]
+      },
+      {
+        desc:'Node 9: left=null→0, right=null→0. maxLeft=max(0,0)=0, maxRight=max(0,0)=0. currMax = 9+0+0 = <span class="hi">9</span>. maxSum updated to 9. Returns 9.',
+        active:null,returning:"n9",pathNodes:["n9"],
+        stack:["getMaximumPath(-10)"],
+        curr:"9",ml:"0",mr:"0",cm:"9",ret:"9",maxSum:"9",maxUpdated:true,
+        log:[{t:"  → getMaximumPath(9)"},{t:"  left=null→0, right=null→0"},{t:"  currMax=9+0+0=9  maxSum=9",h:true},{t:"  returns 9"}]
+      },
+      {
+        desc:'Back in -10: ansOnLeft=9, so maxLeft=max(0,9)=9. Now recurse right → <em>getMaximumPath(20)</em>.',
+        active:"n20",returning:null,pathNodes:["n9"],
+        stack:["getMaximumPath(-10)","getMaximumPath(20)"],
+        curr:"20",ml:"—",mr:"—",cm:"—",ret:"—",maxSum:"9",maxUpdated:false,
+        log:[{t:"→ getMaximumPath(-10)"},{t:"  ← node 9 returned 9 → maxLeft=9"},{t:"  → getMaximumPath(20)",h:true}]
+      },
+      {
+        desc:'In node 20: recurse left → <em>getMaximumPath(15)</em>.',
+        active:"n15",returning:null,pathNodes:["n9"],
+        stack:["getMaximumPath(-10)","getMaximumPath(20)","getMaximumPath(15)"],
+        curr:"15",ml:"—",mr:"—",cm:"—",ret:"—",maxSum:"9",maxUpdated:false,
+        log:[{t:"  → getMaximumPath(20)"},{t:"    → getMaximumPath(15)",h:true}]
+      },
+      {
+        desc:'Node 15: leaf. maxLeft=0, maxRight=0. currMax=15. maxSum updated to <span class="hi">15</span>. Returns 15.',
+        active:null,returning:"n15",pathNodes:["n9","n15"],
+        stack:["getMaximumPath(-10)","getMaximumPath(20)"],
+        curr:"15",ml:"0",mr:"0",cm:"15",ret:"15",maxSum:"15",maxUpdated:true,
+        log:[{t:"    → getMaximumPath(15)"},{t:"    currMax=15+0+0=15  maxSum=15",h:true},{t:"    returns 15"}]
+      },
+      {
+        desc:'Back in 20: maxLeft=max(0,15)=15. Recurse right → <em>getMaximumPath(7)</em>.',
+        active:"n7",returning:null,pathNodes:["n9","n15"],
+        stack:["getMaximumPath(-10)","getMaximumPath(20)","getMaximumPath(7)"],
+        curr:"7",ml:"—",mr:"—",cm:"—",ret:"—",maxSum:"15",maxUpdated:false,
+        log:[{t:"  → getMaximumPath(20)"},{t:"    ← node 15 returned 15 → maxLeft=15"},{t:"    → getMaximumPath(7)",h:true}]
+      },
+      {
+        desc:'Node 7: leaf. currMax=7. maxSum stays 15. Returns 7.',
+        active:null,returning:"n7",pathNodes:["n9","n15","n7"],
+        stack:["getMaximumPath(-10)","getMaximumPath(20)"],
+        curr:"7",ml:"0",mr:"0",cm:"7",ret:"7",maxSum:"15",maxUpdated:false,
+        log:[{t:"    → getMaximumPath(7)"},{t:"    currMax=7+0+0=7  maxSum stays 15"},{t:"    returns 7"}]
+      },
+      {
+        desc:'🎯 Back in node 20: maxLeft=15, maxRight=max(0,7)=7. currMax = 20+15+7 = <span class="hi">42</span>! maxSum = 42. This is the PATH PEAK. Returns 20+max(15,7) = 35.',
+        active:null,returning:"n20",pathNodes:["n20","n15","n7"],
+        stack:["getMaximumPath(-10)"],
+        curr:"20",ml:"15",mr:"7",cm:"42",ret:"35",maxSum:"42",maxUpdated:true,
+        log:[{t:"  → getMaximumPath(20)"},{t:"  maxLeft=15, maxRight=7"},{t:"  currMax=20+15+7=42  maxSum=42 ✓",h:true},{t:"  returns 20+max(15,7)=35"}]
+      },
+      {
+        desc:'Back in root -10: maxLeft=max(0,9)=9, maxRight=max(0,35)=35. currMax=-10+9+35=34 < 42. maxSum stays 42. Returns -10+35=25.',
+        active:null,returning:"n-10",pathNodes:["n20","n15","n7"],
+        stack:[],
+        curr:"-10",ml:"9",mr:"35",cm:"34",ret:"25",maxSum:"42",maxUpdated:false,
+        log:[{t:"→ getMaximumPath(-10)"},{t:"  maxLeft=9, maxRight=35"},{t:"  currMax=-10+9+35=34 < 42  no update"},{t:"  returns -10+35=25"},{t:"→ return maxSum = 42 ✓",h:true}],
+        final:true
+      }
+    ]
+  },
+
+  {
+    label: "Example 2: [-3, -1, -2]  — All Negatives",
+    answer: -1,
+    answerLabel: "maxSum = -1",
+    pathNodes: ["n-1"],
+    /*
+        -3
+       /  \
+     -1   -2
+     Answer: -1 (just the single node -1)
+    */
+    svgLayout: {
+      nodes:[
+        {id:"n-3",val:-3,cx:260,cy:50,r:28},
+        {id:"n-1",val:-1,cx:140,cy:150,r:26},
+        {id:"n-2",val:-2,cx:380,cy:150,r:26},
+      ],
+      edges:[
+        {x1:238,y1:64,x2:162,y2:134},
+        {x1:282,y1:64,x2:358,y2:134},
+      ],
+      pathEdges:[]
+    },
+    steps:[
+      {
+        desc:'Call <em>getMaximumPath(-3)</em> — root. All values negative! Watch how Math.max(0,...) prunes them.',
+        active:"n-3",returning:null,pathNodes:[],
+        stack:["getMaximumPath(-3)"],
+        curr:"-3",ml:"—",mr:"—",cm:"—",ret:"—",maxSum:"-∞",maxUpdated:false,
+        log:[{t:"→ getMaximumPath(-3)",h:true},{t:"  All values are negative!"},{t:"  Math.max(0,...) will prune bad arms"}]
+      },
+      {
+        desc:'Recurse left → <em>getMaximumPath(-1)</em>. Node -1 is a leaf.',
+        active:"n-1",returning:null,pathNodes:[],
+        stack:["getMaximumPath(-3)","getMaximumPath(-1)"],
+        curr:"-1",ml:"—",mr:"—",cm:"—",ret:"—",maxSum:"-∞",maxUpdated:false,
+        log:[{t:"→ getMaximumPath(-3)"},{t:"  → getMaximumPath(-1)",h:true}]
+      },
+      {
+        desc:'Node -1: leaf. left=null→0, right=null→0. maxLeft=max(0,0)=0, maxRight=0. currMax=-1+0+0=<span class="hi">-1</span>. maxSum=-1. Returns -1+max(0,0)=-1, but parent will do max(0,-1)=0.',
+        active:null,returning:"n-1",pathNodes:["n-1"],
+        stack:["getMaximumPath(-3)"],
+        curr:"-1",ml:"0",mr:"0",cm:"-1",ret:"-1",maxSum:"-1",maxUpdated:true,
+        log:[{t:"  → getMaximumPath(-1)"},{t:"  currMax=-1+0+0=-1  maxSum=-1",h:true},{t:"  returns -1 (parent will clamp to 0)"}]
+      },
+      {
+        desc:'Back in -3: raw left returned -1, so maxLeft=<span class="neg">max(0,-1)=0</span>. Negative arm PRUNED! Now recurse right → <em>getMaximumPath(-2)</em>.',
+        active:"n-2",returning:null,pathNodes:["n-1"],
+        stack:["getMaximumPath(-3)","getMaximumPath(-2)"],
+        curr:"-2",ml:"—",mr:"—",cm:"—",ret:"—",maxSum:"-1",maxUpdated:false,
+        log:[{t:"→ getMaximumPath(-3)"},{t:"  ← node -1 returned -1"},{t:"  maxLeft=max(0,-1)=0  ← PRUNED!",h:true},{t:"  → getMaximumPath(-2)"}]
+      },
+      {
+        desc:'Node -2: leaf. currMax=-2. maxSum stays -1 (better). Returns -2, parent will clamp to 0.',
+        active:null,returning:"n-2",pathNodes:["n-1"],
+        stack:["getMaximumPath(-3)"],
+        curr:"-2",ml:"0",mr:"0",cm:"-2",ret:"-2",maxSum:"-1",maxUpdated:false,
+        log:[{t:"  → getMaximumPath(-2)"},{t:"  currMax=-2+0+0=-2  maxSum stays -1"},{t:"  returns -2"}]
+      },
+      {
+        desc:'Back in -3: maxLeft=max(0,-1)=0, maxRight=<span class="neg">max(0,-2)=0</span>. currMax=-3+0+0=<span class="neg">-3</span>. maxSum stays <span class="hi">-1</span>. The single node -1 is the answer!',
+        active:null,returning:"n-3",pathNodes:["n-1"],
+        stack:[],
+        curr:"-3",ml:"0",mr:"0",cm:"-3",ret:"-3",maxSum:"-1",maxUpdated:false,
+        log:[{t:"→ getMaximumPath(-3)"},{t:"  maxLeft=max(0,-1)=0, maxRight=max(0,-2)=0"},{t:"  currMax=-3+0+0=-3 < -1  no update"},{t:"→ return maxSum = -1 ✓",h:true}],
+        final:true
+      }
+    ]
+  },
+
+  {
+    label: "Example 3: [5]  — Single Node",
+    answer: 5,
+    answerLabel: "maxSum = 5",
+    pathNodes:["n5"],
+    svgLayout:{
+      nodes:[{id:"n5",val:5,cx:260,cy:80,r:30}],
+      edges:[],pathEdges:[]
+    },
+    steps:[
+      {
+        desc:'Single node tree. Call <em>getMaximumPath(5)</em>.',
+        active:"n5",returning:null,pathNodes:[],
+        stack:["getMaximumPath(5)"],
+        curr:"5",ml:"—",mr:"—",cm:"—",ret:"—",maxSum:"-∞",maxUpdated:false,
+        log:[{t:"→ getMaximumPath(5)",h:true},{t:"  Single node — no children"}]
+      },
+      {
+        desc:'Node 5: left=null→0, right=null→0. maxLeft=max(0,0)=0, maxRight=0. currMax=5+0+0=<span class="hi">5</span>. maxSum=5. Returns 5+max(0,0)=5.',
+        active:null,returning:"n5",pathNodes:["n5"],
+        stack:[],
+        curr:"5",ml:"0",mr:"0",cm:"5",ret:"5",maxSum:"5",maxUpdated:true,
+        log:[{t:"→ getMaximumPath(5)"},{t:"  left=null→0  right=null→0"},{t:"  currMax=5+0+0=5  maxSum=5 ✓",h:true},{t:"→ return maxSum = 5 ✓"}],
+        final:true
+      }
+    ]
+  },
+
+  {
+    label: "Example 4: [1, 2, 3, 4, 5]  — Left-skewed rich subtree",
+    answer: 15,
+    answerLabel: "maxSum = 15",
+    pathNodes:["n4","n2","n5"],
+    /*
+           1
+          / \
+         2    3
+        / \
+       4    5
+      Best path: 4→2→5 = 11? or 4+2+5=11, 2+3=5, root=1+2+3=6...
+      Wait: 4→2→5 = 11, but 1+2+5=8, 1+2+3=6
+      Actually: maxLeft at 2 = max(4,5)=5, maxRight=5
+      currMax at 2 = 4+2+5=11
+      returns to 1: 2+max(4,5)=7
+      at 1: maxLeft=7, maxRight=3, currMax=1+7+3=11... same
+      Hmm let me use [1,2,3,4,5,null,null] giving left-dominated
+      Actually [2,3,4] gives currMax=9
+      Let me use [-1,4,3,null,5] 
+      path: 5→4→(-1) = 8? or 5→4→3 = 12? 4+(-1)+5 = 8
+      Let me use [5, 4, 8, 11, null, 13, 4, 7, 2, null, null, null, 1]
+      That's the actual example from leetcode problem: 48
+      Instead let me use a cleaner one: [1, 2, 3, 4, 5]
+      At node 4: leaf → currMax=4, returns 4
+      At node 5: leaf → currMax=5, returns 5
+      At node 2: maxLeft=max(0,4)=4, maxRight=max(0,5)=5
+        currMax=2+4+5=11, returns 2+max(4,5)=7
+      At node 3: leaf → currMax=3, returns 3
+      At node 1: maxLeft=max(0,7)=7, maxRight=max(0,3)=3
+        currMax=1+7+3=11, returns 1+max(7,3)=8
+      maxSum=11 (tied at node 2 and node 1)
+      Let me use [-1, 4, 3, null, 5] to get a clearer winner
+      At node 5: currMax=5, returns 5
+      At node 4: maxLeft=max(0,0)=0, maxRight=max(0,5)=5
+        currMax=4+0+5=9, returns 4+5=9
+      At node 3: leaf → currMax=3, returns 3
+      At node -1: maxLeft=max(0,9)=9, maxRight=max(0,3)=3
+        currMax=-1+9+3=11, returns -1+max(9,3)=8
+      maxSum=11 at root.
+      
+      Actually let me just use [1,2,3,4,5] which gives maxSum=11
+      That's clear enough, both nodes give 11
+    */
+    svgLayout:{
+      nodes:[
+        {id:"n1",val:1,cx:260,cy:40,r:26},
+        {id:"n2",val:2,cx:140,cy:125,r:24},
+        {id:"n3",val:3,cx:380,cy:125,r:24},
+        {id:"n4",val:4,cx:70,cy:210,r:22},
+        {id:"n5",val:5,cx:210,cy:210,r:22},
+      ],
+      edges:[
+        {x1:240,y1:56,x2:162,y2:109},
+        {x1:280,y1:56,x2:358,y2:109},
+        {x1:122,y1:143,x2:87,y2:194},
+        {x1:158,y1:143,x2:192,y2:194},
+      ],
+      pathEdges:[
+        {x1:87,y1:194,x2:122,y2:145},
+        {x1:158,y1:145,x2:192,y2:194},
+      ]
+    },
+    steps:[
+      {
+        desc:'Call <em>getMaximumPath(1)</em> — root. Tree: [1,2,3,4,5]. Expected: maxSum=11 (path 4→2→5).',
+        active:"n1",returning:null,pathNodes:[],
+        stack:["getMaximumPath(1)"],
+        curr:"1",ml:"—",mr:"—",cm:"—",ret:"—",maxSum:"-∞",maxUpdated:false,
+        log:[{t:"→ getMaximumPath(1)",h:true},{t:"  Tree: [1,2,3,4,5]  expect 11"}]
+      },
+      {
+        desc:'Recurse left → <em>getMaximumPath(2)</em>.',
+        active:"n2",returning:null,pathNodes:[],
+        stack:["getMaximumPath(1)","getMaximumPath(2)"],
+        curr:"2",ml:"—",mr:"—",cm:"—",ret:"—",maxSum:"-∞",maxUpdated:false,
+        log:[{t:"→ getMaximumPath(1)"},{t:"  → getMaximumPath(2)",h:true}]
+      },
+      {
+        desc:'Recurse left of 2 → <em>getMaximumPath(4)</em>. Leaf node.',
+        active:"n4",returning:null,pathNodes:[],
+        stack:["getMaximumPath(1)","getMaximumPath(2)","getMaximumPath(4)"],
+        curr:"4",ml:"—",mr:"—",cm:"—",ret:"—",maxSum:"-∞",maxUpdated:false,
+        log:[{t:"  → getMaximumPath(2)"},{t:"    → getMaximumPath(4)",h:true}]
+      },
+      {
+        desc:'Node 4: leaf. currMax=4+0+0=<span class="hi">4</span>. maxSum=4. Returns 4.',
+        active:null,returning:"n4",pathNodes:["n4"],
+        stack:["getMaximumPath(1)","getMaximumPath(2)"],
+        curr:"4",ml:"0",mr:"0",cm:"4",ret:"4",maxSum:"4",maxUpdated:true,
+        log:[{t:"    → getMaximumPath(4)"},{t:"    currMax=4  maxSum=4",h:true},{t:"    returns 4"}]
+      },
+      {
+        desc:'Back in 2: maxLeft=max(0,4)=4. Recurse right → <em>getMaximumPath(5)</em>.',
+        active:"n5",returning:null,pathNodes:["n4"],
+        stack:["getMaximumPath(1)","getMaximumPath(2)","getMaximumPath(5)"],
+        curr:"5",ml:"—",mr:"—",cm:"—",ret:"—",maxSum:"4",maxUpdated:false,
+        log:[{t:"  → getMaximumPath(2)"},{t:"    ← node 4 returned 4 → maxLeft=4"},{t:"    → getMaximumPath(5)",h:true}]
+      },
+      {
+        desc:'Node 5: leaf. currMax=5+0+0=<span class="hi">5</span>. maxSum updated to 5. Returns 5.',
+        active:null,returning:"n5",pathNodes:["n4","n5"],
+        stack:["getMaximumPath(1)","getMaximumPath(2)"],
+        curr:"5",ml:"0",mr:"0",cm:"5",ret:"5",maxSum:"5",maxUpdated:true,
+        log:[{t:"    → getMaximumPath(5)"},{t:"    currMax=5  maxSum=5",h:true},{t:"    returns 5"}]
+      },
+      {
+        desc:'🎯 Node 2: maxLeft=4, maxRight=max(0,5)=5. currMax=2+4+5=<span class="hi">11</span>! maxSum=11. Path: 4→2→5. Returns 2+max(4,5)=7.',
+        active:null,returning:"n2",pathNodes:["n4","n2","n5"],
+        stack:["getMaximumPath(1)"],
+        curr:"2",ml:"4",mr:"5",cm:"11",ret:"7",maxSum:"11",maxUpdated:true,
+        log:[{t:"  → getMaximumPath(2)"},{t:"  maxLeft=4, maxRight=5"},{t:"  currMax=2+4+5=11  maxSum=11 ✓",h:true},{t:"  returns 2+max(4,5)=7"}]
+      },
+      {
+        desc:'Back in 1: maxLeft=max(0,7)=7. Recurse right → <em>getMaximumPath(3)</em>.',
+        active:"n3",returning:null,pathNodes:["n4","n2","n5"],
+        stack:["getMaximumPath(1)","getMaximumPath(3)"],
+        curr:"3",ml:"—",mr:"—",cm:"—",ret:"—",maxSum:"11",maxUpdated:false,
+        log:[{t:"→ getMaximumPath(1)"},{t:"  ← node 2 returned 7 → maxLeft=7"},{t:"  → getMaximumPath(3)",h:true}]
+      },
+      {
+        desc:'Node 3: leaf. currMax=3. maxSum stays 11. Returns 3.',
+        active:null,returning:"n3",pathNodes:["n4","n2","n5"],
+        stack:["getMaximumPath(1)"],
+        curr:"3",ml:"0",mr:"0",cm:"3",ret:"3",maxSum:"11",maxUpdated:false,
+        log:[{t:"  → getMaximumPath(3)"},{t:"  currMax=3 < 11  no update"},{t:"  returns 3"}]
+      },
+      {
+        desc:'Root node 1: maxLeft=7, maxRight=max(0,3)=3. currMax=1+7+3=11 = equal to maxSum. maxSum stays 11. Returns 1+max(7,3)=8.',
+        active:null,returning:"n1",pathNodes:["n4","n2","n5"],
+        stack:[],
+        curr:"1",ml:"7",mr:"3",cm:"11",ret:"8",maxSum:"11",maxUpdated:false,
+        log:[{t:"→ getMaximumPath(1)"},{t:"  maxLeft=7, maxRight=3"},{t:"  currMax=1+7+3=11 = maxSum (tie, no change)"},{t:"→ return maxSum = 11 ✓",h:true}],
+        final:true
+      }
+    ]
+  },
+
+  {
+    /*
+      Tree (all negatives, lowest value -20 sits at an internal "middle" node):
+
+              -2          ← root
+             /    \
+          -20      -3     ← -20 is the LOWEST value, internal left child
+          /  \        \
+        -6   -4        -1  ← -1 is the best single node → answer
+
+      Post-order trace:
+        getMaximumPath(-6):  leaf, currMax=-6, maxSum=-6,  returns -6
+        getMaximumPath(-4):  leaf, currMax=-4, maxSum=-4,  returns -4
+        getMaximumPath(-20): maxLeft=max(0,-6)=0, maxRight=max(0,-4)=0
+                             currMax=-20+0+0=-20, maxSum stays -4
+                             returns -20+max(0,0)=-20
+        getMaximumPath(-1):  leaf, currMax=-1, maxSum=-1 ✓  returns -1
+        getMaximumPath(-3):  maxLeft=max(0,-20-clamp)=0, maxRight=max(0,-1)=0
+                             Wait: -3 has no left child, right=-1 returns -1
+                             maxLeft=max(0,0)=0 (no left child → null → 0)
+                             maxRight=max(0,-1)=0  (clamped!)
+                             currMax=-3+0+0=-3, maxSum stays -1
+                             returns -3+max(0,0)=-3
+        getMaximumPath(-2):  maxLeft=max(0,-20)=0 (clamped!), maxRight=max(0,-3)=0 (clamped!)
+                             currMax=-2+0+0=-2, maxSum stays -1
+                             returns -2
+
+      Answer: -1  (just the single node -1, everything else is too negative to include)
+
+      KEY LESSON: Even though -20 is an internal node with children, because ALL values
+      are negative, Math.max(0,...) prunes every single arm. Each node stands alone,
+      evaluated only as a single-node path (left=0, right=0). The least negative
+      node (-1) wins. The -20 node is completely "quarantined" — its children can't
+      help it, and it can't help its parent.
+    */
+    label: "Example 5: All-Negative Tree, -20 is lowest internal node",
+    answer: -1,
+    answerLabel: "maxSum = -1",
+    pathNodes: ["na-1"],
+    svgLayout: {
+      nodes: [
+        { id:"na-2",  val:-2,  cx:260, cy:38,  r:26 },
+        { id:"na-20", val:-20, cx:130, cy:125, r:30 },
+        { id:"na-3",  val:-3,  cx:400, cy:125, r:26 },
+        { id:"na-6",  val:-6,  cx:55,  cy:215, r:23 },
+        { id:"na-4",  val:-4,  cx:205, cy:215, r:23 },
+        { id:"na-1",  val:-1,  cx:470, cy:215, r:23 },
+      ],
+      edges: [
+        {x1:237,y1:52, x2:158,y2:109},
+        {x1:283,y1:52, x2:376,y2:109},
+        {x1:107,y1:145,x2:74,  y2:196},
+        {x1:153,y1:145,x2:188, y2:196},
+        {x1:418,y1:145,x2:452, y2:196},
+      ],
+      pathEdges: []
+    },
+    steps: [
+      {
+        desc: '🌲 Tree: [-2, -20, -3, -6, -4, null, -1]. ALL values negative. <span class="neg">-20 is the lowest</span> — sits as an internal node (left child of root). Watch how <em>Math.max(0,...)</em> quarantines every node.',
+        active:"na-2", returning:null, pathNodes:[],
+        stack:["getMaximumPath(-2)"],
+        curr:"-2", ml:"—", mr:"—", cm:"—", ret:"—", maxSum:"-∞", maxUpdated:false,
+        log:[{t:"→ getMaximumPath(-2)  [root]",h:true},{t:"  ALL values are negative!"},{t:"  -20 is lowest — internal node left of root"},{t:"  maxSum starts at -Infinity"}]
+      },
+      {
+        desc: 'Recurse left → <em>getMaximumPath(-20)</em>. This is the lowest value in the tree — sits at an internal position with two children.',
+        active:"na-20", returning:null, pathNodes:[],
+        stack:["getMaximumPath(-2)","getMaximumPath(-20)"],
+        curr:"-20", ml:"—", mr:"—", cm:"—", ret:"—", maxSum:"-∞", maxUpdated:false,
+        log:[{t:"→ getMaximumPath(-2)"},{t:"  → getMaximumPath(-20)",h:true},{t:"  Note: -20 has children -6 and -4"}]
+      },
+      {
+        desc: 'Recurse left of -20 → <em>getMaximumPath(-6)</em>. Leaf node.',
+        active:"na-6", returning:null, pathNodes:[],
+        stack:["getMaximumPath(-2)","getMaximumPath(-20)","getMaximumPath(-6)"],
+        curr:"-6", ml:"—", mr:"—", cm:"—", ret:"—", maxSum:"-∞", maxUpdated:false,
+        log:[{t:"  → getMaximumPath(-20)"},{t:"    → getMaximumPath(-6)",h:true}]
+      },
+      {
+        desc: 'Node -6: leaf. maxLeft=max(0,0)=0, maxRight=0. currMax=-6+0+0=<span class="neg">-6</span>. maxSum=-6. Returns -6. (Parent will clamp this to 0.)',
+        active:null, returning:"na-6", pathNodes:["na-6"],
+        stack:["getMaximumPath(-2)","getMaximumPath(-20)"],
+        curr:"-6", ml:"0", mr:"0", cm:"-6", ret:"-6", maxSum:"-6", maxUpdated:true,
+        log:[{t:"    → getMaximumPath(-6)"},{t:"    currMax=-6+0+0=-6  maxSum=-6",h:true},{t:"    returns -6  (parent will do max(0,-6)=0)"}]
+      },
+      {
+        desc: 'Back in -20: maxLeft=<span class="neg">max(0,-6)=0</span> — arm PRUNED! Recurse right → <em>getMaximumPath(-4)</em>.',
+        active:"na-4", returning:null, pathNodes:["na-6"],
+        stack:["getMaximumPath(-2)","getMaximumPath(-20)","getMaximumPath(-4)"],
+        curr:"-4", ml:"—", mr:"—", cm:"—", ret:"—", maxSum:"-6", maxUpdated:false,
+        log:[{t:"  → getMaximumPath(-20)"},{t:"    ← node -6 returned -6"},{t:"    maxLeft=max(0,-6)=0  ← PRUNED!",h:true},{t:"    → getMaximumPath(-4)"}]
+      },
+      {
+        desc: 'Node -4: leaf. currMax=-4. maxSum updates to <span class="neg">-4</span> (better than -6). Returns -4. (Parent will clamp to 0.)',
+        active:null, returning:"na-4", pathNodes:["na-6","na-4"],
+        stack:["getMaximumPath(-2)","getMaximumPath(-20)"],
+        curr:"-4", ml:"0", mr:"0", cm:"-4", ret:"-4", maxSum:"-4", maxUpdated:true,
+        log:[{t:"    → getMaximumPath(-4)"},{t:"    currMax=-4+0+0=-4  maxSum=-4",h:true},{t:"    returns -4  (parent will do max(0,-4)=0)"}]
+      },
+      {
+        desc: '⚠️ Node <span class="neg">-20</span>: maxLeft=<span class="neg">max(0,-6)=0</span>, maxRight=<span class="neg">max(0,-4)=0</span>. BOTH arms pruned! currMax=-20+0+0=<span class="neg">-20</span>. maxSum stays -4. Returns -20+max(0,0)=<span class="neg">-20</span>. Parent will clamp to 0 — the -20 node is completely quarantined!',
+        active:null, returning:"na-20", pathNodes:["na-6","na-4"],
+        stack:["getMaximumPath(-2)"],
+        curr:"-20", ml:"0", mr:"0", cm:"-20", ret:"-20", maxSum:"-4", maxUpdated:false,
+        log:[{t:"  → getMaximumPath(-20)"},{t:"  maxLeft=max(0,-6)=0  ← PRUNED"},{t:"  maxRight=max(0,-4)=0  ← PRUNED"},{t:"  currMax=-20+0+0=-20  maxSum stays -4",h:true},{t:"  returns -20  (root will do max(0,-20)=0)"}]
+      },
+      {
+        desc: 'Back in root -2: maxLeft=<span class="neg">max(0,-20)=0</span>. -20\'s entire subtree is quarantined! Now recurse right → <em>getMaximumPath(-3)</em>.',
+        active:"na-3", returning:null, pathNodes:["na-6","na-4"],
+        stack:["getMaximumPath(-2)","getMaximumPath(-3)"],
+        curr:"-3", ml:"—", mr:"—", cm:"—", ret:"—", maxSum:"-4", maxUpdated:false,
+        log:[{t:"→ getMaximumPath(-2)"},{t:"  ← node -20 returned -20"},{t:"  maxLeft=max(0,-20)=0  ← ENTIRE SUBTREE PRUNED!",h:true},{t:"  → getMaximumPath(-3)"}]
+      },
+      {
+        desc: 'In -3: no left child (null→0), recurse right → <em>getMaximumPath(-1)</em>.',
+        active:"na-1", returning:null, pathNodes:["na-6","na-4"],
+        stack:["getMaximumPath(-2)","getMaximumPath(-3)","getMaximumPath(-1)"],
+        curr:"-1", ml:"—", mr:"—", cm:"—", ret:"—", maxSum:"-4", maxUpdated:false,
+        log:[{t:"  → getMaximumPath(-3)"},{t:"    left=null → 0"},{t:"    → getMaximumPath(-1)",h:true}]
+      },
+      {
+        desc: '🎯 Node -1: leaf. currMax=-1+0+0=<span class="hi">-1</span>. This is the BEST so far! maxSum=-1. Returns -1. (Parent -3 will clamp to 0.)',
+        active:null, returning:"na-1", pathNodes:["na-1"],
+        stack:["getMaximumPath(-2)","getMaximumPath(-3)"],
+        curr:"-1", ml:"0", mr:"0", cm:"-1", ret:"-1", maxSum:"-1", maxUpdated:true,
+        log:[{t:"    → getMaximumPath(-1)"},{t:"    currMax=-1+0+0=-1  maxSum=-1 ✓",h:true},{t:"    returns -1  (least negative wins!)"}]
+      },
+      {
+        desc: 'Back in -3: maxLeft=max(0,null)=0, maxRight=<span class="neg">max(0,-1)=0</span>. currMax=-3+0+0=<span class="neg">-3</span>. maxSum stays -1. Returns -3+max(0,0)=-3.',
+        active:null, returning:"na-3", pathNodes:["na-1"],
+        stack:["getMaximumPath(-2)"],
+        curr:"-3", ml:"0", mr:"0", cm:"-3", ret:"-3", maxSum:"-1", maxUpdated:false,
+        log:[{t:"  → getMaximumPath(-3)"},{t:"  maxLeft=0 (no left child), maxRight=max(0,-1)=0"},{t:"  currMax=-3+0+0=-3 < -1  no update"},{t:"  returns -3"}]
+      },
+      {
+        desc: 'Root -2: maxLeft=<span class="neg">max(0,-20)=0</span>, maxRight=<span class="neg">max(0,-3)=0</span>. BOTH arms pruned! currMax=-2+0+0=<span class="neg">-2</span>. maxSum stays <span class="hi">-1</span>. The single node -1 is our answer — everything else was too negative!',
+        active:null, returning:"na-2", pathNodes:["na-1"],
+        stack:[],
+        curr:"-2", ml:"0", mr:"0", cm:"-2", ret:"-2", maxSum:"-1", maxUpdated:false,
+        log:[
+          {t:"→ getMaximumPath(-2)"},
+          {t:"  maxLeft=max(0,-20)=0  ← pruned"},
+          {t:"  maxRight=max(0,-3)=0  ← pruned"},
+          {t:"  currMax=-2+0+0=-2 < -1  no update"},
+          {t:"→ return maxSum = -1 ✓  (node -1 wins!)",h:true}
+        ],
+        final:true
+      }
+    ]
+  }
+];
+
+// ─── STATE ────────────────────────────────────────────────────────────────
+let exIdx = 0;
+let cur = 0;
+let playTimer = null;
+
+function getCurrentEx() { return EXAMPLES[exIdx]; }
+function getCurrentSteps() { return getCurrentEx().steps; }
+
+// ─── RENDER SVG ───────────────────────────────────────────────────────────
+function renderSVG(layout, step) {
+  const svg = document.getElementById("tree-svg");
+  const pathNodeSet = new Set(step.pathNodes || []);
+  const activeId = step.active;
+  const returningId = step.returning;
+
+  let html = "";
+
+  // Draw path highlight edges
+  (layout.pathEdges || []).forEach((e,i) => {
+    const visible = step.pathNodes && step.pathNodes.length > 1 && pathNodeSet.size > 1;
+    html += `<line x1="${e.x1}" y1="${e.y1}" x2="${e.x2}" y2="${e.y2}"
+      stroke="${visible ? '#fb923c' : 'transparent'}" stroke-width="3"
+      stroke-linecap="round" opacity="${visible ? 0.7 : 0}"
+      style="transition: opacity .4s, stroke .4s"/>`;
+  });
+
+  // Draw normal edges
+  layout.edges.forEach(e => {
+    html += `<line x1="${e.x1}" y1="${e.y1}" x2="${e.x2}" y2="${e.y2}" stroke="#1e2231" stroke-width="2"/>`;
+  });
+
+  // Draw nodes
+  layout.nodes.forEach(n => {
+    let fill = "#13161d", stroke = "#2a2f3e", sw = "1.5", textFill = "#6b7280";
+    if (n.id === activeId) {
+      fill = "#1e1908"; stroke = "#fb923c"; sw = "2.5"; textFill = "#fb923c";
+    } else if (n.id === returningId) {
+      fill = "#0f1f16"; stroke = "#34d399"; sw = "2.5"; textFill = "#34d399";
+    } else if (pathNodeSet.has(n.id) && n.id !== activeId && n.id !== returningId) {
+      fill = "#1a1808"; stroke = "#fb923c"; sw = "2"; textFill = "#fb923c";
+    }
+
+    html += `<g id="${n.id}">
+      <circle cx="${n.cx}" cy="${n.cy}" r="${n.r}" fill="${fill}" stroke="${stroke}" stroke-width="${sw}" style="transition: all .2s"/>
+      <text x="${n.cx}" y="${n.cy+4}" text-anchor="middle" dominant-baseline="middle"
+        font-family="'JetBrains Mono',monospace" font-size="${String(n.val).length > 3 ? 10 : n.r > 24 ? 14 : 12}" font-weight="700" fill="${textFill}"
+        style="transition: fill .2s">${n.val}</text>
+    </g>`;
+  });
+
+  svg.innerHTML = html;
+}
+
+// ─── RENDER STEP ──────────────────────────────────────────────────────────
+function renderStep(step) {
+  const ex = getCurrentEx();
+  renderSVG(ex.svgLayout, step);
+
+  // Call stack
+  const stackEl = document.getElementById("stack");
+  let sh = step.stack.map((f,i) => {
+    const isTop = i === step.stack.length-1;
+    return `<div class="frame ${isTop?'active':''}">${f}</div>`;
+  }).join("");
+  if (!step.stack.length && step.returning) {
+    sh = `<div class="frame returning">← returned ${step.ret}</div>`;
+  }
+  stackEl.innerHTML = sh;
+
+  // maxSum display
+  const msEl = document.getElementById("maxsum-display");
+  msEl.textContent = step.maxSum;
+  if (step.maxUpdated) {
+    msEl.classList.add("updated");
+    setTimeout(() => msEl.classList.remove("updated"), 500);
+  } else {
+    msEl.classList.remove("updated");
+  }
+
+  // Vars
+  document.getElementById("v-curr").textContent = step.curr;
+  document.getElementById("v-ml").textContent   = step.ml;
+  document.getElementById("v-mr").textContent   = step.mr;
+  document.getElementById("v-cm").textContent   = step.cm;
+  document.getElementById("v-ret").textContent  = step.ret;
+
+  // Log
+  const logEl = document.getElementById("log");
+  logEl.innerHTML = step.log.map(e => `<div class="entry${e.h?' hl':''}">${e.t}</div>`).join("");
+  logEl.scrollTop = logEl.scrollHeight;
+
+  // Controls
+  const steps = getCurrentSteps();
+  document.getElementById("step-label").textContent = `Step ${cur+1} / ${steps.length}`;
+  document.getElementById("step-desc").innerHTML = step.desc;
+  document.getElementById("prog").style.width = ((cur+1)/steps.length*100)+"%";
+
+  const badge = document.getElementById("ans-badge");
+  if (step.final) {
+    badge.style.display = "inline-block";
+    badge.textContent = "✓ " + ex.answerLabel;
+  } else {
+    badge.style.display = "none";
+  }
+
+  document.getElementById("btn-prev").disabled = cur === 0;
+  document.getElementById("btn-next").disabled = cur === steps.length-1;
+}
+
+// ─── NAVIGATION ───────────────────────────────────────────────────────────
+function move(d) {
+  const steps = getCurrentSteps();
+  cur = Math.max(0, Math.min(steps.length-1, cur+d));
+  renderStep(steps[cur]);
+}
+
+function loadExample(idx) {
+  exIdx = idx;
+  cur = 0;
+  stopPlay();
+
+  const ex = EXAMPLES[idx];
+  document.getElementById("example-label").textContent =
+    `// Interactive dry run — ${ex.label}`;
+
+  renderStep(ex.steps[0]);
+}
+
+document.getElementById("examples-row").addEventListener("click", e => {
+  const btn = e.target.closest(".ex-btn");
+  if (!btn) return;
+  document.querySelectorAll(".ex-btn").forEach(b => b.classList.remove("active"));
+  btn.classList.add("active");
+  loadExample(parseInt(btn.dataset.ex));
+});
+
+document.addEventListener("keydown", e => {
+  if (e.key==="ArrowRight"||e.key==="ArrowDown") move(1);
+  if (e.key==="ArrowLeft" ||e.key==="ArrowUp")   move(-1);
+});
+
+function stopPlay() {
+  if (playTimer) { clearInterval(playTimer); playTimer = null; }
+  const btn = document.getElementById("btn-play");
+  btn.textContent = "▶ Play";
+  btn.classList.remove("btn-play-active");
+}
+
+function togglePlay() {
+  const btn = document.getElementById("btn-play");
+  if (playTimer) { stopPlay(); return; }
+  btn.textContent = "⏸ Pause";
+  btn.classList.add("btn-play-active");
+  playTimer = setInterval(() => {
+    const steps = getCurrentSteps();
+    if (cur >= steps.length-1) { stopPlay(); return; }
+    move(1);
+  }, 1500);
+}
+
+// ─── INIT ─────────────────────────────────────────────────────────────────
+loadExample(0);
+</script>
+</body>
+</html>

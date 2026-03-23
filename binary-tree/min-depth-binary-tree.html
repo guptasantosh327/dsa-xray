@@ -1,0 +1,1200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Minimum Depth of Binary Tree — Interactive Dry Run</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Sora:wght@300;400;600;700&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0d0f14;
+      --surface: #13161d;
+      --surface2: #1a1e28;
+      --surface3: #212638;
+      --border: rgba(255,255,255,0.07);
+      --border-mid: rgba(255,255,255,0.12);
+      --text: #e8eaf0;
+      --text-muted: #6b7280;
+      --text-dim: #3d4251;
+      --accent: #7c6ef5;
+      --accent-glow: rgba(124,110,245,0.25);
+      --green: #34d399;
+      --green-bg: rgba(52,211,153,0.1);
+      --amber: #fbbf24;
+      --amber-bg: rgba(251,191,36,0.12);
+      --blue: #60a5fa;
+      --blue-bg: rgba(96,165,250,0.1);
+      --red: #f87171;
+      --red-bg: rgba(248,113,113,0.12);
+      --teal: #2dd4bf;
+      --teal-bg: rgba(45,212,191,0.10);
+      --purple: #c084fc;
+      --purple-bg: rgba(192,132,252,0.1);
+      --mono: 'JetBrains Mono', monospace;
+      --sans: 'Sora', sans-serif;
+    }
+
+    html { scroll-behavior: smooth; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--sans);
+      font-size: 15px;
+      line-height: 1.6;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background-image:
+        linear-gradient(rgba(124,110,245,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(124,110,245,0.03) 1px, transparent 1px);
+      background-size: 40px 40px;
+      pointer-events: none; z-index: 0;
+    }
+
+    .page {
+      position: relative; z-index: 1;
+      max-width: 980px;
+      margin: 0 auto;
+      padding: 3rem 1.5rem 5rem;
+    }
+
+    .back-nav {
+      display: inline-flex; align-items: center; gap: 8px;
+      font-family: var(--mono); font-size: 12px;
+      color: var(--text-muted); text-decoration: none;
+      padding: 7px 14px 7px 10px; border-radius: 8px;
+      border: 1px solid var(--border); background: var(--surface);
+      margin-bottom: 2rem; transition: all .15s;
+    }
+    .back-nav:hover { border-color: var(--border-mid); color: var(--text); }
+
+    header { margin-bottom: 2.5rem; animation: fadeUp .6s ease both; }
+
+    .tag {
+      display: inline-block; font-family: var(--mono); font-size: 11px;
+      font-weight: 500; letter-spacing: .12em; text-transform: uppercase;
+      color: var(--teal); background: var(--teal-bg);
+      border: 1px solid rgba(45,212,191,0.3);
+      padding: 4px 12px; border-radius: 100px; margin-bottom: 1.2rem;
+    }
+
+    h1 {
+      font-size: clamp(1.8rem, 5vw, 2.8rem); font-weight: 700;
+      line-height: 1.15; color: var(--text); margin-bottom: .8rem;
+      letter-spacing: -.02em;
+    }
+    h1 span { color: var(--teal); }
+    .subtitle { font-size: 15px; color: var(--text-muted); max-width: 620px; line-height: 1.7; }
+
+    /* ── TEACHER BOX ── */
+    .teacher-box {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 16px; overflow: hidden;
+      margin-bottom: 2rem; animation: fadeUp .6s ease .04s both;
+    }
+    .teacher-header {
+      display: flex; align-items: center; gap: 10px;
+      padding: 14px 20px; border-bottom: 1px solid var(--border);
+      background: var(--surface2);
+    }
+    .teacher-icon { font-size: 18px; }
+    .teacher-title { font-family: var(--mono); font-size: 11px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--text-dim); }
+    .teacher-body { padding: 20px; display: flex; flex-direction: column; gap: 16px; }
+
+    .concept-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    @media(max-width:640px) { .concept-row { grid-template-columns: 1fr; } }
+
+    .concept-card {
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: 12px; padding: 14px 16px;
+    }
+    .concept-card-head {
+      display: flex; align-items: center; gap: 8px;
+      margin-bottom: 8px;
+    }
+    .concept-card-icon { font-size: 15px; }
+    .concept-card-title { font-family: var(--mono); font-size: 10px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--text-muted); }
+    .concept-card p { font-size: 12px; color: var(--text-muted); line-height: 1.75; }
+    .concept-card p strong { color: var(--text); }
+    .concept-card code { font-family: var(--mono); font-size: 11px; background: var(--surface3); padding: 1px 5px; border-radius: 4px; color: var(--accent); }
+
+    /* The gotcha banner */
+    .gotcha {
+      background: var(--red-bg); border: 1px solid rgba(248,113,113,0.25);
+      border-left: 3px solid var(--red); border-radius: 10px;
+      padding: 14px 18px; font-size: 13px; color: var(--text-muted);
+      font-family: var(--mono); line-height: 1.75;
+    }
+    .gotcha strong { color: var(--red); }
+
+    /* Comparison trees */
+    .compare-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    @media(max-width:640px) { .compare-row { grid-template-columns: 1fr; } }
+
+    .compare-card {
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: 12px; padding: 14px 16px;
+    }
+    .compare-card-head {
+      font-family: var(--mono); font-size: 10px; font-weight: 700;
+      letter-spacing: .1em; text-transform: uppercase; color: var(--text-dim);
+      margin-bottom: 10px;
+    }
+    .compare-card svg { width: 100%; }
+    .compare-card-desc {
+      font-family: var(--mono); font-size: 11px; color: var(--text-muted);
+      margin-top: 8px; line-height: 1.6;
+    }
+    .compare-card-desc .ans { color: var(--teal); font-weight: 700; }
+    .compare-card-desc .warn { color: var(--red); font-weight: 700; }
+
+    /* Step table */
+    .step-table { width: 100%; border-collapse: collapse; font-family: var(--mono); font-size: 11px; }
+    .step-table th { text-align: left; padding: 6px 10px; color: var(--text-dim); font-weight: 700; letter-spacing: .08em; text-transform: uppercase; border-bottom: 1px solid var(--border); }
+    .step-table td { padding: 6px 10px; border-bottom: 1px solid var(--border); color: var(--text-muted); vertical-align: top; }
+    .step-table tr:last-child td { border-bottom: none; }
+    .step-table td.is-leaf { color: var(--green); font-weight: 700; }
+    .step-table td.not-leaf { color: var(--text-dim); }
+    .step-table td.highlight { color: var(--teal); font-weight: 700; }
+
+    /* Key insight */
+    .insight-banner {
+      background: var(--teal-bg); border: 1px solid rgba(45,212,191,0.22);
+      border-left: 3px solid var(--teal); border-radius: 10px;
+      padding: 14px 18px; margin-bottom: 2rem; font-size: 13px;
+      color: var(--text-muted); font-family: var(--mono);
+      animation: fadeUp .6s ease .05s both; line-height: 1.7;
+    }
+    .insight-banner strong { color: var(--teal); }
+
+    /* Example selector */
+    .examples-row {
+      display: flex; gap: 10px; flex-wrap: wrap;
+      margin-bottom: 2rem; animation: fadeUp .6s ease .07s both;
+    }
+    .ex-btn {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 10px 18px; border-radius: 12px;
+      border: 1px solid var(--border); background: var(--surface);
+      cursor: pointer; transition: all .18s;
+      font-family: var(--mono); font-size: 12px;
+      font-weight: 600; color: var(--text-muted); user-select: none;
+    }
+    .ex-btn:hover { border-color: var(--border-mid); color: var(--text); transform: translateY(-2px); }
+    .ex-btn.active { background: var(--teal-bg); border-color: rgba(45,212,191,0.4); color: var(--teal); transform: translateY(-2px); }
+    .ex-badge { font-size: 9px; font-weight: 700; padding: 2px 7px; border-radius: 5px; background: var(--surface3); color: var(--text-dim); }
+    .ex-btn.active .ex-badge { background: rgba(255,255,255,0.1); color: inherit; }
+
+    /* Code */
+    .code-block {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 12px; overflow: hidden; margin-bottom: 2rem;
+      animation: fadeUp .6s ease .1s both;
+    }
+    .code-header {
+      display: flex; align-items: center; gap: 8px;
+      padding: 12px 16px; border-bottom: 1px solid var(--border);
+      background: var(--surface2);
+    }
+    .code-header span { font-family: var(--mono); font-size: 12px; color: var(--text-muted); }
+    .dots { display: flex; gap: 6px; }
+    .dot { width: 10px; height: 10px; border-radius: 50%; }
+    .dot-r { background: #ff5f57; } .dot-y { background: #ffbd2e; } .dot-g { background: #28c940; }
+    pre {
+      padding: 1.25rem 1.5rem; overflow-x: auto;
+      font-family: var(--mono); font-size: 13px; line-height: 1.9; color: #c9d1d9;
+    }
+    .kw { color: #ff79c6; } .fn { color: #50fa7b; } .cm { color: #6272a4; font-style: italic; }
+    .num { color: #bd93f9; } .var { color: #8be9fd; }
+    .hl { background: rgba(45,212,191,0.13); border-radius: 3px; padding: 0 3px; }
+
+    .section-label {
+      font-family: var(--mono); font-size: 11px; font-weight: 500;
+      letter-spacing: .1em; text-transform: uppercase; color: var(--text-dim);
+      margin-bottom: 1rem; margin-top: 2.5rem;
+    }
+
+    /* Visualizer */
+    .viz-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 16px; overflow: hidden; animation: fadeUp .6s ease .2s both;
+    }
+    .progress-bar-wrap { height: 3px; background: var(--border); }
+    .progress-bar-inner {
+      height: 100%;
+      background: linear-gradient(90deg, var(--teal), var(--blue));
+      transition: width .35s cubic-bezier(.4,0,.2,1);
+      border-radius: 0 2px 2px 0;
+    }
+
+    .controls {
+      display: flex; align-items: center; gap: 10px;
+      padding: 14px 20px; border-bottom: 1px solid var(--border);
+      background: var(--surface2); flex-wrap: wrap;
+    }
+    .btn {
+      display: inline-flex; align-items: center; gap: 6px;
+      font-family: var(--mono); font-size: 12px; font-weight: 500;
+      padding: 7px 16px; border-radius: 8px; border: 1px solid var(--border-mid);
+      background: var(--surface3); color: var(--text); cursor: pointer;
+      transition: all .15s; letter-spacing: .02em;
+    }
+    .btn:hover:not(:disabled) { background: var(--accent-glow); border-color: var(--accent); color: var(--accent); }
+    .btn:disabled { opacity: .3; cursor: default; }
+    .btn-play-active {
+      background: var(--teal-bg) !important;
+      border-color: rgba(45,212,191,0.4) !important;
+      color: var(--teal) !important;
+    }
+    .step-info { flex: 1; font-size: 13px; color: var(--text-muted); font-family: var(--mono); }
+    kbd { font-size: 10px; background: var(--surface3); border: 1px solid var(--border-mid); padding: 2px 5px; border-radius: 4px; color: var(--text-muted); font-family: var(--mono); }
+
+    .result-badge {
+      font-family: var(--mono); font-size: 11px; font-weight: 700;
+      letter-spacing: .06em; padding: 4px 12px; border-radius: 100px;
+    }
+    .badge-done { background: var(--teal-bg); color: var(--teal); border: 1px solid rgba(45,212,191,0.3); }
+
+    .step-desc {
+      padding: 12px 20px; font-size: 13px; color: var(--text-muted);
+      background: var(--surface2); border-bottom: 1px solid var(--border);
+      font-family: var(--mono); min-height: 44px; line-height: 1.6;
+    }
+    .step-desc em { color: var(--amber); font-style: normal; }
+    .step-desc .ok { color: var(--green); font-weight: 600; }
+    .step-desc .hi { color: var(--teal); font-weight: 600; }
+    .step-desc .leaf { color: var(--green); font-weight: 700; }
+    .step-desc .not-leaf-warn { color: var(--red); font-weight: 600; }
+
+    /* Main layout */
+    .main-grid { display: grid; grid-template-columns: 1fr 310px; }
+    .left-col { border-right: 1px solid var(--border); display: flex; flex-direction: column; }
+
+    /* Tree panel */
+    .tree-panel { padding: 20px; border-bottom: 1px solid var(--border); }
+    .panel-label {
+      font-family: var(--mono); font-size: 10px; font-weight: 700;
+      letter-spacing: .12em; text-transform: uppercase; color: var(--text-dim); margin-bottom: 10px;
+    }
+
+    /* Queue */
+    .queue-panel { padding: 16px 20px; border-bottom: 1px solid var(--border); }
+    .queue-track {
+      display: flex; align-items: center; gap: 6px;
+      flex-wrap: wrap; min-height: 44px;
+    }
+    .queue-front-label { font-family: var(--mono); font-size: 11px; color: var(--text-dim); margin-right: 4px; }
+    .q-node {
+      display: inline-flex; align-items: center; justify-content: center;
+      min-width: 36px; height: 36px; padding: 0 8px;
+      border-radius: 8px; font-family: var(--mono); font-size: 12px;
+      font-weight: 700; border: 1px solid var(--border-mid);
+      background: var(--surface2); color: var(--text-muted); transition: all .2s;
+    }
+    .q-node.active { background: var(--blue-bg); border-color: rgba(96,165,250,0.5); color: var(--blue); }
+    .q-node.processing { background: var(--amber-bg); border-color: rgba(251,191,36,0.5); color: var(--amber); }
+    .q-node.is-leaf { background: var(--green-bg); border-color: rgba(52,211,153,0.5); color: var(--green); }
+
+    /* Depth display */
+    .depth-panel { padding: 16px 20px; }
+    .depth-track { display: flex; align-items: center; gap: 12px; }
+    .depth-label { font-family: var(--mono); font-size: 11px; color: var(--text-muted); }
+    .depth-boxes { display: flex; gap: 6px; }
+    .depth-box {
+      width: 32px; height: 32px; border-radius: 6px;
+      border: 1px solid var(--border);
+      background: var(--surface2); display: flex; align-items: center;
+      justify-content: center; font-family: var(--mono); font-size: 11px;
+      font-weight: 700; color: var(--text-dim); transition: all .3s;
+    }
+    .depth-box.current { background: var(--teal-bg); border-color: rgba(45,212,191,0.4); color: var(--teal); }
+    .depth-box.done { background: var(--green-bg); border-color: rgba(52,211,153,0.4); color: var(--green); }
+
+    /* Side panel */
+    .side-panel { display: flex; flex-direction: column; }
+
+    /* Depth tracker */
+    .depth-tracker {
+      margin: 14px 16px 12px;
+      padding: 12px 14px; background: var(--surface3);
+      border: 1px solid var(--border-mid); border-radius: 10px;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .depth-tracker-label { font-family: var(--mono); font-size: 11px; color: var(--text-muted); }
+    .depth-tracker-val {
+      font-family: var(--mono); font-size: 20px; font-weight: 700;
+      color: var(--text-dim); transition: color .3s, transform .2s;
+    }
+    .depth-tracker-val.updated { color: var(--teal); transform: scale(1.3); }
+
+    .stack-panel { padding: 14px 16px; border-bottom: 1px solid var(--border); }
+    .call-stack { display: flex; flex-direction: column-reverse; gap: 4px; min-height: 50px; }
+    .frame {
+      padding: 5px 10px; border-radius: 6px; font-size: 10px;
+      font-family: var(--mono); border: 1px solid var(--border);
+      background: var(--surface2); color: var(--text-muted); transition: all .2s;
+    }
+    .frame.active { border-color: rgba(96,165,250,0.4); background: var(--blue-bg); color: var(--blue); }
+    .frame.leaf { border-color: rgba(52,211,153,0.4); background: var(--green-bg); color: var(--green); }
+
+    .vars-panel { padding: 14px 16px; border-bottom: 1px solid var(--border); }
+    .var-row {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 4px 0; border-bottom: 1px solid var(--border); font-size: 12px;
+    }
+    .var-row:last-child { border-bottom: none; }
+    .var-name { font-family: var(--mono); color: var(--text-muted); font-size: 11px; }
+    .var-val { font-family: var(--mono); font-weight: 700; color: var(--amber); font-size: 11px; }
+    .var-val.teal { color: var(--teal); }
+    .var-val.green { color: var(--green); }
+    .var-val.red { color: var(--red); }
+    .var-val.blue { color: var(--blue); }
+
+    .log-panel { padding: 14px 16px; flex: 1; }
+    .log {
+      font-size: 11px; font-family: var(--mono); line-height: 1.9;
+      color: var(--text-dim); max-height: 190px; overflow-y: auto;
+    }
+    .log::-webkit-scrollbar { width: 4px; }
+    .log::-webkit-scrollbar-thumb { background: var(--border-mid); border-radius: 2px; }
+    .entry.hl { color: var(--text); }
+    .entry.leaf { color: var(--green); font-weight: 600; }
+    .entry.skip { color: var(--red); }
+    .entry.done { color: var(--teal); }
+
+    /* Overview section */
+    .overview { margin-top: 2.5rem; animation: fadeUp .6s ease .25s both; }
+    .overview-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+    .overview-full { margin-bottom: 12px; }
+    .ov-card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 18px 20px; position: relative; overflow: hidden; }
+    .ov-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; }
+    .ov-card.blue::before   { background: linear-gradient(90deg, var(--blue), transparent); }
+    .ov-card.green::before  { background: linear-gradient(90deg, var(--green), transparent); }
+    .ov-card.amber::before  { background: linear-gradient(90deg, var(--amber), transparent); }
+    .ov-card.red::before    { background: linear-gradient(90deg, var(--red), transparent); }
+    .ov-card.accent::before { background: linear-gradient(90deg, var(--accent), transparent); }
+    .ov-card.teal::before   { background: linear-gradient(90deg, var(--teal), transparent); }
+    .ov-card-head { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+    .ov-icon { font-size: 16px; }
+    .ov-title { font-family: var(--mono); font-size: 10px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--text-muted); }
+    .ov-card p { font-size: 13px; color: var(--text-muted); line-height: 1.75; }
+    .ov-card p strong { color: var(--text); font-weight: 600; }
+    .ov-card code { font-family: var(--mono); font-size: 11px; background: var(--surface2); padding: 1px 6px; border-radius: 4px; color: var(--accent); }
+    .hint-list { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+    .hint-list li { display: flex; gap: 10px; align-items: flex-start; font-size: 13px; color: var(--text-muted); line-height: 1.65; }
+    .hint-list li .bullet { font-family: var(--mono); font-size: 10px; font-weight: 700; color: var(--accent); background: var(--accent-glow); border: 1px solid rgba(124,110,245,0.25); padding: 2px 7px; border-radius: 4px; flex-shrink: 0; margin-top: 2px; }
+    .hint-list li .bullet.green { color: var(--green); background: var(--green-bg); border-color: rgba(52,211,153,0.25); }
+    .hint-list li .bullet.red { color: var(--red); background: var(--red-bg); border-color: rgba(248,113,113,0.25); }
+    .hint-list li .bullet.teal { color: var(--teal); background: var(--teal-bg); border-color: rgba(45,212,191,0.25); }
+    .edge-list { display: flex; flex-direction: column; gap: 8px; }
+    .edge-item { display: flex; gap: 10px; align-items: flex-start; }
+    .edge-label { font-family: var(--mono); font-size: 9px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; padding: 3px 8px; border-radius: 5px; flex-shrink: 0; margin-top: 2px; }
+    .edge-label.warn { background: var(--red-bg); color: var(--red); border: 1px solid rgba(248,113,113,0.25); }
+    .edge-label.ok { background: var(--green-bg); color: var(--green); border: 1px solid rgba(52,211,153,0.25); }
+    .edge-text { font-size: 12px; color: var(--text-muted); line-height: 1.65; }
+    .edge-text code { font-family: var(--mono); font-size: 11px; background: var(--surface2); padding: 1px 5px; border-radius: 4px; color: var(--accent); }
+    .best-solution { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; margin-bottom: 12px; }
+    .best-solution-header { display: flex; align-items: center; justify-content: space-between; padding: 12px 18px; border-bottom: 1px solid var(--border); background: var(--surface2); }
+    .best-solution-title { display: flex; align-items: center; gap: 8px; font-family: var(--mono); font-size: 11px; font-weight: 700; color: var(--green); letter-spacing: .08em; }
+    .best-solution-pills { display: flex; gap: 6px; flex-wrap: wrap; }
+    .sol-pill { font-family: var(--mono); font-size: 10px; padding: 3px 9px; border-radius: 6px; background: var(--surface3); border: 1px solid var(--border-mid); color: var(--text-muted); }
+    .best-solution pre { padding: 1rem 1.25rem; font-size: 12px; line-height: 1.8; overflow-x: auto; }
+
+    .explanation { margin-top: 2.5rem; animation: fadeUp .6s ease .3s both; }
+    .explain-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 12px; }
+    .explain-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 16px 18px; }
+    .explain-card .icon { font-size: 18px; margin-bottom: 8px; }
+    .explain-card h3 { font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 6px; }
+    .explain-card p { font-size: 12px; color: var(--text-muted); line-height: 1.7; }
+    .explain-card code { font-family: var(--mono); font-size: 11px; background: var(--surface2); padding: 1px 5px; border-radius: 4px; color: var(--accent); }
+    .complexity { display: flex; gap: 10px; margin-top: 1.5rem; flex-wrap: wrap; }
+    .cpill { font-family: var(--mono); font-size: 12px; padding: 6px 14px; border-radius: 8px; border: 1px solid var(--border); background: var(--surface); }
+    .cpill strong { color: var(--accent); font-weight: 700; }
+
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+    @media(max-width:700px) { .main-grid { grid-template-columns: 1fr; } .left-col { border-right: none; border-bottom: 1px solid var(--border); } .overview-grid { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+<div class="page">
+
+  <a class="back-nav" href="../dsa-hub.html">← All visualizers</a>
+
+  <header>
+    <div class="tag">Algorithm Dry Run · LeetCode #111</div>
+    <h1>Minimum <span>Depth</span> of Binary Tree</h1>
+    <p class="subtitle">Step-by-step BFS trace of <code style="font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--accent);background:var(--surface);padding:2px 7px;border-radius:5px;">minDepth</code> — watch the queue drain level by level. The instant you hit a <span style="color:var(--green);font-weight:700">leaf</span>, you're done — that's your answer.</p>
+  </header>
+
+  <!-- ── TEACHER BOX ── -->
+  <div class="teacher-box">
+    <div class="teacher-header">
+      <span class="teacher-icon">🎓</span>
+      <span class="teacher-title">// understanding the problem — read this first!</span>
+    </div>
+    <div class="teacher-body">
+
+      <div class="concept-row">
+        <div class="concept-card">
+          <div class="concept-card-head"><span class="concept-card-icon">📏</span><span class="concept-card-title">What is Depth?</span></div>
+          <p>Depth = the number of nodes on the path from the <strong>root to a node</strong>. Root itself is depth <strong>1</strong>. Its children are depth 2, and so on.</p>
+        </div>
+        <div class="concept-card">
+          <div class="concept-card-head"><span class="concept-card-icon">🍃</span><span class="concept-card-title">What is a Leaf?</span></div>
+          <p>A <strong>leaf node</strong> = a node with <strong>zero children</strong>. Both <code>left === null</code> AND <code>right === null</code>. This is the only valid "floor" you can stop at.</p>
+        </div>
+      </div>
+
+      <div class="gotcha">
+        ⚠️ <strong>The Classic Gotcha — don't make this mistake!</strong><br/>
+        If a node has only ONE child (say, left child exists but right doesn't), it is <strong>NOT a leaf</strong>. You CANNOT stop there. You must go deeper on the side that has a child. This is what makes Minimum Depth harder than it looks.
+      </div>
+
+      <div class="compare-row">
+        <div class="compare-card">
+          <div class="compare-card-head">// correct tree — answer = 2</div>
+          <svg viewBox="0 0 220 130" style="max-height:110px">
+            <line x1="110" y1="34" x2="60" y2="74" stroke="#1e2231" stroke-width="2"/>
+            <line x1="110" y1="34" x2="164" y2="74" stroke="#1e2231" stroke-width="2"/>
+            <circle cx="110" cy="26" r="22" fill="#13161d" stroke="#2dd4bf" stroke-width="2"/>
+            <text x="110" y="30" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="13" font-weight="700" fill="#2dd4bf">3</text>
+            <circle cx="58" cy="82" r="20" fill="#13161d" stroke="#34d399" stroke-width="2"/>
+            <text x="58" y="86" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="13" font-weight="700" fill="#34d399">9</text>
+            <text x="40" y="62" font-family="'JetBrains Mono',monospace" font-size="9" fill="#34d399">← LEAF!</text>
+            <circle cx="166" cy="82" r="20" fill="#13161d" stroke="#3d4251" stroke-width="1.5"/>
+            <text x="166" y="86" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="13" font-weight="700" fill="#6b7280">20</text>
+            <line x1="150" y1="99" x2="130" y2="120" stroke="#1e2231" stroke-width="1.5"/>
+            <line x1="182" y1="99" x2="198" y2="120" stroke="#1e2231" stroke-width="1.5"/>
+            <circle cx="130" cy="124" r="14" fill="#13161d" stroke="#3d4251" stroke-width="1.5"/>
+            <text x="130" y="128" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="10" font-weight="700" fill="#6b7280">15</text>
+            <circle cx="200" cy="124" r="14" fill="#13161d" stroke="#3d4251" stroke-width="1.5"/>
+            <text x="200" y="128" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="10" font-weight="700" fill="#6b7280">7</text>
+          </svg>
+          <div class="compare-card-desc">BFS hits node 9 first (level 2). 9 has no children → <span class="ans">leaf found! Answer = 2</span>. We stop immediately, never visiting 20's subtree.</div>
+        </div>
+        <div class="compare-card">
+          <div class="compare-card-head">// gotcha tree — answer = 2 (NOT 1!)</div>
+          <svg viewBox="0 0 220 130" style="max-height:110px">
+            <line x1="110" y1="34" x2="80" y2="74" stroke="#1e2231" stroke-width="2"/>
+            <circle cx="110" cy="26" r="22" fill="#13161d" stroke="#f87171" stroke-width="2"/>
+            <text x="110" y="30" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="13" font-weight="700" fill="#f87171">1</text>
+            <text x="135" y="22" font-family="'JetBrains Mono',monospace" font-size="8" fill="#f87171">NOT leaf!</text>
+            <text x="135" y="32" font-family="'JetBrains Mono',monospace" font-size="8" fill="#f87171">(has child)</text>
+            <circle cx="78" cy="82" r="20" fill="#13161d" stroke="#34d399" stroke-width="2"/>
+            <text x="78" y="86" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="13" font-weight="700" fill="#34d399">2</text>
+            <text x="32" y="82" font-family="'JetBrains Mono',monospace" font-size="8" fill="#34d399">← LEAF</text>
+            <text x="148" y="82" font-family="'JetBrains Mono',monospace" font-size="10" fill="#3d4251">null</text>
+          </svg>
+          <div class="compare-card-desc">Node 1 has a left child (2) but no right child. <span class="warn">Node 1 is NOT a leaf!</span> Must go to depth 2 where node 2 is the actual leaf. <span class="ans">Answer = 2</span>.</div>
+        </div>
+      </div>
+
+      <div class="concept-card">
+        <div class="concept-card-head"><span class="concept-card-icon">⚡</span><span class="concept-card-title">Why BFS is better than DFS for this problem</span></div>
+        <p>With <strong>BFS</strong> you explore level by level. The <strong>very first leaf</strong> you see is at the minimum depth — <strong>stop immediately</strong>! With DFS, you'd have to explore the entire tree and track the minimum across all leaf depths. BFS gives an early exit win.</p>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="insight-banner">
+    ⚡ <strong>The only leaf check you need:</strong> <code style="color:var(--amber)">if (!curr.left && !curr.right) return depth</code> — when BOTH children are null, you found a leaf. Return the current depth immediately. BFS guarantees this is the shallowest possible leaf.
+  </div>
+
+  <!-- Example selector -->
+  <p class="section-label">// choose an example</p>
+  <div class="examples-row" id="examples-row">
+    <button class="ex-btn active" data-ex="0">Example 1 <span class="ex-badge">Standard</span></button>
+    <button class="ex-btn" data-ex="1">Example 2 <span class="ex-badge">Gotcha!</span></button>
+    <button class="ex-btn" data-ex="2">Example 3 <span class="ex-badge">Single</span></button>
+    <button class="ex-btn" data-ex="3">Example 4 <span class="ex-badge">Deep</span></button>
+  </div>
+
+  <!-- Code -->
+  <div class="code-block">
+    <div class="code-header">
+      <div class="dots"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div></div>
+      <span>minDepth.js</span>
+    </div>
+    <pre><span class="kw">var</span> <span class="fn">minDepth</span> = <span class="kw">function</span>(<span class="var">root</span>) {
+    <span class="kw">if</span> (!<span class="var">root</span>) <span class="kw">return</span> <span class="num">0</span>                       <span class="cm">// empty tree → 0</span>
+
+    <span class="kw">let</span> <span class="var">queue</span> = [<span class="var">root</span>]                       <span class="cm">// seed BFS queue with root</span>
+    <span class="kw">let</span> <span class="var">depth</span> = <span class="num">1</span>                              <span class="cm">// root itself is depth 1</span>
+
+    <span class="kw">while</span> (<span class="var">queue</span>.length) {
+        <span class="kw">let</span> <span class="var">len</span> = <span class="var">queue</span>.length               <span class="cm">// snapshot: nodes at THIS level</span>
+
+        <span class="kw">for</span> (<span class="kw">let</span> <span class="var">i</span> = <span class="num">0</span>; <span class="var">i</span> &lt; <span class="var">len</span>; <span class="var">i</span>++) {
+            <span class="kw">let</span> <span class="var">curr</span> = <span class="var">queue</span>.<span class="fn">shift</span>()
+
+            <span class="hl"><span class="kw">if</span> (!<span class="var">curr</span>.left &amp;&amp; !<span class="var">curr</span>.right) {       <span class="cm">// ← LEAF CHECK: no children at all</span>
+                <span class="kw">return</span> <span class="var">depth</span>                    <span class="cm">// first leaf = minimum depth!</span>
+            }</span>
+
+            <span class="kw">if</span> (<span class="var">curr</span>.left)  <span class="var">queue</span>.<span class="fn">push</span>(<span class="var">curr</span>.left)
+            <span class="kw">if</span> (<span class="var">curr</span>.right) <span class="var">queue</span>.<span class="fn">push</span>(<span class="var">curr</span>.right)
+        }
+
+        <span class="var">depth</span>++                                <span class="cm">// done with this level → go deeper</span>
+    }
+
+    <span class="kw">return</span> <span class="var">depth</span>
+};</pre>
+  </div>
+
+  <p class="section-label" id="example-label">// Interactive dry run — Example 1: [3,9,20,null,null,15,7] → answer: 2</p>
+
+  <!-- Visualizer -->
+  <div class="viz-card">
+    <div class="progress-bar-wrap">
+      <div class="progress-bar-inner" id="prog" style="width:8%"></div>
+    </div>
+
+    <div class="controls">
+      <button class="btn" id="btn-prev" onclick="move(-1)" disabled>← Prev</button>
+      <button class="btn" id="btn-play" onclick="togglePlay()">▶ Play</button>
+      <button class="btn" id="btn-next" onclick="move(1)">Next →</button>
+      <span class="step-info" id="step-label">Step 1 / ?</span>
+      <span style="font-family:var(--mono);font-size:11px;color:var(--text-dim);display:flex;gap:4px;align-items:center"><kbd>←</kbd><kbd>→</kbd></span>
+      <span class="result-badge badge-done" id="ans-badge" style="display:none">✓ minDepth = ?</span>
+    </div>
+
+    <div class="step-desc" id="step-desc">Loading...</div>
+
+    <div class="main-grid">
+      <!-- Left col -->
+      <div class="left-col">
+        <div class="tree-panel">
+          <div class="panel-label">// binary tree — <span id="tree-label" style="color:var(--text-muted);font-weight:400">[3, 9, 20, null, null, 15, 7]</span></div>
+          <svg id="tree-svg" viewBox="0 0 500 280" width="100%"></svg>
+        </div>
+
+        <div class="queue-panel">
+          <div class="panel-label">// BFS queue (front → back) — <span id="level-indicator" style="color:var(--teal)">Level 1</span></div>
+          <div class="queue-track" id="queue-track">
+            <span class="queue-front-label">front →</span>
+          </div>
+        </div>
+
+        <div class="depth-panel">
+          <div class="panel-label">// depth ladder — current depth highlighted</div>
+          <div class="depth-track">
+            <span class="depth-label">depth =</span>
+            <div class="depth-boxes" id="depth-boxes"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Side panel -->
+      <div class="side-panel">
+        <div style="padding:14px 16px 0;">
+          <div class="panel-label">// current depth</div>
+          <div class="depth-tracker">
+            <span class="depth-tracker-label">depth =</span>
+            <span class="depth-tracker-val" id="depth-display">1</span>
+          </div>
+        </div>
+
+        <div class="stack-panel">
+          <div class="panel-label">// BFS loop state</div>
+          <div class="call-stack" id="stack"></div>
+        </div>
+
+        <div class="vars-panel">
+          <div class="panel-label">// variables</div>
+          <div class="var-row"><span class="var-name">depth</span>      <span class="var-val teal"  id="v-depth">1</span></div>
+          <div class="var-row"><span class="var-name">len (snap)</span> <span class="var-val"       id="v-len">—</span></div>
+          <div class="var-row"><span class="var-name">i</span>          <span class="var-val"       id="v-i">—</span></div>
+          <div class="var-row"><span class="var-name">curr.val</span>   <span class="var-val blue"  id="v-curr">—</span></div>
+          <div class="var-row"><span class="var-name">is leaf?</span>   <span class="var-val"       id="v-leaf">—</span></div>
+        </div>
+
+        <div class="log-panel">
+          <div class="panel-label">// execution log</div>
+          <div class="log" id="log"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Overview -->
+  <div class="overview">
+    <p class="section-label">// problem overview — everything you need for revision</p>
+
+    <div class="overview-grid">
+      <div class="ov-card blue">
+        <div class="ov-card-head"><span class="ov-icon">📋</span><span class="ov-title">What the problem is asking</span></div>
+        <p>Given a binary tree, find the <strong>minimum depth</strong> — the number of nodes along the shortest path from the root down to the <strong>nearest leaf node</strong>.</p>
+        <p style="margin-top:8px">A <strong>leaf</strong> is a node with <strong>no children at all</strong>. A node with one child is NOT a leaf — you must continue deeper on that side.</p>
+      </div>
+      <div class="ov-card teal">
+        <div class="ov-card-head"><span class="ov-icon">💡</span><span class="ov-title">Core intuition</span></div>
+        <p>Use <strong>BFS level by level</strong>. At each level, check every node. The <strong>very first leaf</strong> you encounter is at the minimum depth. Return immediately — BFS guarantees it's the shallowest one.</p>
+        <p style="margin-top:8px">This is better than DFS because with DFS you'd traverse the whole tree. BFS gives an <strong>early exit</strong> — sometimes saving a lot of work.</p>
+      </div>
+    </div>
+
+    <div class="overview-grid">
+      <div class="ov-card accent">
+        <div class="ov-card-head"><span class="ov-icon">🧩</span><span class="ov-title">Hints to reach the solution</span></div>
+        <ul class="hint-list">
+          <li><span class="bullet">1</span>Start with standard BFS. Queue seeded with root. <code>depth = 1</code> (root is level 1).</li>
+          <li><span class="bullet">2</span>Snapshot <code>len = queue.length</code> at each level so you know when to increment depth.</li>
+          <li><span class="bullet teal">3</span>At each node: check <code>!curr.left && !curr.right</code>. If BOTH are null → leaf! Return depth immediately.</li>
+          <li><span class="bullet green">4</span>After the inner loop finishes (all nodes at this level processed), do <code>depth++</code> and continue.</li>
+        </ul>
+      </div>
+      <div class="ov-card amber">
+        <div class="ov-card-head"><span class="ov-icon">⚡</span><span class="ov-title">Key trick / pattern</span></div>
+        <p><strong>The critical difference from Max Depth:</strong> In max depth you always visit the entire tree. In min depth, BFS lets you stop at the very first leaf. Once found, <code>return depth</code> immediately — don't wait for the level to finish.</p>
+        <p style="margin-top:8px"><strong>Why depth starts at 1:</strong> The root node itself counts as depth 1 (it's on the path). If root is a leaf (single node tree), we return 1 immediately.</p>
+        <p style="margin-top:8px"><strong>The one-child trap:</strong> A node with one child looks "shallow" but can't be a leaf. BFS naturally handles this — those nodes still enqueue their existing child, so traversal continues.</p>
+      </div>
+    </div>
+
+    <div class="overview-full">
+      <div class="ov-card red">
+        <div class="ov-card-head"><span class="ov-icon">⚠️</span><span class="ov-title">Edge cases to watch out for</span></div>
+        <div class="edge-list">
+          <div class="edge-item"><span class="edge-label warn">null</span><span class="edge-text"><strong>Empty tree (<code>root = null</code>):</strong> Return 0. An empty tree has no nodes, so depth = 0. Handle this before creating the queue.</span></div>
+          <div class="edge-item"><span class="edge-label warn">one child</span><span class="edge-text"><strong>Node with only one child:</strong> e.g. tree = [1, 2]. Node 1 has left child 2 but no right. Minimum depth is 2, NOT 1. The check <code>!curr.left && !curr.right</code> (both must be null) correctly skips node 1.</span></div>
+          <div class="edge-item"><span class="edge-label warn">single</span><span class="edge-text"><strong>Single node tree:</strong> Root is both root and leaf. <code>!root.left && !root.right</code> is true at depth=1. Returns 1 correctly.</span></div>
+          <div class="edge-item"><span class="edge-label ok">note</span><span class="edge-text"><strong>DFS alternative works too:</strong> Recursively, min depth = <code>1 + min(leftDepth, rightDepth)</code>, BUT you must special-case when only one child exists: if left is null, return <code>1 + rightDepth</code>. The BFS approach avoids this special casing entirely.</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="overview-full">
+      <div class="best-solution">
+        <div class="best-solution-header">
+          <span class="best-solution-title">✦ Best solution for learning</span>
+          <div class="best-solution-pills">
+            <span class="sol-pill">O(n) time</span>
+            <span class="sol-pill">O(n) space</span>
+            <span class="sol-pill">BFS level-order</span>
+            <span class="sol-pill">Early exit on leaf</span>
+          </div>
+        </div>
+        <pre><span class="kw">var</span> <span class="fn">minDepth</span> = <span class="kw">function</span>(<span class="var">root</span>) {
+  <span class="kw">if</span> (!<span class="var">root</span>) <span class="kw">return</span> <span class="num">0</span>;                     <span class="cm">// empty tree</span>
+
+  <span class="kw">let</span> <span class="var">queue</span> = [<span class="var">root</span>];
+  <span class="kw">let</span> <span class="var">depth</span> = <span class="num">1</span>;                             <span class="cm">// root is depth 1</span>
+
+  <span class="kw">while</span> (<span class="var">queue</span>.length) {
+    <span class="kw">let</span> <span class="var">len</span> = <span class="var">queue</span>.length;                 <span class="cm">// nodes at this level</span>
+
+    <span class="kw">for</span> (<span class="kw">let</span> <span class="var">i</span> = <span class="num">0</span>; <span class="var">i</span> &lt; <span class="var">len</span>; <span class="var">i</span>++) {
+      <span class="kw">let</span> <span class="var">curr</span> = <span class="var">queue</span>.<span class="fn">shift</span>();
+
+      <span class="cm">// ← THE KEY CHECK: both children must be null to be a leaf</span>
+      <span class="kw">if</span> (!<span class="var">curr</span>.left &amp;&amp; !<span class="var">curr</span>.right) <span class="kw">return</span> <span class="var">depth</span>;
+
+      <span class="kw">if</span> (<span class="var">curr</span>.left)  <span class="var">queue</span>.<span class="fn">push</span>(<span class="var">curr</span>.left);
+      <span class="kw">if</span> (<span class="var">curr</span>.right) <span class="var">queue</span>.<span class="fn">push</span>(<span class="var">curr</span>.right);
+    }
+
+    <span class="var">depth</span>++;                                  <span class="cm">// next level</span>
+  }
+
+  <span class="kw">return</span> <span class="var">depth</span>;
+};
+
+<span class="cm">// KEY RULES:
+// 1. Leaf = !curr.left && !curr.right  (BOTH null, not just one)
+// 2. BFS guarantees first leaf found = minimum depth leaf
+// 3. Return depth IMMEDIATELY when leaf found (early exit)
+// 4. depth starts at 1 (root counts as level 1)
+// 5. depth++ only after finishing ALL nodes at the current level</span></pre>
+      </div>
+    </div>
+  </div>
+
+  <div class="explanation">
+    <p class="section-label">// how it works</p>
+    <div class="explain-grid">
+      <div class="explain-card">
+        <div class="icon">🔍</div>
+        <h3>BFS = Level by Level</h3>
+        <p>Queue processes all nodes at depth 1, then all at depth 2, and so on. This guarantees the first leaf you see is at the minimum depth. You never need to go deeper once found.</p>
+      </div>
+      <div class="explain-card">
+        <div class="icon">🍃</div>
+        <h3>Leaf = both children null</h3>
+        <p>The check <code>!curr.left && !curr.right</code> is the entire algorithm's core. One null child → not a leaf, keep going. Both null → leaf, return immediately.</p>
+      </div>
+      <div class="explain-card">
+        <div class="icon">📸</div>
+        <h3>len snapshot</h3>
+        <p>Save <code>len = queue.length</code> before the loop. This tells you exactly how many nodes are on the current level. After processing all of them, <code>depth++</code>.</p>
+      </div>
+      <div class="explain-card">
+        <div class="icon">🚀</div>
+        <h3>Early exit advantage</h3>
+        <p>Unlike max depth where you visit every node, min depth exits the moment the first leaf is found. In best case (balanced tree), you only visit ~half the nodes.</p>
+      </div>
+    </div>
+    <div class="complexity">
+      <div class="cpill">Time: <strong>O(n)</strong> — worst case all nodes visited</div>
+      <div class="cpill">Space: <strong>O(n)</strong> — queue can hold one full level</div>
+      <div class="cpill">Best case: <strong>O(n/2)</strong> for balanced tree</div>
+      <div class="cpill">Pattern: <strong>BFS early exit</strong></div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ─── EXAMPLES ──────────────────────────────────────────────────────────────
+
+const EXAMPLES = [
+  {
+    /* 
+         3
+        / \
+       9   20
+          /  \
+         15   7
+      BFS: Level 1 → [3]. Check 3: has children → not leaf.
+           Level 2 → [9, 20]. Check 9: NO children → LEAF! depth=2 → return 2.
+    */
+    label: "Example 1: [3, 9, 20, null, null, 15, 7]",
+    treeLabel: "[3, 9, 20, null, null, 15, 7]",
+    answer: 2,
+    maxDepth: 3,
+    svgLayout: {
+      nodes: [
+        { id:"n3",  val:3,  cx:250, cy:38,  r:26 },
+        { id:"n9",  val:9,  cx:130, cy:120, r:24 },
+        { id:"n20", val:20, cx:380, cy:120, r:24 },
+        { id:"n15", val:15, cx:308, cy:200, r:21 },
+        { id:"n7",  val:7,  cx:452, cy:200, r:21 },
+      ],
+      edges:[
+        {x1:230,y1:52, x2:152,y2:104},
+        {x1:270,y1:52, x2:358,y2:104},
+        {x1:364,y1:140,x2:324,y2:183},
+        {x1:396,y1:140,x2:434,y2:183},
+      ]
+    },
+    steps: [
+      {
+        desc: 'Initialize: <em>queue=[3]</em>, depth=1. BFS starts. Level 1 has 1 node.',
+        activeNodes:["n3"], processingNode:null, leafNode:null,
+        queue:[{v:3}], depth:1, len:"1", i:"—", curr:"—", isLeaf:"—",
+        level:"Level 1",
+        stack:["while(queue.length)  depth=1"],
+        log:[{t:"minDepth([3,9,20,null,null,15,7])",h:true},{t:"queue=[3]  depth=1"}]
+      },
+      {
+        desc: '<em>Level 1, i=0</em>: Dequeue <em>curr=3</em>. Check: has left(9) ✓ → <span class="not-leaf-warn">NOT a leaf!</span> Enqueue children 9 and 20.',
+        activeNodes:[], processingNode:"n3", leafNode:null,
+        queue:[{v:9},{v:20}], depth:1, len:"1", i:"0", curr:"3", isLeaf:"✗ has children",
+        level:"Level 1",
+        stack:["while → Level 1", "  i=0  curr=3"],
+        log:[{t:"Level 1 ─── len=1",h:true},{t:"  i=0: dequeue curr=3"},{t:"  has left(9) → NOT a leaf"},{t:"  enqueue 9 and 20"}]
+      },
+      {
+        desc: '<em>Level 1 done.</em> No leaf found. <em>depth++ → 2</em>. Queue now has Level 2 nodes: [9, 20].',
+        activeNodes:["n9","n20"], processingNode:null, leafNode:null,
+        queue:[{v:9},{v:20}], depth:2, len:"—", i:"—", curr:"—", isLeaf:"—",
+        level:"Level 2",
+        stack:["while → depth=2"],
+        log:[{t:"Level 1 done — no leaf found"},{t:"depth++ → 2",h:true},{t:"Level 2: queue=[9,20]  len=2"}]
+      },
+      {
+        desc: '<em>Level 2, i=0</em>: Dequeue <em>curr=9</em>. Check: left=null ✓, right=null ✓ → <span class="leaf">🍃 IT\'S A LEAF!</span> <span class="ok">Return depth=2 immediately!</span>',
+        activeNodes:[], processingNode:null, leafNode:"n9",
+        queue:[{v:20}], depth:2, len:"2", i:"0", curr:"9", isLeaf:"✓ LEAF!",
+        level:"Level 2",
+        stack:["while → Level 2", "  i=0: curr=9 → LEAF ✓"],
+        log:[{t:"Level 2 ─── len=2",h:true},{t:"  i=0: dequeue curr=9"},{t:"  !curr.left && !curr.right → TRUE!",h:true},{t:"  🍃 LEAF FOUND at depth=2 → return 2 ✓",h:true}],
+        final:true
+      }
+    ]
+  },
+
+  {
+    /*
+         1
+        /
+       2
+      The GOTCHA! Node 1 has only left child → NOT a leaf.
+      BFS: Level 1 → [1]. Check 1: has left child → NOT leaf.
+           Level 2 → [2]. Check 2: NO children → LEAF! depth=2 → return 2.
+    */
+    label: "Example 2 (GOTCHA): [1, 2] — one-child trap",
+    treeLabel: "[1, 2]",
+    answer: 2,
+    maxDepth: 2,
+    svgLayout: {
+      nodes: [
+        { id:"n1", val:1, cx:250, cy:50,  r:28 },
+        { id:"n2", val:2, cx:140, cy:150, r:26 },
+      ],
+      edges:[
+        {x1:228,y1:66, x2:162,y2:132},
+      ],
+      nullNodes:[
+        { x:350, y:150, label:"null" }
+      ]
+    },
+    steps: [
+      {
+        desc: 'GOTCHA tree: [1, 2]. Node 1 only has a left child. Many students think the answer is 1 — watch why it\'s wrong.',
+        activeNodes:["n1"], processingNode:null, leafNode:null,
+        queue:[{v:1}], depth:1, len:"1", i:"—", curr:"—", isLeaf:"—",
+        level:"Level 1",
+        stack:["while(queue.length)  depth=1"],
+        log:[{t:"GOTCHA TREE: [1, 2]",h:true},{t:"Node 1 has left child, no right child"},{t:"Is node 1 a leaf? WATCH CAREFULLY"}]
+      },
+      {
+        desc: '<em>Level 1, i=0</em>: Dequeue <em>curr=1</em>. Check: <span class="not-leaf-warn">curr.left = node(2) — NOT null!</span> The condition <code>!left && !right</code> is FALSE. Node 1 is NOT a leaf even though it has only one child.',
+        activeNodes:[], processingNode:"n1", leafNode:null,
+        queue:[{v:2}], depth:1, len:"1", i:"0", curr:"1", isLeaf:"✗ has left child",
+        level:"Level 1",
+        stack:["while → Level 1", "  i=0  curr=1"],
+        log:[{t:"Level 1 ─── len=1",h:true},{t:"  i=0: dequeue curr=1"},{t:"  curr.left=node(2)  curr.right=null"},{t:"  !left&&!right? → FALSE  (left exists!)",h:true},{t:"  NOT a leaf → enqueue left(2)"}]
+      },
+      {
+        desc: 'Level 1 done. No leaf. <em>depth++ → 2</em>. Queue: [2]. Now checking Level 2.',
+        activeNodes:["n2"], processingNode:null, leafNode:null,
+        queue:[{v:2}], depth:2, len:"—", i:"—", curr:"—", isLeaf:"—",
+        level:"Level 2",
+        stack:["while → depth=2"],
+        log:[{t:"Level 1 done — no leaf"},{t:"depth++ → 2",h:true},{t:"Level 2: queue=[2]  len=1"}]
+      },
+      {
+        desc: '<em>Level 2, i=0</em>: Dequeue <em>curr=2</em>. Check: left=null ✓ AND right=null ✓ → <span class="leaf">🍃 LEAF!</span> <span class="ok">Return depth=2</span>. NOT 1 — we had to go deeper!',
+        activeNodes:[], processingNode:null, leafNode:"n2",
+        queue:[], depth:2, len:"1", i:"0", curr:"2", isLeaf:"✓ LEAF!",
+        level:"Level 2",
+        stack:["while → Level 2", "  i=0: curr=2 → LEAF ✓"],
+        log:[{t:"Level 2 ─── len=1",h:true},{t:"  i=0: dequeue curr=2"},{t:"  !curr.left && !curr.right → TRUE!",h:true},{t:"  🍃 LEAF at depth=2  (NOT 1!) → return 2 ✓",h:true}],
+        final:true
+      }
+    ]
+  },
+
+  {
+    /*  Single node: root=5. It has no children → it IS a leaf at depth=1. */
+    label: "Example 3: [5] — Single Node",
+    treeLabel: "[5]",
+    answer: 1,
+    maxDepth: 1,
+    svgLayout: {
+      nodes:[{ id:"n5", val:5, cx:250, cy:80, r:30 }],
+      edges:[]
+    },
+    steps: [
+      {
+        desc: 'Single node tree. Root itself is the only node. Is it a leaf?',
+        activeNodes:["n5"], processingNode:null, leafNode:null,
+        queue:[{v:5}], depth:1, len:"1", i:"—", curr:"—", isLeaf:"—",
+        level:"Level 1",
+        stack:["while → depth=1"],
+        log:[{t:"Single node tree: [5]",h:true},{t:"queue=[5]  depth=1"}]
+      },
+      {
+        desc: '<em>Level 1, i=0</em>: Dequeue <em>curr=5</em>. left=null AND right=null → <span class="leaf">🍃 LEAF!</span> Root is its own leaf! <span class="ok">Return depth=1</span>.',
+        activeNodes:[], processingNode:null, leafNode:"n5",
+        queue:[], depth:1, len:"1", i:"0", curr:"5", isLeaf:"✓ LEAF!",
+        level:"Level 1",
+        stack:["while → Level 1", "  i=0: curr=5 → LEAF ✓"],
+        log:[{t:"Level 1 ─── len=1",h:true},{t:"  i=0: dequeue curr=5"},{t:"  !left && !right → TRUE!",h:true},{t:"  🍃 Root is a leaf! return depth=1 ✓",h:true}],
+        final:true
+      }
+    ]
+  },
+
+  {
+    /*
+          1
+         / \
+        2    3
+       / \
+      4    5
+      Min leaf = 3 at depth 2.
+    */
+    label: "Example 4: [1, 2, 3, 4, 5] — Early Exit",
+    treeLabel: "[1, 2, 3, 4, 5]",
+    answer: 2,
+    maxDepth: 3,
+    svgLayout: {
+      nodes:[
+        {id:"n1",val:1,cx:250,cy:38,r:26},
+        {id:"n2",val:2,cx:130,cy:118,r:24},
+        {id:"n3",val:3,cx:380,cy:118,r:24},
+        {id:"n4",val:4,cx:62, cy:200,r:21},
+        {id:"n5",val:5,cx:200,cy:200,r:21},
+      ],
+      edges:[
+        {x1:230,y1:52,x2:152,y2:102},
+        {x1:270,y1:52,x2:358,y2:102},
+        {x1:112,y1:138,x2:78, y2:183},
+        {x1:148,y1:138,x2:183,y2:183},
+      ]
+    },
+    steps:[
+      {
+        desc:'Initialize: <em>queue=[1]</em>, depth=1. BFS starts. Note: node 3 at Level 2 is a leaf — BFS will find it before ever visiting Level 3.',
+        activeNodes:["n1"], processingNode:null, leafNode:null,
+        queue:[{v:1}], depth:1, len:"1", i:"—", curr:"—", isLeaf:"—",
+        level:"Level 1",
+        stack:["while → depth=1"],
+        log:[{t:"Tree: [1,2,3,4,5]  expect answer=2",h:true},{t:"Node 3 (right child) is a leaf at depth 2"},{t:"queue=[1]  depth=1"}]
+      },
+      {
+        desc:'<em>Level 1, i=0</em>: Dequeue <em>curr=1</em>. Has both children → <span class="not-leaf-warn">NOT a leaf</span>. Enqueue 2 and 3.',
+        activeNodes:[], processingNode:"n1", leafNode:null,
+        queue:[{v:2},{v:3}], depth:1, len:"1", i:"0", curr:"1", isLeaf:"✗ both children",
+        level:"Level 1",
+        stack:["while → Level 1","  i=0  curr=1"],
+        log:[{t:"Level 1 ─── len=1"},{t:"  i=0: curr=1 — has children → NOT leaf"},{t:"  enqueue 2, 3"}]
+      },
+      {
+        desc:'Level 1 done. <em>depth++ → 2</em>. Level 2 queue: [2, 3]. Checking both nodes now.',
+        activeNodes:["n2","n3"], processingNode:null, leafNode:null,
+        queue:[{v:2},{v:3}], depth:2, len:"—", i:"—", curr:"—", isLeaf:"—",
+        level:"Level 2",
+        stack:["while → depth=2"],
+        log:[{t:"Level 1 done — no leaf"},{t:"depth++ → 2",h:true},{t:"Level 2: queue=[2,3]  len=2"}]
+      },
+      {
+        desc:'<em>Level 2, i=0</em>: Dequeue <em>curr=2</em>. Has left(4) → <span class="not-leaf-warn">NOT a leaf</span>. Enqueue 4 and 5. Now check node 3.',
+        activeNodes:["n3"], processingNode:"n2", leafNode:null,
+        queue:[{v:3},{v:4},{v:5}], depth:2, len:"2", i:"0", curr:"2", isLeaf:"✗ has children",
+        level:"Level 2",
+        stack:["while → Level 2","  i=0  curr=2"],
+        log:[{t:"Level 2 ─── len=2"},{t:"  i=0: curr=2 — has children → NOT leaf"},{t:"  enqueue 4, 5"}]
+      },
+      {
+        desc:'🎯 <em>Level 2, i=1</em>: Dequeue <em>curr=3</em>. left=null ✓, right=null ✓ → <span class="leaf">🍃 LEAF!</span> <span class="ok">Return depth=2!</span> We NEVER visit nodes 4 and 5 — BFS saved us that work!',
+        activeNodes:[], processingNode:null, leafNode:"n3",
+        queue:[{v:4},{v:5}], depth:2, len:"2", i:"1", curr:"3", isLeaf:"✓ LEAF!",
+        level:"Level 2",
+        stack:["while → Level 2","  i=1: curr=3 → LEAF ✓"],
+        log:[{t:"  i=1: curr=3"},{t:"  !curr.left && !curr.right → TRUE!",h:true},{t:"  🍃 LEAF at depth=2 → return 2 ✓",h:true},{t:"  Nodes 4 and 5 never visited — early exit!"}],
+        final:true
+      }
+    ]
+  }
+];
+
+// ─── STATE ────────────────────────────────────────────────────────────────
+let exIdx = 0;
+let cur = 0;
+let playTimer = null;
+
+const getCurrentEx = () => EXAMPLES[exIdx];
+const getCurrentSteps = () => getCurrentEx().steps;
+
+// ─── RENDER SVG ───────────────────────────────────────────────────────────
+function renderSVG(layout, step) {
+  const svg = document.getElementById("tree-svg");
+  const activeSet = new Set(step.activeNodes || []);
+  const processingId = step.processingNode;
+  const leafId = step.leafNode;
+
+  let html = "";
+
+  // edges
+  (layout.edges || []).forEach(e => {
+    html += `<line x1="${e.x1}" y1="${e.y1}" x2="${e.x2}" y2="${e.y2}" stroke="#1e2231" stroke-width="2"/>`;
+  });
+
+  // null nodes
+  (layout.nullNodes || []).forEach(n => {
+    html += `<text x="${n.x}" y="${n.y}" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="11" fill="#2a2f3e">${n.label}</text>`;
+  });
+
+  // nodes
+  layout.nodes.forEach(n => {
+    let fill="#13161d", stroke="#2a2f3e", sw="1.5", textFill="#6b7280";
+    if (n.id === leafId) {
+      fill="#0f1f16"; stroke="#34d399"; sw="3"; textFill="#34d399";
+    } else if (n.id === processingId) {
+      fill="#1e1a08"; stroke="#fbbf24"; sw="2.5"; textFill="#fbbf24";
+    } else if (activeSet.has(n.id)) {
+      fill="#1a2035"; stroke="#60a5fa"; sw="2"; textFill="#60a5fa";
+    }
+
+    const valStr = String(n.val);
+    const fontSize = valStr.length > 2 ? 11 : (n.r > 24 ? 14 : 12);
+
+    html += `<g id="${n.id}">
+      <circle cx="${n.cx}" cy="${n.cy}" r="${n.r}" fill="${fill}" stroke="${stroke}" stroke-width="${sw}" style="transition:all .2s"/>
+      <text x="${n.cx}" y="${n.cy+4}" text-anchor="middle" dominant-baseline="middle"
+        font-family="'JetBrains Mono',monospace" font-size="${fontSize}" font-weight="700"
+        fill="${textFill}" style="transition:fill .2s">${n.val}</text>
+    </g>`;
+  });
+
+  // Leaf glow ring
+  if (leafId) {
+    const nd = layout.nodes.find(n => n.id === leafId);
+    if (nd) {
+      html += `<circle cx="${nd.cx}" cy="${nd.cy}" r="${nd.r + 8}" fill="none" stroke="rgba(52,211,153,0.2)" stroke-width="4" style="animation:leafPulse 1s ease-in-out infinite"/>`;
+    }
+  }
+
+  svg.innerHTML = html;
+}
+
+// ─── RENDER DEPTH BOXES ───────────────────────────────────────────────────
+function renderDepthBoxes(depth, maxDepth) {
+  const container = document.getElementById("depth-boxes");
+  let html = "";
+  for (let d = 1; d <= Math.min(maxDepth, 4); d++) {
+    const cls = d < depth ? "depth-box done" : d === depth ? "depth-box current" : "depth-box";
+    html += `<div class="${cls}">${d}</div>`;
+  }
+  container.innerHTML = html;
+}
+
+// ─── RENDER STEP ──────────────────────────────────────────────────────────
+function renderStep(step) {
+  const ex = getCurrentEx();
+  renderSVG(ex.svgLayout, step);
+  renderDepthBoxes(step.depth, ex.maxDepth);
+
+  // Queue
+  const qt = document.getElementById("queue-track");
+  let qhtml = '<span class="queue-front-label">front →</span>';
+  if (!step.queue || step.queue.length === 0) {
+    qhtml += '<span style="font-family:var(--mono);font-size:11px;color:var(--text-dim);margin-left:8px">[ empty ]</span>';
+  } else {
+    step.queue.forEach((item, i) => {
+      const isFirst = i === 0;
+      const isLeafInQ = step.leafNode && step.queue.length === 1 && step.final;
+      let cls = isFirst ? (isLeafInQ ? "q-node is-leaf" : "q-node active") : "q-node";
+      qhtml += `<div class="${cls}">${item.v}</div>`;
+      if (i < step.queue.length - 1) qhtml += '<span style="font-family:var(--mono);font-size:11px;color:var(--text-dim)">·</span>';
+    });
+  }
+  qt.innerHTML = qhtml;
+
+  // Level indicator
+  document.getElementById("level-indicator").textContent = step.level || "";
+
+  // Depth tracker
+  const depthEl = document.getElementById("depth-display");
+  const prevDepth = parseInt(depthEl.textContent);
+  depthEl.textContent = step.depth;
+  if (step.depth !== prevDepth) {
+    depthEl.classList.add("updated");
+    setTimeout(() => depthEl.classList.remove("updated"), 500);
+  }
+
+  // Stack
+  const stackEl = document.getElementById("stack");
+  stackEl.innerHTML = step.stack.map((f, i) => {
+    const isTop = i === step.stack.length - 1;
+    const cls = step.leafNode && isTop ? "frame leaf" : isTop ? "frame active" : "frame";
+    return `<div class="${cls}">${f}</div>`;
+  }).join("");
+
+  // Vars
+  document.getElementById("v-depth").textContent = step.depth;
+  document.getElementById("v-len").textContent = step.len;
+  document.getElementById("v-i").textContent = step.i;
+  document.getElementById("v-curr").textContent = step.curr;
+
+  const leafEl = document.getElementById("v-leaf");
+  if (step.isLeaf === "✓ LEAF!") {
+    leafEl.className = "var-val green";
+  } else if (step.isLeaf && step.isLeaf.startsWith("✗")) {
+    leafEl.className = "var-val red";
+  } else {
+    leafEl.className = "var-val";
+  }
+  leafEl.textContent = step.isLeaf;
+
+  // Log
+  const logEl = document.getElementById("log");
+  logEl.innerHTML = step.log.map(e =>
+    `<div class="entry${e.h ? ' hl' : ''}">${e.t}</div>`
+  ).join("");
+  logEl.scrollTop = logEl.scrollHeight;
+
+  // Step meta
+  const steps = getCurrentSteps();
+  document.getElementById("step-label").textContent = `Step ${cur + 1} / ${steps.length}`;
+  document.getElementById("step-desc").innerHTML = step.desc;
+  document.getElementById("prog").style.width = ((cur + 1) / steps.length * 100) + "%";
+
+  const badge = document.getElementById("ans-badge");
+  if (step.final) {
+    badge.style.display = "inline-block";
+    badge.textContent = `✓ minDepth = ${ex.answer}`;
+  } else {
+    badge.style.display = "none";
+  }
+
+  document.getElementById("btn-prev").disabled = cur === 0;
+  document.getElementById("btn-next").disabled = cur === steps.length - 1;
+}
+
+// ─── NAVIGATION ───────────────────────────────────────────────────────────
+function move(d) {
+  const steps = getCurrentSteps();
+  cur = Math.max(0, Math.min(steps.length - 1, cur + d));
+  renderStep(steps[cur]);
+}
+
+function loadExample(idx) {
+  exIdx = idx;
+  cur = 0;
+  stopPlay();
+  const ex = EXAMPLES[idx];
+  document.getElementById("example-label").textContent = `// Interactive dry run — ${ex.label} → answer: ${ex.answer}`;
+  document.getElementById("tree-label").textContent = ex.treeLabel;
+  renderStep(ex.steps[0]);
+}
+
+document.getElementById("examples-row").addEventListener("click", e => {
+  const btn = e.target.closest(".ex-btn");
+  if (!btn) return;
+  document.querySelectorAll(".ex-btn").forEach(b => b.classList.remove("active"));
+  btn.classList.add("active");
+  loadExample(parseInt(btn.dataset.ex));
+});
+
+document.addEventListener("keydown", e => {
+  if (e.key === "ArrowRight" || e.key === "ArrowDown") move(1);
+  if (e.key === "ArrowLeft"  || e.key === "ArrowUp")   move(-1);
+});
+
+function stopPlay() {
+  if (playTimer) { clearInterval(playTimer); playTimer = null; }
+  const btn = document.getElementById("btn-play");
+  btn.textContent = "▶ Play";
+  btn.classList.remove("btn-play-active");
+}
+
+function togglePlay() {
+  const btn = document.getElementById("btn-play");
+  if (playTimer) { stopPlay(); return; }
+  btn.textContent = "⏸ Pause";
+  btn.classList.add("btn-play-active");
+  playTimer = setInterval(() => {
+    const steps = getCurrentSteps();
+    if (cur >= steps.length - 1) { stopPlay(); return; }
+    move(1);
+  }, 1500);
+}
+
+// Init
+loadExample(0);
+</script>
+</body>
+</html>

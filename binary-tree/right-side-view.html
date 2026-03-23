@@ -1,0 +1,1273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Right Side View — Interactive Dry Run</title>
+  <meta name="description" content="Step-by-step interactive dry run of rightSideView — watch BFS unfold level by level and see which node is visible from the right."/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Sora:wght@300;400;600;700&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0d0f14;
+      --surface: #13161d;
+      --surface2: #1a1e28;
+      --surface3: #212638;
+      --border: rgba(255,255,255,0.07);
+      --border-mid: rgba(255,255,255,0.12);
+      --text: #e8eaf0;
+      --text-muted: #6b7280;
+      --text-dim: #3d4251;
+      --accent: #7c6ef5;
+      --accent-glow: rgba(124,110,245,0.25);
+      --green: #34d399;
+      --green-bg: rgba(52,211,153,0.1);
+      --amber: #fbbf24;
+      --amber-bg: rgba(251,191,36,0.12);
+      --blue: #60a5fa;
+      --blue-bg: rgba(96,165,250,0.1);
+      --red: #f87171;
+      --red-bg: rgba(248,113,113,0.12);
+      --cyan: #22d3ee;
+      --cyan-bg: rgba(34,211,238,0.10);
+      --mono: 'JetBrains Mono', monospace;
+      --sans: 'Sora', sans-serif;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--sans);
+      font-size: 15px;
+      line-height: 1.6;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(124,110,245,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(124,110,245,0.03) 1px, transparent 1px);
+      background-size: 40px 40px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .page {
+      position: relative;
+      z-index: 1;
+      max-width: 980px;
+      margin: 0 auto;
+      padding: 3rem 1.5rem 5rem;
+    }
+
+    .back-nav {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-family: var(--mono);
+      font-size: 12px;
+      color: var(--text-muted);
+      text-decoration: none;
+      padding: 7px 14px 7px 10px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      margin-bottom: 2rem;
+      transition: all .15s;
+    }
+    .back-nav:hover { border-color: var(--border-mid); color: var(--text); }
+
+    header { margin-bottom: 2.5rem; animation: fadeUp .6s ease both; }
+
+    .tag {
+      display: inline-block;
+      font-family: var(--mono);
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: var(--accent);
+      background: var(--accent-glow);
+      border: 1px solid rgba(124,110,245,0.3);
+      padding: 4px 12px;
+      border-radius: 100px;
+      margin-bottom: 1.2rem;
+    }
+
+    h1 {
+      font-family: var(--sans);
+      font-size: clamp(1.8rem, 5vw, 2.8rem);
+      font-weight: 700;
+      line-height: 1.15;
+      color: var(--text);
+      margin-bottom: .8rem;
+      letter-spacing: -.02em;
+    }
+
+    h1 span { color: var(--accent); }
+
+    .subtitle {
+      font-size: 15px;
+      color: var(--text-muted);
+      max-width: 620px;
+      line-height: 1.7;
+    }
+
+    .insight-banner {
+      background: var(--cyan-bg);
+      border: 1px solid rgba(34,211,238,0.22);
+      border-left: 3px solid var(--cyan);
+      border-radius: 10px;
+      padding: 14px 18px;
+      margin-bottom: 2rem;
+      font-size: 13px;
+      color: var(--text-muted);
+      font-family: var(--mono);
+      animation: fadeUp .6s ease .05s both;
+    }
+    .insight-banner strong { color: var(--cyan); font-weight: 600; }
+
+    /* Eye icon banner */
+    .eye-banner {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px 18px;
+      margin-bottom: 2rem;
+      animation: fadeUp .6s ease .07s both;
+    }
+
+    .eye-icon {
+      font-size: 28px;
+      flex-shrink: 0;
+    }
+
+    .eye-desc {
+      font-size: 13px;
+      color: var(--text-muted);
+      font-family: var(--mono);
+      line-height: 1.6;
+    }
+
+    .eye-desc strong { color: var(--cyan); }
+
+    /* Code block */
+    .code-block {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      margin-bottom: 2rem;
+      animation: fadeUp .6s ease .1s both;
+    }
+
+    .code-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border);
+      background: var(--surface2);
+    }
+
+    .code-header span { font-family: var(--mono); font-size: 12px; color: var(--text-muted); }
+
+    .dots { display: flex; gap: 6px; }
+    .dot { width: 10px; height: 10px; border-radius: 50%; }
+    .dot-r { background: #ff5f57; }
+    .dot-y { background: #ffbd2e; }
+    .dot-g { background: #28c940; }
+
+    pre {
+      padding: 1.25rem 1.5rem;
+      overflow-x: auto;
+      font-family: var(--mono);
+      font-size: 13px;
+      line-height: 1.9;
+      color: #c9d1d9;
+    }
+
+    .kw  { color: #ff79c6; }
+    .fn  { color: #50fa7b; }
+    .cm  { color: #6272a4; font-style: italic; }
+    .num { color: #bd93f9; }
+    .var { color: #8be9fd; }
+    .hl  { background: rgba(34,211,238,0.12); border-radius: 3px; padding: 0 3px; }
+
+    .section-label {
+      font-family: var(--mono);
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      margin-bottom: 1rem;
+      margin-top: 2.5rem;
+    }
+
+    /* Visualizer */
+    .viz-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      overflow: hidden;
+      animation: fadeUp .6s ease .2s both;
+    }
+
+    .progress-bar-wrap { height: 3px; background: var(--border); }
+    .progress-bar-inner {
+      height: 100%;
+      background: linear-gradient(90deg, var(--cyan), var(--accent));
+      transition: width .35s cubic-bezier(.4,0,.2,1);
+      border-radius: 0 2px 2px 0;
+    }
+
+    .controls {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 14px 20px;
+      border-bottom: 1px solid var(--border);
+      background: var(--surface2);
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-family: var(--mono);
+      font-size: 12px;
+      font-weight: 500;
+      padding: 7px 16px;
+      border-radius: 8px;
+      border: 1px solid var(--border-mid);
+      background: var(--surface3);
+      color: var(--text);
+      cursor: pointer;
+      transition: all .15s;
+      letter-spacing: .02em;
+    }
+
+    .btn:hover:not(:disabled) { background: var(--accent-glow); border-color: var(--accent); color: var(--accent); }
+    .btn:disabled { opacity: .3; cursor: default; }
+
+    .btn-play-active {
+      background: var(--cyan-bg) !important;
+      border-color: rgba(34,211,238,0.4) !important;
+      color: var(--cyan) !important;
+    }
+
+    .step-info { flex: 1; font-size: 13px; color: var(--text-muted); font-family: var(--mono); }
+
+    kbd {
+      font-size: 10px;
+      background: var(--surface3);
+      border: 1px solid var(--border-mid);
+      padding: 2px 5px;
+      border-radius: 4px;
+      color: var(--text-muted);
+      font-family: var(--mono);
+    }
+
+    .result-badge {
+      font-family: var(--mono);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: .06em;
+      padding: 4px 12px;
+      border-radius: 100px;
+      text-transform: uppercase;
+    }
+
+    .badge-done {
+      background: var(--cyan-bg);
+      color: var(--cyan);
+      border: 1px solid rgba(34,211,238,0.3);
+    }
+
+    .step-desc {
+      padding: 12px 20px;
+      font-size: 13px;
+      color: var(--text-muted);
+      background: var(--surface2);
+      border-bottom: 1px solid var(--border);
+      font-family: var(--mono);
+      min-height: 44px;
+      line-height: 1.6;
+    }
+
+    .step-desc em  { color: var(--amber); font-style: normal; }
+    .step-desc .ok { color: var(--green); font-weight: 600; }
+    .step-desc .hi { color: var(--cyan); font-weight: 600; }
+    .step-desc .vis { color: var(--cyan); font-weight: 700; }
+
+    /* Main layout */
+    .main-grid {
+      display: grid;
+      grid-template-columns: 1fr 320px;
+    }
+
+    .left-col { border-right: 1px solid var(--border); display: flex; flex-direction: column; }
+
+    .tree-panel { padding: 20px; border-bottom: 1px solid var(--border); }
+
+    .panel-label {
+      font-family: var(--mono);
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      margin-bottom: 10px;
+    }
+
+    /* "Standing here" eye marker */
+    .eye-marker {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--cyan);
+    }
+
+    /* Queue display */
+    .queue-panel { padding: 16px 20px; border-bottom: 1px solid var(--border); }
+
+    .queue-track {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+      min-height: 44px;
+    }
+
+    .queue-label { font-family: var(--mono); font-size: 11px; color: var(--text-dim); margin-right: 4px; }
+
+    .q-node {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      font-family: var(--mono);
+      font-size: 13px;
+      font-weight: 700;
+      border: 1px solid var(--border-mid);
+      background: var(--surface2);
+      color: var(--text-muted);
+      transition: all .2s;
+    }
+
+    .q-node.active    { background: var(--blue-bg); border-color: rgba(96,165,250,0.5); color: var(--blue); }
+    .q-node.processing{ background: var(--amber-bg); border-color: rgba(251,191,36,0.5); color: var(--amber); box-shadow: 0 0 10px rgba(251,191,36,0.2); }
+    .q-node.visible   { background: var(--cyan-bg); border-color: rgba(34,211,238,0.5); color: var(--cyan); box-shadow: 0 0 12px rgba(34,211,238,0.25); }
+
+    /* Answer panel */
+    .ans-panel { padding: 16px 20px; }
+
+    .ans-track {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      min-height: 44px;
+    }
+
+    .ans-cell {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      font-family: var(--mono);
+      font-size: 14px;
+      font-weight: 700;
+      background: var(--cyan-bg);
+      border: 1px solid rgba(34,211,238,0.4);
+      color: var(--cyan);
+      animation: popIn .3s cubic-bezier(.34,1.56,.64,1) both;
+    }
+
+    @keyframes popIn {
+      from { transform: scale(0.4); opacity: 0; }
+      to   { transform: scale(1);   opacity: 1; }
+    }
+
+    /* Side panel */
+    .side-panel { display: flex; flex-direction: column; }
+
+    .stack-panel { padding: 14px 16px; border-bottom: 1px solid var(--border); }
+
+    .call-stack {
+      display: flex;
+      flex-direction: column-reverse;
+      gap: 4px;
+      min-height: 52px;
+    }
+
+    .frame {
+      padding: 5px 10px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-family: var(--mono);
+      border: 1px solid var(--border);
+      background: var(--surface2);
+      color: var(--text-muted);
+    }
+
+    .frame.active { border-color: rgba(96,165,250,0.4); background: var(--blue-bg); color: var(--blue); }
+
+    .vars-panel { padding: 14px 16px; border-bottom: 1px solid var(--border); }
+
+    .var-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 4px 0;
+      border-bottom: 1px solid var(--border);
+      font-size: 12px;
+    }
+    .var-row:last-child { border-bottom: none; }
+    .var-name { font-family: var(--mono); color: var(--text-muted); }
+    .var-val  { font-family: var(--mono); font-weight: 700; color: var(--amber); }
+    .var-val.cyan  { color: var(--cyan); }
+    .var-val.green { color: var(--green); }
+    .var-val.dim   { color: var(--text-dim); }
+
+    .log-panel { padding: 14px 16px; flex: 1; }
+
+    .log {
+      font-size: 11px;
+      font-family: var(--mono);
+      line-height: 1.9;
+      color: var(--text-dim);
+      max-height: 200px;
+      overflow-y: auto;
+    }
+
+    .log::-webkit-scrollbar { width: 4px; }
+    .log::-webkit-scrollbar-thumb { background: var(--border-mid); border-radius: 2px; }
+
+    .entry.hl   { color: var(--text); }
+    .entry.vis  { color: var(--cyan); font-weight: 600; }
+    .entry.done { color: var(--green); }
+
+    /* Explanation */
+    .explanation { margin-top: 2.5rem; animation: fadeUp .6s ease .3s both; }
+
+    .explain-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+      gap: 12px;
+    }
+
+    .explain-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px 18px;
+    }
+
+    .explain-card .icon { font-size: 18px; margin-bottom: 8px; }
+    .explain-card h3 { font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 6px; }
+    .explain-card p { font-size: 12px; color: var(--text-muted); line-height: 1.7; }
+    .explain-card code {
+      font-family: var(--mono);
+      font-size: 11px;
+      background: var(--surface2);
+      padding: 1px 5px;
+      border-radius: 4px;
+      color: var(--accent);
+    }
+
+    .complexity { display: flex; gap: 10px; margin-top: 1.5rem; flex-wrap: wrap; }
+
+    .cpill {
+      font-family: var(--mono);
+      font-size: 12px;
+      padding: 6px 14px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+    }
+
+    .cpill strong { color: var(--accent); font-weight: 700; }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── PROBLEM OVERVIEW ───────────────────────────── */
+    .overview { margin-top: 2.5rem; animation: fadeUp .6s ease .25s both; }
+    .overview-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+    .overview-full { margin-bottom: 12px; }
+    .ov-card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 18px 20px; position: relative; overflow: hidden; }
+    .ov-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; }
+    .ov-card.blue::before   { background: linear-gradient(90deg, var(--blue), transparent); }
+    .ov-card.green::before  { background: linear-gradient(90deg, var(--green), transparent); }
+    .ov-card.amber::before  { background: linear-gradient(90deg, var(--amber), transparent); }
+    .ov-card.red::before    { background: linear-gradient(90deg, var(--red), transparent); }
+    .ov-card.accent::before { background: linear-gradient(90deg, var(--accent), transparent); }
+    .ov-card.cyan::before   { background: linear-gradient(90deg, var(--cyan), transparent); }
+    .ov-card-head { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+    .ov-icon { font-size: 16px; }
+    .ov-title { font-family: var(--mono); font-size: 10px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--text-muted); }
+    .ov-card p { font-size: 13px; color: var(--text-muted); line-height: 1.75; }
+    .ov-card p strong { color: var(--text); font-weight: 600; }
+    .ov-card code { font-family: var(--mono); font-size: 11px; background: var(--surface2); padding: 1px 6px; border-radius: 4px; color: var(--accent); }
+    .hint-list { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+    .hint-list li { display: flex; gap: 10px; align-items: flex-start; font-size: 13px; color: var(--text-muted); line-height: 1.65; }
+    .hint-list li .bullet { font-family: var(--mono); font-size: 10px; font-weight: 700; color: var(--accent); background: var(--accent-glow); border: 1px solid rgba(124,110,245,0.25); padding: 2px 7px; border-radius: 4px; flex-shrink: 0; margin-top: 2px; }
+    .hint-list li .bullet.green { color: var(--green); background: var(--green-bg); border-color: rgba(52,211,153,0.25); }
+    .hint-list li .bullet.amber { color: var(--amber); background: var(--amber-bg); border-color: rgba(251,191,36,0.25); }
+    .hint-list li .bullet.red   { color: var(--red);   background: var(--red-bg);   border-color: rgba(248,113,113,0.25); }
+    .hint-list li .bullet.blue  { color: var(--blue);  background: var(--blue-bg);  border-color: rgba(96,165,250,0.25); }
+    .edge-list { display: flex; flex-direction: column; gap: 8px; }
+    .edge-item { display: flex; gap: 10px; align-items: flex-start; }
+    .edge-label { font-family: var(--mono); font-size: 9px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; padding: 3px 8px; border-radius: 5px; flex-shrink: 0; margin-top: 2px; }
+    .edge-label.warn { background: var(--red-bg); color: var(--red); border: 1px solid rgba(248,113,113,0.25); }
+    .edge-label.ok   { background: var(--green-bg); color: var(--green); border: 1px solid rgba(52,211,153,0.25); }
+    .edge-text { font-size: 12px; color: var(--text-muted); line-height: 1.65; }
+    .edge-text code { font-family: var(--mono); font-size: 11px; background: var(--surface2); padding: 1px 5px; border-radius: 4px; color: var(--accent); }
+    .best-solution { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; margin-bottom: 12px; }
+    .best-solution-header { display: flex; align-items: center; justify-content: space-between; padding: 12px 18px; border-bottom: 1px solid var(--border); background: var(--surface2); }
+    .best-solution-title { display: flex; align-items: center; gap: 8px; font-family: var(--mono); font-size: 11px; font-weight: 700; color: var(--green); letter-spacing: .08em; }
+    .best-solution-pills { display: flex; gap: 6px; }
+    .sol-pill { font-family: var(--mono); font-size: 10px; padding: 3px 9px; border-radius: 6px; background: var(--surface3); border: 1px solid var(--border-mid); color: var(--text-muted); }
+    .best-solution pre { padding: 1rem 1.25rem; font-size: 12px; line-height: 1.8; overflow-x: auto; }
+    @media (max-width: 680px) { .overview-grid { grid-template-columns: 1fr; } }
+
+    @media (max-width: 720px) {
+      .main-grid { grid-template-columns: 1fr; }
+      .left-col { border-right: none; border-bottom: 1px solid var(--border); }
+    }
+  
+    /* ── NEW TOP SECTIONS ── */
+    .pattern-banner-new { display:flex; align-items:flex-start; gap:16px; border-left-width:3px; border-left-style:solid; border-radius:10px; padding:14px 18px; margin-bottom:2rem; flex-wrap:wrap; animation:fadeUp .6s ease .03s both; }
+    .pb-label  { font-family:var(--mono); font-size:10px; font-weight:700; letter-spacing:.12em; text-transform:uppercase; color:var(--text-dim); margin-bottom:4px; }
+    .pb-name   { font-family:var(--mono); font-size:13px; font-weight:700; }
+    .pb-desc   { font-family:var(--mono); font-size:12px; color:var(--text-muted); flex:1; min-width:200px; line-height:1.7; }
+    .pb-solves { font-family:var(--mono); font-size:11px; color:var(--text-dim); }
+
+    .prob-section { background:var(--surface); border:1px solid var(--border); border-radius:14px; overflow:hidden; margin-bottom:2rem; animation:fadeUp .6s ease .04s both; }
+    .prob-section-hdr { display:flex; align-items:center; gap:10px; padding:14px 20px; border-bottom:1px solid var(--border); background:var(--surface2); }
+    .prob-section-icon  { font-size:16px; }
+    .prob-section-title { font-family:var(--mono); font-size:11px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:var(--text-muted); }
+    .prob-body { padding:20px; }
+    .prob-body p { font-size:13px; color:var(--text-muted); line-height:1.75; margin-bottom:10px; }
+    .prob-body p:last-child { margin-bottom:0; }
+    .prob-body p strong { color:var(--text); }
+    .prob-body code { font-family:var(--mono); font-size:11px; background:var(--surface2); padding:1px 6px; border-radius:4px; color:var(--accent); }
+
+    /* SVG example grid — replaces array [x,y,z] notation */
+    .svg-example-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:14px; margin-top:16px; }
+    .svg-ex-card { background:var(--surface2); border:1px solid var(--border); border-radius:10px; overflow:hidden; }
+    .svg-ex-header { display:flex; align-items:center; justify-content:space-between; padding:8px 14px; border-bottom:1px solid var(--border); }
+    .svg-ex-label  { font-family:var(--mono); font-size:10px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:var(--text-dim); }
+    .svg-ex-result { font-family:var(--mono); font-size:11px; font-weight:700; padding:2px 10px; border-radius:5px; }
+    .res-green  { background:rgba(52,211,153,.12); color:#34d399; border:1px solid rgba(52,211,153,.25); }
+    .res-red    { background:rgba(248,113,113,.12); color:#f87171; border:1px solid rgba(248,113,113,.25); }
+    .res-blue   { background:rgba(96,165,250,.12);  color:#60a5fa; border:1px solid rgba(96,165,250,.25); }
+    .res-orange { background:rgba(251,146,60,.12);  color:#fb923c; border:1px solid rgba(251,146,60,.25); }
+    .res-purple { background:rgba(192,132,252,.12); color:#c084fc; border:1px solid rgba(192,132,252,.25); }
+    .svg-ex-body { padding:12px; display:flex; justify-content:center; align-items:center; min-height:90px; }
+    .svg-ex-body svg { max-height:120px; width:100%; }
+
+    /* Hints */
+    .hints-list-new { display:flex; flex-direction:column; gap:10px; }
+    .hint-row { display:flex; gap:12px; align-items:flex-start; }
+    .hint-badge { font-family:var(--mono); font-size:11px; font-weight:700; padding:3px 8px; border-radius:6px; flex-shrink:0; margin-top:2px; min-width:28px; text-align:center; }
+    .hint-body { font-size:13px; color:var(--text-muted); line-height:1.7; }
+    .hint-body code { font-family:var(--mono); font-size:11px; background:var(--surface2); padding:1px 5px; border-radius:4px; color:var(--accent); }
+    .hint-body strong { color:var(--text); }
+    .intuition-new { border-radius:10px; padding:16px 18px; margin-top:14px; }
+    .intuition-new p { font-size:13px; color:var(--text-muted); line-height:1.75; }
+
+  </style>
+</head>
+<body>
+<div class="page">
+
+  <a class="back-nav" href="../dsa-hub.html">← All visualizers</a>
+
+  <header>
+    <div class="tag">Algorithm Dry Run · LeetCode #199</div>
+    <h1><span>Right Side View</span> of Binary Tree</h1>
+    <p class="subtitle">
+      Step-by-step BFS trace of <code style="font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--accent);background:var(--surface);padding:2px 7px;border-radius:5px;">rightSideView</code> — watch the queue drain level by level and see which node you'd spot if you stood to the right of the tree.
+    </p>
+  </header>
+
+  <div class="insight-banner">
+    ⚡ <strong>Key insight:</strong> The queue always processes nodes <strong>left → right</strong> within each level. We capture <code style="color:var(--amber)">len = queue.length</code> at the start of every level. The node processed at <code style="color:var(--amber)">i == len - 1</code> (the last slot) is the rightmost — the one visible from the right side.
+  </div>
+
+  <div class="pattern-banner-new" style="background:rgba(34,211,238,.06);border:1px solid rgba(34,211,238,.25);border-left-color:#22d3ee">
+    <div>
+      <div class="pb-label">Pattern</div>
+      <div class="pb-name" style="color:#22d3ee">🎯 BFS Level-order + Last Node Capture</div>
+    </div>
+    <div class="pb-desc">Process every level completely via BFS. The last node dequeued at each level (<code>i === len−1</code>) is always the rightmost — the one visible from the right.</div>
+    <div class="pb-solves">Same pattern unlocks:<br/><span style="color:#22d3ee">#116 Populating Next Right Pointers · #515 Find Largest Value Each Row · #637 Average of Levels</span></div>
+  </div>
+
+  <div class="prob-section">
+    <div class="prob-section-hdr">
+      <span class="prob-section-icon">📋</span>
+      <span class="prob-section-title">Problem Statement</span>
+    </div>
+    <div class="prob-body">
+      <p>Imagine standing to the <strong>right</strong> of a binary tree and looking left. At each row (level), you can see exactly one node — the <strong>rightmost</strong> one at that depth. Return all visible nodes ordered top to bottom.</p>
+        <p>⚠️ The rightmost visible node is <em>not</em> always the right child. If a node has no right child but has a left child, that left child becomes the visible node for its level.</p><div class="svg-example-grid">
+    <div class="svg-ex-card">
+      <div class="svg-ex-header">
+        <span class="svg-ex-label">Tree [1, 2, 3, null, 5, null, 4]</span>
+        <span class="svg-ex-result res-blue">[1, 3, 4]</span>
+      </div>
+      <div class="svg-ex-body"><svg viewBox="0 0 260 140"><line x1="110" y1="26" x2="62" y2="63" stroke="#1e2231" stroke-width="1.5"/><line x1="110" y1="26" x2="168" y2="63" stroke="#1e2231" stroke-width="1.5"/><line x1="154" y1="83" x2="136" y2="110" stroke="#1e2231" stroke-width="1.5"/><line x1="182" y1="83" x2="196" y2="110" stroke="#1e2231" stroke-width="1.5"/><circle cx="110" cy="18" r="20" fill="#0c1d1f" stroke="#22d3ee" stroke-width="2.5"/><text x="110" y="22" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="13" font-weight="700" fill="#22d3ee">1</text><circle cx="60" cy="74" r="19" fill="#13161d" stroke="#3d4251" stroke-width="1.5"/><text x="60" y="78" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="13" font-weight="700" fill="#6b7280">2</text><circle cx="170" cy="74" r="19" fill="#0c1d1f" stroke="#22d3ee" stroke-width="2.5"/><text x="170" y="78" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="13" font-weight="700" fill="#22d3ee">3</text><circle cx="134" cy="114" r="15" fill="#13161d" stroke="#3d4251" stroke-width="1.5"/><text x="134" y="118" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="11" font-weight="700" fill="#6b7280">5</text><circle cx="198" cy="114" r="15" fill="#0c1d1f" stroke="#22d3ee" stroke-width="2.5"/><text x="198" y="118" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="11" font-weight="700" fill="#22d3ee">4</text><text x="226" y="22" font-family="'JetBrains Mono',monospace" font-size="9" fill="#22d3ee">👁 1</text><text x="226" y="76" font-family="'JetBrains Mono',monospace" font-size="9" fill="#22d3ee">👁 3</text><text x="226" y="116" font-family="'JetBrains Mono',monospace" font-size="9" fill="#22d3ee">👁 4</text></svg></div>
+    </div>
+    <div class="svg-ex-card">
+      <div class="svg-ex-header">
+        <span class="svg-ex-label">Tree [1, 2] — left child is visible!</span>
+        <span class="svg-ex-result res-green">[1, 2]</span>
+      </div>
+      <div class="svg-ex-body"><svg viewBox="0 0 200 100"><line x1="80" y1="28" x2="48" y2="64" stroke="#1e2231" stroke-width="1.5"/><circle cx="80" cy="20" r="20" fill="#0c1d1f" stroke="#22d3ee" stroke-width="2.5"/><text x="80" y="24" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="13" font-weight="700" fill="#22d3ee">1</text><circle cx="46" cy="74" r="19" fill="#0c1d1f" stroke="#22d3ee" stroke-width="2.5"/><text x="46" y="78" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="13" font-weight="700" fill="#22d3ee">2</text><text x="110" y="22" font-family="'JetBrains Mono',monospace" font-size="9" fill="#22d3ee">👁 1</text><text x="110" y="76" font-family="'JetBrains Mono',monospace" font-size="9" fill="#22d3ee">👁 2</text><text x="4" y="96" font-family="'JetBrains Mono',monospace" font-size="8" fill="#fbbf24">left child visible!</text></svg></div>
+    </div>
+  </div>
+    </div>
+  </div>
+
+  <div class="prob-section">
+    <div class="prob-section-hdr">
+      <span class="prob-section-icon">💡</span>
+      <span class="prob-section-title">Intuition + Hints</span>
+    </div>
+    <div class="prob-body">
+      <div class="hints-list-new">
+      <div class="hint-row">
+        <span class="hint-badge" style="color:#22d3ee;background:rgba(34,211,238,.1);border:1px solid rgba(34,211,238,.25)">1</span>
+        <div class="hint-body"><strong>Use BFS</strong>, processing level by level. Snapshot <code>len = queue.length</code> before each level — that's exactly how many nodes belong to this level.</div>
+      </div>
+      <div class="hint-row">
+        <span class="hint-badge" style="color:#22d3ee;background:rgba(34,211,238,.1);border:1px solid rgba(34,211,238,.25)">2</span>
+        <div class="hint-body">BFS always dequeues nodes <strong>left to right</strong> within a level. So the last node dequeued at each level is always the rightmost.</div>
+      </div>
+      <div class="hint-row">
+        <span class="hint-badge" style="color:#22d3ee;background:rgba(34,211,238,.1);border:1px solid rgba(34,211,238,.25)">3</span>
+        <div class="hint-body">In the inner loop, check <code>if (i === len - 1)</code>. When true, you're at the rightmost node for this level — push its value into the answer.</div>
+      </div>
+      <div class="hint-row">
+        <span class="hint-badge" style="color:#22d3ee;background:rgba(34,211,238,.1);border:1px solid rgba(34,211,238,.25)">4</span>
+        <div class="hint-body">Always enqueue both children normally regardless. The answer collection happens only at that final <code>i === len - 1</code> check.</div>
+      </div>
+    </div><div class="intuition-new" style="background:rgba(34,211,238,.06);border:1px solid rgba(34,211,238,.2);margin-top:14px"><p><strong style="color:#22d3ee">Core insight:</strong> We don't need to know which direction each node faces or whether a right sibling exists. BFS naturally lines up nodes left-to-right, so the last dequeued node at each level <em>is</em> the rightmost by definition. One index check, zero geometry.</p></div>
+    </div>
+  </div>
+
+
+  <div class="eye-banner">
+    <div class="eye-icon">👁️</div>
+    <div class="eye-desc">
+      Imagine standing to the <strong>right</strong> of the tree and looking left. At each row (level), you see exactly <strong>one</strong> node — the last one before the view is blocked by nothing (it's the rightmost). That's what we collect.
+    </div>
+  </div>
+
+  <!-- Code -->
+  <div class="code-block">
+    <div class="code-header">
+      <div class="dots"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div></div>
+      <span>rightSideView.js</span>
+    </div>
+    <pre><span class="kw">var</span> <span class="fn">rightSideView</span> = <span class="kw">function</span> (<span class="var">root</span>) {
+    <span class="kw">if</span> (!<span class="var">root</span>) <span class="kw">return</span> []              <span class="cm">// empty tree → nothing to see</span>
+    <span class="kw">let</span> <span class="var">queque</span> = [<span class="var">root</span>]              <span class="cm">// BFS queue seeded with root</span>
+    <span class="kw">let</span> <span class="var">ans</span> = []
+
+    <span class="kw">while</span> (<span class="var">queque</span>.length) {
+        <span class="kw">let</span> <span class="var">lastNode</span>;
+        <span class="kw">let</span> <span class="var">len</span> = <span class="var">queque</span>.length;        <span class="cm">// snapshot — nodes at THIS level</span>
+        <span class="kw">for</span> (<span class="kw">let</span> <span class="var">i</span> = <span class="num">0</span>; <span class="var">i</span> &lt; <span class="var">len</span>; <span class="var">i</span>++) {
+            <span class="kw">let</span> <span class="var">curr</span> = <span class="var">queque</span>.<span class="fn">shift</span>()    <span class="cm">// dequeue front</span>
+            <span class="var">curr</span>.left  &amp;&amp; <span class="var">queque</span>.<span class="fn">push</span>(<span class="var">curr</span>.left)
+            <span class="var">curr</span>.right &amp;&amp; <span class="var">queque</span>.<span class="fn">push</span>(<span class="var">curr</span>.right)
+            <span class="hl"><span class="kw">if</span> (<span class="var">i</span> == <span class="var">len</span> - <span class="num">1</span>) {            <span class="cm">// last node in this level?</span>
+                <span class="var">lastNode</span> = <span class="var">curr</span>            <span class="cm">// ← visible from the right!</span>
+            }</span>
+        }
+        <span class="var">ans</span>.<span class="fn">push</span>(<span class="var">lastNode</span>.val)
+    }
+    <span class="kw">return</span> <span class="var">ans</span>;
+};</pre>
+  </div>
+
+  <p class="section-label">// Interactive dry run — tree: [1, 2, 3, null, 5, null, 4]</p>
+
+  <!-- Visualizer -->
+  <div class="viz-card">
+    <div class="progress-bar-wrap">
+      <div class="progress-bar-inner" id="prog" style="width:5%"></div>
+    </div>
+
+    <div class="controls">
+      <button class="btn" id="btn-prev" onclick="move(-1)" disabled>← Prev</button>
+      <button class="btn" id="btn-play" onclick="togglePlay()">▶ Play</button>
+      <button class="btn" id="btn-next" onclick="move(1)">Next →</button>
+      <span class="step-info" id="step-label">Step 1 / 18</span>
+      <span style="font-family:var(--mono);font-size:11px;color:var(--text-dim);display:flex;gap:4px;align-items:center"><kbd>←</kbd><kbd>→</kbd></span>
+      <span class="result-badge badge-done" id="ans-badge" style="display:none">✓ [1, 3, 4]</span>
+    </div>
+
+    <div class="step-desc" id="step-desc">Initialize: <em>queue = [1]</em>, ans = []. BFS begins. 👁️ Standing to the right, ready to observe.</div>
+
+    <div class="main-grid">
+      <!-- Left: tree + queue + answer -->
+      <div class="left-col">
+
+        <!-- Tree SVG -->
+        <div class="tree-panel">
+          <div class="panel-label" style="display:flex;justify-content:space-between">
+            <span>// binary tree</span>
+            <span class="eye-marker">👁️ view from here →</span>
+          </div>
+          <!--
+            Tree: [1, 2, 3, null, 5, null, 4]
+                  1
+                 / \
+                2    3
+                 \    \
+                  5    4
+          -->
+          <svg id="tree-svg" viewBox="0 0 500 260" width="100%">
+            <!-- "Camera" / eye on the right -->
+            <text x="480" y="80" text-anchor="end" font-family="'JetBrains Mono',monospace" font-size="22" fill="rgba(34,211,238,0.3)">👁</text>
+
+            <!-- Dashed horizontal "sight lines" from right (shown when node is visible) -->
+            <line id="sight-L0" x1="248" y1="46" x2="470" y2="46" stroke="rgba(34,211,238,0)" stroke-width="1.5" stroke-dasharray="5 4"/>
+            <line id="sight-L1" x1="312" y1="124" x2="470" y2="124" stroke="rgba(34,211,238,0)" stroke-width="1.5" stroke-dasharray="5 4"/>
+            <line id="sight-L2" x1="345" y1="202" x2="470" y2="202" stroke="rgba(34,211,238,0)" stroke-width="1.5" stroke-dasharray="5 4"/>
+
+            <!-- Level labels -->
+            <text x="12" y="50"  font-family="'JetBrains Mono',monospace" font-size="9" fill="#3d4251">L0</text>
+            <text x="12" y="128" font-family="'JetBrains Mono',monospace" font-size="9" fill="#3d4251">L1</text>
+            <text x="12" y="206" font-family="'JetBrains Mono',monospace" font-size="9" fill="#3d4251">L2</text>
+
+            <!-- Edges -->
+            <!-- 1 → 2 -->
+            <line x1="222" y1="58" x2="152" y2="110" stroke="#1e2231" stroke-width="2"/>
+            <!-- 1 → 3 -->
+            <line x1="268" y1="58" x2="312" y2="110" stroke="#1e2231" stroke-width="2"/>
+            <!-- 2 → null left (dashed) -->
+            <line x1="132" y1="140" x2="108" y2="185" stroke="#2a2f3e" stroke-width="1" stroke-dasharray="3 4"/>
+            <text x="92" y="198" font-family="'JetBrains Mono',monospace" font-size="9" fill="#2a2f3e" text-anchor="middle">null</text>
+            <!-- 2 → 5 (right) -->
+            <line x1="168" y1="140" x2="200" y2="188" stroke="#1e2231" stroke-width="2"/>
+            <!-- 3 → null left (dashed) -->
+            <line x1="292" y1="140" x2="268" y2="185" stroke="#2a2f3e" stroke-width="1" stroke-dasharray="3 4"/>
+            <text x="252" y="198" font-family="'JetBrains Mono',monospace" font-size="9" fill="#2a2f3e" text-anchor="middle">null</text>
+            <!-- 3 → 4 (right) -->
+            <line x1="332" y1="140" x2="346" y2="188" stroke="#1e2231" stroke-width="2"/>
+
+            <!-- Node 1 (root) -->
+            <g id="n1">
+              <circle cx="245" cy="46" r="28" fill="#13161d" stroke="#2a2f3e" stroke-width="1.5"/>
+              <text x="245" y="50" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="15" font-weight="700" fill="#6b7280">1</text>
+            </g>
+            <!-- Node 2 -->
+            <g id="n2">
+              <circle cx="150" cy="124" r="26" fill="#13161d" stroke="#2a2f3e" stroke-width="1.5"/>
+              <text x="150" y="128" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="14" font-weight="700" fill="#6b7280">2</text>
+            </g>
+            <!-- Node 3 -->
+            <g id="n3">
+              <circle cx="313" cy="124" r="26" fill="#13161d" stroke="#2a2f3e" stroke-width="1.5"/>
+              <text x="313" y="128" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="14" font-weight="700" fill="#6b7280">3</text>
+            </g>
+            <!-- Node 5 -->
+            <g id="n5">
+              <circle cx="202" cy="202" r="22" fill="#13161d" stroke="#2a2f3e" stroke-width="1.5"/>
+              <text x="202" y="206" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="13" font-weight="700" fill="#6b7280">5</text>
+            </g>
+            <!-- Node 4 -->
+            <g id="n4">
+              <circle cx="347" cy="202" r="22" fill="#13161d" stroke="#2a2f3e" stroke-width="1.5"/>
+              <text x="347" y="206" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="13" font-weight="700" fill="#6b7280">4</text>
+            </g>
+          </svg>
+        </div>
+
+        <!-- Queue -->
+        <div class="queue-panel">
+          <div class="panel-label">// queue (front → back)</div>
+          <div class="queue-track" id="queue-track">
+            <span class="queue-label">front →</span>
+          </div>
+        </div>
+
+        <!-- Answer -->
+        <div class="ans-panel">
+          <div class="panel-label">// ans[] — right side view nodes collected</div>
+          <div class="ans-track" id="ans-track">
+            <span style="font-family:var(--mono);font-size:11px;color:var(--text-dim)">[ ]</span>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Side panel -->
+      <div class="side-panel">
+        <!-- Call stack (just the while loop iteration) -->
+        <div class="stack-panel">
+          <div class="panel-label">// loop state</div>
+          <div class="call-stack" id="stack"></div>
+        </div>
+
+        <!-- Variables -->
+        <div class="vars-panel">
+          <div class="panel-label">// variables</div>
+          <div class="var-row"><span class="var-name">level</span>     <span class="var-val blue"  id="v-level">—</span></div>
+          <div class="var-row"><span class="var-name">len (snap)</span><span class="var-val"       id="v-len">—</span></div>
+          <div class="var-row"><span class="var-name">i</span>         <span class="var-val"       id="v-i">—</span></div>
+          <div class="var-row"><span class="var-name">curr.val</span>  <span class="var-val"       id="v-curr">—</span></div>
+          <div class="var-row"><span class="var-name">i==len-1?</span> <span class="var-val"       id="v-last">—</span></div>
+          <div class="var-row"><span class="var-name">lastNode.val</span><span class="var-val cyan" id="v-last-node">—</span></div>
+        </div>
+
+        <!-- Log -->
+        <div class="log-panel">
+          <div class="panel-label">// execution log</div>
+          <div class="log" id="log"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── PROBLEM OVERVIEW ── -->
+  <div class="overview">
+    <p class="section-label">// problem overview — everything you need for revision</p>
+
+    <div class="overview-grid">
+      <div class="ov-card blue">
+        <div class="ov-card-head"><span class="ov-icon">📋</span><span class="ov-title">What the problem is asking</span></div>
+        <p>Given a binary tree, imagine yourself standing on the <strong>right side</strong> of it. Return the values of the nodes you can see, <strong>ordered from top to bottom</strong>.</p>
+        <p style="margin-top:8px">At each level (row) of the tree, you can only see <strong>one node</strong> — the rightmost one. If a node has no right child at some level but a left child exists, that left child becomes visible. You collect exactly one node per level.</p>
+      </div>
+      <div class="ov-card cyan">
+        <div class="ov-card-head"><span class="ov-icon">💡</span><span class="ov-title">Core intuition</span></div>
+        <p>Use <strong>BFS (level-order traversal)</strong>. Process the tree level by level. At each level, the <strong>last node you dequeue</strong> is the rightmost — the one visible from the right.</p>
+        <p style="margin-top:8px">The key insight: BFS always processes nodes <strong>left→right</strong> within a level. So the last node processed in each level's inner loop is the rightmost. Check <code>i === len - 1</code> to identify it.</p>
+      </div>
+    </div>
+
+    <div class="overview-grid">
+      <div class="ov-card accent">
+        <div class="ov-card-head"><span class="ov-icon">🧩</span><span class="ov-title">Hints to reach the solution</span></div>
+        <ul class="hint-list">
+          <li><span class="bullet">1</span>Use a BFS queue. Seed it with the root. Process level by level with a while loop.</li>
+          <li><span class="bullet">2</span>At the start of each level, snapshot <code>len = queue.length</code>. This tells you exactly how many nodes belong to this level.</li>
+          <li><span class="bullet blue">3</span>In the inner for loop (0 to len-1), enqueue children normally. When <code>i === len - 1</code> (the last node of this level), save its value — that's the right-side-visible node.</li>
+          <li><span class="bullet green">4</span>After the inner loop, push the saved value into <code>ans</code>. Repeat for every level.</li>
+        </ul>
+      </div>
+      <div class="ov-card amber">
+        <div class="ov-card-head"><span class="ov-icon">⚡</span><span class="ov-title">Key trick / pattern</span></div>
+        <p><strong>The len snapshot:</strong> <code>let len = queue.length</code> before the inner loop is the backbone of all BFS level-traversal problems. It freezes the count of nodes at the current level. As you process nodes and enqueue their children, the queue grows — but <code>len</code> stays fixed, so you only process this level's nodes.</p>
+        <p style="margin-top:8px"><strong>i === len - 1:</strong> The last iteration of the inner loop always processes the rightmost node of that level (because BFS processes left→right). This is simpler than checking "is there a right sibling" or tracking position separately.</p>
+        <p style="margin-top:8px"><strong>DFS alternative:</strong> You can also solve this with DFS (right subtree first), taking the first node you see at each depth. BFS is more intuitive for this problem though.</p>
+      </div>
+    </div>
+
+    <div class="overview-full">
+      <div class="ov-card red">
+        <div class="ov-card-head"><span class="ov-icon">⚠️</span><span class="ov-title">Edge cases to watch out for</span></div>
+        <div class="edge-list">
+          <div class="edge-item"><span class="edge-label warn">null</span><span class="edge-text"><strong>Empty tree:</strong> <code>if (!root) return []</code>. Without this guard, <code>queue = [null]</code> and the while loop runs once accessing <code>null.left</code> → crash.</span></div>
+          <div class="edge-item"><span class="edge-label warn">left only</span><span class="edge-text"><strong>Right side is not always the right child:</strong> Tree <svg viewBox="0 0 110 70" style="display:inline-block;vertical-align:middle;margin:0 4px;border-radius:6px;background:var(--surface2);padding:4px" width="120" height="70"><line x1="55" y1="18" x2="28" y2="45" stroke="#1e2231" stroke-width="1.5"/><text x="75" y="14" font-family="'JetBrains Mono',monospace" font-size="8" fill="#3d4251">null</text><circle cx="55" cy="12" r="13" fill="#0c1d1f" stroke="#22d3ee" stroke-width="2"/><text x="55" y="15" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="10" font-weight="700" fill="#22d3ee">1</text><circle cx="26" cy="48" r="12" fill="#13161d" stroke="#3d4251" stroke-width="1.5"/><text x="26" y="51" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="10" font-weight="700" fill="#6b7280">2</text><line x1="24" y1="60" x2="18" y2="66" stroke="#1e2231" stroke-width="1.5"/><circle cx="16" cy="68" r="9" fill="#0c1d1f" stroke="#22d3ee" stroke-width="1.5"/><text x="16" y="71" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="10" font-weight="700" fill="#22d3ee">3</text><text x="60" y="68" font-family="'JetBrains Mono',monospace" font-size="8" fill="#22d3ee">👁3</text></svg> — node 3 is the only node at level 2 (left child of 2, right is null). It becomes the rightmost and is visible from the right. Return includes <code>3</code>. BFS handles this automatically — the last node dequeued at each level is always visible.</span></div>
+          <div class="edge-item"><span class="edge-label warn">skewed</span><span class="edge-text"><strong>Skewed tree (all left children):</strong> <svg viewBox="0 0 110 70" style="display:inline-block;vertical-align:middle;margin:0 4px;border-radius:6px;background:var(--surface2);padding:4px" width="120" height="70"><line x1="90" y1="12" x2="72" y2="28" stroke="#1e2231" stroke-width="1.5"/><line x1="72" y1="36" x2="56" y2="52" stroke="#1e2231" stroke-width="1.5"/><line x1="56" y1="60" x2="42" y2="66" stroke="#1e2231" stroke-width="1.5"/><circle cx="90" cy="8" r="11" fill="#0c1d1f" stroke="#22d3ee" stroke-width="1.5"/><text x="90" y="11" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="10" font-weight="700" fill="#22d3ee">1</text><circle cx="72" cy="32" r="11" fill="#0c1d1f" stroke="#22d3ee" stroke-width="1.5"/><text x="72" y="35" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="10" font-weight="700" fill="#22d3ee">2</text><circle cx="56" cy="56" r="11" fill="#0c1d1f" stroke="#22d3ee" stroke-width="1.5"/><text x="56" y="59" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="10" font-weight="700" fill="#22d3ee">3</text><circle cx="42" cy="66" r="9" fill="#0c1d1f" stroke="#22d3ee" stroke-width="1.5"/><text x="42" y="69" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="10" font-weight="700" fill="#22d3ee">4</text><text x="4" y="20" font-family="'JetBrains Mono',monospace" font-size="8" fill="#fbbf24">all left</text><text x="4" y="34" font-family="'JetBrains Mono',monospace" font-size="8" fill="#fbbf24">→ each</text><text x="4" y="48" font-family="'JetBrains Mono',monospace" font-size="8" fill="#fbbf24">visible</text></svg> — every level has exactly one node, so every node is visible from the right. The view equals the entire tree in order: <code>[1, 2, 3, 4]</code>.</span></div>
+          <div class="edge-item"><span class="edge-label ok">note</span><span class="edge-text"><strong>One node per level guaranteed:</strong> Every level has at least one node (otherwise BFS wouldn't process that level at all). So <code>ans.length === treeHeight</code> always.</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="overview-full">
+      <div class="best-solution">
+        <div class="best-solution-header">
+          <span class="best-solution-title">✦ Best solution for learning</span>
+          <div class="best-solution-pills">
+            <span class="sol-pill">O(n) time</span>
+            <span class="sol-pill">O(n) space</span>
+            <span class="sol-pill">BFS level-order</span>
+            <span class="sol-pill">len snapshot</span>
+          </div>
+        </div>
+        <pre><span class="kw">var</span> <span class="fn">rightSideView</span> = <span class="kw">function</span>(<span class="var">root</span>) {
+  <span class="kw">if</span> (!<span class="var">root</span>) <span class="kw">return</span> [];                  <span class="cm">// edge case: empty tree</span>
+  <span class="kw">let</span> <span class="var">queue</span> = [<span class="var">root</span>], <span class="var">ans</span> = [];
+
+  <span class="kw">while</span> (<span class="var">queue</span>.length) {
+    <span class="kw">let</span> <span class="var">len</span> = <span class="var">queue</span>.length;              <span class="cm">// snapshot: nodes at this level</span>
+
+    <span class="kw">for</span> (<span class="kw">let</span> <span class="var">i</span> = <span class="num">0</span>; <span class="var">i</span> < <span class="var">len</span>; <span class="var">i</span>++) {
+      <span class="kw">let</span> <span class="var">curr</span> = <span class="var">queue</span>.<span class="fn">shift</span>();          <span class="cm">// dequeue front</span>
+      <span class="kw">if</span> (<span class="var">curr</span>.left)  <span class="var">queue</span>.<span class="fn">push</span>(<span class="var">curr</span>.left);
+      <span class="kw">if</span> (<span class="var">curr</span>.right) <span class="var">queue</span>.<span class="fn">push</span>(<span class="var">curr</span>.right);
+
+      <span class="kw">if</span> (<span class="var">i</span> === <span class="var">len</span> - <span class="num">1</span>) {              <span class="cm">// last node in this level = rightmost</span>
+        <span class="var">ans</span>.<span class="fn">push</span>(<span class="var">curr</span>.val);
+      }
+    }
+  }
+  <span class="kw">return</span> <span class="var">ans</span>;
+};
+
+<span class="cm">// Key insight: BFS processes nodes left→right within each level.
+// The last node processed (i === len-1) is always the rightmost — visible from right.
+// len snapshot prevents mixing current and next level nodes in the inner loop.
+// Works even when right child is null — the leftmost surviving node becomes visible.</span></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- Explanation -->
+  <div class="explanation">
+    <p class="section-label">// how it works</p>
+    <div class="explain-grid">
+      <div class="explain-card">
+        <div class="icon">📸</div>
+        <h3>len snapshot trick</h3>
+        <p>Before the inner loop, we save <code>len = queue.length</code>. This tells us exactly how many nodes belong to the current level — even as we add children to the queue.</p>
+      </div>
+      <div class="explain-card">
+        <div class="icon">👁️</div>
+        <h3>Last node = visible node</h3>
+        <p>The condition <code>i == len - 1</code> fires only for the last node at each level. Since BFS processes left → right, the last one is always the rightmost — exactly what's visible from the right.</p>
+      </div>
+      <div class="explain-card">
+        <div class="icon">🔄</div>
+        <h3>BFS Queue</h3>
+        <p>A queue ensures we process nodes breadth-first. <code>shift()</code> dequeues from front; <code>push()</code> enqueues children to back. Left child before right — preserving left-to-right order.</p>
+      </div>
+      <div class="explain-card">
+        <div class="icon">🎯</div>
+        <h3>One value per level</h3>
+        <p>Each iteration of the while loop handles exactly one level. We collect exactly one value per level — the rightmost one — into <code>ans[]</code>.</p>
+      </div>
+    </div>
+
+    <div class="complexity">
+      <div class="cpill">Time: <strong>O(n)</strong> — every node visited once</div>
+      <div class="cpill">Space: <strong>O(n)</strong> — queue holds at most one full level</div>
+      <div class="cpill">Pattern: <strong>BFS</strong> level-order</div>
+      <div class="cpill">Key check: <strong>i == len - 1</strong></div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+/*
+  Tree: [1, 2, 3, null, 5, null, 4]
+        1
+       / \
+      2    3
+       \    \
+        5    4
+
+  Level 0: process [1]          → last is 1 → ans=[1]
+  Level 1: process [2, 3]       → last is 3 → ans=[1,3]
+  Level 2: process [5, 4]       → last is 4 → ans=[1,3,4]
+*/
+
+const steps = [
+  // ── INIT ──────────────────────────────────────────
+  {
+    desc: 'Initialize: <em>queue = [1]</em>, ans = []. Root node queued. BFS begins — Level 0 up next.',
+    activeNodes: [], processingNode: null, visibleNode: null,
+    sightLines: [],
+    queue: [1], ans: [],
+    level: '—', len: '—', i: '—', curr: '—', isLast: '—', lastNode: '—',
+    stack: ['while (queue.length)'],
+    log: [{ t: 'rightSideView called', h: true }, { t: 'queue=[1]  ans=[]' }]
+  },
+
+  // ── LEVEL 0 ───────────────────────────────────────
+  {
+    desc: '<em>Level 0 starts.</em> <span class="hi">len = 1</span> (snapshot). 1 node to process this level.',
+    activeNodes: ['n1'], processingNode: null, visibleNode: null,
+    sightLines: [],
+    queue: [1], ans: [],
+    level: '0', len: '1', i: '0', curr: '—', isLast: '—', lastNode: '—',
+    stack: ['while → Level 0', '  len = 1'],
+    log: [{ t: '── Level 0 ──  len=1', h: true }]
+  },
+  {
+    desc: '<em>i=0</em>: Dequeue <em>curr = 1</em>. Enqueue children: left(2), right(3). <span class="hi">i == len-1</span> (0 == 0) ✓ → <span class="vis">lastNode = 1 (visible!)</span>',
+    activeNodes: [], processingNode: 'n1', visibleNode: null,
+    sightLines: [],
+    queue: [2, 3], ans: [],
+    level: '0', len: '1', i: '0', curr: '1', isLast: '✓ YES', lastNode: '1',
+    stack: ['while → Level 0', '  i=0  curr=1'],
+    log: [{ t: '── Level 0 ──' },
+          { t: '  i=0: dequeue curr=1', h: true },
+          { t: '  enqueue left(2), right(3)' },
+          { t: '  i==len-1 (0==0) ✓  lastNode=1', h: true }]
+  },
+  {
+    desc: '<em>Level 0 done.</em> <span class="vis">👁️ ans.push(1)</span> — node 1 is visible from the right at level 0. Queue now has level-1 nodes.',
+    activeNodes: [], processingNode: null, visibleNode: 'n1',
+    sightLines: ['sight-L0'],
+    queue: [2, 3], ans: [1],
+    level: '0', len: '1', i: '0', curr: '1', isLast: '✓ YES', lastNode: '1',
+    stack: ['while → Level 0 done', '  ans.push(1)'],
+    log: [{ t: '── Level 0 ──' },
+          { t: '  lastNode = 1' },
+          { t: '  ans.push(1)  → ans=[1] 👁️', h: true, css: 'vis' }]
+  },
+
+  // ── LEVEL 1 ───────────────────────────────────────
+  {
+    desc: '<em>Level 1 starts.</em> <span class="hi">len = 2</span> (snapshot). 2 nodes to process: [2, 3].',
+    activeNodes: ['n2', 'n3'], processingNode: null, visibleNode: null,
+    sightLines: [],
+    queue: [2, 3], ans: [1],
+    level: '1', len: '2', i: '—', curr: '—', isLast: '—', lastNode: '—',
+    stack: ['while → Level 1', '  len = 2'],
+    log: [{ t: '── Level 1 ──  len=2', h: true }]
+  },
+  {
+    desc: '<em>i=0</em>: Dequeue <em>curr = 2</em>. Node 2 has no left child, enqueue right(5). <span class="hi">i != len-1</span> (0 ≠ 1) — NOT the last, not visible yet.',
+    activeNodes: ['n3'], processingNode: 'n2', visibleNode: null,
+    sightLines: [],
+    queue: [3, 5], ans: [1],
+    level: '1', len: '2', i: '0', curr: '2', isLast: '✗ NO', lastNode: '—',
+    stack: ['while → Level 1', '  i=0  curr=2'],
+    log: [{ t: '── Level 1 ──' },
+          { t: '  i=0: dequeue curr=2', h: true },
+          { t: '  no left child. enqueue right(5)' },
+          { t: '  i==len-1? (0==1) ✗  not last yet' }]
+  },
+  {
+    desc: '<em>i=1</em>: Dequeue <em>curr = 3</em>. Node 3 has no left child, enqueue right(4). <span class="hi">i == len-1</span> (1 == 1) ✓ → <span class="vis">lastNode = 3!</span>',
+    activeNodes: [], processingNode: 'n3', visibleNode: null,
+    sightLines: [],
+    queue: [5, 4], ans: [1],
+    level: '1', len: '2', i: '1', curr: '3', isLast: '✓ YES', lastNode: '3',
+    stack: ['while → Level 1', '  i=1  curr=3'],
+    log: [{ t: '── Level 1 ──' },
+          { t: '  i=0: dequeue curr=2 → enqueue 5' },
+          { t: '  i=1: dequeue curr=3', h: true },
+          { t: '  no left child. enqueue right(4)' },
+          { t: '  i==len-1 (1==1) ✓  lastNode=3', h: true }]
+  },
+  {
+    desc: '<em>Level 1 done.</em> <span class="vis">👁️ ans.push(3)</span> — node 3 is visible from the right at level 1. Queue: [5, 4].',
+    activeNodes: [], processingNode: null, visibleNode: 'n3',
+    sightLines: ['sight-L1'],
+    queue: [5, 4], ans: [1, 3],
+    level: '1', len: '2', i: '1', curr: '3', isLast: '✓ YES', lastNode: '3',
+    stack: ['while → Level 1 done', '  ans.push(3)'],
+    log: [{ t: '── Level 1 ──' },
+          { t: '  lastNode = 3' },
+          { t: '  ans.push(3)  → ans=[1,3] 👁️', h: true, css: 'vis' }]
+  },
+
+  // ── LEVEL 2 ───────────────────────────────────────
+  {
+    desc: '<em>Level 2 starts.</em> <span class="hi">len = 2</span> (snapshot). 2 nodes to process: [5, 4].',
+    activeNodes: ['n5', 'n4'], processingNode: null, visibleNode: null,
+    sightLines: [],
+    queue: [5, 4], ans: [1, 3],
+    level: '2', len: '2', i: '—', curr: '—', isLast: '—', lastNode: '—',
+    stack: ['while → Level 2', '  len = 2'],
+    log: [{ t: '── Level 2 ──  len=2', h: true }]
+  },
+  {
+    desc: '<em>i=0</em>: Dequeue <em>curr = 5</em>. Leaf node — no children. <span class="hi">i != len-1</span> (0 ≠ 1) — not the last node, hidden behind node 4.',
+    activeNodes: ['n4'], processingNode: 'n5', visibleNode: null,
+    sightLines: [],
+    queue: [4], ans: [1, 3],
+    level: '2', len: '2', i: '0', curr: '5', isLast: '✗ NO', lastNode: '—',
+    stack: ['while → Level 2', '  i=0  curr=5'],
+    log: [{ t: '── Level 2 ──' },
+          { t: '  i=0: dequeue curr=5', h: true },
+          { t: '  leaf node — no children to enqueue' },
+          { t: '  i==len-1? (0==1) ✗  node 5 is hidden!' }]
+  },
+  {
+    desc: '<em>i=1</em>: Dequeue <em>curr = 4</em>. Leaf node — no children. <span class="hi">i == len-1</span> (1 == 1) ✓ → <span class="vis">lastNode = 4! Node 5 was blocked — we see 4.</span>',
+    activeNodes: [], processingNode: 'n4', visibleNode: null,
+    sightLines: [],
+    queue: [], ans: [1, 3],
+    level: '2', len: '2', i: '1', curr: '4', isLast: '✓ YES', lastNode: '4',
+    stack: ['while → Level 2', '  i=1  curr=4'],
+    log: [{ t: '── Level 2 ──' },
+          { t: '  i=0: dequeue curr=5 (hidden!)' },
+          { t: '  i=1: dequeue curr=4', h: true },
+          { t: '  leaf node — no children' },
+          { t: '  i==len-1 (1==1) ✓  lastNode=4', h: true }]
+  },
+  {
+    desc: '🎉 <em>Level 2 done.</em> <span class="vis">👁️ ans.push(4)</span>. Queue is now empty → while loop ends. <span class="ok">Return [1, 3, 4]!</span>',
+    activeNodes: [], processingNode: null, visibleNode: 'n4',
+    sightLines: ['sight-L0', 'sight-L1', 'sight-L2'],
+    queue: [], ans: [1, 3, 4],
+    level: '2', len: '2', i: '1', curr: '4', isLast: '✓ YES', lastNode: '4',
+    stack: ['done ✓'],
+    log: [{ t: '── Level 2 ──' },
+          { t: '  lastNode = 4' },
+          { t: '  ans.push(4)  → ans=[1,3,4] 👁️', h: true, css: 'vis' },
+          { t: 'queue empty → loop ends', h: true },
+          { t: 'return [1, 3, 4] ✓', css: 'done', h: true }],
+    final: true
+  }
+];
+
+let cur = 0;
+const nodeIds = ['n1','n2','n3','n4','n5'];
+const sightLineIds = ['sight-L0','sight-L1','sight-L2'];
+
+function styleNode(id, state) {
+  const g = document.getElementById(id);
+  if (!g) return;
+  const c = g.querySelector('circle');
+  const t = g.querySelector('text');
+  const styles = {
+    active:     { fill:'#1a2035', stroke:'#60a5fa', sw:'2', text:'#60a5fa' },
+    processing: { fill:'#1e1a08', stroke:'#fbbf24', sw:'2.5', text:'#fbbf24' },
+    visible:    { fill:'#0c1d1f', stroke:'#22d3ee', sw:'3', text:'#22d3ee' },
+    default:    { fill:'#13161d', stroke:'#2a2f3e', sw:'1.5', text:'#6b7280' }
+  };
+  const s = styles[state] || styles.default;
+  c.setAttribute('fill', s.fill);
+  c.setAttribute('stroke', s.stroke);
+  c.setAttribute('stroke-width', s.sw);
+  t.setAttribute('fill', s.text);
+}
+
+function renderStep(s) {
+  // Node colors
+  nodeIds.forEach(id => {
+    if (id === s.processingNode) styleNode(id, 'processing');
+    else if (id === s.visibleNode) styleNode(id, 'visible');
+    else if (s.activeNodes.includes(id)) styleNode(id, 'active');
+    else styleNode(id, 'default');
+  });
+
+  // Sight lines
+  sightLineIds.forEach(id => {
+    const el = document.getElementById(id);
+    el.setAttribute('stroke',
+      s.sightLines.includes(id) ? 'rgba(34,211,238,0.45)' : 'rgba(34,211,238,0)'
+    );
+  });
+
+  // Queue
+  const qt = document.getElementById('queue-track');
+  let qhtml = '<span class="queue-label">front →</span>';
+  if (s.queue.length === 0) {
+    qhtml += '<span style="font-family:var(--mono);font-size:11px;color:var(--text-dim);margin-left:8px">[ empty ]</span>';
+  } else {
+    s.queue.forEach((v, i) => {
+      const cls = i === 0 ? 'q-node active' : 'q-node';
+      qhtml += `<div class="${cls}">${v}</div>`;
+      if (i < s.queue.length - 1) qhtml += '<span style="font-family:var(--mono);font-size:11px;color:var(--text-dim)">·</span>';
+    });
+  }
+  qt.innerHTML = qhtml;
+
+  // Answer track
+  const at = document.getElementById('ans-track');
+  if (s.ans.length === 0) {
+    at.innerHTML = '<span style="font-family:var(--mono);font-size:11px;color:var(--text-dim)">[ ]</span>';
+  } else {
+    at.innerHTML = s.ans.map(v => `<div class="ans-cell">${v}</div>`).join('') +
+      `<span style="font-family:var(--mono);font-size:12px;color:var(--text-dim);margin-left:4px">← visible nodes</span>`;
+  }
+
+  // Stack
+  const stackEl = document.getElementById('stack');
+  stackEl.innerHTML = s.stack.map((f, i) => {
+    const isTop = i === s.stack.length - 1;
+    return `<div class="frame ${isTop ? 'active' : ''}">${f}</div>`;
+  }).join('');
+
+  // Variables
+  const levelColor = s.level === '0' ? 'blue' : s.level === '1' ? '' : s.level === '2' ? 'green' : 'dim';
+  document.getElementById('v-level').className = `var-val ${levelColor}`;
+  document.getElementById('v-level').textContent = s.level;
+  document.getElementById('v-len').textContent   = s.len;
+  document.getElementById('v-i').textContent     = s.i;
+  document.getElementById('v-curr').textContent  = s.curr;
+
+  const lastEl = document.getElementById('v-last');
+  lastEl.className = `var-val ${s.isLast === '✓ YES' ? 'cyan' : s.isLast === '✗ NO' ? 'red' : ''}`;
+  lastEl.textContent = s.isLast;
+
+  document.getElementById('v-last-node').textContent = s.lastNode;
+
+  // Log
+  const logEl = document.getElementById('log');
+  logEl.innerHTML = s.log.map(e =>
+    `<div class="entry${e.h ? ' hl' : ''}${e.css ? ' ' + e.css : ''}">${e.t}</div>`
+  ).join('');
+  logEl.scrollTop = logEl.scrollHeight;
+
+  // Step meta
+  document.getElementById('step-label').textContent = `Step ${cur + 1} / ${steps.length}`;
+  document.getElementById('step-desc').innerHTML = s.desc;
+  document.getElementById('prog').style.width = ((cur + 1) / steps.length * 100) + '%';
+  document.getElementById('ans-badge').style.display = s.final ? 'inline-block' : 'none';
+
+  document.getElementById('btn-prev').disabled = cur === 0;
+  document.getElementById('btn-next').disabled = cur === steps.length - 1;
+}
+
+function move(d) {
+  cur = Math.max(0, Math.min(steps.length - 1, cur + d));
+  renderStep(steps[cur]);
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight' || e.key === 'ArrowDown') move(1);
+  if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp')   move(-1);
+});
+
+let playTimer = null;
+function togglePlay() {
+  const btn = document.getElementById('btn-play');
+  if (playTimer) {
+    clearInterval(playTimer); playTimer = null;
+    btn.textContent = '▶ Play';
+    btn.classList.remove('btn-play-active');
+  } else {
+    btn.textContent = '⏸ Pause';
+    btn.classList.add('btn-play-active');
+    playTimer = setInterval(() => {
+      if (cur >= steps.length - 1) {
+        clearInterval(playTimer); playTimer = null;
+        btn.textContent = '▶ Play';
+        btn.classList.remove('btn-play-active');
+        return;
+      }
+      move(1);
+    }, 1500);
+  }
+}
+
+renderStep(steps[0]);
+</script>
+</body>
+</html>

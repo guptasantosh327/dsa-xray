@@ -1,0 +1,1322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Lowest Common Ancestor — Interactive Dry Run</title>
+  <meta name="description" content="Step-by-step interactive dry run of lowestCommonAncestor — watch post-order count propagate up and LCA snap into place."/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Sora:wght@300;400;600;700&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0d0f14;
+      --surface: #13161d;
+      --surface2: #1a1e28;
+      --surface3: #212638;
+      --border: rgba(255,255,255,0.07);
+      --border-mid: rgba(255,255,255,0.12);
+      --text: #e8eaf0;
+      --text-muted: #6b7280;
+      --text-dim: #3d4251;
+      --accent: #7c6ef5;
+      --accent-glow: rgba(124,110,245,0.25);
+      --green: #34d399;
+      --green-bg: rgba(52,211,153,0.1);
+      --amber: #fbbf24;
+      --amber-bg: rgba(251,191,36,0.12);
+      --blue: #60a5fa;
+      --blue-bg: rgba(96,165,250,0.1);
+      --red: #f87171;
+      --red-bg: rgba(248,113,113,0.12);
+      --rose: #f472b6;
+      --rose-bg: rgba(244,114,182,0.12);
+      --orange: #fb923c;
+      --orange-bg: rgba(251,146,60,0.12);
+      --yellow: #fde68a;
+      --mono: 'JetBrains Mono', monospace;
+      --sans: 'Sora', sans-serif;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--sans);
+      font-size: 15px;
+      line-height: 1.6;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(124,110,245,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(124,110,245,0.03) 1px, transparent 1px);
+      background-size: 40px 40px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .page {
+      position: relative;
+      z-index: 1;
+      max-width: 1020px;
+      margin: 0 auto;
+      padding: 3rem 1.5rem 5rem;
+    }
+
+    .back-nav {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-family: var(--mono);
+      font-size: 12px;
+      color: var(--text-muted);
+      text-decoration: none;
+      padding: 7px 14px 7px 10px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      margin-bottom: 2rem;
+      transition: all .15s;
+    }
+    .back-nav:hover { border-color: var(--border-mid); color: var(--text); }
+
+    header { margin-bottom: 2.5rem; animation: fadeUp .6s ease both; }
+
+    .tag {
+      display: inline-block;
+      font-family: var(--mono);
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: var(--accent);
+      background: var(--accent-glow);
+      border: 1px solid rgba(124,110,245,0.3);
+      padding: 4px 12px;
+      border-radius: 100px;
+      margin-bottom: 1.2rem;
+    }
+
+    h1 {
+      font-family: var(--sans);
+      font-size: clamp(1.8rem, 5vw, 2.8rem);
+      font-weight: 700;
+      line-height: 1.15;
+      color: var(--text);
+      margin-bottom: .8rem;
+      letter-spacing: -.02em;
+    }
+
+    h1 span { color: var(--accent); }
+
+    .subtitle {
+      font-size: 15px;
+      color: var(--text-muted);
+      max-width: 600px;
+      line-height: 1.7;
+    }
+
+    .insight-banner {
+      background: var(--rose-bg);
+      border: 1px solid rgba(244,114,182,0.22);
+      border-left: 3px solid var(--rose);
+      border-radius: 10px;
+      padding: 14px 18px;
+      margin-bottom: 2rem;
+      font-size: 13px;
+      color: var(--text-muted);
+      font-family: var(--mono);
+      animation: fadeUp .6s ease .05s both;
+    }
+    .insight-banner strong { color: var(--rose); font-weight: 600; }
+
+    /* Input display */
+    .input-row {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 2rem;
+      flex-wrap: wrap;
+      animation: fadeUp .6s ease .07s both;
+    }
+
+    .input-pill {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-family: var(--mono);
+      font-size: 12px;
+      padding: 8px 14px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+    }
+
+    .input-pill .label { color: var(--text-dim); }
+    .input-pill .val-p { color: var(--rose); font-weight: 700; }
+    .input-pill .val-q { color: var(--amber); font-weight: 700; }
+    .input-pill .val-lca { color: var(--green); font-weight: 700; }
+
+    /* Code block */
+    .code-block {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      margin-bottom: 2rem;
+      animation: fadeUp .6s ease .1s both;
+    }
+
+    .code-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border);
+      background: var(--surface2);
+    }
+
+    .code-header span { font-family: var(--mono); font-size: 12px; color: var(--text-muted); }
+
+    .dots { display: flex; gap: 6px; }
+    .dot { width: 10px; height: 10px; border-radius: 50%; }
+    .dot-r { background: #ff5f57; }
+    .dot-y { background: #ffbd2e; }
+    .dot-g { background: #28c940; }
+
+    pre {
+      padding: 1.25rem 1.5rem;
+      overflow-x: auto;
+      font-family: var(--mono);
+      font-size: 13px;
+      line-height: 1.9;
+      color: #c9d1d9;
+    }
+
+    .kw  { color: #ff79c6; }
+    .fn  { color: #50fa7b; }
+    .cm  { color: #6272a4; font-style: italic; }
+    .num { color: #bd93f9; }
+    .var { color: #8be9fd; }
+    .hl  { background: rgba(244,114,182,0.12); border-radius: 3px; padding: 0 3px; }
+
+    .section-label {
+      font-family: var(--mono);
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      margin-bottom: 1rem;
+      margin-top: 2.5rem;
+    }
+
+    /* Visualizer card */
+    .viz-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      overflow: hidden;
+      animation: fadeUp .6s ease .2s both;
+    }
+
+    .progress-bar-wrap { height: 3px; background: var(--border); }
+    .progress-bar-inner {
+      height: 100%;
+      background: linear-gradient(90deg, var(--rose), var(--accent));
+      transition: width .35s cubic-bezier(.4,0,.2,1);
+      border-radius: 0 2px 2px 0;
+    }
+
+    .controls {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 14px 20px;
+      border-bottom: 1px solid var(--border);
+      background: var(--surface2);
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-family: var(--mono);
+      font-size: 12px;
+      font-weight: 500;
+      padding: 7px 16px;
+      border-radius: 8px;
+      border: 1px solid var(--border-mid);
+      background: var(--surface3);
+      color: var(--text);
+      cursor: pointer;
+      transition: all .15s;
+      letter-spacing: .02em;
+    }
+
+    .btn:hover:not(:disabled) {
+      background: var(--accent-glow);
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    .btn:disabled { opacity: .3; cursor: default; }
+
+    .btn-play-active {
+      background: var(--rose-bg) !important;
+      border-color: rgba(244,114,182,0.4) !important;
+      color: var(--rose) !important;
+    }
+
+    .step-info { flex: 1; font-size: 13px; color: var(--text-muted); font-family: var(--mono); }
+
+    kbd {
+      font-size: 10px;
+      background: var(--surface3);
+      border: 1px solid var(--border-mid);
+      padding: 2px 5px;
+      border-radius: 4px;
+      color: var(--text-muted);
+      font-family: var(--mono);
+    }
+
+    .result-badge {
+      font-family: var(--mono);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: .06em;
+      padding: 4px 12px;
+      border-radius: 100px;
+      text-transform: uppercase;
+    }
+
+    .badge-lca {
+      background: var(--green-bg);
+      color: var(--green);
+      border: 1px solid rgba(52,211,153,0.3);
+    }
+
+    .step-desc {
+      padding: 12px 20px;
+      font-size: 13px;
+      color: var(--text-muted);
+      background: var(--surface2);
+      border-bottom: 1px solid var(--border);
+      font-family: var(--mono);
+      min-height: 44px;
+      line-height: 1.6;
+    }
+
+    .step-desc em  { color: var(--amber); font-style: normal; }
+    .step-desc .ok { color: var(--green); font-weight: 600; }
+    .step-desc .hi { color: var(--rose); font-weight: 600; }
+    .step-desc .p  { color: var(--rose); font-weight: 700; }
+    .step-desc .q  { color: var(--amber); font-weight: 700; }
+
+    /* Main layout */
+    .main-grid {
+      display: grid;
+      grid-template-columns: 1fr 320px;
+    }
+
+    .tree-panel {
+      padding: 24px 20px;
+      border-right: 1px solid var(--border);
+    }
+
+    .panel-label {
+      font-family: var(--mono);
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      margin-bottom: 10px;
+    }
+
+    #tree-svg { width: 100%; }
+
+    /* Count badges on tree */
+    .count-badge {
+      transition: opacity .25s;
+    }
+
+    /* Side panel */
+    .side-panel { display: flex; flex-direction: column; }
+
+    /* LCA tracker */
+    .lca-tracker {
+      margin: 14px 16px 0;
+      padding: 12px 14px;
+      background: var(--surface3);
+      border: 1px solid var(--border-mid);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+
+    .lca-label { font-family: var(--mono); font-size: 11px; color: var(--text-muted); }
+    .lca-val {
+      font-family: var(--mono);
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--text-dim);
+      transition: color .3s, transform .2s;
+    }
+
+    .lca-val.updated {
+      color: var(--green);
+      transform: scale(1.3);
+    }
+
+    .stack-panel { padding: 14px 16px; border-bottom: 1px solid var(--border); }
+
+    .call-stack {
+      display: flex;
+      flex-direction: column-reverse;
+      gap: 4px;
+      min-height: 52px;
+    }
+
+    .frame {
+      padding: 5px 10px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-family: var(--mono);
+      border: 1px solid var(--border);
+      background: var(--surface2);
+      color: var(--text-muted);
+      transition: all .2s;
+    }
+
+    .frame.active    { border-color: rgba(244,114,182,0.4); background: var(--rose-bg); color: var(--rose); }
+    .frame.returning { border-color: rgba(52,211,153,0.3); background: var(--green-bg); color: var(--green); }
+
+    .vars-panel { padding: 14px 16px; border-bottom: 1px solid var(--border); }
+
+    .var-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 4px 0;
+      border-bottom: 1px solid var(--border);
+      font-size: 12px;
+    }
+
+    .var-row:last-child { border-bottom: none; }
+    .var-name { font-family: var(--mono); color: var(--text-muted); }
+    .var-val  { font-family: var(--mono); font-weight: 700; color: var(--amber); }
+    .var-val.green  { color: var(--green); }
+    .var-val.rose   { color: var(--rose); }
+    .var-val.blue   { color: var(--blue); }
+    .var-val.dim    { color: var(--text-dim); }
+
+    .log-panel { padding: 14px 16px; flex: 1; }
+
+    .log {
+      font-size: 11px;
+      font-family: var(--mono);
+      line-height: 1.9;
+      color: var(--text-dim);
+      max-height: 180px;
+      overflow-y: auto;
+    }
+
+    .log::-webkit-scrollbar { width: 4px; }
+    .log::-webkit-scrollbar-thumb { background: var(--border-mid); border-radius: 2px; }
+
+    .entry.hl   { color: var(--text); }
+    .entry.ok   { color: var(--green); }
+    .entry.rose { color: var(--rose); }
+    .entry.amb  { color: var(--amber); }
+
+    /* Explanation */
+    .explanation { margin-top: 2.5rem; animation: fadeUp .6s ease .3s both; }
+
+    .explain-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+      gap: 12px;
+    }
+
+    .explain-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px 18px;
+    }
+
+    .explain-card .icon { font-size: 18px; margin-bottom: 8px; }
+    .explain-card h3 { font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 6px; }
+    .explain-card p { font-size: 12px; color: var(--text-muted); line-height: 1.7; }
+    .explain-card code {
+      font-family: var(--mono);
+      font-size: 11px;
+      background: var(--surface2);
+      padding: 1px 5px;
+      border-radius: 4px;
+      color: var(--accent);
+    }
+
+    .complexity { display: flex; gap: 10px; margin-top: 1.5rem; flex-wrap: wrap; }
+
+    .cpill {
+      font-family: var(--mono);
+      font-size: 12px;
+      padding: 6px 14px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+    }
+
+    .cpill strong { color: var(--accent); font-weight: 700; }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── PROBLEM OVERVIEW ───────────────────────────── */
+    .overview { margin-top: 2.5rem; animation: fadeUp .6s ease .25s both; }
+    .overview-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+    .overview-full { margin-bottom: 12px; }
+    .ov-card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 18px 20px; position: relative; overflow: hidden; }
+    .ov-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; }
+    .ov-card.blue::before   { background: linear-gradient(90deg, var(--blue), transparent); }
+    .ov-card.green::before  { background: linear-gradient(90deg, var(--green), transparent); }
+    .ov-card.amber::before  { background: linear-gradient(90deg, var(--amber), transparent); }
+    .ov-card.red::before    { background: linear-gradient(90deg, var(--red), transparent); }
+    .ov-card.accent::before { background: linear-gradient(90deg, var(--accent), transparent); }
+    .ov-card.rose::before   { background: linear-gradient(90deg, var(--rose), transparent); }
+    .ov-card-head { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+    .ov-icon { font-size: 16px; }
+    .ov-title { font-family: var(--mono); font-size: 10px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--text-muted); }
+    .ov-card p { font-size: 13px; color: var(--text-muted); line-height: 1.75; }
+    .ov-card p strong { color: var(--text); font-weight: 600; }
+    .ov-card code { font-family: var(--mono); font-size: 11px; background: var(--surface2); padding: 1px 6px; border-radius: 4px; color: var(--accent); }
+    .hint-list { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+    .hint-list li { display: flex; gap: 10px; align-items: flex-start; font-size: 13px; color: var(--text-muted); line-height: 1.65; }
+    .hint-list li .bullet { font-family: var(--mono); font-size: 10px; font-weight: 700; color: var(--accent); background: var(--accent-glow); border: 1px solid rgba(124,110,245,0.25); padding: 2px 7px; border-radius: 4px; flex-shrink: 0; margin-top: 2px; }
+    .hint-list li .bullet.green { color: var(--green); background: var(--green-bg); border-color: rgba(52,211,153,0.25); }
+    .hint-list li .bullet.amber { color: var(--amber); background: var(--amber-bg); border-color: rgba(251,191,36,0.25); }
+    .hint-list li .bullet.red   { color: var(--red);   background: var(--red-bg);   border-color: rgba(248,113,113,0.25); }
+    .hint-list li .bullet.blue  { color: var(--blue);  background: var(--blue-bg);  border-color: rgba(96,165,250,0.25); }
+    .edge-list { display: flex; flex-direction: column; gap: 8px; }
+    .edge-item { display: flex; gap: 10px; align-items: flex-start; }
+    .edge-label { font-family: var(--mono); font-size: 9px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; padding: 3px 8px; border-radius: 5px; flex-shrink: 0; margin-top: 2px; }
+    .edge-label.warn { background: var(--red-bg); color: var(--red); border: 1px solid rgba(248,113,113,0.25); }
+    .edge-label.ok   { background: var(--green-bg); color: var(--green); border: 1px solid rgba(52,211,153,0.25); }
+    .edge-text { font-size: 12px; color: var(--text-muted); line-height: 1.65; }
+    .edge-text code { font-family: var(--mono); font-size: 11px; background: var(--surface2); padding: 1px 5px; border-radius: 4px; color: var(--accent); }
+    .best-solution { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; margin-bottom: 12px; }
+    .best-solution-header { display: flex; align-items: center; justify-content: space-between; padding: 12px 18px; border-bottom: 1px solid var(--border); background: var(--surface2); }
+    .best-solution-title { display: flex; align-items: center; gap: 8px; font-family: var(--mono); font-size: 11px; font-weight: 700; color: var(--green); letter-spacing: .08em; }
+    .best-solution-pills { display: flex; gap: 6px; }
+    .sol-pill { font-family: var(--mono); font-size: 10px; padding: 3px 9px; border-radius: 6px; background: var(--surface3); border: 1px solid var(--border-mid); color: var(--text-muted); }
+    .best-solution pre { padding: 1rem 1.25rem; font-size: 12px; line-height: 1.8; overflow-x: auto; }
+    @media (max-width: 680px) { .overview-grid { grid-template-columns: 1fr; } }
+
+    @media (max-width: 680px) {
+      .main-grid { grid-template-columns: 1fr; }
+      .tree-panel { border-right: none; border-bottom: 1px solid var(--border); }
+    }
+  
+    /* ── NEW TOP SECTIONS ── */
+    .pattern-banner-new { display:flex; align-items:flex-start; gap:16px; border-left-width:3px; border-left-style:solid; border-radius:10px; padding:14px 18px; margin-bottom:2rem; flex-wrap:wrap; animation:fadeUp .6s ease .03s both; }
+    .pb-label  { font-family:var(--mono); font-size:10px; font-weight:700; letter-spacing:.12em; text-transform:uppercase; color:var(--text-dim); margin-bottom:4px; }
+    .pb-name   { font-family:var(--mono); font-size:13px; font-weight:700; }
+    .pb-desc   { font-family:var(--mono); font-size:12px; color:var(--text-muted); flex:1; min-width:200px; line-height:1.7; }
+    .pb-solves { font-family:var(--mono); font-size:11px; color:var(--text-dim); }
+
+    .prob-section { background:var(--surface); border:1px solid var(--border); border-radius:14px; overflow:hidden; margin-bottom:2rem; animation:fadeUp .6s ease .04s both; }
+    .prob-section-hdr { display:flex; align-items:center; gap:10px; padding:14px 20px; border-bottom:1px solid var(--border); background:var(--surface2); }
+    .prob-section-icon  { font-size:16px; }
+    .prob-section-title { font-family:var(--mono); font-size:11px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:var(--text-muted); }
+    .prob-body { padding:20px; }
+    .prob-body p { font-size:13px; color:var(--text-muted); line-height:1.75; margin-bottom:10px; }
+    .prob-body p:last-child { margin-bottom:0; }
+    .prob-body p strong { color:var(--text); }
+    .prob-body code { font-family:var(--mono); font-size:11px; background:var(--surface2); padding:1px 6px; border-radius:4px; color:var(--accent); }
+
+    /* SVG example grid — replaces array [x,y,z] notation */
+    .svg-example-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:14px; margin-top:16px; }
+    .svg-ex-card { background:var(--surface2); border:1px solid var(--border); border-radius:10px; overflow:hidden; }
+    .svg-ex-header { display:flex; align-items:center; justify-content:space-between; padding:8px 14px; border-bottom:1px solid var(--border); }
+    .svg-ex-label  { font-family:var(--mono); font-size:10px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:var(--text-dim); }
+    .svg-ex-result { font-family:var(--mono); font-size:11px; font-weight:700; padding:2px 10px; border-radius:5px; }
+    .res-green  { background:rgba(52,211,153,.12); color:#34d399; border:1px solid rgba(52,211,153,.25); }
+    .res-red    { background:rgba(248,113,113,.12); color:#f87171; border:1px solid rgba(248,113,113,.25); }
+    .res-blue   { background:rgba(96,165,250,.12);  color:#60a5fa; border:1px solid rgba(96,165,250,.25); }
+    .res-orange { background:rgba(251,146,60,.12);  color:#fb923c; border:1px solid rgba(251,146,60,.25); }
+    .res-purple { background:rgba(192,132,252,.12); color:#c084fc; border:1px solid rgba(192,132,252,.25); }
+    .svg-ex-body { padding:12px; display:flex; justify-content:center; align-items:center; min-height:90px; }
+    .svg-ex-body svg { max-height:120px; width:100%; }
+
+    /* Hints */
+    .hints-list-new { display:flex; flex-direction:column; gap:10px; }
+    .hint-row { display:flex; gap:12px; align-items:flex-start; }
+    .hint-badge { font-family:var(--mono); font-size:11px; font-weight:700; padding:3px 8px; border-radius:6px; flex-shrink:0; margin-top:2px; min-width:28px; text-align:center; }
+    .hint-body { font-size:13px; color:var(--text-muted); line-height:1.7; }
+    .hint-body code { font-family:var(--mono); font-size:11px; background:var(--surface2); padding:1px 5px; border-radius:4px; color:var(--accent); }
+    .hint-body strong { color:var(--text); }
+    .intuition-new { border-radius:10px; padding:16px 18px; margin-top:14px; }
+    .intuition-new p { font-size:13px; color:var(--text-muted); line-height:1.75; }
+
+  </style>
+</head>
+<body>
+<div class="page">
+
+  <a class="back-nav" href="../dsa-hub.html">← All visualizers</a>
+
+  <header>
+    <div class="tag">Algorithm Dry Run · LeetCode #236</div>
+    <h1>Lowest <span>Common Ancestor</span></h1>
+    <p class="subtitle">
+      Step-by-step trace of <code style="font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--accent);background:var(--surface);padding:2px 7px;border-radius:5px;">lowestCommonAncestor</code> — watch post-order counts bubble up the tree. The first node where count reaches 2 is the LCA.
+    </p>
+  </header>
+
+  <div class="insight-banner">
+    ⚡ <strong>Key insight:</strong> Each node counts how many of <code style="color:var(--rose)">p</code> and <code style="color:var(--amber)">q</code> exist in its entire subtree (including itself). The <strong>deepest node</strong> where this count first hits <code style="color:var(--green)">2</code> is the LCA — because that's where the two paths meet for the very first time.
+  </div>
+
+  <div class="pattern-banner-new" style="background:rgba(244,114,182,.06);border:1px solid rgba(244,114,182,.25);border-left-color:#f472b6">
+    <div>
+      <div class="pb-label">Pattern</div>
+      <div class="pb-name" style="color:#f472b6">🎯 Post-order DFS + Count Propagation</div>
+    </div>
+    <div class="pb-desc">Each node reports how many of {p, q} live in its subtree. The deepest node where this count first reaches 2 is the LCA.</div>
+    <div class="pb-solves">Same pattern unlocks:<br/><span style="color:#f472b6">#1644 LCA with Parent Pointer · #1650 LCA III · #235 LCA of BST</span></div>
+  </div>
+
+  <div class="prob-section">
+    <div class="prob-section-hdr">
+      <span class="prob-section-icon">📋</span>
+      <span class="prob-section-title">Problem Statement</span>
+    </div>
+    <div class="prob-body">
+      <p>Given a binary tree and two nodes <strong>p</strong> and <strong>q</strong>, find their <strong>Lowest Common Ancestor (LCA)</strong> — the deepest node that has both p and q as descendants. A node is a descendant of itself.</p>
+        <p>🔑 The LCA is the first <em>meeting point</em> when you trace upward from both p and q simultaneously.</p><div class="svg-example-grid">
+    <div class="svg-ex-card">
+      <div class="svg-ex-header">
+        <span class="svg-ex-label">p=5, q=4  →  LCA is node 5 (p is ancestor of q)</span>
+        <span class="svg-ex-result res-purple">node 5</span>
+      </div>
+      <div class="svg-ex-body"><svg viewBox="0 0 240 140"><line x1="120" y1="26" x2="66" y2="64" stroke="#1e2231" stroke-width="1.5"/><line x1="120" y1="26" x2="180" y2="64" stroke="#1e2231" stroke-width="1.5"/><line x1="52" y1="82" x2="28" y2="108" stroke="#1e2231" stroke-width="1.5"/><line x1="80" y1="82" x2="106" y2="108" stroke="#1e2231" stroke-width="1.5"/><line x1="94" y1="120" x2="82" y2="136" stroke="#1e2231" stroke-width="1.5"/><circle cx="120" cy="18" r="20" fill="#13161d" stroke="#3d4251" stroke-width="1.5"/><text x="120" y="22" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="13" font-weight="700" fill="#6b7280">3</text><circle cx="64" cy="74" r="20" fill="#1a1520" stroke="#f472b6" stroke-width="2.5"/><text x="64" y="78" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="13" font-weight="700" fill="#f472b6">5</text><circle cx="182" cy="74" r="20" fill="#13161d" stroke="#3d4251" stroke-width="1.5"/><text x="182" y="78" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="13" font-weight="700" fill="#6b7280">1</text><circle cx="26" cy="110" r="16" fill="#13161d" stroke="#3d4251" stroke-width="1.5"/><text x="26" y="114" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="11" font-weight="700" fill="#6b7280">6</text><circle cx="108" cy="110" r="16" fill="#13161d" stroke="#3d4251" stroke-width="1.5"/><text x="108" y="114" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="11" font-weight="700" fill="#6b7280">2</text><circle cx="84" cy="136" r="13" fill="#1e1a08" stroke="#fbbf24" stroke-width="2"/><text x="84" y="140" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="11" font-weight="700" fill="#fbbf24">4</text><text x="4" y="72" font-family="'JetBrains Mono',monospace" font-size="8" fill="#f472b6">p=LCA</text><text x="80" y="136" font-family="'JetBrains Mono',monospace" font-size="8" fill="#fbbf24">q</text><text x="148" y="60" font-family="'JetBrains Mono',monospace" font-size="9" fill="#f472b6">LCA=5</text></svg></div>
+    </div>
+    <div class="svg-ex-card">
+      <div class="svg-ex-header">
+        <span class="svg-ex-label">p=5, q=1  →  LCA is node 3 (root)</span>
+        <span class="svg-ex-result res-blue">node 3</span>
+      </div>
+      <div class="svg-ex-body"><svg viewBox="0 0 200 100"><line x1="100" y1="26" x2="54" y2="64" stroke="#1e2231" stroke-width="1.5"/><line x1="100" y1="26" x2="154" y2="64" stroke="#1e2231" stroke-width="1.5"/><circle cx="100" cy="18" r="20" fill="#0e1820" stroke="#60a5fa" stroke-width="2.5"/><text x="100" y="22" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="13" font-weight="700" fill="#60a5fa">3</text><circle cx="52" cy="74" r="20" fill="#1a1520" stroke="#f472b6" stroke-width="2"/><text x="52" y="78" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="13" font-weight="700" fill="#f472b6">5</text><circle cx="156" cy="74" r="20" fill="#1a2030" stroke="#fbbf24" stroke-width="2"/><text x="156" y="78" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="13" font-weight="700" fill="#fbbf24">1</text><text x="4" y="18" font-family="'JetBrains Mono',monospace" font-size="9" fill="#60a5fa">LCA=3</text><text x="22" y="72" font-family="'JetBrains Mono',monospace" font-size="8" fill="#f472b6">p</text><text x="172" y="72" font-family="'JetBrains Mono',monospace" font-size="8" fill="#fbbf24">q</text></svg></div>
+    </div>
+  </div>
+    </div>
+  </div>
+
+  <div class="prob-section">
+    <div class="prob-section-hdr">
+      <span class="prob-section-icon">💡</span>
+      <span class="prob-section-title">Intuition + Hints</span>
+    </div>
+    <div class="prob-body">
+      <div class="hints-list-new">
+      <div class="hint-row">
+        <span class="hint-badge" style="color:#f472b6;background:rgba(244,114,182,.1);border:1px solid rgba(244,114,182,.25)">1</span>
+        <div class="hint-body"><strong>Think in counts.</strong> Each node can report how many of {p, q} live in its subtree: 0, 1, or 2. This count naturally bubbles up via post-order.</div>
+      </div>
+      <div class="hint-row">
+        <span class="hint-badge" style="color:#f472b6;background:rgba(244,114,182,.1);border:1px solid rgba(244,114,182,.25)">2</span>
+        <div class="hint-body">At every node: <code>count = leftCount + rightCount + (curr is p or q ? 1 : 0)</code>.</div>
+      </div>
+      <div class="hint-row">
+        <span class="hint-badge" style="color:#f472b6;background:rgba(244,114,182,.1);border:1px solid rgba(244,114,182,.25)">3</span>
+        <div class="hint-body">The <strong>first</strong> node where <code>count === 2</code> is the LCA. Use a <code>!lca</code> guard — without it, every ancestor above the true LCA would also claim to be the LCA.</div>
+      </div>
+      <div class="hint-row">
+        <span class="hint-badge" style="color:#f472b6;background:rgba(244,114,182,.1);border:1px solid rgba(244,114,182,.25)">4</span>
+        <div class="hint-body">Use a <strong>closure variable</strong> <code>let lca = null</code>. The helper returns a number (count), while the answer is captured separately. Post-order is mandatory — children must report before parents can decide.</div>
+      </div>
+    </div><div class="intuition-new" style="background:rgba(244,114,182,.06);border:1px solid rgba(244,114,182,.2);margin-top:14px"><p><strong style="color:#f472b6">Core insight:</strong> Every node is a messenger carrying a count upward. The first node that collects count=2 from its subtree (including itself) is exactly where p and q's paths converge — the LCA.</p></div>
+    </div>
+  </div>
+
+
+  <!-- PROBLEM STATEMENT -->
+  <div style="background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden;margin-bottom:2rem">
+    <div style="display:flex;align-items:center;gap:10px;padding:14px 20px;border-bottom:1px solid var(--border);background:var(--surface2)">
+      <span style="font-size:16px">📋</span>
+      <span style="font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text-muted)">Problem Statement + Examples</span>
+    </div>
+    <div style="padding:20px">
+      <p style="font-size:13px;color:var(--text-muted);line-height:1.75;margin-bottom:16px">Given a binary tree and two nodes <strong style="color:var(--text)">p</strong> and <strong style="color:var(--text)">q</strong>, find their <strong style="color:var(--text)">Lowest Common Ancestor (LCA)</strong> — the deepest node that has <em>both</em> p and q as descendants. A node is a descendant of itself.</p>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+        <div style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:14px">
+          <div style="font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text-dim);margin-bottom:10px">p=5, q=1 → LCA = 3 (root)</div>
+          <svg width="180" height="120" viewBox="0 0 180 120">
+            <line x1="90" y1="24" x2="50" y2="54" stroke="#2a2f3e" stroke-width="1.5"/>
+            <line x1="90" y1="24" x2="132" y2="54" stroke="#2a2f3e" stroke-width="1.5"/>
+            <line x1="38" y1="68" x2="20" y2="94" stroke="#2a2f3e" stroke-width="1.5"/>
+            <line x1="62" y1="68" x2="80" y2="94" stroke="#2a2f3e" stroke-width="1.5"/>
+            <circle cx="90" cy="16" r="16" fill="#13161d" stroke="#3d4251" stroke-width="1.5"/><text x="90" y="20" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="12" font-weight="700" fill="#6b7280">3</text>
+            <circle cx="50" cy="62" r="16" fill="#1a1520" stroke="#f472b6" stroke-width="2.5"/><text x="50" y="66" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="12" font-weight="700" fill="#f472b6">5</text>
+            <circle cx="132" cy="62" r="16" fill="#1e1a08" stroke="#fbbf24" stroke-width="2.5"/><text x="132" y="66" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="12" font-weight="700" fill="#fbbf24">1</text>
+            <circle cx="19" cy="100" r="12" fill="#13161d" stroke="#2a2f3e" stroke-width="1.5"/><text x="19" y="104" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="10" font-weight="700" fill="#6b7280">6</text>
+            <circle cx="81" cy="100" r="12" fill="#13161d" stroke="#2a2f3e" stroke-width="1.5"/><text x="81" y="104" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="10" font-weight="700" fill="#6b7280">2</text>
+            <text x="90" y="8" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="9" fill="#34d399">LCA=3</text>
+          </svg>
+          <p style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text-dim);margin-top:6px">p=5 is left subtree, q=1 is right — root is the meeting point.</p>
+        </div>
+        <div style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:14px">
+          <div style="font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text-dim);margin-bottom:10px">p=5, q=4 → LCA = 5 (ancestor!)</div>
+          <svg width="180" height="130" viewBox="0 0 180 130">
+            <line x1="90" y1="24" x2="50" y2="54" stroke="#2a2f3e" stroke-width="1.5"/>
+            <line x1="90" y1="24" x2="140" y2="54" stroke="#2a2f3e" stroke-width="1.5"/>
+            <line x1="38" y1="68" x2="20" y2="96" stroke="#2a2f3e" stroke-width="1.5"/>
+            <line x1="62" y1="68" x2="80" y2="96" stroke="#2a2f3e" stroke-width="1.5"/>
+            <line x1="70" y1="112" x2="84" y2="124" stroke="#2a2f3e" stroke-width="1.5"/>
+            <circle cx="90" cy="16" r="16" fill="#13161d" stroke="#3d4251" stroke-width="1.5"/><text x="90" y="20" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="12" font-weight="700" fill="#6b7280">3</text>
+            <circle cx="50" cy="62" r="16" fill="#1a1520" stroke="#f472b6" stroke-width="2.5"/><text x="50" y="66" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="12" font-weight="700" fill="#f472b6">5</text>
+            <circle cx="140" cy="62" r="14" fill="#13161d" stroke="#2a2f3e" stroke-width="1.5"/><text x="140" y="66" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="11" font-weight="700" fill="#6b7280">1</text>
+            <circle cx="19" cy="102" r="12" fill="#13161d" stroke="#2a2f3e" stroke-width="1.5"/><text x="19" y="106" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="10" font-weight="700" fill="#6b7280">6</text>
+            <circle cx="80" cy="102" r="12" fill="#13161d" stroke="#2a2f3e" stroke-width="1.5"/><text x="80" y="106" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="10" font-weight="700" fill="#6b7280">2</text>
+            <circle cx="85" cy="126" r="10" fill="#1e1a08" stroke="#fbbf24" stroke-width="2"/><text x="85" y="130" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="9" font-weight="700" fill="#fbbf24">4</text>
+            <text x="50" y="48" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="9" fill="#34d399">LCA=5</text>
+          </svg>
+          <p style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text-dim);margin-top:6px">p=5 is an ancestor of q=4 — so p itself is the LCA!</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- HINTS -->
+  <div style="background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden;margin-bottom:2rem">
+    <div style="display:flex;align-items:center;gap:10px;padding:14px 20px;border-bottom:1px solid var(--border);background:var(--surface2)">
+      <span style="font-size:16px">💡</span>
+      <span style="font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text-muted)">Intuition + Hints</span>
+    </div>
+    <div style="padding:20px;display:flex;flex-direction:column;gap:10px">
+      <div style="display:flex;gap:12px;align-items:flex-start"><span style="font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;color:var(--rose);background:var(--rose-bg);border:1px solid rgba(244,114,182,0.25);padding:3px 8px;border-radius:6px;flex-shrink:0;margin-top:2px">1</span><div style="font-size:13px;color:var(--text-muted);line-height:1.7">Think about what each node should <strong style="color:var(--text)">return to its parent</strong>: how many of {p, q} are in my subtree? That number (0, 1, or 2) is the signal.</div></div>
+      <div style="display:flex;gap:12px;align-items:flex-start"><span style="font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;color:var(--rose);background:var(--rose-bg);border:1px solid rgba(244,114,182,0.25);padding:3px 8px;border-radius:6px;flex-shrink:0;margin-top:2px">2</span><div style="font-size:13px;color:var(--text-muted);line-height:1.7">At each node: <code style="font-family:'JetBrains Mono',monospace;font-size:11px;background:var(--surface2);padding:1px 5px;border-radius:4px;color:var(--accent)">count = ansOnLeft + ansOnRight + (curr is p or q ? 1 : 0)</code>.</div></div>
+      <div style="display:flex;gap:12px;align-items:flex-start"><span style="font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;color:var(--rose);background:var(--rose-bg);border:1px solid rgba(244,114,182,0.25);padding:3px 8px;border-radius:6px;flex-shrink:0;margin-top:2px">3</span><div style="font-size:13px;color:var(--text-muted);line-height:1.7">When <code style="font-family:'JetBrains Mono',monospace;font-size:11px;background:var(--surface2);padding:1px 5px;border-radius:4px;color:var(--accent)">count === 2</code> AND <code style="font-family:'JetBrains Mono',monospace;font-size:11px;background:var(--surface2);padding:1px 5px;border-radius:4px;color:var(--accent)">lca</code> is still null → this is the deepest node containing both. Capture it with a closure variable.</div></div>
+      <div style="display:flex;gap:12px;align-items:flex-start"><span style="font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;color:var(--rose);background:var(--rose-bg);border:1px solid rgba(244,114,182,0.25);padding:3px 8px;border-radius:6px;flex-shrink:0;margin-top:2px">4</span><div style="font-size:13px;color:var(--text-muted);line-height:1.7">Use <strong style="color:var(--text)">post-order</strong> (left → right → root). You need children's counts before you can compute the parent's count. This is a bottom-up data flow.</div></div>
+      <div style="background:var(--rose-bg);border:1px solid rgba(244,114,182,0.2);border-radius:10px;padding:14px;margin-top:4px">
+        <p style="font-size:13px;color:var(--text-muted);line-height:1.75"><strong style="color:var(--rose)">Key trick — the <code>!lca</code> guard:</strong> Every ancestor of the true LCA also has count=2. Without the guard, they'd all claim to be the LCA. The guard ensures only the <em>first</em> (deepest) node with count=2 wins.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="input-row">
+    <div class="input-pill"><span class="label">p =</span><span class="val-p">node 5</span></div>
+    <div class="input-pill"><span class="label">q =</span><span class="val-q">node 4</span></div>
+    <div class="input-pill"><span class="label">LCA =</span><span class="val-lca">?</span></div>
+  </div>
+
+  <!-- Code -->
+  <div class="code-block">
+    <div class="code-header">
+      <div class="dots"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div></div>
+      <span>lowestCommonAncestor.js</span>
+    </div>
+    <pre><span class="kw">var</span> <span class="fn">lowestCommonAncestor</span> = <span class="kw">function</span>(<span class="var">root</span>, <span class="var">p</span>, <span class="var">q</span>) {
+  <span class="kw">let</span> <span class="var">lca</span> = <span class="kw">null</span>
+
+  <span class="kw">function</span> <span class="fn">postOrderTraversal</span>(<span class="var">curr</span>) {
+    <span class="kw">if</span> (!<span class="var">curr</span>) <span class="kw">return</span> <span class="num">0</span>                         <span class="cm">// null → contributes 0</span>
+    <span class="kw">let</span> <span class="var">count</span> = <span class="num">0</span>
+    <span class="kw">let</span> <span class="var">ansOnLeft</span>  = <span class="fn">postOrderTraversal</span>(<span class="var">curr</span>.left)
+    <span class="kw">let</span> <span class="var">ansOnRight</span> = <span class="fn">postOrderTraversal</span>(<span class="var">curr</span>.right)
+
+    <span class="kw">if</span> (<span class="var">curr</span>.val == <span class="var">p</span>.val || <span class="var">curr</span>.val == <span class="var">q</span>.val) {
+      <span class="var">count</span>++                                   <span class="cm">// curr is p or q → count it</span>
+    }
+
+    <span class="var">count</span> = <span class="var">ansOnLeft</span> + <span class="var">ansOnRight</span> + <span class="var">count</span>;
+    <span class="hl"><span class="kw">if</span> (<span class="var">count</span> == <span class="num">2</span> && !<span class="var">lca</span>) {</span>               <span class="cm">// first time count==2 → LCA found!</span>
+    <span class="hl">  <span class="var">lca</span> = <span class="var">curr</span></span>
+    <span class="hl">}</span>
+    <span class="kw">return</span> <span class="var">count</span>
+  }
+
+  <span class="fn">postOrderTraversal</span>(<span class="var">root</span>);
+  <span class="kw">return</span> <span class="var">lca</span>
+};</pre>
+  </div>
+
+  <p class="section-label">// Interactive dry run — p=5, q=4 → LCA should be node 5</p>
+
+  <!-- Visualizer -->
+  <div class="viz-card">
+    <div class="progress-bar-wrap">
+      <div class="progress-bar-inner" id="prog" style="width:7%"></div>
+    </div>
+
+    <div class="controls">
+      <button class="btn" id="btn-prev" onclick="move(-1)" disabled>← Prev</button>
+      <button class="btn" id="btn-play" onclick="togglePlay()">▶ Play</button>
+      <button class="btn" id="btn-next" onclick="move(1)">Next →</button>
+      <span class="step-info" id="step-label">Step 1 / 14</span>
+      <span style="font-family:var(--mono);font-size:11px;color:var(--text-dim);display:flex;gap:4px;align-items:center"><kbd>←</kbd><kbd>→</kbd></span>
+      <span class="result-badge badge-lca" id="ans-badge" style="display:none">✓ LCA = node 5</span>
+    </div>
+
+    <div class="step-desc" id="step-desc">Call <em>postOrderTraversal(3)</em> — entering root. Recursing all the way down left side first.</div>
+
+    <div class="main-grid">
+      <!-- Tree SVG -->
+      <div class="tree-panel">
+        <div class="panel-label">// binary tree &nbsp; p=<span style="color:var(--rose)">5</span> &nbsp; q=<span style="color:var(--amber)">4</span></div>
+        <!--
+          Tree:
+                3          (root)
+               / \
+              5    1
+             / \  / \
+            6   2 0   8
+               / \
+              7   4
+        -->
+        <svg id="tree-svg" viewBox="0 0 540 310" width="100%">
+          <!-- edges -->
+          <line x1="270" y1="48" x2="158" y2="108" stroke="#1e2231" stroke-width="2"/>
+          <line x1="270" y1="48" x2="386" y2="108" stroke="#1e2231" stroke-width="2"/>
+          <!-- 5's children -->
+          <line x1="140" y1="130" x2="85"  y2="188" stroke="#1e2231" stroke-width="2"/>
+          <line x1="176" y1="130" x2="220" y2="188" stroke="#1e2231" stroke-width="2"/>
+          <!-- 1's children -->
+          <line x1="368" y1="130" x2="330" y2="188" stroke="#1e2231" stroke-width="2"/>
+          <line x1="404" y1="130" x2="450" y2="188" stroke="#1e2231" stroke-width="2"/>
+          <!-- 2's children -->
+          <line x1="206" y1="210" x2="174" y2="262" stroke="#1e2231" stroke-width="2"/>
+          <line x1="234" y1="210" x2="266" y2="262" stroke="#1e2231" stroke-width="2"/>
+
+          <!-- count badge circles (shown after node returns) -->
+          <!-- These are rendered via JS -->
+
+          <!-- node 3 -->
+          <g id="n3">
+            <circle cx="270" cy="38" r="28" fill="#13161d" stroke="#2a2f3e" stroke-width="1.5"/>
+            <text x="270" y="42" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="15" font-weight="700" fill="#6b7280">3</text>
+          </g>
+          <!-- node 5 (p) -->
+          <g id="n5">
+            <circle cx="158" cy="118" r="28" fill="#13161d" stroke="#2a2f3e" stroke-width="1.5"/>
+            <text x="158" y="122" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="15" font-weight="700" fill="#6b7280">5</text>
+          </g>
+          <!-- node 1 -->
+          <g id="n1">
+            <circle cx="386" cy="118" r="28" fill="#13161d" stroke="#2a2f3e" stroke-width="1.5"/>
+            <text x="386" y="122" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="15" font-weight="700" fill="#6b7280">1</text>
+          </g>
+          <!-- node 6 -->
+          <g id="n6">
+            <circle cx="82" cy="198" r="24" fill="#13161d" stroke="#2a2f3e" stroke-width="1.5"/>
+            <text x="82" y="202" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="14" font-weight="700" fill="#6b7280">6</text>
+          </g>
+          <!-- node 2 -->
+          <g id="n2">
+            <circle cx="220" cy="198" r="24" fill="#13161d" stroke="#2a2f3e" stroke-width="1.5"/>
+            <text x="220" y="202" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="14" font-weight="700" fill="#6b7280">2</text>
+          </g>
+          <!-- node 0 -->
+          <g id="n0">
+            <circle cx="328" cy="198" r="24" fill="#13161d" stroke="#2a2f3e" stroke-width="1.5"/>
+            <text x="328" y="202" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="14" font-weight="700" fill="#6b7280">0</text>
+          </g>
+          <!-- node 8 -->
+          <g id="n8">
+            <circle cx="452" cy="198" r="24" fill="#13161d" stroke="#2a2f3e" stroke-width="1.5"/>
+            <text x="452" y="202" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="14" font-weight="700" fill="#6b7280">8</text>
+          </g>
+          <!-- node 7 -->
+          <g id="n7">
+            <circle cx="170" cy="272" r="20" fill="#13161d" stroke="#2a2f3e" stroke-width="1.5"/>
+            <text x="170" y="276" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="13" font-weight="700" fill="#6b7280">7</text>
+          </g>
+          <!-- node 4 (q) -->
+          <g id="n4">
+            <circle cx="268" cy="272" r="20" fill="#13161d" stroke="#2a2f3e" stroke-width="1.5"/>
+            <text x="268" y="276" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="13" font-weight="700" fill="#6b7280">4</text>
+          </g>
+
+          <!-- count badges (shown after node returns) -->
+          <text id="c3" x="302" y="28"  font-family="'JetBrains Mono',monospace" font-size="11" fill="#7c6ef5" text-anchor="start" display="none"></text>
+          <text id="c5" x="190" y="108" font-family="'JetBrains Mono',monospace" font-size="11" fill="#7c6ef5" text-anchor="start" display="none"></text>
+          <text id="c1" x="418" y="108" font-family="'JetBrains Mono',monospace" font-size="11" fill="#7c6ef5" text-anchor="start" display="none"></text>
+          <text id="c6" x="108" y="192" font-family="'JetBrains Mono',monospace" font-size="11" fill="#7c6ef5" text-anchor="start" display="none"></text>
+          <text id="c2" x="246" y="192" font-family="'JetBrains Mono',monospace" font-size="11" fill="#7c6ef5" text-anchor="start" display="none"></text>
+          <text id="c0" x="354" y="192" font-family="'JetBrains Mono',monospace" font-size="11" fill="#7c6ef5" text-anchor="start" display="none"></text>
+          <text id="c8" x="478" y="192" font-family="'JetBrains Mono',monospace" font-size="11" fill="#7c6ef5" text-anchor="start" display="none"></text>
+          <text id="c7" x="192" y="265" font-family="'JetBrains Mono',monospace" font-size="11" fill="#7c6ef5" text-anchor="start" display="none"></text>
+          <text id="c4" x="290" y="265" font-family="'JetBrains Mono',monospace" font-size="11" fill="#7c6ef5" text-anchor="start" display="none"></text>
+        </svg>
+      </div>
+
+      <!-- Side panel -->
+      <div class="side-panel">
+        <!-- LCA tracker -->
+        <div style="padding:14px 16px 0;">
+          <div class="panel-label">// lca (closure variable)</div>
+          <div class="lca-tracker">
+            <span class="lca-label">lca =</span>
+            <span class="lca-val" id="lca-display">null</span>
+          </div>
+        </div>
+
+        <!-- Call stack -->
+        <div class="stack-panel">
+          <div class="panel-label">// call stack</div>
+          <div class="call-stack" id="stack"></div>
+        </div>
+
+        <!-- Variables -->
+        <div class="vars-panel">
+          <div class="panel-label">// local variables</div>
+          <div class="var-row"><span class="var-name">curr.val</span>   <span class="var-val"      id="v-curr">—</span></div>
+          <div class="var-row"><span class="var-name">ansOnLeft</span>  <span class="var-val"      id="v-al">—</span></div>
+          <div class="var-row"><span class="var-name">ansOnRight</span> <span class="var-val"      id="v-ar">—</span></div>
+          <div class="var-row"><span class="var-name">count</span>      <span class="var-val rose" id="v-count">—</span></div>
+          <div class="var-row"><span class="var-name">returns</span>    <span class="var-val green" id="v-ret">—</span></div>
+        </div>
+
+        <!-- Log -->
+        <div class="log-panel">
+          <div class="panel-label">// execution log</div>
+          <div class="log" id="log"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── PROBLEM OVERVIEW ── -->
+  <div class="overview">
+    <p class="section-label">// problem overview — everything you need for revision</p>
+
+    <div class="overview-grid">
+      <div class="ov-card blue">
+        <div class="ov-card-head"><span class="ov-icon">📋</span><span class="ov-title">What the problem is asking</span></div>
+        <p>Given a binary tree and two nodes <strong>p</strong> and <strong>q</strong>, find their <strong>Lowest Common Ancestor (LCA)</strong> — the deepest node that has <em>both</em> p and q as descendants (a node is considered a descendant of itself).</p>
+        <p style="margin-top:8px">In other words: go up from both p and q. The first node where their paths <strong>meet</strong> is the LCA. It's the deepest node that "covers" both targets.</p>
+      </div>
+      <div class="ov-card rose">
+        <div class="ov-card-head"><span class="ov-icon">💡</span><span class="ov-title">Core intuition</span></div>
+        <p>Each node can <strong>count</strong> how many of {p, q} exist in its subtree (0, 1, or 2). This count bubbles <strong>bottom-up</strong> via post-order DFS.</p>
+        <p style="margin-top:8px">The <strong>first node where count reaches 2</strong> is the LCA — because that's the deepest node whose subtree contains <em>both</em> targets. Every ancestor above it will also have count=2, but they're higher up, so we use the <code>!lca</code> guard to capture only the first (deepest) one.</p>
+      </div>
+    </div>
+
+    <div class="overview-grid">
+      <div class="ov-card accent">
+        <div class="ov-card-head"><span class="ov-icon">🧩</span><span class="ov-title">Hints to reach the solution</span></div>
+        <ul class="hint-list">
+          <li><span class="bullet">1</span>Think about what each node should <em>return</em> to its parent: the count of p and q found in its subtree (0, 1, or 2).</li>
+          <li><span class="bullet">2</span>At each node: <code>count = ansOnLeft + ansOnRight + (curr is p or q ? 1 : 0)</code>.</li>
+          <li><span class="bullet blue">3</span>When <code>count === 2</code> AND <code>lca</code> is still null → set <code>lca = curr</code>. The <code>!lca</code> guard is critical to capture the <em>deepest</em> node, not a higher ancestor.</li>
+          <li><span class="bullet green">4</span>Use a <strong>closure variable</strong> <code>let lca = null</code>. The helper returns a number (count), while <code>lca</code> stores the result separately.</li>
+        </ul>
+      </div>
+      <div class="ov-card amber">
+        <div class="ov-card-head"><span class="ov-icon">⚡</span><span class="ov-title">Key trick / pattern</span></div>
+        <p><strong>The !lca guard:</strong> Without it, every ancestor of the true LCA would also claim to be the LCA (all have count=2 by the time we reach them). The check <code>if (count === 2 && !lca)</code> ensures we lock in the <em>first</em> node that reaches count=2 — which post-order guarantees is the deepest.</p>
+        <p style="margin-top:8px"><strong>Post-order is mandatory:</strong> We need children's counts before computing the parent's count. Pre-order or in-order wouldn't work — the information flows upward, not downward.</p>
+        <p style="margin-top:8px"><strong>A node counts itself:</strong> If <code>curr.val === p.val</code>, count gets +1. This handles the case where p is an ancestor of q (p would be the LCA).</p>
+      </div>
+    </div>
+
+    <div class="overview-full">
+      <div class="ov-card red">
+        <div class="ov-card-head"><span class="ov-icon">⚠️</span><span class="ov-title">Edge cases to watch out for</span></div>
+        <div class="edge-list">
+          <div class="edge-item"><span class="edge-label warn">ancestor</span><span class="edge-text"><strong>p is ancestor of q (or vice versa):</strong> <svg viewBox="0 0 110 70" style="display:inline-block;vertical-align:middle;margin:0 4px;border-radius:6px;background:var(--surface2);padding:4px" width="120" height="70"><line x1="55" y1="14" x2="30" y2="38" stroke="#1e2231" stroke-width="1.5"/><line x1="55" y1="14" x2="82" y2="38" stroke="#1e2231" stroke-width="1.5"/><circle cx="55" cy="10" r="13" fill="#13161d" stroke="#3d4251" stroke-width="1.5"/><text x="55" y="13" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="10" font-weight="700" fill="#6b7280">3</text><circle cx="28" cy="44" r="13" fill="#1a1520" stroke="#f472b6" stroke-width="2"/><text x="28" y="47" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="10" font-weight="700" fill="#f472b6">5</text><circle cx="84" cy="44" r="13" fill="#13161d" stroke="#3d4251" stroke-width="1.5"/><text x="84" y="47" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="10" font-weight="700" fill="#6b7280">1</text><line x1="28" y1="57" x2="28" y2="64" stroke="#1e2231" stroke-width="1.5"/><circle cx="28" cy="66" r="10" fill="#1e1a08" stroke="#fbbf24" stroke-width="1.5"/><text x="28" y="69" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="10" font-weight="700" fill="#fbbf24">4</text><text x="6" y="8" font-family="'JetBrains Mono',monospace" font-size="8" fill="#f472b6">p</text><text x="36" y="8" font-family="'JetBrains Mono',monospace" font-size="8" fill="#f472b6">LCA=5</text><text x="18" y="68" font-family="'JetBrains Mono',monospace" font-size="8" fill="#fbbf24">q</text></svg> p=5, q=4, and 4 lives under 5. The LCA is 5 itself. When the algorithm visits node 5: left returns 0, right subtree returns 1 (found q=4), and curr matches p → count = 0+1+1 = 2 → LCA = node 5 ✓</span></div>
+          <div class="edge-item"><span class="edge-label warn">root</span><span class="edge-text"><strong>LCA is the root:</strong> <svg viewBox="0 0 110 70" style="display:inline-block;vertical-align:middle;margin:0 4px;border-radius:6px;background:var(--surface2);padding:4px" width="120" height="70"><line x1="55" y1="14" x2="28" y2="44" stroke="#1e2231" stroke-width="1.5"/><line x1="55" y1="14" x2="84" y2="44" stroke="#1e2231" stroke-width="1.5"/><circle cx="55" cy="10" r="13" fill="#0e1820" stroke="#60a5fa" stroke-width="2"/><text x="55" y="13" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="10" font-weight="700" fill="#60a5fa">3</text><circle cx="26" cy="50" r="13" fill="#1a1520" stroke="#f472b6" stroke-width="2"/><text x="26" y="53" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="10" font-weight="700" fill="#f472b6">5</text><circle cx="86" cy="50" r="13" fill="#1a2030" stroke="#fbbf24" stroke-width="2"/><text x="86" y="53" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="10" font-weight="700" fill="#fbbf24">1</text><text x="4" y="8" font-family="'JetBrains Mono',monospace" font-size="8" fill="#60a5fa">LCA</text><text x="12" y="68" font-family="'JetBrains Mono',monospace" font-size="8" fill="#f472b6">p</text><text x="88" y="68" font-family="'JetBrains Mono',monospace" font-size="8" fill="#fbbf24">q</text></svg> p=5 (left), q=1 (right). The root is the first node whose subtree contains both. count at root = leftCount(2) + rightCount(1) + 0 = 2 → LCA = root ✓</span></div>
+          <div class="edge-item"><span class="edge-label warn">same node</span><span class="edge-text"><strong>p === q:</strong> A node is an ancestor of itself. The problem guarantees p ≠ q for this variant, but if they were equal, count would hit 2 only at an ancestor — that ancestor would be the LCA.</span></div>
+          <div class="edge-item"><span class="edge-label ok">guarantee</span><span class="edge-text"><strong>Both nodes exist:</strong> The problem guarantees both p and q exist in the tree. The count will always reach 2 somewhere, so <code>lca</code> will always be set before we return.</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="overview-full">
+      <div class="best-solution">
+        <div class="best-solution-header">
+          <span class="best-solution-title">✦ Best solution for learning</span>
+          <div class="best-solution-pills">
+            <span class="sol-pill">O(n) time</span>
+            <span class="sol-pill">O(h) space</span>
+            <span class="sol-pill">Post-order DFS</span>
+            <span class="sol-pill">Count propagation</span>
+          </div>
+        </div>
+        <pre><span class="kw">var</span> <span class="fn">lowestCommonAncestor</span> = <span class="kw">function</span>(<span class="var">root</span>, <span class="var">p</span>, <span class="var">q</span>) {
+  <span class="kw">let</span> <span class="var">lca</span> = <span class="kw">null</span>;
+
+  <span class="kw">function</span> <span class="fn">postOrder</span>(<span class="var">curr</span>) {
+    <span class="kw">if</span> (!<span class="var">curr</span>) <span class="kw">return</span> <span class="num">0</span>;                        <span class="cm">// null contributes 0</span>
+
+    <span class="kw">let</span> <span class="var">left</span>  = <span class="fn">postOrder</span>(<span class="var">curr</span>.left);             <span class="cm">// count from left subtree</span>
+    <span class="kw">let</span> <span class="var">right</span> = <span class="fn">postOrder</span>(<span class="var">curr</span>.right);            <span class="cm">// count from right subtree</span>
+    <span class="kw">let</span> <span class="var">self</span>  = (<span class="var">curr</span>.val == <span class="var">p</span>.val || <span class="var">curr</span>.val == <span class="var">q</span>.val) ? <span class="num">1</span> : <span class="num">0</span>;
+
+    <span class="kw">let</span> <span class="var">count</span> = <span class="var">left</span> + <span class="var">right</span> + <span class="var">self</span>;
+
+    <span class="kw">if</span> (<span class="var">count</span> === <span class="num">2</span> && !<span class="var">lca</span>) <span class="var">lca</span> = <span class="var">curr</span>;       <span class="cm">// first node with both targets</span>
+
+    <span class="kw">return</span> <span class="var">count</span>;
+  }
+
+  <span class="fn">postOrder</span>(<span class="var">root</span>);
+  <span class="kw">return</span> <span class="var">lca</span>;
+};
+
+<span class="cm">// Key insight: each node reports how many of {p,q} are in its subtree.
+// The deepest node where this count first hits 2 is the LCA.
+// !lca guard: prevents ancestor nodes (also with count=2) from overwriting.
+// Post-order ensures children's counts arrive before the parent computes its own.</span></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- Explanation -->
+  <div class="explanation">
+    <p class="section-label">// how it works</p>
+    <div class="explain-grid">
+      <div class="explain-card">
+        <div class="icon">📬</div>
+        <h3>Count = signal</h3>
+        <p>Each node returns how many of {p, q} are in its subtree (0, 1, or 2). This count travels <em>upward</em> like a message being passed to parents.</p>
+      </div>
+      <div class="explain-card">
+        <div class="icon">🎯</div>
+        <h3>count == 2 → LCA</h3>
+        <p>When count first reaches 2, <strong>both</strong> targets are in this node's world. The <code>!lca</code> guard ensures we capture the <em>deepest</em> such node, not a higher ancestor.</p>
+      </div>
+      <div class="explain-card">
+        <div class="icon">🔁</div>
+        <h3>Post-order is crucial</h3>
+        <p>Left → Right → Root. We must process children <em>first</em> to know their counts before deciding on the current node. Pre-order or in-order wouldn't work here.</p>
+      </div>
+      <div class="explain-card">
+        <div class="icon">🛡️</div>
+        <h3>The !lca guard</h3>
+        <p>Without it, every ancestor of the LCA would also claim to be the LCA (they all eventually see count=2). The guard says: "first one wins — that's the deepest."</p>
+      </div>
+    </div>
+
+    <div class="complexity">
+      <div class="cpill">Time: <strong>O(n)</strong> — each node visited once</div>
+      <div class="cpill">Space: <strong>O(h)</strong> — call stack depth = height</div>
+      <div class="cpill">Traversal: <strong>post-order DFS</strong></div>
+      <div class="cpill">Pattern: <strong>count propagation</strong></div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+/*
+  Tree:
+         3
+        / \
+       5    1
+      / \  / \
+     6   2 0   8
+        / \
+       7   4
+
+  p=5, q=4
+
+  Post-order:
+  postOrder(6):  l=0,r=0, not p/q → count=0, returns 0
+  postOrder(7):  l=0,r=0, not p/q → count=0, returns 0
+  postOrder(4):  l=0,r=0, q→count=1, total=1, returns 1
+  postOrder(2):  l=0(7),r=1(4), not p/q → count=1, returns 1
+  postOrder(5):  l=0(6),r=1(2), p→count++, total=2
+                  count==2 && !lca → LCA = 5 ✓
+                  returns 2
+  postOrder(0):  returns 0
+  postOrder(8):  returns 0
+  postOrder(1):  l=0,r=0, not p/q → count=0, returns 0
+  postOrder(3):  l=2(5),r=0(1), not p/q → count=2
+                  count==2 BUT lca already set → skip
+                  returns 2
+  Result: LCA = node 5
+*/
+
+const steps = [
+  {
+    desc: 'Call <em>postOrderTraversal(3)</em> — root. Recursing left first → will go all the way down to leaves.',
+    active:"n3", returning:null, lcaNode:null, lcaUpdated:false,
+    stack:["postOrderTraversal(3)"],
+    curr:"3", al:"—", ar:"—", count:"—", ret:"—",
+    counts:{},
+    log:[{t:"→ postOrderTraversal(node = 3)", h:true},
+         {t:"  recursing left first..."}]
+  },
+  {
+    desc: 'Recurse left → call <em>postOrderTraversal(5)</em>. Node 5 is <span class="p">p</span> — it will contribute to count.',
+    active:"n5", returning:null, lcaNode:null, lcaUpdated:false,
+    stack:["postOrderTraversal(3)","postOrderTraversal(5)"],
+    curr:"5", al:"—", ar:"—", count:"—", ret:"—",
+    counts:{},
+    log:[{t:"→ postOrderTraversal(node = 3)"},
+         {t:"  → postOrderTraversal(node = 5)", h:true},
+         {t:"    node 5 is p!"}]
+  },
+  {
+    desc: 'Recurse left of 5 → call <em>postOrderTraversal(6)</em>. Node 6: not p, not q, no children → returns 0.',
+    active:null, returning:"n6", lcaNode:null, lcaUpdated:false,
+    stack:["postOrderTraversal(3)","postOrderTraversal(5)"],
+    curr:"6", al:"0", ar:"0", count:"0", ret:"0",
+    counts:{c6:"cnt=0"},
+    log:[{t:"→ postOrderTraversal(node = 3)"},
+         {t:"  → postOrderTraversal(node = 5)"},
+         {t:"    → postOrderTraversal(node = 6)", h:true},
+         {t:"    not p/q, leaf → count=0, returns 0"}]
+  },
+  {
+    desc: 'Back in 5 — left done (ansOnLeft=0). Now recurse right → call <em>postOrderTraversal(2)</em>.',
+    active:"n2", returning:null, lcaNode:null, lcaUpdated:false,
+    stack:["postOrderTraversal(3)","postOrderTraversal(5)","postOrderTraversal(2)"],
+    curr:"2", al:"—", ar:"—", count:"—", ret:"—",
+    counts:{c6:"cnt=0"},
+    log:[{t:"  → postOrderTraversal(node = 5)"},
+         {t:"    ← node 6 returned 0 (ansOnLeft=0)"},
+         {t:"    → postOrderTraversal(node = 2)", h:true}]
+  },
+  {
+    desc: 'In node 2: recurse left → call <em>postOrderTraversal(7)</em>. Node 7: leaf, not p/q → returns 0.',
+    active:null, returning:"n7", lcaNode:null, lcaUpdated:false,
+    stack:["postOrderTraversal(3)","postOrderTraversal(5)","postOrderTraversal(2)"],
+    curr:"7", al:"0", ar:"0", count:"0", ret:"0",
+    counts:{c6:"cnt=0", c7:"cnt=0"},
+    log:[{t:"    → postOrderTraversal(node = 2)"},
+         {t:"      → postOrderTraversal(node = 7)", h:true},
+         {t:"      not p/q, leaf → count=0, returns 0"}]
+  },
+  {
+    desc: 'In node 2: left done. Recurse right → call <em>postOrderTraversal(4)</em>. Node 4 is <span class="q">q</span>!',
+    active:"n4", returning:null, lcaNode:null, lcaUpdated:false,
+    stack:["postOrderTraversal(3)","postOrderTraversal(5)","postOrderTraversal(2)","postOrderTraversal(4)"],
+    curr:"4", al:"—", ar:"—", count:"—", ret:"—",
+    counts:{c6:"cnt=0", c7:"cnt=0"},
+    log:[{t:"    → postOrderTraversal(node = 2)"},
+         {t:"      ← node 7 returned 0"},
+         {t:"      → postOrderTraversal(node = 4)", h:true},
+         {t:"      node 4 is q!"}]
+  },
+  {
+    desc: 'Node 4 = <span class="q">q</span>! Both children null → 0. curr.val==q.val → count=1. Returns <em>1</em>.',
+    active:null, returning:"n4", lcaNode:null, lcaUpdated:false,
+    stack:["postOrderTraversal(3)","postOrderTraversal(5)","postOrderTraversal(2)"],
+    curr:"4", al:"0", ar:"0", count:"1", ret:"1",
+    counts:{c6:"cnt=0", c7:"cnt=0", c4:"cnt=1"},
+    log:[{t:"      → postOrderTraversal(node = 4)", h:true},
+         {t:"      l=0,r=0. curr==q → count++ → count=1", cls:"amb"},
+         {t:"      count=1 (not 2 yet) → returns 1"}]
+  },
+  {
+    desc: 'Back in node 2: ansOnLeft=0 (7), ansOnRight=1 (4). Node 2 is not p/q → count=0+1+0=<em>1</em>. Returns 1.',
+    active:null, returning:"n2", lcaNode:null, lcaUpdated:false,
+    stack:["postOrderTraversal(3)","postOrderTraversal(5)"],
+    curr:"2", al:"0", ar:"1", count:"1", ret:"1",
+    counts:{c6:"cnt=0", c7:"cnt=0", c4:"cnt=1", c2:"cnt=1"},
+    log:[{t:"    → postOrderTraversal(node = 2)"},
+         {t:"    ← node 7=0, ← node 4=1"},
+         {t:"    not p/q → count=0+1+0=1, returns 1", h:true}]
+  },
+  {
+    desc: '🎯 Back in node 5: ansOnLeft=0 (6), ansOnRight=1 (2). Node 5 = <span class="p">p</span> → count++. count = 0+1+1 = <span class="hi">2</span>! count==2 && !lca → <span class="ok">LCA = node 5!</span>',
+    active:null, returning:"n5", lcaNode:"n5", lcaUpdated:true,
+    stack:["postOrderTraversal(3)"],
+    curr:"5", al:"0", ar:"1", count:"2", ret:"2",
+    counts:{c6:"cnt=0", c7:"cnt=0", c4:"cnt=1", c2:"cnt=1", c5:"cnt=2"},
+    log:[{t:"  → postOrderTraversal(node = 5)"},
+         {t:"  ← node 6=0, ← node 2=1"},
+         {t:"  curr==p → count++ → count=0+1+1=2", cls:"rose"},
+         {t:"  count==2 && !lca → LCA = node 5 ✓", h:true},
+         {t:"  returns 2"}]
+  },
+  {
+    desc: 'Back in node 3: left subtree returned 2. Now recurse right → call <em>postOrderTraversal(1)</em>.',
+    active:"n1", returning:null, lcaNode:"n5", lcaUpdated:false,
+    stack:["postOrderTraversal(3)","postOrderTraversal(1)"],
+    curr:"1", al:"—", ar:"—", count:"—", ret:"—",
+    counts:{c6:"cnt=0", c7:"cnt=0", c4:"cnt=1", c2:"cnt=1", c5:"cnt=2"},
+    log:[{t:"→ postOrderTraversal(node = 3)"},
+         {t:"  ← node 5 subtree returned 2"},
+         {t:"  → postOrderTraversal(node = 1)", h:true}]
+  },
+  {
+    desc: 'Node 1: recurse left (0) and right (8). Both are leaves, not p/q → return 0 each.',
+    active:null, returning:"n1", lcaNode:"n5", lcaUpdated:false,
+    stack:["postOrderTraversal(3)"],
+    curr:"1", al:"0", ar:"0", count:"0", ret:"0",
+    counts:{c6:"cnt=0", c7:"cnt=0", c4:"cnt=1", c2:"cnt=1", c5:"cnt=2", c0:"cnt=0", c8:"cnt=0", c1:"cnt=0"},
+    log:[{t:"  → postOrderTraversal(node = 1)"},
+         {t:"    node 0 → leaf, not p/q → returns 0"},
+         {t:"    node 8 → leaf, not p/q → returns 0"},
+         {t:"  l=0,r=0, not p/q → count=0, returns 0", h:true}]
+  },
+  {
+    desc: 'Back in root (3): ansOnLeft=2, ansOnRight=0. Node 3 not p/q → count=2+0+0=2. count==2 BUT <em>lca is already set</em> → <span class="ok">skip!</span> The guard `!lca` protects us.',
+    active:null, returning:"n3", lcaNode:"n5", lcaUpdated:false,
+    stack:[],
+    curr:"3", al:"2", ar:"0", count:"2", ret:"2",
+    counts:{c6:"cnt=0", c7:"cnt=0", c4:"cnt=1", c2:"cnt=1", c5:"cnt=2", c0:"cnt=0", c8:"cnt=0", c1:"cnt=0", c3:"cnt=2"},
+    log:[{t:"→ postOrderTraversal(node = 3)"},
+         {t:"  ← node 5 subtree=2, ← node 1 subtree=0"},
+         {t:"  count=2+0+0=2, BUT lca already set → skip", h:true},
+         {t:"  returns 2"},
+         {t:"→ return lca = node 5 ✓", h:true}],
+    final: true
+  }
+];
+
+let cur = 0;
+const nodeIds = ["n3","n5","n1","n6","n2","n0","n8","n7","n4"];
+const countIds = ["c3","c5","c1","c6","c2","c0","c8","c7","c4"];
+
+function styleNode(id, state) {
+  const g = document.getElementById(id);
+  if (!g) return;
+  const c = g.querySelector("circle");
+  const t = g.querySelector("text");
+  const styles = {
+    active:   {fill:"#1a1520", stroke:"#f472b6", sw:"2.5", text:"#f472b6"},
+    returning:{fill:"#0f1f16", stroke:"#34d399", sw:"2.5", text:"#34d399"},
+    lca:      {fill:"#0e1e14", stroke:"#34d399", sw:"3",   text:"#34d399"},
+    p:        {fill:"#1a1520", stroke:"#f472b6", sw:"2",   text:"#f472b6"},
+    q:        {fill:"#1e1a08", stroke:"#fbbf24", sw:"2",   text:"#fbbf24"},
+    default:  {fill:"#13161d", stroke:"#2a2f3e", sw:"1.5", text:"#6b7280"}
+  };
+  const s = styles[state] || styles.default;
+  c.setAttribute("fill", s.fill);
+  c.setAttribute("stroke", s.stroke);
+  c.setAttribute("stroke-width", s.sw);
+  t.setAttribute("fill", s.text);
+}
+
+function renderStep(s) {
+  // nodes
+  nodeIds.forEach(id => {
+    const val = id.replace("n","");
+    if (id === s.active) {
+      styleNode(id, "active");
+    } else if (id === s.returning) {
+      styleNode(id, s.lcaNode === id ? "lca" : "returning");
+    } else if (s.lcaNode === id) {
+      styleNode(id, "lca");
+    } else if (id === "n5") {
+      styleNode(id, "p");
+    } else if (id === "n4") {
+      styleNode(id, "q");
+    } else {
+      styleNode(id, "default");
+    }
+  });
+
+  // count badges
+  countIds.forEach(id => {
+    const el = document.getElementById(id);
+    if (s.counts && s.counts[id]) {
+      el.removeAttribute("display");
+      el.textContent = s.counts[id];
+    } else {
+      el.setAttribute("display","none");
+    }
+  });
+
+  // call stack
+  const stackEl = document.getElementById("stack");
+  let html = s.stack.map((f,i) => {
+    const isTop = i === s.stack.length-1;
+    return `<div class="frame ${isTop?"active":""}">${f}</div>`;
+  }).join("");
+  if (!s.stack.length && s.returning) {
+    html = `<div class="frame returning">← returned ${s.ret}</div>`;
+  }
+  stackEl.innerHTML = html;
+
+  // vars
+  document.getElementById("v-curr").textContent  = s.curr;
+  document.getElementById("v-al").textContent    = s.al;
+  document.getElementById("v-ar").textContent    = s.ar;
+  document.getElementById("v-count").textContent = s.count;
+  document.getElementById("v-ret").textContent   = s.ret;
+
+  // LCA display
+  const lcaEl = document.getElementById("lca-display");
+  if (s.lcaNode) {
+    lcaEl.textContent = "node " + s.lcaNode.replace("n","");
+    if (s.lcaUpdated) {
+      lcaEl.classList.add("updated");
+      setTimeout(() => lcaEl.classList.remove("updated"), 500);
+    }
+  } else {
+    lcaEl.textContent = "null";
+    lcaEl.className = "lca-val";
+  }
+
+  // log
+  const logEl = document.getElementById("log");
+  logEl.innerHTML = s.log.map(e => `<div class="entry${e.h?" hl":""}${e.cls?" "+e.cls:""}">${e.t}</div>`).join("");
+  logEl.scrollTop = logEl.scrollHeight;
+
+  // step meta
+  document.getElementById("step-label").textContent = `Step ${cur+1} / ${steps.length}`;
+  document.getElementById("step-desc").innerHTML = s.desc;
+  document.getElementById("prog").style.width = ((cur+1)/steps.length*100)+"%";
+  document.getElementById("ans-badge").style.display = s.final ? "inline-block" : "none";
+
+  document.getElementById("btn-prev").disabled = cur === 0;
+  document.getElementById("btn-next").disabled = cur === steps.length-1;
+}
+
+function move(d) {
+  cur = Math.max(0, Math.min(steps.length-1, cur+d));
+  renderStep(steps[cur]);
+}
+
+document.addEventListener("keydown", e => {
+  if (e.key==="ArrowRight"||e.key==="ArrowDown") move(1);
+  if (e.key==="ArrowLeft" ||e.key==="ArrowUp")   move(-1);
+});
+
+let playTimer = null;
+function togglePlay() {
+  const btn = document.getElementById("btn-play");
+  if (playTimer) {
+    clearInterval(playTimer); playTimer = null;
+    btn.textContent = "▶ Play";
+    btn.classList.remove("btn-play-active");
+  } else {
+    btn.textContent = "⏸ Pause";
+    btn.classList.add("btn-play-active");
+    playTimer = setInterval(() => {
+      if (cur >= steps.length-1) {
+        clearInterval(playTimer); playTimer = null;
+        btn.textContent = "▶ Play";
+        btn.classList.remove("btn-play-active");
+        return;
+      }
+      move(1);
+    }, 1500);
+  }
+}
+
+renderStep(steps[0]);
+</script>
+</body>
+</html>

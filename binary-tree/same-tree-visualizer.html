@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Same Tree — Interactive Dry Run</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Sora:wght@300;400;600;700&display=swap" rel="stylesheet"/>
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{--bg:#0d0f14;--surface:#13161d;--surface2:#1a1e28;--surface3:#212638;--border:rgba(255,255,255,0.07);--border-mid:rgba(255,255,255,0.12);--text:#e8eaf0;--text-muted:#6b7280;--text-dim:#3d4251;--accent:#7c6ef5;--accent-glow:rgba(124,110,245,0.25);--green:#34d399;--green-bg:rgba(52,211,153,0.1);--amber:#fbbf24;--amber-bg:rgba(251,191,36,0.12);--blue:#60a5fa;--blue-bg:rgba(96,165,250,0.1);--red:#f87171;--red-bg:rgba(248,113,113,0.12);--teal:#2dd4bf;--teal-bg:rgba(45,212,191,0.1);--mono:'JetBrains Mono',monospace;--sans:'Sora',sans-serif}
+    html{scroll-behavior:smooth}
+    body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:15px;line-height:1.6;min-height:100vh;overflow-x:hidden}
+    body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(124,110,245,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(124,110,245,0.03) 1px,transparent 1px);background-size:40px 40px;pointer-events:none;z-index:0}
+    .page{position:relative;z-index:1;max-width:980px;margin:0 auto;padding:3rem 1.5rem 5rem}
+    .back-nav{display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:12px;color:var(--text-muted);text-decoration:none;padding:7px 14px 7px 10px;border-radius:8px;border:1px solid var(--border);background:var(--surface);margin-bottom:2rem;transition:all .15s}
+    .back-nav:hover{border-color:var(--border-mid);color:var(--text)}
+    header{margin-bottom:2rem;animation:fadeUp .6s ease both}
+    .tag{display:inline-block;font-family:var(--mono);font-size:11px;font-weight:500;letter-spacing:.12em;text-transform:uppercase;color:var(--teal);background:var(--teal-bg);border:1px solid rgba(45,212,191,0.3);padding:4px 12px;border-radius:100px;margin-bottom:1.2rem}
+    h1{font-size:clamp(1.8rem,5vw,2.8rem);font-weight:700;line-height:1.15;color:var(--text);margin-bottom:.8rem;letter-spacing:-.02em}
+    h1 span{color:var(--teal)}
+    .subtitle{font-size:15px;color:var(--text-muted);max-width:600px;line-height:1.7}
+    .pattern-banner{display:flex;align-items:flex-start;gap:16px;background:var(--teal-bg);border:1px solid rgba(45,212,191,0.25);border-left:3px solid var(--teal);border-radius:10px;padding:14px 18px;margin-bottom:2rem;animation:fadeUp .6s ease .03s both;flex-wrap:wrap}
+    .pattern-label{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--text-dim);margin-bottom:4px}
+    .pattern-name{font-family:var(--mono);font-size:13px;font-weight:700;color:var(--teal)}
+    .pattern-desc{font-family:var(--mono);font-size:12px;color:var(--text-muted);flex:1;min-width:200px}
+    .pattern-solves{font-family:var(--mono);font-size:11px;color:var(--text-dim)}
+    .pattern-solves span{color:var(--teal)}
+    .problem-section{background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden;margin-bottom:2rem;animation:fadeUp .6s ease .04s both}
+    .section-header{display:flex;align-items:center;gap:10px;padding:14px 20px;border-bottom:1px solid var(--border);background:var(--surface2)}
+    .section-header-title{font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text-muted)}
+    .section-body{padding:20px}
+    .section-body p{font-size:13px;color:var(--text-muted);line-height:1.75;margin-bottom:10px}
+    .section-body p:last-child{margin-bottom:0}
+    .section-body p strong{color:var(--text)}
+    .section-body code{font-family:var(--mono);font-size:11px;background:var(--surface2);padding:1px 6px;border-radius:4px;color:var(--accent)}
+    .io-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px}
+    .io-card{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:12px 14px}
+    .io-label{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text-dim);margin-bottom:8px}
+    .io-row{display:flex;justify-content:space-between;font-family:var(--mono);font-size:12px;padding:4px 0;border-bottom:1px solid var(--border);color:var(--text-muted)}
+    .io-row:last-child{border-bottom:none}
+    .io-t{color:var(--green);font-weight:700}.io-f{color:var(--red);font-weight:700}
+    .hints-grid{display:flex;flex-direction:column;gap:10px}
+    .hint-step{display:flex;gap:12px;align-items:flex-start}
+    .hint-num{font-family:var(--mono);font-size:11px;font-weight:700;color:var(--teal);background:var(--teal-bg);border:1px solid rgba(45,212,191,0.25);padding:3px 8px;border-radius:6px;flex-shrink:0;margin-top:2px;min-width:28px;text-align:center}
+    .hint-text{font-size:13px;color:var(--text-muted);line-height:1.7}
+    .hint-text code{font-family:var(--mono);font-size:11px;background:var(--surface2);padding:1px 5px;border-radius:4px;color:var(--accent)}
+    .hint-text strong{color:var(--text)}
+    .intuition-box{background:var(--teal-bg);border:1px solid rgba(45,212,191,0.2);border-radius:10px;padding:16px 18px;margin-top:14px}
+    .intuition-box p{font-size:13px;color:var(--text-muted);line-height:1.75}
+    .intuition-box p strong{color:var(--teal)}
+    .code-block{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:2rem;animation:fadeUp .6s ease .1s both}
+    .code-header{display:flex;align-items:center;gap:8px;padding:12px 16px;border-bottom:1px solid var(--border);background:var(--surface2)}
+    .code-header span{font-family:var(--mono);font-size:12px;color:var(--text-muted)}
+    .dots{display:flex;gap:6px}.dot{width:10px;height:10px;border-radius:50%}
+    .dot-r{background:#ff5f57}.dot-y{background:#ffbd2e}.dot-g{background:#28c940}
+    pre{padding:1.25rem 1.5rem;overflow-x:auto;font-family:var(--mono);font-size:13px;line-height:1.8;color:#c9d1d9}
+    .kw{color:#ff79c6}.fn{color:#50fa7b}.cm{color:#6272a4;font-style:italic}.num{color:#bd93f9}.var{color:#8be9fd}.hl{background:rgba(45,212,191,0.1);border-radius:3px;padding:0 3px}
+    .section-label{font-family:var(--mono);font-size:11px;font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:var(--text-dim);margin-bottom:1rem;margin-top:2.5rem}
+    .examples-row{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:1.5rem}
+    .ex-btn{display:inline-flex;align-items:center;gap:8px;padding:9px 16px;border-radius:10px;border:1px solid var(--border);background:var(--surface);cursor:pointer;transition:all .18s;font-family:var(--mono);font-size:12px;font-weight:600;color:var(--text-muted);user-select:none}
+    .ex-btn:hover{border-color:var(--border-mid);color:var(--text);transform:translateY(-1px)}
+    .ex-btn.active{background:var(--teal-bg);border-color:rgba(45,212,191,0.4);color:var(--teal);transform:translateY(-1px)}
+    .ex-badge{font-size:9px;font-weight:700;padding:2px 7px;border-radius:5px;background:var(--surface3);color:var(--text-dim)}
+    .ex-btn.active .ex-badge{background:rgba(255,255,255,0.1);color:inherit}
+    .viz-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;overflow:hidden;animation:fadeUp .6s ease .2s both}
+    .progress-bar-wrap{height:3px;background:var(--border)}
+    .progress-bar-inner{height:100%;background:linear-gradient(90deg,var(--teal),var(--accent));transition:width .35s cubic-bezier(.4,0,.2,1);border-radius:0 2px 2px 0}
+    .controls{display:flex;align-items:center;gap:10px;padding:14px 20px;border-bottom:1px solid var(--border);background:var(--surface2);flex-wrap:wrap}
+    .btn{display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:12px;font-weight:500;padding:7px 16px;border-radius:8px;border:1px solid var(--border-mid);background:var(--surface3);color:var(--text);cursor:pointer;transition:all .15s}
+    .btn:hover:not(:disabled){background:var(--teal-bg);border-color:var(--teal);color:var(--teal)}
+    .btn:disabled{opacity:.3;cursor:default}
+    .btn-play{background:var(--teal-bg)!important;border-color:rgba(45,212,191,0.4)!important;color:var(--teal)!important}
+    .btn-reset{background:var(--red-bg)!important;border-color:rgba(248,113,113,0.3)!important;color:var(--red)!important}
+    .step-info{flex:1;font-size:13px;color:var(--text-muted);font-family:var(--mono)}
+    kbd{font-size:10px;background:var(--surface3);border:1px solid var(--border-mid);padding:2px 5px;border-radius:4px;color:var(--text-muted);font-family:var(--mono)}
+    .result-badge{font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:.06em;padding:4px 12px;border-radius:100px;text-transform:uppercase}
+    .badge-true{background:var(--green-bg);color:var(--green);border:1px solid rgba(52,211,153,0.25)}
+    .badge-false{background:var(--red-bg);color:var(--red);border:1px solid rgba(248,113,113,0.25)}
+    .step-desc{padding:12px 20px;font-size:13px;color:var(--text-muted);background:var(--surface2);border-bottom:1px solid var(--border);font-family:var(--mono);min-height:44px;line-height:1.6}
+    .step-desc em{color:var(--amber);font-style:normal}
+    .step-desc .ok{color:var(--green);font-weight:600}
+    .step-desc .fail{color:var(--red);font-weight:600}
+    .main-grid{display:grid;grid-template-columns:1fr 1fr 290px}
+    .tree-panel{padding:18px 14px;border-right:1px solid var(--border)}
+    .tree-panel-label{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+    .panel-label{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--text-dim)}
+    .tree-tag{font-family:var(--mono);font-size:10px;font-weight:700;padding:2px 8px;border-radius:4px}
+    .tag-p{background:var(--blue-bg);color:var(--blue)}.tag-q{background:var(--teal-bg);color:var(--teal)}
+    .side-panel{display:flex;flex-direction:column}
+    .stack-panel{padding:14px 16px;border-bottom:1px solid var(--border)}
+    .call-stack{display:flex;flex-direction:column-reverse;gap:4px;min-height:50px}
+    .frame{padding:5px 10px;border-radius:6px;font-size:10px;font-family:var(--mono);border:1px solid var(--border);background:var(--surface2);color:var(--text-muted);transition:all .2s;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .frame.active{border-color:rgba(96,165,250,0.4);background:var(--blue-bg);color:var(--blue)}
+    .frame.ret-true{border-color:rgba(52,211,153,0.3);background:var(--green-bg);color:var(--green)}
+    .frame.ret-false{border-color:rgba(248,113,113,0.3);background:var(--red-bg);color:var(--red)}
+    .vars-panel{padding:14px 16px;border-bottom:1px solid var(--border)}
+    .var-row{display:flex;justify-content:space-between;align-items:center;padding:4px 0;border-bottom:1px solid var(--border);font-size:12px}
+    .var-row:last-child{border-bottom:none}
+    .var-name{font-family:var(--mono);color:var(--text-muted);font-size:11px}
+    .var-val{font-family:var(--mono);font-weight:700;color:var(--amber);font-size:11px}
+    .var-val.g{color:var(--green)}.var-val.r{color:var(--red)}.var-val.b{color:var(--blue)}.var-val.t{color:var(--teal)}.var-val.d{color:var(--text-dim)}
+    .ret-banner{margin:10px 16px;padding:9px 14px;border-radius:8px;font-family:var(--mono);font-size:12px;font-weight:700;display:none;align-items:center;gap:8px}
+    .ret-banner.show{display:flex}
+    .ret-t{background:var(--green-bg);color:var(--green);border:1px solid rgba(52,211,153,0.25)}
+    .ret-f{background:var(--red-bg);color:var(--red);border:1px solid rgba(248,113,113,0.25)}
+    .log-panel{padding:14px 16px;flex:1}
+    .log{font-size:11px;font-family:var(--mono);line-height:1.9;color:var(--text-dim);max-height:140px;overflow-y:auto}
+    .log::-webkit-scrollbar{width:4px}.log::-webkit-scrollbar-thumb{background:var(--border-mid);border-radius:2px}
+    .entry.hl{color:var(--text)}.entry.ok{color:var(--green)}.entry.fail{color:var(--red)}
+    .revision-section{margin-top:2.5rem;animation:fadeUp .6s ease .3s both}
+    .explain-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-bottom:16px}
+    .explain-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+    .explain-card .icon{font-size:18px;margin-bottom:8px}
+    .explain-card h3{font-size:13px;font-weight:600;color:var(--text);margin-bottom:6px}
+    .explain-card p{font-size:12px;color:var(--text-muted);line-height:1.7}
+    .explain-card code{font-family:var(--mono);font-size:11px;background:var(--surface2);padding:1px 5px;border-radius:4px;color:var(--accent)}
+    .mental-model{background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden;margin-bottom:16px}
+    .mental-model-header{display:flex;align-items:center;gap:8px;padding:12px 18px;border-bottom:1px solid var(--border);background:var(--surface2)}
+    .mm-title{font-family:var(--mono);font-size:11px;font-weight:700;color:var(--amber)}
+    .mm-body{padding:18px;display:flex;flex-direction:column;gap:10px}
+    .mm-item{display:flex;gap:10px;align-items:flex-start}
+    .mm-b{font-family:var(--mono);font-size:12px;color:var(--amber);font-weight:700;flex-shrink:0;margin-top:2px}
+    .mm-t{font-size:13px;color:var(--text-muted);line-height:1.7}
+    .mm-t strong{color:var(--text)}.mm-t code{font-family:var(--mono);font-size:11px;background:var(--surface2);padding:1px 5px;border-radius:4px;color:var(--accent)}
+    .edge-cases-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden;margin-bottom:16px}
+    .ec-header{display:flex;align-items:center;gap:8px;padding:12px 18px;border-bottom:1px solid var(--border);background:var(--surface2)}
+    .ec-title{font-family:var(--mono);font-size:11px;font-weight:700;color:var(--red)}
+    .el{display:flex;flex-direction:column}
+    .ei{display:flex;gap:12px;align-items:flex-start;padding:12px 18px;border-bottom:1px solid var(--border)}
+    .ei:last-child{border-bottom:none}
+    .el-w{font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:3px 8px;border-radius:5px;flex-shrink:0;margin-top:2px}
+    .el-w.w{background:var(--red-bg);color:var(--red);border:1px solid rgba(248,113,113,0.25)}
+    .el-w.ok{background:var(--green-bg);color:var(--green);border:1px solid rgba(52,211,153,0.25)}
+    .et{font-size:12px;color:var(--text-muted);line-height:1.65}
+    .et code{font-family:var(--mono);font-size:11px;background:var(--surface2);padding:1px 5px;border-radius:4px;color:var(--accent)}
+    .best-solution{background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden;margin-bottom:16px}
+    .bs-header{display:flex;align-items:center;justify-content:space-between;padding:12px 18px;border-bottom:1px solid var(--border);background:var(--surface2);flex-wrap:wrap;gap:8px}
+    .bs-title{font-family:var(--mono);font-size:11px;font-weight:700;color:var(--green)}
+    .sol-pills{display:flex;gap:6px;flex-wrap:wrap}
+    .sol-pill{font-family:var(--mono);font-size:10px;padding:3px 9px;border-radius:6px;background:var(--surface3);border:1px solid var(--border-mid);color:var(--text-muted)}
+    .complexity{display:flex;gap:10px;margin-top:1.5rem;flex-wrap:wrap}
+    .cpill{font-family:var(--mono);font-size:12px;padding:6px 14px;border-radius:8px;border:1px solid var(--border);background:var(--surface)}
+    .cpill strong{color:var(--accent);font-weight:700}
+    @keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+    @media(max-width:760px){.main-grid{grid-template-columns:1fr}.tree-panel{border-right:none;border-bottom:1px solid var(--border)}.io-grid{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+<div class="page">
+  <a class="back-nav" href="../dsa-hub.html">← All problems</a>
+  <header>
+    <div class="tag">LeetCode #100 · Algorithm Dry Run</div>
+    <h1>Is <span>Same Tree</span>?</h1>
+    <p class="subtitle">Step-by-step trace of <code style="font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--accent);background:var(--surface);padding:2px 7px;border-radius:5px;">isSameTree</code> — watch two trees traversed simultaneously, node-pair by node-pair, with short-circuit <code style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--teal);">&&</code> stopping early on any mismatch.</p>
+  </header>
+
+  <div class="pattern-banner">
+    <div><div class="pattern-label">Pattern</div><div class="pattern-name">🎯 Pre-order DFS + Short-circuit &&</div></div>
+    <div class="pattern-desc">Simultaneously walk two structures. Check current node, then recurse into children using &&. First false = stop.</div>
+    <div class="pattern-solves">Same pattern unlocks: <span>#572 Subtree · #226 Invert Tree · #101 Symmetric Tree</span></div>
+  </div>
+
+  <div class="problem-section">
+    <div class="section-header"><span style="font-size:16px">📋</span><span class="section-header-title">Problem Statement</span></div>
+    <div class="section-body">
+      <p>Given two binary trees <strong>p</strong> and <strong>q</strong>, return <code>true</code> if they are <strong>exactly the same</strong> — same structure AND same node values at every position.</p>
+      <p>Both must be <em>structurally identical</em> (same shape) and <em>value-identical</em> (every corresponding node has same value).</p>
+      <div class="io-grid">
+        <div class="io-card">
+          <div class="io-label">Examples</div>
+          <div class="io-row"><span style="color:var(--blue)">[1,2,3] vs [1,2,3]</span><span class="io-t">true</span></div>
+          <div class="io-row"><span style="color:var(--blue)">[1,2] vs [1,null,2]</span><span class="io-f">false</span></div>
+          <div class="io-row"><span style="color:var(--blue)">[1,2,1] vs [1,1,2]</span><span class="io-f">false</span></div>
+        </div>
+        <div class="io-card">
+          <div class="io-label">Key Facts</div>
+          <div class="io-row"><span>Both null</span><span class="io-t">→ true</span></div>
+          <div class="io-row"><span>One null</span><span class="io-f">→ false</span></div>
+          <div class="io-row"><span>Same vals, diff structure</span><span class="io-f">→ false</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="problem-section">
+    <div class="section-header"><span style="font-size:16px">💡</span><span class="section-header-title">Intuition + Hints</span></div>
+    <div class="section-body">
+      <div class="hints-grid">
+        <div class="hint-step"><span class="hint-num">1</span><div class="hint-text"><strong>Handle null cases first</strong>. If both are null → same. If one null, one not → different. These are your two base cases.</div></div>
+        <div class="hint-step"><span class="hint-num">2</span><div class="hint-text">After null checks, compare <code>p.val === q.val</code>. If values differ → return false. No need to recurse.</div></div>
+        <div class="hint-step"><span class="hint-num">3</span><div class="hint-text">Use <code>&&</code> chaining: <code>p.val===q.val && isSame(p.left,q.left) && isSame(p.right,q.right)</code>. Short-circuits on first false.</div></div>
+        <div class="hint-step"><span class="hint-num">4</span><div class="hint-text">No helper needed — the main function IS the recursive function. Elegant recursion.</div></div>
+      </div>
+      <div class="intuition-box">
+        <p><strong>Core insight:</strong> Two trees are the same if their roots match AND their left subtrees are the same AND their right subtrees are the same. It's pre-order because we check root before children. The <code>&&</code> gives us free short-circuiting — the moment any pair doesn't match, recursion stops.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header"><div class="dots"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div></div><span>isSameTree.js</span></div>
+    <pre><span class="kw">var</span> <span class="fn">isSameTree</span> = <span class="kw">function</span>(<span class="var">p</span>, <span class="var">q</span>) {
+  <span class="kw">if</span> (!<span class="var">p</span> && !<span class="var">q</span>) <span class="kw">return</span> <span class="kw">true</span>;    <span class="cm">// ① both null → identical</span>
+  <span class="kw">if</span> (!<span class="var">p</span> || !<span class="var">q</span>) <span class="kw">return</span> <span class="kw">false</span>;   <span class="cm">// ② one null → different structure</span>
+
+  <span class="hl"><span class="kw">return</span> <span class="var">p</span>.val === <span class="var">q</span>.val              <span class="cm">// ③ values must match</span>
+      && <span class="fn">isSameTree</span>(<span class="var">p</span>.left,  <span class="var">q</span>.left)   <span class="cm">//    AND left subtrees match</span>
+      && <span class="fn">isSameTree</span>(<span class="var">p</span>.right, <span class="var">q</span>.right); <span class="cm">//    AND right subtrees match</span></span>
+};</pre>
+  </div>
+
+  <p class="section-label">// Interactive dry run — choose an example</p>
+  <div class="examples-row" id="examples-row">
+    <button class="ex-btn active" data-ex="0">Example 1 <span class="ex-badge">Same → true</span></button>
+    <button class="ex-btn" data-ex="1">Example 2 <span class="ex-badge">Diff value → false</span></button>
+    <button class="ex-btn" data-ex="2">Example 3 <span class="ex-badge">Diff structure</span></button>
+    <button class="ex-btn" data-ex="3">Example 4 <span class="ex-badge">Both empty</span></button>
+  </div>
+
+  <div class="viz-card">
+    <div class="progress-bar-wrap"><div class="progress-bar-inner" id="prog" style="width:9%"></div></div>
+    <div class="controls">
+      <button class="btn" id="btn-prev" onclick="move(-1)" disabled>← Prev</button>
+      <button class="btn btn-play" id="btn-play" onclick="togglePlay()">▶ Play</button>
+      <button class="btn" id="btn-next" onclick="move(1)">Next →</button>
+      <button class="btn btn-reset" onclick="reset()">↺ Reset</button>
+      <span class="step-info" id="step-label">Step 1 / ?</span>
+      <span style="font-family:var(--mono);font-size:11px;color:var(--text-dim);display:flex;gap:4px;align-items:center"><kbd>←</kbd><kbd>→</kbd></span>
+      <span class="result-badge" id="ans-badge" style="display:none">✓</span>
+    </div>
+    <div class="step-desc" id="step-desc">Loading...</div>
+    <div class="main-grid">
+      <div class="tree-panel">
+        <div class="tree-panel-label"><span class="panel-label">// tree</span><span class="tree-tag tag-p">p</span></div>
+        <svg id="svg-p" width="100%" viewBox="0 0 220 200"></svg>
+      </div>
+      <div class="tree-panel">
+        <div class="tree-panel-label"><span class="panel-label">// tree</span><span class="tree-tag tag-q">q</span></div>
+        <svg id="svg-q" width="100%" viewBox="0 0 220 200"></svg>
+      </div>
+      <div class="side-panel">
+        <div class="stack-panel"><div class="panel-label">// call stack</div><div class="call-stack" id="stack"></div></div>
+        <div class="vars-panel">
+          <div class="panel-label">// current comparison</div>
+          <div class="var-row"><span class="var-name">p.val</span><span class="var-val b" id="v-pv">—</span></div>
+          <div class="var-row"><span class="var-name">q.val</span><span class="var-val t" id="v-qv">—</span></div>
+          <div class="var-row"><span class="var-name">match?</span><span class="var-val" id="v-match">—</span></div>
+          <div class="var-row"><span class="var-name">case</span><span class="var-val d" id="v-case">—</span></div>
+          <div class="var-row"><span class="var-name">returns</span><span class="var-val g" id="v-ret">—</span></div>
+        </div>
+        <div class="ret-banner" id="ret-banner"></div>
+        <div class="log-panel"><div class="panel-label">// execution log</div><div class="log" id="log"></div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="revision-section">
+    <p class="section-label">// revision — lock this in your memory</p>
+    <div class="mental-model">
+      <div class="mental-model-header"><span style="font-size:16px">🧠</span><span class="mm-title">Mental Model — 30-second recall</span></div>
+      <div class="mm-body">
+        <div class="mm-item"><span class="mm-b">▸</span><div class="mm-t"><strong>Walk both trees in lockstep.</strong> At each position, compare the pair. If they match, descend. If either is missing or values differ, return false.</div></div>
+        <div class="mm-item"><span class="mm-b">▸</span><div class="mm-t"><strong>Order of null checks matters.</strong> Check <code>!p && !q</code> (both null) BEFORE <code>!p || !q</code> (one null). If you flip them, both-null returns false incorrectly.</div></div>
+        <div class="mm-item"><span class="mm-b">▸</span><div class="mm-t"><strong>Short-circuit &&</strong>: JavaScript stops evaluating as soon as any condition is false. If <code>p.val !== q.val</code>, neither left nor right recursive call ever executes. O(1) best case.</div></div>
+        <div class="mm-item"><span class="mm-b">▸</span><div class="mm-t"><strong>This is pre-order</strong> — root checked first, then children. The function itself is the recursion (no helper needed).</div></div>
+      </div>
+    </div>
+    <div class="explain-grid">
+      <div class="explain-card"><div class="icon">🌑</div><h3>Both null → true</h3><p>If <code>!p && !q</code>, both subtrees are empty — structurally identical. Return true. The happy base case.</p></div>
+      <div class="explain-card"><div class="icon">⚡</div><h3>One null → false</h3><p>If <code>!p || !q</code>, one exists and one doesn't. Trees diverge in structure. Return false immediately.</p></div>
+      <div class="explain-card"><div class="icon">🔗</div><h3>Short-circuit &&</h3><p>The && chain means if <code>p.val !== q.val</code>, neither recursive call is made. JavaScript stops at the first false.</p></div>
+      <div class="explain-card"><div class="icon">🔁</div><h3>Pre-order traversal</h3><p>Root checked first, then left, then right. If any level fails, false propagates up the call stack.</p></div>
+    </div>
+    <div class="edge-cases-card">
+      <div class="ec-header"><span style="font-size:16px">⚠️</span><span class="ec-title">Edge Cases</span></div>
+      <div class="el">
+        <div class="ei"><span class="el-w w">both null</span><span class="et"><code>isSameTree(null,null)</code> → true. Empty trees are identical. Handle with <code>!p && !q</code> first.</span></div>
+        <div class="ei"><span class="el-w w">one null</span><span class="et">p=[1,2], q=[1,null,2] — same values, different structure → false. The null check catches this.</span></div>
+        <div class="ei"><span class="el-w w">same vals</span><span class="et">p=[1,2], q=[1,null,2] → false. Shape matters. <code>!p||!q</code> fires when one side has a child the other doesn't.</span></div>
+        <div class="ei"><span class="el-w ok">perf</span><span class="et"><strong>Best case O(1)</strong>: root values differ → return false without any recursion. <strong>Worst case O(n)</strong>: identical trees — every node must be verified.</span></div>
+      </div>
+    </div>
+    <div class="best-solution">
+      <div class="bs-header"><span class="bs-title">✦ Clean solution for revision</span><div class="sol-pills"><span class="sol-pill">O(n) time</span><span class="sol-pill">O(h) space</span><span class="sol-pill">Pre-order DFS</span><span class="sol-pill">Short-circuit &&</span></div></div>
+      <pre><span class="kw">var</span> <span class="fn">isSameTree</span> = <span class="kw">function</span>(<span class="var">p</span>, <span class="var">q</span>) {
+  <span class="kw">if</span> (!<span class="var">p</span> && !<span class="var">q</span>) <span class="kw">return</span> <span class="kw">true</span>;   <span class="cm">// ① both null → same</span>
+  <span class="kw">if</span> (!<span class="var">p</span> || !<span class="var">q</span>) <span class="kw">return</span> <span class="kw">false</span>;  <span class="cm">// ② one null → diff</span>
+  <span class="kw">return</span> <span class="var">p</span>.val === <span class="var">q</span>.val
+      && <span class="fn">isSameTree</span>(<span class="var">p</span>.left, <span class="var">q</span>.left)
+      && <span class="fn">isSameTree</span>(<span class="var">p</span>.right, <span class="var">q</span>.right);
+};
+<span class="cm">// Pattern: Pre-order DFS + Short-circuit &&
+// Template: check null → check value → recurse left && recurse right</span></pre>
+    </div>
+    <div class="complexity">
+      <div class="cpill">Time: <strong>O(n)</strong> worst case (identical trees)</div>
+      <div class="cpill">Space: <strong>O(h)</strong> call stack depth</div>
+      <div class="cpill">Best: <strong>O(1)</strong> root mismatch</div>
+      <div class="cpill">Worst: <strong>O(n)</strong> identical trees</div>
+    </div>
+  </div>
+</div>
+
+<script>
+// Tree node helper
+function mkNode(val, cx, cy, r) { return {val,cx,cy,r}; }
+function mkEdge(x1,y1,x2,y2) { return {x1,y1,x2,y2}; }
+
+const TREES = {
+  same: {
+    p: { nodes:[mkNode(1,110,30,22),mkNode(2,60,100,20),mkNode(3,160,100,20)], edges:[mkEdge(96,44,74,88),mkEdge(124,44,146,88)] },
+    q: { nodes:[mkNode(1,110,30,22),mkNode(2,60,100,20),mkNode(3,160,100,20)], edges:[mkEdge(96,44,74,88),mkEdge(124,44,146,88)] }
+  },
+  diffVal: {
+    p: { nodes:[mkNode(1,110,30,22),mkNode(2,60,100,20),mkNode(3,160,100,20)], edges:[mkEdge(96,44,74,88),mkEdge(124,44,146,88)] },
+    q: { nodes:[mkNode(1,110,30,22),mkNode(2,60,100,20),mkNode(4,160,100,20)], edges:[mkEdge(96,44,74,88),mkEdge(124,44,146,88)] }
+  },
+  diffStruct: {
+    p: { nodes:[mkNode(1,110,30,22),mkNode(2,60,100,20)], edges:[mkEdge(96,44,74,88)] },
+    q: { nodes:[mkNode(1,110,30,22),mkNode(2,160,100,20)], edges:[mkEdge(124,44,146,88)] }
+  },
+  bothEmpty: {
+    p: { nodes:[], edges:[], emptyText:"null" },
+    q: { nodes:[], edges:[], emptyText:"null" }
+  }
+};
+
+const EXAMPLES = [
+  {
+    label:"[1,2,3] vs [1,2,3] — Same",
+    answer:true,
+    pTree: TREES.same.p, qTree: TREES.same.q,
+    steps:[
+      {desc:'Call <em>isSameTree(p=1, q=1)</em>. Both exist. 1===1 ✓ → recurse left.',pA:"1",qA:"1",pR:null,qR:null,stack:["isSameTree(p=1,q=1)"],pv:"1",qv:"1",match:"1===1 ✓",cas:"③ check vals",ret:"—",banner:null,log:[{t:"→ isSameTree(p=1,q=1)",h:true},{t:"  !p&&!q? No. !p||!q? No. 1===1 ✓  recurse left"}]},
+      {desc:'<em>isSameTree(p=2, q=2)</em>. 2===2 ✓ → recurse left.',pA:"2",qA:"2",pR:null,qR:null,stack:["isSameTree(p=1,q=1)","isSameTree(p=2,q=2)"],pv:"2",qv:"2",match:"2===2 ✓",cas:"③ check vals",ret:"—",banner:null,log:[{t:"→ isSameTree(p=1,q=1)"},{t:"  → isSameTree(p=2,q=2)",h:true},{t:"    2===2 ✓  recurse left"}]},
+      {desc:'<em>isSameTree(null, null)</em> — left of node 2. <span class="ok">Both null → case ① → return true</span>',pA:null,qA:null,pR:null,qR:null,stack:["isSameTree(p=1,q=1)","isSameTree(p=2,q=2)","isSameTree(null,null)"],pv:"null",qv:"null",match:"— (null)",cas:"① both null",ret:"true",banner:{type:"t",text:"← returns true"},log:[{t:"    → isSameTree(null,null)",h:true},{t:"    !p&&!q? YES → return true ✓",h:true}]},
+      {desc:'Right of node 2: <em>isSameTree(null, null)</em>. <span class="ok">Both null → true</span>',pA:null,qA:null,pR:null,qR:null,stack:["isSameTree(p=1,q=1)","isSameTree(p=2,q=2)","isSameTree(null,null)"],pv:"null",qv:"null",match:"— (null)",cas:"① both null",ret:"true",banner:{type:"t",text:"← returns true"},log:[{t:"    recurse right → isSameTree(null,null)",h:true},{t:"    !p&&!q? YES → return true ✓",h:true}]},
+      {desc:'Node 2: val ✓, left ✓, right ✓ → <span class="ok">return true</span>',pA:null,qA:null,pR:"2",qR:"2",stack:["isSameTree(p=1,q=1)"],pv:"2",qv:"2",match:"2===2 ✓",cas:"③ check vals",ret:"true",banner:{type:"t",text:"← isSameTree(2,2) returns true"},log:[{t:"  2===2 && true && true → returns true",h:true}]},
+      {desc:'Back in root. Recurse right → <em>isSameTree(p=3, q=3)</em>. 3===3 ✓',pA:"3",qA:"3",pR:null,qR:null,stack:["isSameTree(p=1,q=1)","isSameTree(p=3,q=3)"],pv:"3",qv:"3",match:"3===3 ✓",cas:"③ check vals",ret:"—",banner:null,log:[{t:"  → isSameTree(p=3,q=3)",h:true},{t:"    3===3 ✓"}]},
+      {desc:'Node 3 children both null → both return true.',pA:null,qA:null,pR:"3",qR:"3",stack:["isSameTree(p=1,q=1)"],pv:"3",qv:"3",match:"3===3 ✓",cas:"③ check vals",ret:"true",banner:{type:"t",text:"← isSameTree(3,3) returns true"},log:[{t:"    null,null → true twice"},{t:"  3===3 && true && true → returns true",h:true}]},
+      {desc:'🎯 Root (1,1): val ✓, left ✓, right ✓. ALL true → <span class="ok">isSameTree = true!</span>',pA:null,qA:null,pR:"1",qR:"1",stack:[],pv:"1",qv:"1",match:"1===1 ✓",cas:"③ check vals",ret:"true",banner:{type:"t",text:"✓ isSameTree returns true"},log:[{t:"1===1 && true && true → returns true",h:true},{t:"✓ Trees are identical → true",h:true}],final:true,ansTrue:true},
+    ]
+  },
+  {
+    label:"[1,2,3] vs [1,2,4] — Diff Value",
+    answer:false,
+    pTree: TREES.diffVal.p, qTree: TREES.diffVal.q,
+    steps:[
+      {desc:'Call <em>isSameTree(p=1, q=1)</em>. 1===1 ✓ → recurse left.',pA:"1",qA:"1",pR:null,qR:null,stack:["isSameTree(p=1,q=1)"],pv:"1",qv:"1",match:"1===1 ✓",cas:"③ check vals",ret:"—",banner:null,log:[{t:"→ isSameTree(p=1,q=1)",h:true},{t:"  1===1 ✓  recurse left"}]},
+      {desc:'<em>isSameTree(p=2,q=2)</em>. 2===2 ✓ → recurse down. Both return true.',pA:null,qA:null,pR:"2",qR:"2",stack:["isSameTree(p=1,q=1)"],pv:"2",qv:"2",match:"2===2 ✓",cas:"③ check vals",ret:"true",banner:{type:"t",text:"← isSameTree(2,2) returns true"},log:[{t:"  → isSameTree(2,2)",h:true},{t:"  2===2 ✓, both children null → true",h:true}]},
+      {desc:'Back in root. Recurse right → <em>isSameTree(p=3, q=4)</em>. 3 ≠ 4 → <span class="fail">return false immediately!</span>',pA:"3",qA:"4",pR:null,qR:null,stack:["isSameTree(p=1,q=1)","isSameTree(p=3,q=4)"],pv:"3",qv:"4",match:"3 ≠ 4 ✗",cas:"③ check vals",ret:"false",banner:{type:"f",text:"← isSameTree(3,4) returns false"},log:[{t:"  → isSameTree(p=3,q=4)",h:true},{t:"  3 !== 4 → return false immediately!",h:true},{t:"  No recursion into children (short-circuit)"}]},
+      {desc:'Root: left=true, right=<span class="fail">false</span>. 1===1 && true && false = <span class="fail">false</span>. Short-circuit stops at right.',pA:null,qA:null,pR:"1",qR:"1",stack:[],pv:"1",qv:"1",match:"1===1 ✓",cas:"③ check vals",ret:"false",banner:{type:"f",text:"✗ isSameTree returns false"},log:[{t:"1===1 && true && false → false",h:true},{t:"✗ Trees differ → return false",h:true}],final:true,ansTrue:false},
+    ]
+  },
+  {
+    label:"[1,2] vs [1,null,2] — Diff Structure",
+    answer:false,
+    pTree: TREES.diffStruct.p, qTree: TREES.diffStruct.q,
+    steps:[
+      {desc:'Call <em>isSameTree(p=1, q=1)</em>. 1===1 ✓ → recurse left.',pA:"1",qA:"1",pR:null,qR:null,stack:["isSameTree(p=1,q=1)"],pv:"1",qv:"1",match:"1===1 ✓",cas:"③ check vals",ret:"—",banner:null,log:[{t:"→ isSameTree(p=1,q=1)",h:true},{t:"  1===1 ✓  recurse left"}]},
+      {desc:'<em>isSameTree(p=2, q=null)</em>. p exists, q=null → <span class="fail">case ② → return false!</span> Structure differs.',pA:"2",qA:null,pR:null,qR:null,stack:["isSameTree(p=1,q=1)","isSameTree(p=2,q=null)"],pv:"2",qv:"null",match:"one null ✗",cas:"② one null",ret:"false",banner:{type:"f",text:"← returns false"},log:[{t:"  → isSameTree(p=2,q=null)",h:true},{t:"  !p||!q? YES (q is null) → return false ✗",h:true}]},
+      {desc:'Left returned false. <code>&&</code> short-circuits — right subtree never checked! isSameTree = <span class="fail">false</span>.',pA:null,qA:null,pR:"1",qR:"1",stack:[],pv:"1",qv:"1",match:"1===1 ✓",cas:"short-circuit",ret:"false",banner:{type:"f",text:"✗ isSameTree returns false"},log:[{t:"  ← left returned false"},{t:"  && short-circuits → no right call",h:true},{t:"✗ Structures differ → return false",h:true}],final:true,ansTrue:false},
+    ]
+  },
+  {
+    label:"null vs null — Both Empty",
+    answer:true,
+    pTree: TREES.bothEmpty.p, qTree: TREES.bothEmpty.q,
+    steps:[
+      {desc:'Both trees empty. <em>isSameTree(null, null)</em>. <span class="ok">Case ① → both null → return true!</span>',pA:null,qA:null,pR:null,qR:null,stack:["isSameTree(null,null)"],pv:"null",qv:"null",match:"— (null)",cas:"① both null",ret:"true",banner:{type:"t",text:"✓ returns true"},log:[{t:"→ isSameTree(null,null)",h:true},{t:"  !p&&!q? YES → return true ✓",h:true}],final:true,ansTrue:true},
+    ]
+  }
+];
+
+let exIdx=0, cur=0, playTimer=null;
+const getEx=()=>EXAMPLES[exIdx];
+const getSteps=()=>getEx().steps;
+
+function colorNode(svgId, val, activeVal, retVal, pathVals) {
+  // We draw the SVG inline each step
+}
+
+function renderTree(svgId, tree, activeVal, retVal) {
+  const svg = document.getElementById(svgId);
+  let html = "";
+  if (tree.emptyText) { html = `<text x="110" y="80" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="16" fill="#3d4251">${tree.emptyText}</text>`; }
+  else {
+    tree.edges.forEach(e => html += `<line x1="${e.x1}" y1="${e.y1}" x2="${e.x2}" y2="${e.y2}" stroke="#1e2231" stroke-width="2"/>`);
+    tree.nodes.forEach(n => {
+      const v = String(n.val);
+      let fill="#13161d", stroke="#2a2f3e", sw="1.5", tf="#6b7280";
+      if (v === activeVal && svgId==="svg-p") { fill="#1a2035"; stroke="#60a5fa"; sw="2.5"; tf="#60a5fa"; }
+      else if (v === activeVal && svgId==="svg-q") { fill="#0f1e20"; stroke="#2dd4bf"; sw="2.5"; tf="#2dd4bf"; }
+      else if (v === retVal) { fill="#0f1f16"; stroke="#34d399"; sw="2.5"; tf="#34d399"; }
+      html += `<g><circle cx="${n.cx}" cy="${n.cy}" r="${n.r}" fill="${fill}" stroke="${stroke}" stroke-width="${sw}" style="transition:all .2s"/><text x="${n.cx}" y="${n.cy+4}" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="13" font-weight="700" fill="${tf}" style="transition:fill .2s">${n.val}</text></g>`;
+    });
+  }
+  svg.innerHTML = html;
+}
+
+function renderStep(step) {
+  const ex = getEx();
+  renderTree("svg-p", ex.pTree, step.pA, step.pR);
+  renderTree("svg-q", ex.qTree, step.qA, step.qR);
+
+  const stackEl = document.getElementById("stack");
+  let sh = step.stack.map((f,i)=>`<div class="frame ${i===step.stack.length-1?"active":""}">${f}</div>`).join("");
+  if (!step.stack.length && step.banner) { const cls=step.banner.type==="t"?"ret-true":"ret-false"; sh=`<div class="frame ${cls}">${step.banner.text}</div>`; }
+  stackEl.innerHTML = sh;
+
+  const matchColor = step.match.includes("✓")?"g":step.match.includes("✗")?"r":"d";
+  document.getElementById("v-pv").textContent = step.pv;
+  document.getElementById("v-qv").textContent = step.qv;
+  document.getElementById("v-match").className = `var-val ${matchColor}`;
+  document.getElementById("v-match").textContent = step.match;
+  document.getElementById("v-case").textContent = step.cas;
+  const retEl = document.getElementById("v-ret");
+  retEl.className = `var-val ${step.ret==="true"?"g":step.ret==="false"?"r":""}`;
+  retEl.textContent = step.ret;
+
+  const bannerEl = document.getElementById("ret-banner");
+  if (step.banner) { bannerEl.textContent=step.banner.text; bannerEl.className=`ret-banner show ${step.banner.type==="t"?"ret-t":"ret-f"}`; }
+  else { bannerEl.className="ret-banner"; }
+
+  const logEl = document.getElementById("log");
+  logEl.innerHTML = step.log.map(e=>`<div class="entry${e.h?" hl":""}">${e.t}</div>`).join("");
+  logEl.scrollTop = logEl.scrollHeight;
+
+  const steps = getSteps();
+  document.getElementById("step-label").textContent = `Step ${cur+1} / ${steps.length}`;
+  document.getElementById("step-desc").innerHTML = step.desc;
+  document.getElementById("prog").style.width = ((cur+1)/steps.length*100)+"%";
+
+  const badge = document.getElementById("ans-badge");
+  if (step.final) { badge.style.display="inline-block"; badge.className=step.ansTrue?"result-badge badge-true":"result-badge badge-false"; badge.textContent=step.ansTrue?"✓ isSameTree = true":"✗ isSameTree = false"; }
+  else badge.style.display="none";
+
+  document.getElementById("btn-prev").disabled = cur===0;
+  document.getElementById("btn-next").disabled = cur===steps.length-1;
+}
+
+function move(d){cur=Math.max(0,Math.min(getSteps().length-1,cur+d));renderStep(getSteps()[cur]);}
+function reset(){cur=0;stopPlay();renderStep(getSteps()[0]);}
+function loadExample(i){exIdx=i;cur=0;stopPlay();renderStep(getSteps()[0]);}
+document.getElementById("examples-row").addEventListener("click",e=>{const b=e.target.closest(".ex-btn");if(!b)return;document.querySelectorAll(".ex-btn").forEach(x=>x.classList.remove("active"));b.classList.add("active");loadExample(parseInt(b.dataset.ex));});
+document.addEventListener("keydown",e=>{if(e.key==="ArrowRight"||e.key==="ArrowDown")move(1);if(e.key==="ArrowLeft"||e.key==="ArrowUp")move(-1);});
+function stopPlay(){if(playTimer){clearInterval(playTimer);playTimer=null;}const b=document.getElementById("btn-play");b.textContent="▶ Play";b.classList.add("btn-play");}
+function togglePlay(){const b=document.getElementById("btn-play");if(playTimer){stopPlay();return;}b.textContent="⏸ Pause";b.classList.add("btn-play");playTimer=setInterval(()=>{if(cur>=getSteps().length-1){stopPlay();return;}move(1);},1400);}
+loadExample(0);
+</script>
+</body>
+</html>

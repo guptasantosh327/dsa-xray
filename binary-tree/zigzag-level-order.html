@@ -1,0 +1,1297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Zigzag Level Order — Interactive Dry Run</title>
+  <meta name="description" content="Step-by-step interactive dry run of zigzagLevelOrder — watch BFS unfold with alternating insertion direction at each level."/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Sora:wght@300;400;600;700&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0d0f14;
+      --surface: #13161d;
+      --surface2: #1a1e28;
+      --surface3: #212638;
+      --border: rgba(255,255,255,0.07);
+      --border-mid: rgba(255,255,255,0.12);
+      --text: #e8eaf0;
+      --text-muted: #6b7280;
+      --text-dim: #3d4251;
+      --accent: #7c6ef5;
+      --accent-glow: rgba(124,110,245,0.25);
+      --green: #34d399;
+      --green-bg: rgba(52,211,153,0.1);
+      --amber: #fbbf24;
+      --amber-bg: rgba(251,191,36,0.12);
+      --blue: #60a5fa;
+      --blue-bg: rgba(96,165,250,0.1);
+      --red: #f87171;
+      --red-bg: rgba(248,113,113,0.12);
+      --orange: #fb923c;
+      --orange-bg: rgba(251,146,60,0.12);
+      --mono: 'JetBrains Mono', monospace;
+      --sans: 'Sora', sans-serif;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--sans);
+      font-size: 15px;
+      line-height: 1.6;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(124,110,245,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(124,110,245,0.03) 1px, transparent 1px);
+      background-size: 40px 40px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .page {
+      position: relative;
+      z-index: 1;
+      max-width: 980px;
+      margin: 0 auto;
+      padding: 3rem 1.5rem 5rem;
+    }
+
+    .back-nav {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-family: var(--mono);
+      font-size: 12px;
+      color: var(--text-muted);
+      text-decoration: none;
+      padding: 7px 14px 7px 10px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      margin-bottom: 2rem;
+      transition: all .15s;
+    }
+    .back-nav:hover { border-color: var(--border-mid); color: var(--text); }
+
+    header { margin-bottom: 2.5rem; animation: fadeUp .6s ease both; }
+
+    .tag {
+      display: inline-block;
+      font-family: var(--mono);
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: var(--accent);
+      background: var(--accent-glow);
+      border: 1px solid rgba(124,110,245,0.3);
+      padding: 4px 12px;
+      border-radius: 100px;
+      margin-bottom: 1.2rem;
+    }
+
+    h1 {
+      font-family: var(--sans);
+      font-size: clamp(1.8rem, 5vw, 2.8rem);
+      font-weight: 700;
+      line-height: 1.15;
+      color: var(--text);
+      margin-bottom: .8rem;
+      letter-spacing: -.02em;
+    }
+
+    h1 span { color: var(--accent); }
+
+    .subtitle {
+      font-size: 15px;
+      color: var(--text-muted);
+      max-width: 600px;
+      line-height: 1.7;
+    }
+
+    .insight-banner {
+      background: var(--orange-bg);
+      border: 1px solid rgba(251,146,60,0.25);
+      border-left: 3px solid var(--orange);
+      border-radius: 10px;
+      padding: 14px 18px;
+      margin-bottom: 1.5rem;
+      font-size: 13px;
+      color: var(--text-muted);
+      font-family: var(--mono);
+      animation: fadeUp .6s ease .05s both;
+    }
+    .insight-banner strong { color: var(--orange); font-weight: 600; }
+
+    .code-block {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      margin-bottom: 2rem;
+      animation: fadeUp .6s ease .1s both;
+    }
+
+    .code-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border);
+      background: var(--surface2);
+    }
+
+    .code-header span { font-family: var(--mono); font-size: 12px; color: var(--text-muted); }
+
+    .dots { display: flex; gap: 6px; }
+    .dot { width: 10px; height: 10px; border-radius: 50%; }
+    .dot-r { background: #ff5f57; }
+    .dot-y { background: #ffbd2e; }
+    .dot-g { background: #28c940; }
+
+    pre {
+      padding: 1.25rem 1.5rem;
+      overflow-x: auto;
+      font-family: var(--mono);
+      font-size: 13px;
+      line-height: 1.9;
+      color: #c9d1d9;
+    }
+
+    .kw  { color: #ff79c6; }
+    .fn  { color: #50fa7b; }
+    .cm  { color: #6272a4; font-style: italic; }
+    .num { color: #bd93f9; }
+    .var { color: #8be9fd; }
+    .hl  { background: rgba(251,146,60,0.15); border-radius: 3px; padding: 0 3px; }
+
+    .section-label {
+      font-family: var(--mono);
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      margin-bottom: 1rem;
+      margin-top: 2.5rem;
+    }
+
+    /* Visualizer */
+    .viz-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      overflow: hidden;
+      animation: fadeUp .6s ease .2s both;
+    }
+
+    .progress-bar-wrap { height: 3px; background: var(--border); }
+    .progress-bar-inner {
+      height: 100%;
+      background: linear-gradient(90deg, var(--orange), var(--accent));
+      transition: width .35s cubic-bezier(.4,0,.2,1);
+      border-radius: 0 2px 2px 0;
+    }
+
+    .controls {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 14px 20px;
+      border-bottom: 1px solid var(--border);
+      background: var(--surface2);
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-family: var(--mono);
+      font-size: 12px;
+      font-weight: 500;
+      padding: 7px 16px;
+      border-radius: 8px;
+      border: 1px solid var(--border-mid);
+      background: var(--surface3);
+      color: var(--text);
+      cursor: pointer;
+      transition: all .15s;
+    }
+
+    .btn:hover:not(:disabled) {
+      background: var(--accent-glow);
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    .btn:disabled { opacity: .3; cursor: default; }
+
+    .btn-play-active {
+      background: var(--orange-bg) !important;
+      border-color: rgba(251,146,60,0.4) !important;
+      color: var(--orange) !important;
+    }
+
+    .step-info { flex: 1; font-size: 13px; color: var(--text-muted); font-family: var(--mono); }
+
+    kbd {
+      font-size: 10px;
+      background: var(--surface3);
+      border: 1px solid var(--border-mid);
+      padding: 2px 5px;
+      border-radius: 4px;
+      color: var(--text-muted);
+      font-family: var(--mono);
+    }
+
+    .result-badge {
+      font-family: var(--mono);
+      font-size: 11px;
+      font-weight: 700;
+      padding: 4px 12px;
+      border-radius: 100px;
+    }
+
+    .badge-done {
+      background: var(--green-bg);
+      color: var(--green);
+      border: 1px solid rgba(52,211,153,0.25);
+    }
+
+    .step-desc {
+      padding: 12px 20px;
+      font-size: 13px;
+      color: var(--text-muted);
+      background: var(--surface2);
+      border-bottom: 1px solid var(--border);
+      font-family: var(--mono);
+      min-height: 44px;
+      line-height: 1.6;
+    }
+
+    .step-desc em    { color: var(--amber); font-style: normal; }
+    .step-desc .ok   { color: var(--green); font-weight: 600; }
+    .step-desc .push { color: var(--blue); font-weight: 600; }
+    .step-desc .uns  { color: var(--orange); font-weight: 600; }
+
+    /* Main layout */
+    .main-grid {
+      display: grid;
+      grid-template-columns: 1fr 320px;
+    }
+
+    .left-col {
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .tree-panel { padding: 20px; border-bottom: 1px solid var(--border); }
+
+    .panel-label {
+      font-family: var(--mono);
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      margin-bottom: 10px;
+    }
+
+    /* Queue visualizer */
+    .queue-panel { padding: 16px 20px; }
+
+    .queue-track {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+      min-height: 44px;
+    }
+
+    .queue-label-arr {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--text-dim);
+      margin-right: 4px;
+    }
+
+    .q-node {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      font-family: var(--mono);
+      font-size: 13px;
+      font-weight: 700;
+      border: 1px solid var(--border-mid);
+      background: var(--surface2);
+      color: var(--text-muted);
+      transition: all .2s;
+    }
+
+    .q-node.active {
+      background: var(--blue-bg);
+      border-color: rgba(96,165,250,0.5);
+      color: var(--blue);
+      box-shadow: 0 0 12px rgba(96,165,250,0.2);
+    }
+
+    .q-node.processing {
+      background: var(--amber-bg);
+      border-color: rgba(251,191,36,0.5);
+      color: var(--amber);
+    }
+
+    .q-arrow {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--text-dim);
+    }
+
+    /* Current level array */
+    .curr-level-panel { padding: 16px 20px; border-top: 1px solid var(--border); }
+
+    .curr-arr-track {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      min-height: 44px;
+      flex-wrap: wrap;
+    }
+
+    .arr-cell {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      font-family: var(--mono);
+      font-size: 13px;
+      font-weight: 700;
+      border: 1px solid var(--border-mid);
+      background: var(--surface2);
+      color: var(--text-muted);
+      transition: all .3s;
+      position: relative;
+    }
+
+    .arr-cell.pushed {
+      background: var(--blue-bg);
+      border-color: rgba(96,165,250,0.5);
+      color: var(--blue);
+    }
+
+    .arr-cell.unshifted {
+      background: var(--orange-bg);
+      border-color: rgba(251,146,60,0.5);
+      color: var(--orange);
+    }
+
+    .arr-cell.new-item {
+      animation: popIn .3s cubic-bezier(.34,1.56,.64,1) both;
+    }
+
+    @keyframes popIn {
+      from { transform: scale(0.5); opacity: 0; }
+      to   { transform: scale(1); opacity: 1; }
+    }
+
+    /* Answer panel */
+    .ans-panel { padding: 14px 20px; border-top: 1px solid var(--border); }
+
+    .ans-rows { display: flex; flex-direction: column; gap: 8px; }
+
+    .ans-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-family: var(--mono);
+      font-size: 12px;
+    }
+
+    .ans-row-label {
+      color: var(--text-dim);
+      min-width: 50px;
+      font-size: 11px;
+    }
+
+    .ans-row-cells { display: flex; gap: 4px; }
+
+    .ans-cell {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 30px;
+      height: 30px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 700;
+      border: 1px solid var(--border);
+      background: var(--surface2);
+      color: var(--text-muted);
+    }
+
+    .ans-cell.l0 { background: rgba(96,165,250,0.08); border-color: rgba(96,165,250,0.2); color: var(--blue); }
+    .ans-cell.l1 { background: var(--orange-bg); border-color: rgba(251,146,60,0.2); color: var(--orange); }
+    .ans-cell.l2 { background: var(--green-bg); border-color: rgba(52,211,153,0.2); color: var(--green); }
+
+    .ans-dir-tag {
+      font-size: 10px;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-family: var(--mono);
+    }
+
+    .dir-lr { background: rgba(96,165,250,0.1); color: var(--blue); border: 1px solid rgba(96,165,250,0.2); }
+    .dir-rl { background: var(--orange-bg); color: var(--orange); border: 1px solid rgba(251,146,60,0.2); }
+
+    /* Side panel */
+    .side-panel { display: flex; flex-direction: column; }
+
+    .stack-panel { padding: 14px 16px; border-bottom: 1px solid var(--border); }
+
+    .vars-panel { padding: 14px 16px; border-bottom: 1px solid var(--border); }
+
+    .var-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 4px 0;
+      border-bottom: 1px solid var(--border);
+      font-size: 12px;
+    }
+
+    .var-row:last-child { border-bottom: none; }
+    .var-name { font-family: var(--mono); color: var(--text-muted); font-size: 11px; }
+    .var-val  { font-family: var(--mono); font-weight: 700; color: var(--amber); font-size: 11px; }
+    .var-val.blue   { color: var(--blue); }
+    .var-val.orange { color: var(--orange); }
+    .var-val.green  { color: var(--green); }
+
+    .log-panel { padding: 14px 16px; flex: 1; }
+
+    .log {
+      font-size: 11px;
+      font-family: var(--mono);
+      line-height: 1.9;
+      color: var(--text-dim);
+      max-height: 200px;
+      overflow-y: auto;
+    }
+
+    .log::-webkit-scrollbar { width: 4px; }
+    .log::-webkit-scrollbar-thumb { background: var(--border-mid); border-radius: 2px; }
+
+    .entry.hl   { color: var(--text); }
+    .entry.push { color: var(--blue); }
+    .entry.uns  { color: var(--orange); }
+    .entry.done { color: var(--green); }
+
+    /* Explanation */
+    .explanation { margin-top: 2.5rem; animation: fadeUp .6s ease .3s both; }
+
+    .explain-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+      gap: 12px;
+    }
+
+    .explain-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px 18px;
+    }
+
+    .explain-card .icon { font-size: 18px; margin-bottom: 8px; }
+    .explain-card h3 { font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 6px; }
+    .explain-card p { font-size: 12px; color: var(--text-muted); line-height: 1.7; }
+    .explain-card code {
+      font-family: var(--mono);
+      font-size: 11px;
+      background: var(--surface2);
+      padding: 1px 5px;
+      border-radius: 4px;
+      color: var(--accent);
+    }
+
+    .complexity { display: flex; gap: 10px; margin-top: 1.5rem; flex-wrap: wrap; }
+
+    .cpill {
+      font-family: var(--mono);
+      font-size: 12px;
+      padding: 6px 14px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+    }
+
+    .cpill strong { color: var(--accent); font-weight: 700; }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── PROBLEM OVERVIEW ───────────────────────────── */
+    .overview { margin-top: 2.5rem; animation: fadeUp .6s ease .25s both; }
+    .overview-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+    .overview-full { margin-bottom: 12px; }
+    .ov-card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 18px 20px; position: relative; overflow: hidden; }
+    .ov-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; }
+    .ov-card.blue::before   { background: linear-gradient(90deg, var(--blue), transparent); }
+    .ov-card.green::before  { background: linear-gradient(90deg, var(--green), transparent); }
+    .ov-card.amber::before  { background: linear-gradient(90deg, var(--amber), transparent); }
+    .ov-card.red::before    { background: linear-gradient(90deg, var(--red), transparent); }
+    .ov-card.accent::before { background: linear-gradient(90deg, var(--accent), transparent); }
+    .ov-card.orange::before { background: linear-gradient(90deg, var(--orange), transparent); }
+    .ov-card-head { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+    .ov-icon { font-size: 16px; }
+    .ov-title { font-family: var(--mono); font-size: 10px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--text-muted); }
+    .ov-card p { font-size: 13px; color: var(--text-muted); line-height: 1.75; }
+    .ov-card p strong { color: var(--text); font-weight: 600; }
+    .ov-card code { font-family: var(--mono); font-size: 11px; background: var(--surface2); padding: 1px 6px; border-radius: 4px; color: var(--accent); }
+    .hint-list { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+    .hint-list li { display: flex; gap: 10px; align-items: flex-start; font-size: 13px; color: var(--text-muted); line-height: 1.65; }
+    .hint-list li .bullet { font-family: var(--mono); font-size: 10px; font-weight: 700; color: var(--accent); background: var(--accent-glow); border: 1px solid rgba(124,110,245,0.25); padding: 2px 7px; border-radius: 4px; flex-shrink: 0; margin-top: 2px; }
+    .hint-list li .bullet.green { color: var(--green); background: var(--green-bg); border-color: rgba(52,211,153,0.25); }
+    .hint-list li .bullet.amber { color: var(--amber); background: var(--amber-bg); border-color: rgba(251,191,36,0.25); }
+    .hint-list li .bullet.red   { color: var(--red);   background: var(--red-bg);   border-color: rgba(248,113,113,0.25); }
+    .hint-list li .bullet.blue  { color: var(--blue);  background: var(--blue-bg);  border-color: rgba(96,165,250,0.25); }
+    .edge-list { display: flex; flex-direction: column; gap: 8px; }
+    .edge-item { display: flex; gap: 10px; align-items: flex-start; }
+    .edge-label { font-family: var(--mono); font-size: 9px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; padding: 3px 8px; border-radius: 5px; flex-shrink: 0; margin-top: 2px; }
+    .edge-label.warn { background: var(--red-bg); color: var(--red); border: 1px solid rgba(248,113,113,0.25); }
+    .edge-label.ok   { background: var(--green-bg); color: var(--green); border: 1px solid rgba(52,211,153,0.25); }
+    .edge-text { font-size: 12px; color: var(--text-muted); line-height: 1.65; }
+    .edge-text code { font-family: var(--mono); font-size: 11px; background: var(--surface2); padding: 1px 5px; border-radius: 4px; color: var(--accent); }
+    .best-solution { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; margin-bottom: 12px; }
+    .best-solution-header { display: flex; align-items: center; justify-content: space-between; padding: 12px 18px; border-bottom: 1px solid var(--border); background: var(--surface2); }
+    .best-solution-title { display: flex; align-items: center; gap: 8px; font-family: var(--mono); font-size: 11px; font-weight: 700; color: var(--green); letter-spacing: .08em; }
+    .best-solution-pills { display: flex; gap: 6px; }
+    .sol-pill { font-family: var(--mono); font-size: 10px; padding: 3px 9px; border-radius: 6px; background: var(--surface3); border: 1px solid var(--border-mid); color: var(--text-muted); }
+    .best-solution pre { padding: 1rem 1.25rem; font-size: 12px; line-height: 1.8; overflow-x: auto; }
+    @media (max-width: 680px) { .overview-grid { grid-template-columns: 1fr; } }
+
+    @media (max-width: 720px) {
+      .main-grid { grid-template-columns: 1fr; }
+      .left-col { border-right: none; border-bottom: 1px solid var(--border); }
+    }
+  
+    /* ── NEW TOP SECTIONS ── */
+    .pattern-banner-new { display:flex; align-items:flex-start; gap:16px; border-left-width:3px; border-left-style:solid; border-radius:10px; padding:14px 18px; margin-bottom:2rem; flex-wrap:wrap; animation:fadeUp .6s ease .03s both; }
+    .pb-label  { font-family:var(--mono); font-size:10px; font-weight:700; letter-spacing:.12em; text-transform:uppercase; color:var(--text-dim); margin-bottom:4px; }
+    .pb-name   { font-family:var(--mono); font-size:13px; font-weight:700; }
+    .pb-desc   { font-family:var(--mono); font-size:12px; color:var(--text-muted); flex:1; min-width:200px; line-height:1.7; }
+    .pb-solves { font-family:var(--mono); font-size:11px; color:var(--text-dim); }
+
+    .prob-section { background:var(--surface); border:1px solid var(--border); border-radius:14px; overflow:hidden; margin-bottom:2rem; animation:fadeUp .6s ease .04s both; }
+    .prob-section-hdr { display:flex; align-items:center; gap:10px; padding:14px 20px; border-bottom:1px solid var(--border); background:var(--surface2); }
+    .prob-section-icon  { font-size:16px; }
+    .prob-section-title { font-family:var(--mono); font-size:11px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:var(--text-muted); }
+    .prob-body { padding:20px; }
+    .prob-body p { font-size:13px; color:var(--text-muted); line-height:1.75; margin-bottom:10px; }
+    .prob-body p:last-child { margin-bottom:0; }
+    .prob-body p strong { color:var(--text); }
+    .prob-body code { font-family:var(--mono); font-size:11px; background:var(--surface2); padding:1px 6px; border-radius:4px; color:var(--accent); }
+
+    /* SVG example grid — replaces array [x,y,z] notation */
+    .svg-example-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:14px; margin-top:16px; }
+    .svg-ex-card { background:var(--surface2); border:1px solid var(--border); border-radius:10px; overflow:hidden; }
+    .svg-ex-header { display:flex; align-items:center; justify-content:space-between; padding:8px 14px; border-bottom:1px solid var(--border); }
+    .svg-ex-label  { font-family:var(--mono); font-size:10px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:var(--text-dim); }
+    .svg-ex-result { font-family:var(--mono); font-size:11px; font-weight:700; padding:2px 10px; border-radius:5px; }
+    .res-green  { background:rgba(52,211,153,.12); color:#34d399; border:1px solid rgba(52,211,153,.25); }
+    .res-red    { background:rgba(248,113,113,.12); color:#f87171; border:1px solid rgba(248,113,113,.25); }
+    .res-blue   { background:rgba(96,165,250,.12);  color:#60a5fa; border:1px solid rgba(96,165,250,.25); }
+    .res-orange { background:rgba(251,146,60,.12);  color:#fb923c; border:1px solid rgba(251,146,60,.25); }
+    .res-purple { background:rgba(192,132,252,.12); color:#c084fc; border:1px solid rgba(192,132,252,.25); }
+    .svg-ex-body { padding:12px; display:flex; justify-content:center; align-items:center; min-height:90px; }
+    .svg-ex-body svg { max-height:120px; width:100%; }
+
+    /* Hints */
+    .hints-list-new { display:flex; flex-direction:column; gap:10px; }
+    .hint-row { display:flex; gap:12px; align-items:flex-start; }
+    .hint-badge { font-family:var(--mono); font-size:11px; font-weight:700; padding:3px 8px; border-radius:6px; flex-shrink:0; margin-top:2px; min-width:28px; text-align:center; }
+    .hint-body { font-size:13px; color:var(--text-muted); line-height:1.7; }
+    .hint-body code { font-family:var(--mono); font-size:11px; background:var(--surface2); padding:1px 5px; border-radius:4px; color:var(--accent); }
+    .hint-body strong { color:var(--text); }
+    .intuition-new { border-radius:10px; padding:16px 18px; margin-top:14px; }
+    .intuition-new p { font-size:13px; color:var(--text-muted); line-height:1.75; }
+
+  </style>
+</head>
+<body>
+<div class="page">
+
+  <a class="back-nav" href="../dsa-hub.html">← All visualizers</a>
+
+  <header>
+    <div class="tag">Algorithm Dry Run · LeetCode #103</div>
+    <h1><span>Zigzag</span> Level Order Traversal</h1>
+    <p class="subtitle">
+      Step-by-step BFS trace of <code style="font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--accent);background:var(--surface);padding:2px 7px;border-radius:5px;">zigzagLevelOrder</code> — watch the queue drain level by level, and see how <code style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--orange);background:var(--surface);padding:2px 6px;border-radius:5px;">push</code> vs <code style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--orange);background:var(--surface);padding:2px 6px;border-radius:5px;">unshift</code> creates the zigzag.
+    </p>
+  </header>
+
+  <div class="insight-banner">
+    ⚡ <strong>Key insight:</strong> The queue always processes nodes <strong>left → right</strong>. The zigzag is created by inserting into <code style="color:var(--amber)">levelArr[]</code> differently — <code style="color:var(--blue)">push()</code> on even levels (appends to end) and <code style="color:var(--orange)">unshift()</code> on odd levels (inserts at front, reversing the order). No extra reversal needed!
+  </div>
+
+  <div class="pattern-banner-new" style="background:rgba(251,146,60,.06);border:1px solid rgba(251,146,60,.25);border-left-color:#fb923c">
+    <div>
+      <div class="pb-label">Pattern</div>
+      <div class="pb-name" style="color:#fb923c">🎯 BFS Level-order + Alternating Insert Direction</div>
+    </div>
+    <div class="pb-desc">Standard BFS queue. Alternate between <code>push()</code> on even levels and <code>unshift()</code> on odd levels. BFS traversal order never changes — only where each value lands in the result.</div>
+    <div class="pb-solves">Same pattern unlocks:<br/><span style="color:#fb923c">#102 Binary Tree Level Order · #107 Bottom-up Level Order · #515 Find Max Each Row</span></div>
+  </div>
+
+  <div class="prob-section">
+    <div class="prob-section-hdr">
+      <span class="prob-section-icon">📋</span>
+      <span class="prob-section-title">Problem Statement</span>
+    </div>
+    <div class="prob-body">
+      <p>Given a binary tree, return its level-order traversal in a <strong>zigzag pattern</strong>: level 0 goes left→right, level 1 goes right→left, level 2 goes left→right again — alternating every level.</p>
+        <p>Output is a list of lists. Each inner list contains all node values at that level in the correct zigzag direction.</p><div class="svg-example-grid">
+    <div class="svg-ex-card">
+      <div class="svg-ex-header">
+        <span class="svg-ex-label">Tree [3, 9, 20, null, null, 15, 7]</span>
+        <span class="svg-ex-result res-orange">[[3],[20,9],[15,7]]</span>
+      </div>
+      <div class="svg-ex-body"><svg viewBox="0 0 260 140"><line x1="130" y1="26" x2="74" y2="64" stroke="#1e2231" stroke-width="1.5"/><line x1="130" y1="26" x2="196" y2="64" stroke="#1e2231" stroke-width="1.5"/><line x1="182" y1="82" x2="158" y2="110" stroke="#1e2231" stroke-width="1.5"/><line x1="210" y1="82" x2="232" y2="110" stroke="#1e2231" stroke-width="1.5"/><circle cx="130" cy="18" r="22" fill="#1a1808" stroke="#fb923c" stroke-width="2"/><text x="130" y="22" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="13" font-weight="700" fill="#fb923c">3</text><circle cx="72" cy="74" r="20" fill="#13161d" stroke="#3d4251" stroke-width="1.5"/><text x="72" y="78" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="13" font-weight="700" fill="#6b7280">9</text><circle cx="198" cy="74" r="20" fill="#13161d" stroke="#3d4251" stroke-width="1.5"/><text x="198" y="78" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="13" font-weight="700" fill="#6b7280">20</text><circle cx="156" cy="114" r="16" fill="#13161d" stroke="#3d4251" stroke-width="1.5"/><text x="156" y="118" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="11" font-weight="700" fill="#6b7280">15</text><circle cx="234" cy="114" r="16" fill="#13161d" stroke="#3d4251" stroke-width="1.5"/><text x="234" y="118" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="11" font-weight="700" fill="#6b7280">7</text><text x="4" y="22" font-family="'JetBrains Mono',monospace" font-size="8" fill="#60a5fa">L0→</text><text x="224" y="22" font-family="'JetBrains Mono',monospace" font-size="8" fill="#60a5fa">[3]</text><text x="4" y="76" font-family="'JetBrains Mono',monospace" font-size="8" fill="#fb923c">←L1</text><text x="204" y="76" font-family="'JetBrains Mono',monospace" font-size="8" fill="#fb923c">[20,9]</text><text x="4" y="118" font-family="'JetBrains Mono',monospace" font-size="8" fill="#60a5fa">L2→</text><text x="186" y="118" font-family="'JetBrains Mono',monospace" font-size="8" fill="#60a5fa">[15,7]</text></svg></div>
+    </div>
+    <div class="svg-ex-card">
+      <div class="svg-ex-header">
+        <span class="svg-ex-label">Tree [1, 2, 3, 4, 5, 6, 7]</span>
+        <span class="svg-ex-result res-orange">[[1],[3,2],[4,5,6,7]]</span>
+      </div>
+      <div class="svg-ex-body"><svg viewBox="0 0 240 120"><line x1="120" y1="24" x2="72" y2="58" stroke="#1e2231" stroke-width="1.5"/><line x1="120" y1="24" x2="172" y2="58" stroke="#1e2231" stroke-width="1.5"/><line x1="60" y1="76" x2="36" y2="104" stroke="#1e2231" stroke-width="1.5"/><line x1="84" y1="76" x2="106" y2="104" stroke="#1e2231" stroke-width="1.5"/><line x1="160" y1="76" x2="136" y2="104" stroke="#1e2231" stroke-width="1.5"/><line x1="184" y1="76" x2="208" y2="104" stroke="#1e2231" stroke-width="1.5"/><circle cx="120" cy="16" r="20" fill="#1a1808" stroke="#fb923c" stroke-width="2"/><text x="120" y="20" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="13" font-weight="700" fill="#fb923c">1</text><circle cx="70" cy="68" r="18" fill="#13161d" stroke="#3d4251" stroke-width="1.5"/><text x="70" y="72" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="13" font-weight="700" fill="#6b7280">2</text><circle cx="174" cy="68" r="18" fill="#13161d" stroke="#3d4251" stroke-width="1.5"/><text x="174" y="72" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="13" font-weight="700" fill="#6b7280">3</text><circle cx="34" cy="108" r="14" fill="#13161d" stroke="#3d4251" stroke-width="1.5"/><text x="34" y="112" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="11" font-weight="700" fill="#6b7280">4</text><circle cx="108" cy="108" r="14" fill="#13161d" stroke="#3d4251" stroke-width="1.5"/><text x="108" y="112" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="11" font-weight="700" fill="#6b7280">5</text><circle cx="136" cy="108" r="14" fill="#13161d" stroke="#3d4251" stroke-width="1.5"/><text x="136" y="112" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="11" font-weight="700" fill="#6b7280">6</text><circle cx="210" cy="108" r="14" fill="#13161d" stroke="#3d4251" stroke-width="1.5"/><text x="210" y="112" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="11" font-weight="700" fill="#6b7280">7</text><text x="4" y="16" font-family="'JetBrains Mono',monospace" font-size="8" fill="#60a5fa">L0→</text><text x="4" y="68" font-family="'JetBrains Mono',monospace" font-size="8" fill="#fb923c">←L1</text><text x="4" y="108" font-family="'JetBrains Mono',monospace" font-size="8" fill="#60a5fa">L2→</text></svg></div>
+    </div>
+  </div>
+    </div>
+  </div>
+
+  <div class="prob-section">
+    <div class="prob-section-hdr">
+      <span class="prob-section-icon">💡</span>
+      <span class="prob-section-title">Intuition + Hints</span>
+    </div>
+    <div class="prob-body">
+      <div class="hints-list-new">
+      <div class="hint-row">
+        <span class="hint-badge" style="color:#fb923c;background:rgba(251,146,60,.1);border:1px solid rgba(251,146,60,.25)">1</span>
+        <div class="hint-body"><strong>Start with plain BFS.</strong> Queue, snapshot <code>len = queue.length</code> before each level's inner loop, process exactly that level's nodes.</div>
+      </div>
+      <div class="hint-row">
+        <span class="hint-badge" style="color:#fb923c;background:rgba(251,146,60,.1);border:1px solid rgba(251,146,60,.25)">2</span>
+        <div class="hint-body">Track a <code>level</code> counter starting at 0. Check <code>level % 2</code> to decide the direction.</div>
+      </div>
+      <div class="hint-row">
+        <span class="hint-badge" style="color:#fb923c;background:rgba(251,146,60,.1);border:1px solid rgba(251,146,60,.25)">3</span>
+        <div class="hint-body"><strong>The entire zigzag trick:</strong> <code>levelArr.push(val)</code> for even levels → appends to end → left-to-right order. <code>levelArr.unshift(val)</code> for odd levels → inserts at front, building the array in reverse → right-to-left order. No extra reversal step needed.</div>
+      </div>
+      <div class="hint-row">
+        <span class="hint-badge" style="color:#fb923c;background:rgba(251,146,60,.1);border:1px solid rgba(251,146,60,.25)">4</span>
+        <div class="hint-body">After the inner loop: <code>ans.push(levelArr)</code> and <code>level++</code>. The <code>len</code> snapshot is critical — it prevents accidentally processing next level's nodes in this loop.</div>
+      </div>
+    </div><div class="intuition-new" style="background:rgba(251,146,60,.06);border:1px solid rgba(251,146,60,.2);margin-top:14px"><p><strong style="color:#fb923c">Core insight:</strong> The queue always processes nodes left to right. The zigzag comes entirely from <em>where you insert</em> into the result array, not from how you traverse. <code>unshift()</code> prepends every new value, so by the time a level is done, the array is naturally reversed.</p></div>
+    </div>
+  </div>
+
+
+  <!-- Code -->
+  <div class="code-block">
+    <div class="code-header">
+      <div class="dots"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div></div>
+      <span>zigzagLevelOrder.js</span>
+    </div>
+    <pre><span class="kw">var</span> <span class="fn">zigzagLevelOrder</span> = <span class="kw">function</span>(<span class="var">root</span>) {
+    <span class="kw">if</span> (!<span class="var">root</span>) <span class="kw">return</span> []
+    <span class="kw">let</span> <span class="var">level</span> = <span class="num">0</span>;
+    <span class="kw">let</span> <span class="var">queue</span> = [<span class="var">root</span>]
+    <span class="kw">let</span> <span class="var">ans</span> = []
+
+    <span class="kw">while</span> (<span class="var">queue</span>.length) {
+        <span class="kw">let</span> <span class="var">len</span> = <span class="var">queue</span>.length;   <span class="cm">// snapshot: nodes at this level</span>
+        <span class="kw">let</span> <span class="var">levelArr</span> = []
+        <span class="kw">for</span> (<span class="kw">let</span> <span class="var">i</span> = <span class="num">0</span>; <span class="var">i</span> &lt; <span class="var">len</span>; <span class="var">i</span>++) {
+            <span class="kw">let</span> <span class="var">curr</span> = <span class="var">queue</span>.<span class="fn">shift</span>();   <span class="cm">// dequeue front</span>
+            <span class="hl"><span class="kw">if</span> (<span class="var">level</span> % <span class="num">2</span> !== <span class="num">0</span>) {
+                <span class="var">levelArr</span>.<span class="fn">unshift</span>(<span class="var">curr</span>.val)    <span class="cm">// odd level → insert at front</span>
+            } <span class="kw">else</span> {
+                <span class="var">levelArr</span>.<span class="fn">push</span>(<span class="var">curr</span>.val)       <span class="cm">// even level → append to end</span>
+            }</span>
+            <span class="kw">if</span> (<span class="var">curr</span>.left)  <span class="var">queue</span>.<span class="fn">push</span>(<span class="var">curr</span>.left)
+            <span class="kw">if</span> (<span class="var">curr</span>.right) <span class="var">queue</span>.<span class="fn">push</span>(<span class="var">curr</span>.right)
+        }
+        <span class="var">ans</span>.<span class="fn">push</span>(<span class="var">levelArr</span>)
+        <span class="var">level</span>++
+    }
+    <span class="kw">return</span> <span class="var">ans</span>;
+};</pre>
+  </div>
+
+  <p class="section-label">// Interactive dry run — tree: [1, 2, 3, 4, 5, null, 6]</p>
+
+  <!-- Visualizer -->
+  <div class="viz-card">
+    <div class="progress-bar-wrap">
+      <div class="progress-bar-inner" id="prog" style="width:5%"></div>
+    </div>
+
+    <div class="controls">
+      <button class="btn" id="btn-prev" onclick="move(-1)" disabled>← Prev</button>
+      <button class="btn" id="btn-play" onclick="togglePlay()">▶ Play</button>
+      <button class="btn" id="btn-next" onclick="move(1)">Next →</button>
+      <span class="step-info" id="step-label">Step 1 / 20</span>
+      <span style="font-family:var(--mono);font-size:11px;color:var(--text-dim);display:flex;gap:4px;align-items:center"><kbd>←</kbd><kbd>→</kbd></span>
+      <span class="result-badge badge-done" id="ans-badge" style="display:none">✓ [[1],[3,2],[4,5,6]]</span>
+    </div>
+
+    <div class="step-desc" id="step-desc">Initialize: <em>queue = [1]</em>, level = 0, ans = []. Root node entered, BFS begins.</div>
+
+    <div class="main-grid">
+      <!-- Left column: tree + queue + levelArr + ans -->
+      <div class="left-col">
+
+        <!-- Tree SVG -->
+        <div class="tree-panel">
+          <div class="panel-label">// binary tree &nbsp;<span style="color:var(--text-dim);font-weight:400">[1, 2, 3, 4, 5, null, 6]</span></div>
+          <svg id="tree-svg" viewBox="0 0 500 230" width="100%">
+            <!-- edges -->
+            <line x1="250" y1="48" x2="150" y2="108" stroke="#1e2231" stroke-width="2"/>
+            <line x1="250" y1="48" x2="360" y2="108" stroke="#1e2231" stroke-width="2"/>
+            <line x1="133" y1="128" x2="85"  y2="183" stroke="#1e2231" stroke-width="2"/>
+            <line x1="167" y1="128" x2="210" y2="183" stroke="#1e2231" stroke-width="2"/>
+            <!-- node3 has no left child (null), right = 6 -->
+            <line x1="378" y1="128" x2="420" y2="183" stroke="#1e2231" stroke-width="2"/>
+            <!-- dashed null left of 3 -->
+            <line x1="342" y1="128" x2="305" y2="183" stroke="#2a2f3e" stroke-width="1.2" stroke-dasharray="4 5"/>
+            <text x="297" y="196" font-family="'JetBrains Mono',monospace" font-size="10" fill="#2a2f3e" text-anchor="middle">null</text>
+
+            <!-- level direction arrows -->
+            <!-- Level 0: L→R -->
+            <text x="20" y="42" font-family="'JetBrains Mono',monospace" font-size="9" fill="#3d4251">L0</text>
+            <text x="460" y="42" font-family="'JetBrains Mono',monospace" font-size="9" fill="#60a5fa" text-anchor="end">L→R</text>
+            <!-- Level 1: R→L -->
+            <text x="20" y="122" font-family="'JetBrains Mono',monospace" font-size="9" fill="#3d4251">L1</text>
+            <text x="460" y="122" font-family="'JetBrains Mono',monospace" font-size="9" fill="#fb923c" text-anchor="end">R→L</text>
+            <!-- Level 2: L→R -->
+            <text x="20" y="196" font-family="'JetBrains Mono',monospace" font-size="9" fill="#3d4251">L2</text>
+            <text x="460" y="196" font-family="'JetBrains Mono',monospace" font-size="9" fill="#60a5fa" text-anchor="end">L→R</text>
+
+            <!-- node 1 -->
+            <g id="n1">
+              <circle cx="250" cy="38" r="28" fill="#13161d" stroke="#2a2f3e" stroke-width="1.5"/>
+              <text x="250" y="42" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="15" font-weight="700" fill="#6b7280">1</text>
+            </g>
+            <!-- node 2 -->
+            <g id="n2">
+              <circle cx="150" cy="118" r="26" fill="#13161d" stroke="#2a2f3e" stroke-width="1.5"/>
+              <text x="150" y="122" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="14" font-weight="700" fill="#6b7280">2</text>
+            </g>
+            <!-- node 3 -->
+            <g id="n3">
+              <circle cx="360" cy="118" r="26" fill="#13161d" stroke="#2a2f3e" stroke-width="1.5"/>
+              <text x="360" y="122" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="14" font-weight="700" fill="#6b7280">3</text>
+            </g>
+            <!-- node 4 -->
+            <g id="n4">
+              <circle cx="84" cy="196" r="22" fill="#13161d" stroke="#2a2f3e" stroke-width="1.5"/>
+              <text x="84" y="200" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="13" font-weight="700" fill="#6b7280">4</text>
+            </g>
+            <!-- node 5 -->
+            <g id="n5">
+              <circle cx="212" cy="196" r="22" fill="#13161d" stroke="#2a2f3e" stroke-width="1.5"/>
+              <text x="212" y="200" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="13" font-weight="700" fill="#6b7280">5</text>
+            </g>
+            <!-- node 6 -->
+            <g id="n6">
+              <circle cx="420" cy="196" r="22" fill="#13161d" stroke="#2a2f3e" stroke-width="1.5"/>
+              <text x="420" y="200" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="13" font-weight="700" fill="#6b7280">6</text>
+            </g>
+          </svg>
+        </div>
+
+        <!-- Queue -->
+        <div class="queue-panel">
+          <div class="panel-label">// queue (BFS queue — dequeue from front, enqueue children to back)</div>
+          <div class="queue-track" id="queue-track">
+            <span class="queue-label-arr">front →</span>
+          </div>
+        </div>
+
+        <!-- Current level array being built -->
+        <div class="curr-level-panel">
+          <div class="panel-label">// levelArr[] — being built this level &nbsp;<span id="dir-badge" style="font-size:10px;font-family:var(--mono);padding:2px 8px;border-radius:4px;background:rgba(96,165,250,0.1);color:var(--blue);border:1px solid rgba(96,165,250,0.2)">push() → even level</span></div>
+          <div class="curr-arr-track" id="curr-arr"></div>
+        </div>
+
+        <!-- Answer so far -->
+        <div class="ans-panel">
+          <div class="panel-label">// ans[] — completed levels</div>
+          <div class="ans-rows" id="ans-rows"></div>
+        </div>
+
+      </div>
+
+      <!-- Side panel -->
+      <div class="side-panel">
+        <!-- Variables -->
+        <div class="vars-panel">
+          <div class="panel-label">// variables</div>
+          <div class="var-row"><span class="var-name">level</span>     <span class="var-val blue"   id="v-level">0</span></div>
+          <div class="var-row"><span class="var-name">queue.len</span> <span class="var-val"        id="v-qlen">1</span></div>
+          <div class="var-row"><span class="var-name">len (snap)</span><span class="var-val"        id="v-len">—</span></div>
+          <div class="var-row"><span class="var-name">i</span>         <span class="var-val"        id="v-i">—</span></div>
+          <div class="var-row"><span class="var-name">curr.val</span>  <span class="var-val orange" id="v-curr-val">—</span></div>
+          <div class="var-row"><span class="var-name">direction</span> <span class="var-val blue"   id="v-dir">push (L→R)</span></div>
+          <div class="var-row"><span class="var-name">levelArr[]</span>    <span class="var-val"        id="v-levelarr">[]</span></div>
+        </div>
+
+        <!-- Log -->
+        <div class="log-panel">
+          <div class="panel-label">// execution log</div>
+          <div class="log" id="log"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── PROBLEM OVERVIEW ── -->
+  <div class="overview">
+    <p class="section-label">// problem overview — everything you need for revision</p>
+
+    <div class="overview-grid">
+      <div class="ov-card blue">
+        <div class="ov-card-head"><span class="ov-icon">📋</span><span class="ov-title">What the problem is asking</span></div>
+        <p>Given a binary tree, return its <strong>level order traversal</strong> but in a <strong>zigzag pattern</strong> — level 0 goes left→right, level 1 goes right→left, level 2 goes left→right again, and so on alternating.</p>
+        <p style="margin-top:8px">Output is a list of lists: each inner list holds the node values at that level, already in the correct zigzag direction.</p>
+      </div>
+      <div class="ov-card orange">
+        <div class="ov-card-head"><span class="ov-icon">💡</span><span class="ov-title">Core intuition</span></div>
+        <p>Standard BFS gives nodes <strong>left→right</strong> at every level. For zigzag, we don't change <em>how</em> we process nodes — we change <em>how</em> we insert their values into the level array.</p>
+        <p style="margin-top:8px"><strong>Even levels</strong>: <code>push(val)</code> → appends to end → L→R order.<br/><strong>Odd levels</strong>: <code>unshift(val)</code> → inserts at front → R→L order. No reversals needed!</p>
+      </div>
+    </div>
+
+    <div class="overview-grid">
+      <div class="ov-card accent">
+        <div class="ov-card-head"><span class="ov-icon">🧩</span><span class="ov-title">Hints to reach the solution</span></div>
+        <ul class="hint-list">
+          <li><span class="bullet">1</span>Start with plain BFS. Use a queue, snapshot <code>len = queue.length</code> before each level's inner loop.</li>
+          <li><span class="bullet">2</span>Track a <code>level</code> counter starting at 0. Check <code>level % 2</code> to decide insert direction.</li>
+          <li><span class="bullet blue">3</span><code>push()</code> for even levels (0, 2, 4…) and <code>unshift()</code> for odd levels (1, 3, 5…). That's the entire zigzag trick.</li>
+          <li><span class="bullet green">4</span>After the inner loop finishes, push <code>levelArr</code> into <code>ans</code> and increment <code>level</code>.</li>
+        </ul>
+      </div>
+      <div class="ov-card amber">
+        <div class="ov-card-head"><span class="ov-icon">⚡</span><span class="ov-title">Key trick / pattern</span></div>
+        <p><strong>push vs unshift:</strong> Both process nodes in the same BFS order (left→right). But <code>unshift()</code> inserts each new value at index 0, pushing previous values right. After processing a full level with <code>unshift()</code>, the array ends up in reverse order — exactly right→left.</p>
+        <p style="margin-top:8px"><strong>The len snapshot:</strong> <code>let len = queue.length</code> before the inner loop is critical. As you process this level's nodes, you're also enqueuing next level's children. Without snapshotting <code>len</code>, you'd accidentally process the next level's nodes too.</p>
+        <p style="margin-top:8px"><strong>Why not reverse?</strong> You could build L→R then reverse for odd levels — same result, but O(n) extra work per level. <code>unshift()</code> is cleaner.</p>
+      </div>
+    </div>
+
+    <div class="overview-full">
+      <div class="ov-card red">
+        <div class="ov-card-head"><span class="ov-icon">⚠️</span><span class="ov-title">Edge cases to watch out for</span></div>
+        <div class="edge-list">
+          <div class="edge-item"><span class="edge-label warn">null</span><span class="edge-text"><strong>Empty tree:</strong> <svg viewBox="0 0 110 70" style="display:inline-block;vertical-align:middle;margin:0 4px;border-radius:6px;background:var(--surface2);padding:4px" width="120" height="70"><text x="20" y="38" font-family="'JetBrains Mono',monospace" font-size="9" fill="#3d4251">null tree</text><text x="20" y="52" font-family="'JetBrains Mono',monospace" font-size="9" fill="#f87171">return []</text></svg> Return <code>[]</code> immediately. Without this guard the queue starts as <code>[null]</code> and the loop runs once trying to access <code>null.left</code> — crash.</span></div>
+          <div class="edge-item"><span class="edge-label warn">single</span><span class="edge-text"><strong>Single node:</strong> Level 0, even → <code>push(root.val)</code> → <code>[[root.val]]</code>. Works naturally.</span></div>
+          <div class="edge-item"><span class="edge-label warn">level count</span><span class="edge-text"><strong>Level counter vs boolean:</strong> <svg viewBox="0 0 110 70" style="display:inline-block;vertical-align:middle;margin:0 4px;border-radius:6px;background:var(--surface2);padding:4px" width="120" height="70"><circle cx="55" cy="14" r="13" fill="#1a1808" stroke="#fb923c" stroke-width="2"/><text x="55" y="17" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="10" font-weight="700" fill="#fb923c">1</text><line x1="55" y1="27" x2="32" y2="44" stroke="#1e2231" stroke-width="1.5"/><line x1="55" y1="27" x2="80" y2="44" stroke="#1e2231" stroke-width="1.5"/><circle cx="30" cy="50" r="12" fill="#13161d" stroke="#3d4251" stroke-width="1.5"/><text x="30" y="53" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="10" font-weight="700" fill="#6b7280">2</text><circle cx="82" cy="50" r="12" fill="#13161d" stroke="#3d4251" stroke-width="1.5"/><text x="82" y="53" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="10" font-weight="700" fill="#6b7280">3</text><text x="4" y="68" font-family="'JetBrains Mono',monospace" font-size="8" fill="#fb923c">L0→  ←L1</text></svg> <code>level % 2</code> and a toggled boolean <code>leftToRight</code> both work equally well. The key is flipping direction after every level. Pick one and stay consistent.</span></div>
+          <div class="edge-item"><span class="edge-label ok">note</span><span class="edge-text"><strong>unshift is O(n):</strong> Each <code>unshift()</code> call shifts all existing elements. For very large levels this is slower than using a deque or building reversed. For interviews, <code>unshift()</code> is acceptable and cleaner.</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="overview-full">
+      <div class="best-solution">
+        <div class="best-solution-header">
+          <span class="best-solution-title">✦ Best solution for learning</span>
+          <div class="best-solution-pills">
+            <span class="sol-pill">O(n) time</span>
+            <span class="sol-pill">O(n) space</span>
+            <span class="sol-pill">BFS + level tracking</span>
+            <span class="sol-pill">push / unshift trick</span>
+          </div>
+        </div>
+        <pre><span class="kw">var</span> <span class="fn">zigzagLevelOrder</span> = <span class="kw">function</span>(<span class="var">root</span>) {
+  <span class="kw">if</span> (!<span class="var">root</span>) <span class="kw">return</span> [];              <span class="cm">// edge case: empty tree</span>
+  <span class="kw">let</span> <span class="var">queue</span> = [<span class="var">root</span>], <span class="var">ans</span> = [], <span class="var">level</span> = <span class="num">0</span>;
+
+  <span class="kw">while</span> (<span class="var">queue</span>.length) {
+    <span class="kw">let</span> <span class="var">len</span> = <span class="var">queue</span>.length;          <span class="cm">// snapshot: # nodes at this level</span>
+    <span class="kw">let</span> <span class="var">levelArr</span> = [];
+
+    <span class="kw">for</span> (<span class="kw">let</span> <span class="var">i</span> = <span class="num">0</span>; <span class="var">i</span> < <span class="var">len</span>; <span class="var">i</span>++) {
+      <span class="kw">let</span> <span class="var">curr</span> = <span class="var">queue</span>.<span class="fn">shift</span>();      <span class="cm">// dequeue front node</span>
+      <span class="kw">if</span> (<span class="var">curr</span>.left)  <span class="var">queue</span>.<span class="fn">push</span>(<span class="var">curr</span>.left);
+      <span class="kw">if</span> (<span class="var">curr</span>.right) <span class="var">queue</span>.<span class="fn">push</span>(<span class="var">curr</span>.right);
+
+      <span class="kw">if</span> (<span class="var">level</span> % <span class="num">2</span> === <span class="num">0</span>) <span class="var">levelArr</span>.<span class="fn">push</span>(<span class="var">curr</span>.val);    <span class="cm">// even: L→R</span>
+      <span class="kw">else</span>               <span class="var">levelArr</span>.<span class="fn">unshift</span>(<span class="var">curr</span>.val); <span class="cm">// odd:  R→L</span>
+    }
+
+    <span class="var">ans</span>.<span class="fn">push</span>(<span class="var">levelArr</span>);
+    <span class="var">level</span>++;
+  }
+  <span class="kw">return</span> <span class="var">ans</span>;
+};
+
+<span class="cm">// Key insight: BFS traversal order never changes (always L→R).
+// Only the INSERTION into levelArr changes: push() vs unshift().
+// unshift() builds the array in reverse by prepending each new value.
+// len snapshot prevents processing next level's nodes in the inner loop.</span></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- Explanation -->
+  <div class="explanation">
+    <p class="section-label">// how it works</p>
+    <div class="explain-grid">
+      <div class="explain-card">
+        <div class="icon">🔄</div>
+        <h3>BFS with a Queue</h3>
+        <p>A queue processes nodes level by level. We capture <code>len = queue.length</code> at the start of each level so we know exactly how many nodes belong to this level — without mixing up the next level's nodes.</p>
+      </div>
+      <div class="explain-card">
+        <div class="icon">📍</div>
+        <h3>push() vs unshift()</h3>
+        <p>On <strong>even levels</strong>: <code>levelArr.push(val)</code> appends to the end → left-to-right order. On <strong>odd levels</strong>: <code>levelArr.unshift(val)</code> inserts at the front → right-to-left order. No array reversal needed!</p>
+      </div>
+      <div class="explain-card">
+        <div class="icon">📸</div>
+        <h3>len snapshot trick</h3>
+        <p>We save <code>len = queue.length</code> before the inner loop. As we process nodes, we enqueue their children — but the loop only runs <code>len</code> times, so only this level's nodes are processed.</p>
+      </div>
+      <div class="explain-card">
+        <div class="icon">🎯</div>
+        <h3>Why level % 2 works</h3>
+        <p>Even levels (0, 2, 4...) use push — natural order. Odd levels (1, 3, 5...) use unshift — reversed. Together they create the zigzag snake pattern across the tree.</p>
+      </div>
+    </div>
+
+    <div class="complexity">
+      <div class="cpill">Time: <strong>O(n)</strong> — every node visited once</div>
+      <div class="cpill">Space: <strong>O(n)</strong> — queue + output storage</div>
+      <div class="cpill">Pattern: <strong>BFS</strong> with alternating insert</div>
+      <div class="cpill">Key ops: <strong>push / unshift / shift</strong></div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+/*
+  Tree: [1, 2, 3, 4, 5, null, 6]
+        1
+       / \
+      2    3
+     / \     \
+    4   5     6
+
+  Level 0 (even): [1]          → push → [1]
+  Level 1 (odd):  [2, 3]       → unshift → [3, 2]
+  Level 2 (even): [4, 5, 6]   → push → [4, 5, 6]
+
+  Final: [[1], [3, 2], [4, 5, 6]]
+*/
+
+const steps = [
+  // --- INIT ---
+  {
+    desc: 'Initialize: <em>queue = [1]</em>, level = 0, ans = []. Root entered. BFS begins.',
+    active: [], processing: null,
+    queue: [1], levelArr: [], ans: [],
+    level: 0, qlen: 1, len: "—", i: "—", currVal: "—", dir: "push (L→R)",
+    dirBadge: { text: "push() → even level", cls: "dir-lr" },
+    log: [{ t: "zigzagLevelOrder([1,2,3,4,5,null,6])", h: true },
+          { t: "queue=[1]  level=0  ans=[]" }]
+  },
+  // --- LEVEL 0 ---
+  {
+    desc: '<em>Level 0 starts.</em> <span class="push">len = 1</span> (snapshot). level % 2 === 0 → will use <span class="push">push()</span> → left-to-right.',
+    active: [1], processing: null,
+    queue: [1], levelArr: [], ans: [],
+    level: 0, qlen: 1, len: "1", i: "0", currVal: "—", dir: "push (L→R)",
+    dirBadge: { text: "push() → even level", cls: "dir-lr" },
+    log: [{ t: "─── Level 0 ───  len=1", h: true },
+          { t: "level%2===0 → push() mode (L→R)" }]
+  },
+  {
+    desc: 'Dequeue <em>curr = node(1)</em> (i=0). level is even → <span class="push">levelArr.push(1)</span>. levelArr = [1]. Children: enqueue 2 and 3.',
+    active: [], processing: 1,
+    queue: [2, 3], levelArr: [{ v: 1, mode: "pushed" }], ans: [],
+    level: 0, qlen: 2, len: "1", i: "0", currVal: "1", dir: "push (L→R)",
+    dirBadge: { text: "push() → even level", cls: "dir-lr" },
+    log: [{ t: "─── Level 0 ───  len=1" },
+          { t: "  i=0: dequeue curr(1)", h: true },
+          { t: "  push(1) → levelArr=[1]", css: "push" },
+          { t: "  enqueue left(2), right(3)" }]
+  },
+  {
+    desc: '<em>Level 0 done.</em> <span class="ok">ans.push([1])</span>. level → 1. Queue now has level-1 nodes: [2, 3].',
+    active: [], processing: null,
+    queue: [2, 3], levelArr: [], ans: [{ vals: [1], cls: "l0", dir: "L→R" }],
+    level: 1, qlen: 2, len: "—", i: "—", currVal: "—", dir: "unshift (R→L)",
+    dirBadge: { text: "unshift() → odd level", cls: "dir-rl" },
+    log: [{ t: "─── Level 0 ───  len=1" },
+          { t: "  push(1) → levelArr=[1]" },
+          { t: "  ans.push([1])  level→1", h: true, css: "done" }]
+  },
+  // --- LEVEL 1 ---
+  {
+    desc: '<em>Level 1 starts.</em> <span class="uns">len = 2</span> (snapshot). level % 2 !== 0 → will use <span class="uns">unshift()</span> → right-to-left.',
+    active: [2, 3], processing: null,
+    queue: [2, 3], levelArr: [], ans: [{ vals: [1], cls: "l0", dir: "L→R" }],
+    level: 1, qlen: 2, len: "2", i: "0", currVal: "—", dir: "unshift (R→L)",
+    dirBadge: { text: "unshift() → odd level", cls: "dir-rl" },
+    log: [{ t: "─── Level 1 ───  len=2", h: true },
+          { t: "level%2!==0 → unshift() mode (R→L)" }]
+  },
+  {
+    desc: 'Dequeue <em>curr = node(2)</em> (i=0). Odd level → <span class="uns">levelArr.unshift(2)</span>. levelArr = [2]. Enqueue children 4, 5.',
+    active: [], processing: 2,
+    queue: [3, 4, 5], levelArr: [{ v: 2, mode: "unshifted" }], ans: [{ vals: [1], cls: "l0", dir: "L→R" }],
+    level: 1, qlen: 3, len: "2", i: "0", currVal: "2", dir: "unshift (R→L)",
+    dirBadge: { text: "unshift() → odd level", cls: "dir-rl" },
+    log: [{ t: "─── Level 1 ───  len=2" },
+          { t: "  i=0: dequeue curr(2)", h: true },
+          { t: "  unshift(2) → levelArr=[2]", css: "uns" },
+          { t: "  enqueue left(4), right(5)" }]
+  },
+  {
+    desc: 'Dequeue <em>curr = node(3)</em> (i=1). Odd level → <span class="uns">levelArr.unshift(3)</span>. Inserts at FRONT! levelArr = [3, 2]. Node 3 has no left, enqueue right child 6.',
+    active: [], processing: 3,
+    queue: [4, 5, 6], levelArr: [{ v: 3, mode: "unshifted" }, { v: 2, mode: "unshifted" }], ans: [{ vals: [1], cls: "l0", dir: "L→R" }],
+    level: 1, qlen: 3, len: "2", i: "1", currVal: "3", dir: "unshift (R→L)",
+    dirBadge: { text: "unshift() → odd level", cls: "dir-rl" },
+    log: [{ t: "─── Level 1 ───  len=2" },
+          { t: "  i=0: dequeue curr(2) → unshift(2)" },
+          { t: "  i=1: dequeue curr(3)", h: true },
+          { t: "  unshift(3) → levelArr=[3,2]  ← 3 at FRONT!", css: "uns" },
+          { t: "  enqueue right(6)  (no left child)" }]
+  },
+  {
+    desc: '<em>Level 1 done.</em> <span class="ok">ans.push([3,2])</span>. level → 2. Notice [3,2] is right-to-left! Queue: [4, 5, 6].',
+    active: [], processing: null,
+    queue: [4, 5, 6], levelArr: [], ans: [{ vals: [1], cls: "l0", dir: "L→R" }, { vals: [3, 2], cls: "l1", dir: "R→L" }],
+    level: 2, qlen: 3, len: "—", i: "—", currVal: "—", dir: "push (L→R)",
+    dirBadge: { text: "push() → even level", cls: "dir-lr" },
+    log: [{ t: "─── Level 1 ───  len=2" },
+          { t: "  unshift(2)→[2], unshift(3)→[3,2]" },
+          { t: "  ans.push([3,2])  level→2", h: true, css: "done" }]
+  },
+  // --- LEVEL 2 ---
+  {
+    desc: '<em>Level 2 starts.</em> <span class="push">len = 3</span> (snapshot). level % 2 === 0 → back to <span class="push">push()</span> → left-to-right.',
+    active: [4, 5, 6], processing: null,
+    queue: [4, 5, 6], levelArr: [], ans: [{ vals: [1], cls: "l0", dir: "L→R" }, { vals: [3, 2], cls: "l1", dir: "R→L" }],
+    level: 2, qlen: 3, len: "3", i: "0", currVal: "—", dir: "push (L→R)",
+    dirBadge: { text: "push() → even level", cls: "dir-lr" },
+    log: [{ t: "─── Level 2 ───  len=3", h: true },
+          { t: "level%2===0 → push() mode (L→R)" }]
+  },
+  {
+    desc: 'Dequeue <em>curr = node(4)</em> (i=0). Even level → <span class="push">levelArr.push(4)</span>. levelArr = [4]. Node 4 is a leaf — no children.',
+    active: [], processing: 4,
+    queue: [5, 6], levelArr: [{ v: 4, mode: "pushed" }], ans: [{ vals: [1], cls: "l0", dir: "L→R" }, { vals: [3, 2], cls: "l1", dir: "R→L" }],
+    level: 2, qlen: 2, len: "3", i: "0", currVal: "4", dir: "push (L→R)",
+    dirBadge: { text: "push() → even level", cls: "dir-lr" },
+    log: [{ t: "─── Level 2 ───  len=3" },
+          { t: "  i=0: dequeue curr(4)", h: true },
+          { t: "  push(4) → levelArr=[4]", css: "push" },
+          { t: "  no children (leaf node)" }]
+  },
+  {
+    desc: 'Dequeue <em>curr = node(5)</em> (i=1). Even level → <span class="push">levelArr.push(5)</span>. levelArr = [4, 5]. Node 5 is a leaf.',
+    active: [], processing: 5,
+    queue: [6], levelArr: [{ v: 4, mode: "pushed" }, { v: 5, mode: "pushed" }], ans: [{ vals: [1], cls: "l0", dir: "L→R" }, { vals: [3, 2], cls: "l1", dir: "R→L" }],
+    level: 2, qlen: 1, len: "3", i: "1", currVal: "5", dir: "push (L→R)",
+    dirBadge: { text: "push() → even level", cls: "dir-lr" },
+    log: [{ t: "─── Level 2 ───  len=3" },
+          { t: "  i=0: dequeue curr(4) → push(4)" },
+          { t: "  i=1: dequeue curr(5)", h: true },
+          { t: "  push(5) → levelArr=[4,5]", css: "push" },
+          { t: "  no children (leaf node)" }]
+  },
+  {
+    desc: 'Dequeue <em>curr = node(6)</em> (i=2). Even level → <span class="push">levelArr.push(6)</span>. levelArr = [4, 5, 6]. Node 6 is a leaf.',
+    active: [], processing: 6,
+    queue: [], levelArr: [{ v: 4, mode: "pushed" }, { v: 5, mode: "pushed" }, { v: 6, mode: "pushed" }], ans: [{ vals: [1], cls: "l0", dir: "L→R" }, { vals: [3, 2], cls: "l1", dir: "R→L" }],
+    level: 2, qlen: 0, len: "3", i: "2", currVal: "6", dir: "push (L→R)",
+    dirBadge: { text: "push() → even level", cls: "dir-lr" },
+    log: [{ t: "─── Level 2 ───  len=3" },
+          { t: "  i=0: push(4)  i=1: push(5)" },
+          { t: "  i=2: dequeue curr(6)", h: true },
+          { t: "  push(6) → levelArr=[4,5,6]", css: "push" },
+          { t: "  no children (leaf node)" }]
+  },
+  {
+    desc: '🎉 <em>Level 2 done.</em> <span class="ok">ans.push([4,5,6])</span>. Queue is empty → while loop ends. Final answer: <span class="ok">[[1],[3,2],[4,5,6]]</span>',
+    active: [], processing: null,
+    queue: [], levelArr: [], ans: [{ vals: [1], cls: "l0", dir: "L→R" }, { vals: [3, 2], cls: "l1", dir: "R→L" }, { vals: [4, 5, 6], cls: "l2", dir: "L→R" }],
+    level: 2, qlen: 0, len: "—", i: "—", currVal: "—", dir: "done",
+    dirBadge: { text: "done ✓", cls: "dir-lr" },
+    log: [{ t: "─── Level 2 ───  len=3" },
+          { t: "  push(4)→[4], push(5)→[4,5], push(6)→[4,5,6]" },
+          { t: "  ans.push([4,5,6])  level→3", css: "done" },
+          { t: "queue.length===0 → loop ends", h: true, css: "done" },
+          { t: "return [[1],[3,2],[4,5,6]] ✓", h: true, css: "done" }],
+    final: true
+  }
+];
+
+let cur = 0;
+const nodeIds = ["n1","n2","n3","n4","n5","n6"];
+
+function styleNode(id, fill, stroke, textColor, sw) {
+  const g = document.getElementById(id);
+  if (!g) return;
+  g.querySelector("circle").setAttribute("fill", fill);
+  g.querySelector("circle").setAttribute("stroke", stroke);
+  g.querySelector("circle").setAttribute("stroke-width", sw || "1.5");
+  g.querySelector("text").setAttribute("fill", textColor);
+}
+
+function renderStep(s) {
+  // tree nodes
+  nodeIds.forEach(id => {
+    const val = parseInt(id.replace("n",""));
+    if (s.processing === val) {
+      styleNode(id, "#1e1a08", "#fbbf24", "#fbbf24", "2.5");
+    } else if (s.active.includes(val)) {
+      styleNode(id, "#1a2035", "#60a5fa", "#60a5fa", "2");
+    } else {
+      styleNode(id, "#13161d", "#2a2f3e", "#6b7280", "1.5");
+    }
+  });
+
+  // queue
+  const qt = document.getElementById("queue-track");
+  let qhtml = '<span class="queue-label-arr">front →</span>';
+  if (s.queue.length === 0) {
+    qhtml += '<span style="font-family:var(--mono);font-size:11px;color:var(--text-dim);margin-left:8px">[ empty ]</span>';
+  } else {
+    s.queue.forEach((v, i) => {
+      const cls = i === 0 ? "q-node active" : "q-node";
+      qhtml += `<div class="${cls}">${v}</div>`;
+      if (i < s.queue.length - 1) qhtml += '<span class="q-arrow">·</span>';
+    });
+  }
+  qhtml += '<span class="queue-label-arr" style="margin-left:6px">← back</span>';
+  qt.innerHTML = qhtml;
+
+  // curr array
+  const ca = document.getElementById("curr-arr");
+  if (s.levelArr.length === 0) {
+    ca.innerHTML = '<span style="font-family:var(--mono);font-size:11px;color:var(--text-dim)">[ ]</span>';
+  } else {
+    ca.innerHTML = s.levelArr.map(c =>
+      `<div class="arr-cell ${c.mode} new-item">${c.v}</div>`
+    ).join('<span style="font-family:var(--mono);font-size:11px;color:var(--text-dim);margin:0 2px">,</span>');
+  }
+
+  // dir badge
+  const db = document.getElementById("dir-badge");
+  db.textContent = s.dirBadge.text;
+  db.className = "ans-dir-tag " + s.dirBadge.cls;
+
+  // ans rows
+  const ar = document.getElementById("ans-rows");
+  if (s.ans.length === 0) {
+    ar.innerHTML = '<span style="font-family:var(--mono);font-size:11px;color:var(--text-dim)">[ ]</span>';
+  } else {
+    ar.innerHTML = s.ans.map((row, i) =>
+      `<div class="ans-row">
+        <span class="ans-row-label">L${i}:</span>
+        <div class="ans-row-cells">${row.vals.map(v => `<div class="ans-cell ${row.cls}">${v}</div>`).join("")}</div>
+        <span class="ans-dir-tag ${row.dir === 'L→R' ? 'dir-lr' : 'dir-rl'}">${row.dir}</span>
+      </div>`
+    ).join("");
+  }
+
+  // vars
+  document.getElementById("v-level").textContent = s.level;
+  document.getElementById("v-qlen").textContent  = s.queue.length;
+  document.getElementById("v-len").textContent   = s.len;
+  document.getElementById("v-i").textContent     = s.i;
+  document.getElementById("v-curr-val").textContent  = s.currVal;
+  document.getElementById("v-dir").textContent   = s.dir;
+  document.getElementById("v-levelarr").textContent  = "[" + s.levelArr.map(c=>c.v).join(",") + "]";
+
+  // log
+  const logEl = document.getElementById("log");
+  logEl.innerHTML = s.log.map(e =>
+    `<div class="entry${e.h?' hl':''}${e.css?' '+e.css:''}">${e.t}</div>`
+  ).join("");
+  logEl.scrollTop = logEl.scrollHeight;
+
+  // meta
+  document.getElementById("step-label").textContent = `Step ${cur+1} / ${steps.length}`;
+  document.getElementById("step-desc").innerHTML = s.desc;
+  document.getElementById("prog").style.width = ((cur+1)/steps.length*100)+"%";
+  document.getElementById("ans-badge").style.display = s.final ? "inline-block" : "none";
+  document.getElementById("btn-prev").disabled = cur === 0;
+  document.getElementById("btn-next").disabled = cur === steps.length-1;
+}
+
+function move(d) {
+  cur = Math.max(0, Math.min(steps.length-1, cur+d));
+  renderStep(steps[cur]);
+}
+
+document.addEventListener("keydown", e => {
+  if (e.key==="ArrowRight"||e.key==="ArrowDown") move(1);
+  if (e.key==="ArrowLeft" ||e.key==="ArrowUp")   move(-1);
+});
+
+let playTimer = null;
+function togglePlay() {
+  const btn = document.getElementById("btn-play");
+  if (playTimer) {
+    clearInterval(playTimer);
+    playTimer = null;
+    btn.textContent = "▶ Play";
+    btn.classList.remove("btn-play-active");
+  } else {
+    btn.textContent = "⏸ Pause";
+    btn.classList.add("btn-play-active");
+    playTimer = setInterval(() => {
+      if (cur >= steps.length - 1) {
+        clearInterval(playTimer); playTimer = null;
+        btn.textContent = "▶ Play";
+        btn.classList.remove("btn-play-active");
+        return;
+      }
+      move(1);
+    }, 1500);
+  }
+}
+
+renderStep(steps[0]);
+</script>
+</body>
+</html>

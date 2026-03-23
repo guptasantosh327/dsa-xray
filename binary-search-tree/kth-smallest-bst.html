@@ -1,0 +1,856 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Kth Smallest Element in BST — Interactive Dry Run</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Sora:wght@300;400;600;700&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #0d0f14; --surface: #13161d; --surface2: #1a1e28; --surface3: #212638;
+      --border: rgba(255,255,255,0.07); --border-mid: rgba(255,255,255,0.12);
+      --text: #e8eaf0; --text-muted: #6b7280; --text-dim: #3d4251;
+      --accent: #7c6ef5; --accent-glow: rgba(124,110,245,0.25);
+      --green: #34d399; --green-bg: rgba(52,211,153,0.1);
+      --amber: #fbbf24; --amber-bg: rgba(251,191,36,0.12);
+      --blue: #60a5fa; --blue-bg: rgba(96,165,250,0.1);
+      --red: #f87171; --red-bg: rgba(248,113,113,0.12);
+      --emerald: #10b981; --emerald-bg: rgba(16,185,129,0.1);
+      --purple: #c084fc; --purple-bg: rgba(192,132,252,0.1);
+      --mono: 'JetBrains Mono', monospace; --sans: 'Sora', sans-serif;
+    }
+    html { scroll-behavior: smooth; }
+    body { background: var(--bg); color: var(--text); font-family: var(--sans); font-size: 15px; line-height: 1.6; min-height: 100vh; overflow-x: hidden; }
+    body::before { content: ''; position: fixed; inset: 0; background-image: linear-gradient(rgba(16,185,129,0.025) 1px, transparent 1px), linear-gradient(90deg, rgba(16,185,129,0.025) 1px, transparent 1px); background-size: 40px 40px; pointer-events: none; z-index: 0; }
+    .page { position: relative; z-index: 1; max-width: 1000px; margin: 0 auto; padding: 3rem 1.5rem 5rem; }
+
+    .back-nav { display: inline-flex; align-items: center; gap: 8px; font-family: var(--mono); font-size: 12px; color: var(--text-muted); text-decoration: none; padding: 7px 14px 7px 10px; border-radius: 8px; border: 1px solid var(--border); background: var(--surface); margin-bottom: 2rem; transition: all .15s; }
+    .back-nav:hover { border-color: var(--border-mid); color: var(--text); }
+
+    header { margin-bottom: 2rem; animation: fadeUp .6s ease both; }
+    .tag { display: inline-block; font-family: var(--mono); font-size: 11px; font-weight: 500; letter-spacing: .12em; text-transform: uppercase; color: var(--emerald); background: var(--emerald-bg); border: 1px solid rgba(16,185,129,0.3); padding: 4px 12px; border-radius: 100px; margin-bottom: 1.2rem; }
+    h1 { font-size: clamp(1.8rem, 5vw, 2.8rem); font-weight: 700; line-height: 1.15; color: var(--text); margin-bottom: .8rem; letter-spacing: -.02em; }
+    h1 span { color: var(--emerald); }
+    .subtitle { font-size: 15px; color: var(--text-muted); max-width: 600px; line-height: 1.7; }
+
+    .pattern-banner { display: flex; align-items: flex-start; gap: 16px; background: var(--emerald-bg); border: 1px solid rgba(16,185,129,0.25); border-left: 3px solid var(--emerald); border-radius: 10px; padding: 14px 18px; margin-bottom: 2rem; animation: fadeUp .6s ease .03s both; flex-wrap: wrap; }
+    .pattern-label { font-family: var(--mono); font-size: 10px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--text-dim); margin-bottom: 4px; }
+    .pattern-name { font-family: var(--mono); font-size: 13px; font-weight: 700; color: var(--emerald); }
+    .pattern-desc { font-family: var(--mono); font-size: 12px; color: var(--text-muted); flex: 1; min-width: 200px; line-height: 1.7; }
+    .pattern-solves { font-family: var(--mono); font-size: 11px; color: var(--text-dim); }
+    .pattern-solves span { color: var(--emerald); }
+
+    .prob-section { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; margin-bottom: 2rem; animation: fadeUp .6s ease .04s both; }
+    .prob-section-hdr { display: flex; align-items: center; gap: 10px; padding: 14px 20px; border-bottom: 1px solid var(--border); background: var(--surface2); }
+    .prob-section-icon { font-size: 16px; }
+    .prob-section-title { font-family: var(--mono); font-size: 11px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--text-muted); }
+    .prob-body { padding: 20px; }
+    .prob-body p { font-size: 13px; color: var(--text-muted); line-height: 1.75; margin-bottom: 10px; }
+    .prob-body p:last-child { margin-bottom: 0; }
+    .prob-body p strong { color: var(--text); }
+    .prob-body code { font-family: var(--mono); font-size: 11px; background: var(--surface2); padding: 1px 6px; border-radius: 4px; color: var(--accent); }
+
+    .bst-rule { background: var(--emerald-bg); border: 1px solid rgba(16,185,129,0.2); border-radius: 10px; padding: 14px 18px; margin-bottom: 14px; font-family: var(--mono); font-size: 12px; color: var(--text-muted); line-height: 1.75; }
+    .bst-rule strong { color: var(--emerald); }
+
+    .svg-example-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; margin-top: 16px; }
+    .svg-ex-card { background: var(--surface2); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+    .svg-ex-header { display: flex; align-items: center; justify-content: space-between; padding: 8px 14px; border-bottom: 1px solid var(--border); }
+    .svg-ex-label { font-family: var(--mono); font-size: 10px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--text-dim); }
+    .svg-ex-result { font-family: var(--mono); font-size: 11px; font-weight: 700; padding: 2px 10px; border-radius: 5px; background: rgba(16,185,129,.12); color: #10b981; border: 1px solid rgba(16,185,129,.25); }
+    .svg-ex-body { padding: 12px; display: flex; justify-content: center; align-items: center; min-height: 90px; }
+    .svg-ex-body svg { max-height: 120px; width: 100%; }
+
+    .hints-list { display: flex; flex-direction: column; gap: 10px; }
+    .hint-row { display: flex; gap: 12px; align-items: flex-start; }
+    .hint-badge { font-family: var(--mono); font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 6px; flex-shrink: 0; margin-top: 2px; min-width: 28px; text-align: center; color: var(--emerald); background: var(--emerald-bg); border: 1px solid rgba(16,185,129,0.25); }
+    .hint-body { font-size: 13px; color: var(--text-muted); line-height: 1.7; }
+    .hint-body code { font-family: var(--mono); font-size: 11px; background: var(--surface2); padding: 1px 5px; border-radius: 4px; color: var(--accent); }
+    .hint-body strong { color: var(--text); }
+    .intuition-box { background: var(--emerald-bg); border: 1px solid rgba(16,185,129,0.2); border-radius: 10px; padding: 16px 18px; margin-top: 14px; }
+    .intuition-box p { font-size: 13px; color: var(--text-muted); line-height: 1.75; }
+    .intuition-box p strong { color: var(--emerald); }
+
+    .key-insight { background: var(--amber-bg); border: 1px solid rgba(251,191,36,0.2); border-left: 3px solid var(--amber); border-radius: 10px; padding: 14px 18px; margin-bottom: 2rem; font-size: 13px; color: var(--text-muted); font-family: var(--mono); animation: fadeUp .6s ease .05s both; line-height: 1.7; }
+    .key-insight strong { color: var(--amber); }
+
+    .code-block { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; margin-bottom: 2rem; animation: fadeUp .6s ease .1s both; }
+    .code-header { display: flex; align-items: center; gap: 8px; padding: 12px 16px; border-bottom: 1px solid var(--border); background: var(--surface2); }
+    .code-header span { font-family: var(--mono); font-size: 12px; color: var(--text-muted); }
+    .dots { display: flex; gap: 6px; }
+    .dot { width: 10px; height: 10px; border-radius: 50%; }
+    .dot-r { background: #ff5f57; } .dot-y { background: #ffbd2e; } .dot-g { background: #28c940; }
+    pre { padding: 1.25rem 1.5rem; overflow-x: auto; font-family: var(--mono); font-size: 13px; line-height: 1.8; color: #c9d1d9; }
+    .kw { color: #ff79c6; } .fn { color: #50fa7b; } .cm { color: #6272a4; font-style: italic; } .num { color: #bd93f9; } .var { color: #8be9fd; } .hl { background: rgba(16,185,129,0.12); border-radius: 3px; padding: 0 3px; }
+
+    .section-label { font-family: var(--mono); font-size: 11px; font-weight: 500; letter-spacing: .1em; text-transform: uppercase; color: var(--text-dim); margin-bottom: 1rem; margin-top: 2.5rem; }
+
+    .examples-row { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 1.5rem; }
+    .ex-btn { display: inline-flex; align-items: center; gap: 8px; padding: 9px 16px; border-radius: 10px; border: 1px solid var(--border); background: var(--surface); cursor: pointer; transition: all .18s; font-family: var(--mono); font-size: 12px; font-weight: 600; color: var(--text-muted); user-select: none; }
+    .ex-btn:hover { border-color: var(--border-mid); color: var(--text); transform: translateY(-1px); }
+    .ex-btn.active { background: var(--emerald-bg); border-color: rgba(16,185,129,0.4); color: var(--emerald); transform: translateY(-1px); }
+    .ex-badge { font-size: 9px; font-weight: 700; padding: 2px 7px; border-radius: 5px; background: var(--surface3); color: var(--text-dim); }
+    .ex-btn.active .ex-badge { background: rgba(255,255,255,0.1); color: inherit; }
+
+    .viz-card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; overflow: hidden; animation: fadeUp .6s ease .2s both; }
+    .progress-bar-wrap { height: 3px; background: var(--border); }
+    .progress-bar-inner { height: 100%; background: linear-gradient(90deg, var(--emerald), #34d399); transition: width .35s cubic-bezier(.4,0,.2,1); border-radius: 0 2px 2px 0; }
+    .controls { display: flex; align-items: center; gap: 10px; padding: 14px 20px; border-bottom: 1px solid var(--border); background: var(--surface2); flex-wrap: wrap; }
+    .btn { display: inline-flex; align-items: center; gap: 6px; font-family: var(--mono); font-size: 12px; font-weight: 500; padding: 7px 16px; border-radius: 8px; border: 1px solid var(--border-mid); background: var(--surface3); color: var(--text); cursor: pointer; transition: all .15s; }
+    .btn:hover:not(:disabled) { background: var(--emerald-bg); border-color: var(--emerald); color: var(--emerald); }
+    .btn:disabled { opacity: .3; cursor: default; }
+    .btn-play { background: var(--emerald-bg) !important; border-color: rgba(16,185,129,0.4) !important; color: var(--emerald) !important; }
+    .btn-reset { background: var(--red-bg) !important; border-color: rgba(248,113,113,0.3) !important; color: var(--red) !important; }
+    .step-info { flex: 1; font-size: 13px; color: var(--text-muted); font-family: var(--mono); }
+    kbd { font-size: 10px; background: var(--surface3); border: 1px solid var(--border-mid); padding: 2px 5px; border-radius: 4px; color: var(--text-muted); font-family: var(--mono); }
+    .result-badge { font-family: var(--mono); font-size: 11px; font-weight: 700; letter-spacing: .06em; padding: 4px 12px; border-radius: 100px; text-transform: uppercase; }
+    .badge-found { background: var(--emerald-bg); color: var(--emerald); border: 1px solid rgba(16,185,129,0.3); }
+
+    .step-desc { padding: 12px 20px; font-size: 13px; color: var(--text-muted); background: var(--surface2); border-bottom: 1px solid var(--border); font-family: var(--mono); min-height: 44px; line-height: 1.6; }
+    .step-desc em { color: var(--amber); font-style: normal; }
+    .step-desc .ok { color: var(--emerald); font-weight: 600; }
+    .step-desc .hi { color: var(--blue); font-weight: 600; }
+    .step-desc .found { color: var(--green); font-weight: 700; }
+    .step-desc .skip { color: var(--red); font-weight: 600; }
+
+    .main-grid { display: grid; grid-template-columns: 1fr 320px; }
+    .tree-panel { padding: 24px 20px; border-right: 1px solid var(--border); }
+    .panel-label { font-family: var(--mono); font-size: 10px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--text-dim); margin-bottom: 10px; }
+    #tree-svg { width: 100%; }
+
+    /* In-order trail display */
+    .trail-panel { padding: 12px 20px; border-top: 1px solid var(--border); }
+    .trail-track { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; min-height: 38px; }
+    .trail-cell { display: inline-flex; align-items: center; justify-content: center; width: 34px; height: 34px; border-radius: 7px; font-family: var(--mono); font-size: 13px; font-weight: 700; border: 1px solid var(--border-mid); background: var(--surface2); color: var(--text-muted); transition: all .2s; }
+    .trail-cell.visited { background: var(--emerald-bg); border-color: rgba(16,185,129,0.4); color: var(--emerald); }
+    .trail-cell.current { background: rgba(16,185,129,0.25); border-color: var(--emerald); color: var(--emerald); box-shadow: 0 0 12px rgba(16,185,129,0.3); }
+    .trail-cell.found { background: var(--amber-bg); border-color: rgba(251,191,36,0.5); color: var(--amber); box-shadow: 0 0 12px rgba(251,191,36,0.3); }
+    .trail-arrow { font-family: var(--mono); font-size: 11px; color: var(--text-dim); }
+
+    .side-panel { display: flex; flex-direction: column; }
+
+    /* Counter tracker */
+    .counter-tracker { margin: 14px 16px 12px; padding: 12px 14px; background: var(--surface3); border: 1px solid var(--border-mid); border-radius: 10px; display: flex; align-items: center; justify-content: space-between; }
+    .counter-label { font-family: var(--mono); font-size: 11px; color: var(--text-muted); }
+    .counter-val { font-family: var(--mono); font-size: 20px; font-weight: 700; color: var(--text-dim); transition: color .3s, transform .2s; }
+    .counter-val.ticking { color: var(--blue); transform: scale(1.25); }
+    .counter-val.done { color: var(--amber); }
+
+    .stack-panel { padding: 14px 16px; border-bottom: 1px solid var(--border); }
+    .call-stack { display: flex; flex-direction: column-reverse; gap: 4px; min-height: 52px; }
+    .frame { padding: 5px 10px; border-radius: 6px; font-size: 10px; font-family: var(--mono); border: 1px solid var(--border); background: var(--surface2); color: var(--text-muted); transition: all .2s; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .frame.active { border-color: rgba(16,185,129,0.4); background: var(--emerald-bg); color: var(--emerald); }
+    .frame.returning { border-color: rgba(52,211,153,0.3); background: var(--green-bg); color: var(--green); }
+    .frame.skipped { border-color: rgba(248,113,113,0.3); background: var(--red-bg); color: var(--red); }
+
+    .vars-panel { padding: 14px 16px; border-bottom: 1px solid var(--border); }
+    .var-row { display: flex; justify-content: space-between; align-items: center; padding: 4px 0; border-bottom: 1px solid var(--border); font-size: 12px; }
+    .var-row:last-child { border-bottom: none; }
+    .var-name { font-family: var(--mono); color: var(--text-muted); font-size: 11px; }
+    .var-val { font-family: var(--mono); font-weight: 700; color: var(--amber); font-size: 11px; }
+    .var-val.g { color: var(--green); } .var-val.em { color: var(--emerald); } .var-val.r { color: var(--red); } .var-val.b { color: var(--blue); } .var-val.d { color: var(--text-dim); }
+
+    .log-panel { padding: 14px 16px; flex: 1; }
+    .log { font-size: 11px; font-family: var(--mono); line-height: 1.9; color: var(--text-dim); max-height: 170px; overflow-y: auto; }
+    .log::-webkit-scrollbar { width: 4px; }
+    .log::-webkit-scrollbar-thumb { background: var(--border-mid); border-radius: 2px; }
+    .entry.hl { color: var(--text); } .entry.ok { color: var(--emerald); } .entry.skip { color: var(--red); } .entry.found { color: var(--amber); font-weight: 600; }
+
+    /* Revision */
+    .revision-section { margin-top: 2.5rem; animation: fadeUp .6s ease .3s both; }
+    .explain-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-bottom: 16px; }
+    .explain-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 16px 18px; }
+    .explain-card .icon { font-size: 18px; margin-bottom: 8px; }
+    .explain-card h3 { font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 6px; }
+    .explain-card p { font-size: 12px; color: var(--text-muted); line-height: 1.7; }
+    .explain-card code { font-family: var(--mono); font-size: 11px; background: var(--surface2); padding: 1px 5px; border-radius: 4px; color: var(--accent); }
+
+    .mental-model { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; margin-bottom: 16px; }
+    .mm-header { display: flex; align-items: center; gap: 8px; padding: 12px 18px; border-bottom: 1px solid var(--border); background: var(--surface2); }
+    .mm-title { font-family: var(--mono); font-size: 11px; font-weight: 700; color: var(--amber); }
+    .mm-body { padding: 18px; display: flex; flex-direction: column; gap: 10px; }
+    .mm-item { display: flex; gap: 10px; align-items: flex-start; }
+    .mm-b { font-family: var(--mono); font-size: 12px; color: var(--amber); font-weight: 700; flex-shrink: 0; margin-top: 2px; }
+    .mm-t { font-size: 13px; color: var(--text-muted); line-height: 1.7; }
+    .mm-t strong { color: var(--text); } .mm-t code { font-family: var(--mono); font-size: 11px; background: var(--surface2); padding: 1px 5px; border-radius: 4px; color: var(--accent); }
+
+    .edge-cases-card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; margin-bottom: 16px; }
+    .ec-header { display: flex; align-items: center; gap: 8px; padding: 12px 18px; border-bottom: 1px solid var(--border); background: var(--surface2); }
+    .ec-title { font-family: var(--mono); font-size: 11px; font-weight: 700; color: var(--red); }
+    .el { display: flex; flex-direction: column; }
+    .ei { display: flex; gap: 12px; align-items: flex-start; padding: 12px 18px; border-bottom: 1px solid var(--border); }
+    .ei:last-child { border-bottom: none; }
+    .el-w { font-family: var(--mono); font-size: 9px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; padding: 3px 8px; border-radius: 5px; flex-shrink: 0; margin-top: 2px; }
+    .el-w.w { background: var(--red-bg); color: var(--red); border: 1px solid rgba(248,113,113,0.25); }
+    .el-w.ok { background: var(--green-bg); color: var(--green); border: 1px solid rgba(52,211,153,0.25); }
+    .et { font-size: 12px; color: var(--text-muted); line-height: 1.65; }
+    .et code { font-family: var(--mono); font-size: 11px; background: var(--surface2); padding: 1px 5px; border-radius: 4px; color: var(--accent); }
+
+    .best-solution { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; margin-bottom: 16px; }
+    .bs-header { display: flex; align-items: center; justify-content: space-between; padding: 12px 18px; border-bottom: 1px solid var(--border); background: var(--surface2); flex-wrap: wrap; gap: 8px; }
+    .bs-title { font-family: var(--mono); font-size: 11px; font-weight: 700; color: var(--green); }
+    .sol-pills { display: flex; gap: 6px; flex-wrap: wrap; }
+    .sol-pill { font-family: var(--mono); font-size: 10px; padding: 3px 9px; border-radius: 6px; background: var(--surface3); border: 1px solid var(--border-mid); color: var(--text-muted); }
+    .complexity { display: flex; gap: 10px; margin-top: 1.5rem; flex-wrap: wrap; }
+    .cpill { font-family: var(--mono); font-size: 12px; padding: 6px 14px; border-radius: 8px; border: 1px solid var(--border); background: var(--surface); }
+    .cpill strong { color: var(--accent); font-weight: 700; }
+
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+    @media (max-width: 680px) { .main-grid { grid-template-columns: 1fr; } .tree-panel { border-right: none; border-bottom: 1px solid var(--border); } }
+  </style>
+</head>
+<body>
+<div class="page">
+  <a class="back-nav" href="../dsa-hub.html">← All problems</a>
+
+  <header>
+    <div class="tag">LeetCode #230 · BST · Algorithm Dry Run</div>
+    <h1>Kth <span>Smallest</span> in BST</h1>
+    <p class="subtitle">Step-by-step trace of <code style="font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--accent);background:var(--surface);padding:2px 7px;border-radius:5px;">kthSmallest</code> — watch in-order DFS visit nodes in ascending order. The kth node visited is the answer.</p>
+  </header>
+
+  <div class="pattern-banner">
+    <div>
+      <div class="pattern-label">Pattern</div>
+      <div class="pattern-name">🎯 In-order DFS + Counter + Early Exit</div>
+    </div>
+    <div class="pattern-desc">In-order traversal of any BST visits nodes in ascending sorted order. Decrement a counter at each root visit. When it hits zero, that node IS the kth smallest.</div>
+    <div class="pattern-solves">Same pattern unlocks: <span>#538 Convert BST to Greater Tree · #99 Recover BST · #272 Closest BST Values II</span></div>
+  </div>
+
+  <!-- PROBLEM STATEMENT -->
+  <div class="prob-section">
+    <div class="prob-section-hdr">
+      <span class="prob-section-icon">📋</span>
+      <span class="prob-section-title">Problem Statement</span>
+    </div>
+    <div class="prob-body">
+      <div class="bst-rule">
+        <strong>BST Superpower for this problem:</strong> In-order traversal (left → root → right) of a BST visits every node in <strong>ascending sorted order</strong>. So the kth node visited is literally the kth smallest value — no sorting needed!
+      </div>
+      <p>Given the root of a BST and an integer <code>k</code>, return the <strong>kth smallest value</strong> (1-indexed) among all node values.</p>
+
+      <div class="svg-example-grid">
+        <div class="svg-ex-card">
+          <div class="svg-ex-header">
+            <span class="svg-ex-label">BST [3,1,4,null,2], k=1</span>
+            <span class="svg-ex-result">1st smallest = 1</span>
+          </div>
+          <div class="svg-ex-body">
+            <svg viewBox="0 0 220 130">
+              <line x1="110" y1="28" x2="62" y2="64" stroke="#1e2231" stroke-width="1.5"/>
+              <line x1="110" y1="28" x2="162" y2="64" stroke="#1e2231" stroke-width="1.5"/>
+              <line x1="72" y1="82" x2="92" y2="108" stroke="#1e2231" stroke-width="1.5"/>
+              <circle cx="110" cy="20" r="20" fill="#13161d" stroke="#2a2f3e" stroke-width="1.5"/>
+              <text x="110" y="24" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="13" font-weight="700" fill="#6b7280">3</text>
+              <circle cx="60" cy="74" r="20" fill="#0b2416" stroke="#10b981" stroke-width="2.5"/>
+              <text x="60" y="78" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="13" font-weight="700" fill="#10b981">1</text>
+              <circle cx="164" cy="74" r="20" fill="#13161d" stroke="#2a2f3e" stroke-width="1.5"/>
+              <text x="164" y="78" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="13" font-weight="700" fill="#6b7280">4</text>
+              <circle cx="94" cy="112" r="16" fill="#13161d" stroke="#2a2f3e" stroke-width="1.5"/>
+              <text x="94" y="116" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="11" font-weight="700" fill="#6b7280">2</text>
+              <text x="4" y="14" font-family="'JetBrains Mono',monospace" font-size="8" fill="#10b981">in-order: 1→2→3→4</text>
+              <text x="4" y="74" font-family="'JetBrains Mono',monospace" font-size="8" fill="#fbbf24">k=1 → stops here!</text>
+            </svg>
+          </div>
+        </div>
+        <div class="svg-ex-card">
+          <div class="svg-ex-header">
+            <span class="svg-ex-label">BST [5,3,6,2,4,null,null,1], k=3</span>
+            <span class="svg-ex-result">3rd smallest = 3</span>
+          </div>
+          <div class="svg-ex-body">
+            <svg viewBox="0 0 260 140">
+              <line x1="130" y1="26" x2="75" y2="62" stroke="#1e2231" stroke-width="1.5"/>
+              <line x1="130" y1="26" x2="195" y2="62" stroke="#1e2231" stroke-width="1.5"/>
+              <line x1="63" y1="80" x2="36" y2="108" stroke="#1e2231" stroke-width="1.5"/>
+              <line x1="87" y1="80" x2="112" y2="108" stroke="#1e2231" stroke-width="1.5"/>
+              <line x1="28" y1="122" x2="16" y2="134" stroke="#1e2231" stroke-width="1.5"/>
+              <circle cx="130" cy="18" r="18" fill="#13161d" stroke="#2a2f3e" stroke-width="1.5"/>
+              <text x="130" y="22" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="12" font-weight="700" fill="#6b7280">5</text>
+              <circle cx="73" cy="72" r="18" fill="#0b2416" stroke="#10b981" stroke-width="2.5"/>
+              <text x="73" y="76" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="12" font-weight="700" fill="#10b981">3</text>
+              <circle cx="197" cy="72" r="18" fill="#13161d" stroke="#2a2f3e" stroke-width="1.5"/>
+              <text x="197" y="76" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="12" font-weight="700" fill="#6b7280">6</text>
+              <circle cx="34" cy="112" r="14" fill="#13161d" stroke="#3d4251" stroke-width="1.5"/>
+              <text x="34" y="116" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="10" font-weight="700" fill="#6b7280">2</text>
+              <circle cx="114" cy="112" r="14" fill="#13161d" stroke="#3d4251" stroke-width="1.5"/>
+              <text x="114" y="116" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="10" font-weight="700" fill="#6b7280">4</text>
+              <text x="4" y="10" font-family="'JetBrains Mono',monospace" font-size="8" fill="#34d399">in-order: 1→2→3→4→5→6</text>
+              <text x="60" y="58" font-family="'JetBrains Mono',monospace" font-size="8" fill="#fbbf24">k=3 → stops here!</text>
+            </svg>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- HINTS -->
+  <div class="prob-section">
+    <div class="prob-section-hdr">
+      <span class="prob-section-icon">💡</span>
+      <span class="prob-section-title">Intuition + Hints</span>
+    </div>
+    <div class="prob-body">
+      <div class="hints-list">
+        <div class="hint-row">
+          <span class="hint-badge">1</span>
+          <div class="hint-body"><strong>BST in-order = sorted array.</strong> In-order traversal visits: left subtree (all smaller) → current node → right subtree (all larger). This is the BST ordering property — it gives ascending order for free.</div>
+        </div>
+        <div class="hint-row">
+          <span class="hint-badge">2</span>
+          <div class="hint-body"><strong>Don't collect everything.</strong> You only need the kth element. Use a <code>count</code> variable. Decrement it each time you "visit" a node (at the root step of in-order). When it reaches 0, you've found it.</div>
+        </div>
+        <div class="hint-row">
+          <span class="hint-badge">3</span>
+          <div class="hint-body"><strong>Early exit saves work.</strong> Once you find the answer, stop all recursion. The <code>if(ans != null) return</code> guard short-circuits every remaining recursive call immediately.</div>
+        </div>
+        <div class="hint-row">
+          <span class="hint-badge">4</span>
+          <div class="hint-body"><strong>Closure variables.</strong> Both <code>ans</code> and <code>count</code> live outside the recursive function — they persist across all recursive calls, acting as shared state.</div>
+        </div>
+      </div>
+      <div class="intuition-box">
+        <p><strong>Mental model:</strong> Imagine BST nodes laid out in a sorted line. In-order DFS visits them exactly left-to-right in that line. You're just counting steps along the line — when your step counter hits k, record the current node and stop walking.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="key-insight">
+    ⚡ <strong>The two-role trick:</strong> <code>count</code> counts DOWN from k. At each "root" step of in-order, decrement count. When count hits exactly 0, the current node is the kth. The <code>if(ans != null) return</code> guard then ensures ALL subsequent recursion is skipped — O(k + h) in the best case instead of O(n).
+  </div>
+
+  <!-- CODE -->
+  <div class="code-block">
+    <div class="code-header"><div class="dots"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div></div><span>kthSmallest.js</span></div>
+    <pre><span class="kw">var</span> <span class="fn">kthSmallest</span> = <span class="kw">function</span>(<span class="var">root</span>, <span class="var">k</span>) {
+  <span class="kw">let</span> <span class="var">ans</span> = <span class="kw">null</span>
+  <span class="kw">let</span> <span class="var">count</span> = <span class="var">k</span>            <span class="cm">// counts down from k to 0</span>
+
+  <span class="kw">const</span> <span class="fn">traversal</span> = (<span class="var">curr</span>) => {
+    <span class="hl"><span class="kw">if</span> (<span class="var">ans</span> != <span class="kw">null</span>) <span class="kw">return</span>  <span class="cm">// ← early exit: answer already found</span></span>
+
+    <span class="var">curr</span>.left && <span class="fn">traversal</span>(<span class="var">curr</span>.left)   <span class="cm">// ① left subtree first</span>
+
+    <span class="hl">--<span class="var">count</span>;                             <span class="cm">// ② visit this node</span>
+    <span class="kw">if</span> (<span class="var">count</span> == <span class="num">0</span>) <span class="var">ans</span> = <span class="var">curr</span>.val</span>      <span class="cm">// kth visit = answer!</span>
+
+    <span class="var">curr</span>.right && <span class="fn">traversal</span>(<span class="var">curr</span>.right)  <span class="cm">// ③ right subtree last</span>
+  }
+
+  <span class="fn">traversal</span>(<span class="var">root</span>)
+  <span class="kw">return</span> <span class="var">ans</span>
+};</pre>
+  </div>
+
+  <p class="section-label">// Interactive dry run — choose an example</p>
+  <div class="examples-row" id="examples-row">
+    <button class="ex-btn active" data-ex="0">Example 1 <span class="ex-badge">k=1, stops early</span></button>
+    <button class="ex-btn" data-ex="1">Example 2 <span class="ex-badge">k=3, mid traversal</span></button>
+    <button class="ex-btn" data-ex="2">Example 3 <span class="ex-badge">k=last, full scan</span></button>
+  </div>
+
+  <div class="viz-card">
+    <div class="progress-bar-wrap"><div class="progress-bar-inner" id="prog" style="width:5%"></div></div>
+    <div class="controls">
+      <button class="btn" id="btn-prev" onclick="move(-1)" disabled>← Prev</button>
+      <button class="btn btn-play" id="btn-play" onclick="togglePlay()">▶ Play</button>
+      <button class="btn" id="btn-next" onclick="move(1)">Next →</button>
+      <button class="btn btn-reset" onclick="reset()">↺ Reset</button>
+      <span class="step-info" id="step-label">Step 1 / ?</span>
+      <span style="font-family:var(--mono);font-size:11px;color:var(--text-dim);display:flex;gap:4px;align-items:center"><kbd>←</kbd><kbd>→</kbd></span>
+      <span class="result-badge badge-found" id="ans-badge" style="display:none">—</span>
+    </div>
+    <div class="step-desc" id="step-desc">Loading...</div>
+    <div class="main-grid">
+      <div class="tree-panel">
+        <div class="panel-label" id="tree-panel-label">// BST — [3, 1, 4, null, 2] · k = 1</div>
+        <svg id="tree-svg" viewBox="0 0 460 280" width="100%"></svg>
+        <div class="trail-panel">
+          <div class="panel-label">// in-order trail — visited nodes so far</div>
+          <div class="trail-track" id="trail-track">
+            <span style="font-family:var(--mono);font-size:11px;color:var(--text-dim)">none yet</span>
+          </div>
+        </div>
+      </div>
+      <div class="side-panel">
+        <div style="padding:14px 16px 0;">
+          <div class="panel-label">// count (starts at k, counts down)</div>
+          <div class="counter-tracker">
+            <span class="counter-label">count =</span>
+            <span class="counter-val" id="count-display">k</span>
+          </div>
+        </div>
+        <div class="stack-panel">
+          <div class="panel-label">// call stack</div>
+          <div class="call-stack" id="stack"></div>
+        </div>
+        <div class="vars-panel">
+          <div class="panel-label">// closure variables</div>
+          <div class="var-row"><span class="var-name">curr.val</span> <span class="var-val d" id="v-curr">—</span></div>
+          <div class="var-row"><span class="var-name">count</span>    <span class="var-val b"  id="v-count">—</span></div>
+          <div class="var-row"><span class="var-name">ans</span>      <span class="var-val d"  id="v-ans">null</span></div>
+          <div class="var-row"><span class="var-name">step</span>     <span class="var-val d"  id="v-step">—</span></div>
+        </div>
+        <div class="log-panel">
+          <div class="panel-label">// execution log</div>
+          <div class="log" id="log"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- REVISION -->
+  <div class="revision-section">
+    <p class="section-label">// revision — lock this in</p>
+
+    <div class="mental-model">
+      <div class="mm-header"><span style="font-size:16px">🧠</span><span class="mm-title">Mental Model — The Sorted Line Walk</span></div>
+      <div class="mm-body">
+        <div class="mm-item"><span class="mm-b">▸</span><div class="mm-t"><strong>In-order on BST = walking sorted values left-to-right.</strong> You don't need a sorted array. The BST IS the sorted structure — in-order traversal just unrolls it in order.</div></div>
+        <div class="mm-item"><span class="mm-b">▸</span><div class="mm-t"><strong>Count down, not up.</strong> Start count at k. Decrement at each node visit. When count hits 0 — you're standing exactly on the kth node.</div></div>
+        <div class="mm-item"><span class="mm-b">▸</span><div class="mm-t"><strong>Early exit = the real optimization.</strong> Standard in-order visits all n nodes. With the <code>if(ans != null) return</code> guard, we stop as soon as count hits 0. For small k, this is huge.</div></div>
+        <div class="mm-item"><span class="mm-b">▸</span><div class="mm-t"><strong>Closure variables are the glue.</strong> <code>ans</code> and <code>count</code> live outside the recursive function. They're shared across all call frames — no need to pass them as parameters or thread them through return values.</div></div>
+      </div>
+    </div>
+
+    <div class="explain-grid">
+      <div class="explain-card"><div class="icon">🌿</div><h3>In-order = sorted</h3><p>Left → Root → Right on any BST visits nodes in ascending order. This is the BST invariant in action.</p></div>
+      <div class="explain-card"><div class="icon">🔢</div><h3>Count-down counter</h3><p>Start at k, decrement at each "root" visit step. Zero means "kth node reached." Simple and precise.</p></div>
+      <div class="explain-card"><div class="icon">⚡</div><h3>Early exit guard</h3><p><code>if(ans != null) return</code> at the TOP of the function short-circuits ALL remaining recursion the moment the answer is found.</p></div>
+      <div class="explain-card"><div class="icon">🔒</div><h3>Closure = shared state</h3><p>Both <code>ans</code> and <code>count</code> are declared outside. Every recursive call reads/writes the same variables. No parameter passing needed.</p></div>
+    </div>
+
+    <div class="edge-cases-card">
+      <div class="ec-header"><span style="font-size:16px">⚠️</span><span class="ec-title">Edge Cases</span></div>
+      <div class="el">
+        <div class="ei"><span class="el-w ok">k=1</span><span class="et">Leftmost node is always the minimum. In-order visits it first. count goes from 1→0 immediately → returns with minimal traversal.</span></div>
+        <div class="ei"><span class="el-w ok">k=n</span><span class="et">Rightmost node is the maximum. Must traverse the entire tree. The <code>if(ans != null) return</code> guard never fires until the very last node.</span></div>
+        <div class="ei"><span class="el-w w">Single node</span><span class="et">Only node, k must be 1. traversal visits it, count 1→0, ans set immediately. Returns correctly.</span></div>
+        <div class="ei"><span class="el-w ok">Guarantee</span><span class="et">Problem guarantees k is valid (1 ≤ k ≤ n), so ans will always be set before traversal ends. No need for a null-check on the return value.</span></div>
+      </div>
+    </div>
+
+    <div class="best-solution">
+      <div class="bs-header">
+        <span class="bs-title">✦ Clean solution for revision</span>
+        <div class="sol-pills"><span class="sol-pill">O(k+h) best</span><span class="sol-pill">O(n) worst</span><span class="sol-pill">O(h) space</span><span class="sol-pill">In-order DFS</span><span class="sol-pill">Early exit</span></div>
+      </div>
+      <pre><span class="kw">var</span> <span class="fn">kthSmallest</span> = <span class="kw">function</span>(<span class="var">root</span>, <span class="var">k</span>) {
+  <span class="kw">let</span> <span class="var">ans</span> = <span class="kw">null</span>, <span class="var">count</span> = <span class="var">k</span>;
+
+  <span class="kw">const</span> <span class="fn">inOrder</span> = (<span class="var">curr</span>) => {
+    <span class="kw">if</span> (<span class="var">ans</span> != <span class="kw">null</span>) <span class="kw">return</span>;          <span class="cm">// already found → skip</span>
+    <span class="var">curr</span>.left  && <span class="fn">inOrder</span>(<span class="var">curr</span>.left);  <span class="cm">// ① go left first</span>
+    <span class="kw">if</span> (--<span class="var">count</span> === <span class="num">0</span>) <span class="var">ans</span> = <span class="var">curr</span>.val;  <span class="cm">// ② visit root: kth?</span>
+    <span class="var">curr</span>.right && <span class="fn">inOrder</span>(<span class="var">curr</span>.right); <span class="cm">// ③ go right last</span>
+  };
+
+  <span class="fn">inOrder</span>(<span class="var">root</span>);
+  <span class="kw">return</span> <span class="var">ans</span>;
+};
+<span class="cm">// Pattern: In-order DFS on BST = ascending order
+// key: count down from k; when 0, current node = kth smallest
+// guard: if(ans != null) return  ← short-circuits all future calls</span></pre>
+    </div>
+
+    <div class="complexity">
+      <div class="cpill">Best: <strong>O(k+h)</strong> — stop at kth node</div>
+      <div class="cpill">Worst: <strong>O(n)</strong> — k = n, full traversal</div>
+      <div class="cpill">Space: <strong>O(h)</strong> — recursion stack depth</div>
+      <div class="cpill">Pattern: <strong>in-order DFS</strong></div>
+    </div>
+  </div>
+</div>
+
+<script>
+/*
+  Example 1: BST [3,1,4,null,2], k=1
+       3
+      / \
+     1    4
+      \
+       2
+  In-order: 1 → 2 → 3 → 4
+  k=1 → answer = 1 (stops immediately after first visit)
+
+  Example 2: BST [5,3,6,2,4,null,null,1], k=3
+         5
+        / \
+       3    6
+      / \
+     2    4
+    /
+   1
+  In-order: 1 → 2 → 3 → 4 → 5 → 6
+  k=3 → answer = 3
+
+  Example 3: BST [3,1,4,null,2], k=4
+  In-order: 1 → 2 → 3 → 4
+  k=4 → answer = 4 (visits all nodes)
+*/
+
+const EXAMPLES = [
+  {
+    label: "BST [3,1,4,null,2], k=1",
+    treeLabel: "[3, 1, 4, null, 2]",
+    k: 1,
+    answer: 1,
+    svgViewBox: "0 0 460 270",
+    nodes: [
+      {id:"n3", val:3, cx:230, cy:48, r:28},
+      {id:"n1", val:1, cx:110, cy:140, r:26},
+      {id:"n4", val:4, cx:360, cy:140, r:26},
+      {id:"n2", val:2, cx:175, cy:225, r:22},
+    ],
+    edges: [
+      {x1:208,y1:62, x2:133,y2:124},
+      {x1:252,y1:62, x2:337,y2:124},
+      {x1:126,y1:158,x2:158,y2:208},
+    ],
+    steps: [
+      {
+        desc: 'Call <em>traversal(3)</em> — root. ans=null → continue. Go left first (in-order).',
+        active:"n3", visited:[], foundNode:null, earlyExit:false,
+        stack:["traversal(3)"],
+        curr:"3", count:"1", ans:"null", step:"→ recurse left",
+        trail: [],
+        log:[{t:"traversal(root=3)  k=1  count=1",h:true},{t:"  ans==null → proceed"},{t:"  go left → traversal(1)"}]
+      },
+      {
+        desc: 'Call <em>traversal(1)</em>. ans=null → continue. Node 1 has no left child — skip left.',
+        active:"n1", visited:[], foundNode:null, earlyExit:false,
+        stack:["traversal(3)","traversal(1)"],
+        curr:"1", count:"1", ans:"null", step:"→ no left child",
+        trail: [],
+        log:[{t:"  traversal(1)",h:true},{t:"    ans==null → proceed"},{t:"    no left child → skip"}]
+      },
+      {
+        desc: '✅ Visit node 1 (root step of in-order). <span class="hi">--count: 1→0</span>. count==0 → <span class="found">ans = 1 !</span>',
+        active:null, visited:["n1"], foundNode:"n1", earlyExit:false,
+        stack:["traversal(3)","traversal(1)"],
+        curr:"1", count:"0", ans:"1", step:"--count → 0 → FOUND!",
+        trail: [{v:1, state:"found"}],
+        log:[{t:"    --count → 0",h:true},{t:"    count==0 → ans = 1 ✓",h:true, css:"found"},{t:"    skip right (ans set)"}]
+      },
+      {
+        desc: 'Returning from traversal(1). Back in traversal(3): <span class="skip">ans != null → EARLY EXIT!</span> Right subtree (4) never visited.',
+        active:null, visited:["n1"], foundNode:"n1", earlyExit:true,
+        stack:[],
+        curr:"3", count:"0", ans:"1", step:"← early exit at root",
+        trail: [{v:1, state:"found"}],
+        log:[{t:"  ← traversal(1) returned"},{t:"  ans != null → EARLY EXIT ✓",h:true,css:"skip"},{t:"  right subtree (4, etc.) never visited!"},{t:"→ return ans = 1 ✓",h:true,css:"found"}],
+        final:true
+      }
+    ]
+  },
+
+  {
+    label: "BST [5,3,6,2,4,null,null,1], k=3",
+    treeLabel: "[5, 3, 6, 2, 4, null, null, 1]",
+    k: 3,
+    answer: 3,
+    svgViewBox: "0 0 460 300",
+    nodes: [
+      {id:"n5",  val:5,  cx:230, cy:42,  r:26},
+      {id:"n3",  val:3,  cx:120, cy:128, r:24},
+      {id:"n6",  val:6,  cx:360, cy:128, r:24},
+      {id:"n2",  val:2,  cx:58,  cy:210, r:22},
+      {id:"n4",  val:4,  cx:185, cy:210, r:22},
+      {id:"n1l", val:1,  cx:22,  cy:280, r:18},
+    ],
+    edges: [
+      {x1:210,y1:56, x2:143,y2:113},
+      {x1:250,y1:56, x2:337,y2:113},
+      {x1:104,y1:146,x2:73,  y2:194},
+      {x1:136,y1:146,x2:168, y2:194},
+      {x1:45, y1:228,x2:27,  y2:265},
+    ],
+    steps: [
+      {
+        desc: 'Call <em>traversal(5)</em>. count=3. Go left first.',
+        active:"n5", visited:[], foundNode:null, earlyExit:false,
+        stack:["traversal(5)"],
+        curr:"5", count:"3", ans:"null", step:"→ go left",
+        trail:[],
+        log:[{t:"traversal(5)  k=3  count=3",h:true},{t:"  go left → traversal(3)"}]
+      },
+      {
+        desc: 'Call <em>traversal(3)</em>. count=3. Go left first.',
+        active:"n3", visited:[], foundNode:null, earlyExit:false,
+        stack:["traversal(5)","traversal(3)"],
+        curr:"3", count:"3", ans:"null", step:"→ go left",
+        trail:[],
+        log:[{t:"  traversal(3)",h:true},{t:"    go left → traversal(2)"}]
+      },
+      {
+        desc: 'Call <em>traversal(2)</em>. Go left → <em>traversal(1)</em>.',
+        active:"n2", visited:[], foundNode:null, earlyExit:false,
+        stack:["traversal(5)","traversal(3)","traversal(2)"],
+        curr:"2", count:"3", ans:"null", step:"→ go left",
+        trail:[],
+        log:[{t:"    traversal(2)",h:true},{t:"      go left → traversal(1)"}]
+      },
+      {
+        desc: 'Call <em>traversal(1)</em>. No left child. Visit node 1: <span class="hi">--count: 3→2</span>. Not 0 yet. No right child.',
+        active:null, visited:["n1l"], foundNode:null, earlyExit:false,
+        stack:["traversal(5)","traversal(3)","traversal(2)"],
+        curr:"1", count:"2", ans:"null", step:"--count → 2",
+        trail:[{v:1,state:"visited"}],
+        log:[{t:"      traversal(1): leaf",h:true},{t:"      --count → 2  (not 0 yet)"}]
+      },
+      {
+        desc: 'Back in traversal(2): left done. Visit node 2: <span class="hi">--count: 2→1</span>. Not 0 yet. No right child.',
+        active:null, visited:["n1l","n2"], foundNode:null, earlyExit:false,
+        stack:["traversal(5)","traversal(3)"],
+        curr:"2", count:"1", ans:"null", step:"--count → 1",
+        trail:[{v:1,state:"visited"},{v:2,state:"visited"}],
+        log:[{t:"    traversal(2): visit node 2",h:true},{t:"    --count → 1  (not 0 yet)"},{t:"    no right child"}]
+      },
+      {
+        desc: 'Back in traversal(3): left done. Visit node 3: <span class="hi">--count: 1→0</span>. count==0 → <span class="found">ans = 3 !</span>',
+        active:null, visited:["n1l","n2"], foundNode:"n3", earlyExit:false,
+        stack:["traversal(5)","traversal(3)"],
+        curr:"3", count:"0", ans:"3", step:"--count → 0 → FOUND!",
+        trail:[{v:1,state:"visited"},{v:2,state:"visited"},{v:3,state:"found"}],
+        log:[{t:"  traversal(3): visit node 3",h:true},{t:"  --count → 0 → ans = 3 ✓",h:true,css:"found"}]
+      },
+      {
+        desc: '🎯 <span class="skip">ans != null → EARLY EXIT everywhere!</span> traversal(3) skips right child (4). Back in traversal(5): early exit. Nodes 4,5,6 never visited.',
+        active:null, visited:["n1l","n2"], foundNode:"n3", earlyExit:true,
+        stack:[],
+        curr:"3", count:"0", ans:"3", step:"← early exit all",
+        trail:[{v:1,state:"visited"},{v:2,state:"visited"},{v:3,state:"found"}],
+        log:[{t:"  ans != null → skip right child (4)",css:"skip"},{t:"← traversal(3) returns"},{t:"  ans != null → EARLY EXIT at 5",h:true,css:"skip"},{t:"  nodes 4,5,6 never visited!"},{t:"→ return ans = 3 ✓",h:true,css:"found"}],
+        final:true
+      }
+    ]
+  },
+
+  {
+    label: "BST [3,1,4,null,2], k=4 — visits all",
+    treeLabel: "[3, 1, 4, null, 2]",
+    k: 4,
+    answer: 4,
+    svgViewBox: "0 0 460 270",
+    nodes: [
+      {id:"n3", val:3, cx:230, cy:48, r:28},
+      {id:"n1", val:1, cx:110, cy:140, r:26},
+      {id:"n4", val:4, cx:360, cy:140, r:26},
+      {id:"n2", val:2, cx:175, cy:225, r:22},
+    ],
+    edges: [
+      {x1:208,y1:62, x2:133,y2:124},
+      {x1:252,y1:62, x2:337,y2:124},
+      {x1:126,y1:158,x2:158,y2:208},
+    ],
+    steps: [
+      {
+        desc: 'k=4 means we want the largest (rightmost) value in this BST. count starts at 4. Full in-order traversal required.',
+        active:"n3", visited:[], foundNode:null, earlyExit:false,
+        stack:["traversal(3)"],
+        curr:"3", count:"4", ans:"null", step:"→ go left",
+        trail:[],
+        log:[{t:"traversal(root=3)  k=4  count=4",h:true},{t:"  k=n → must visit ALL nodes"},{t:"  go left → traversal(1)"}]
+      },
+      {
+        desc: 'Visit node 1: <span class="hi">--count: 4→3</span>. Not found. Go right → traversal(2).',
+        active:null, visited:["n1"], foundNode:null, earlyExit:false,
+        stack:["traversal(3)","traversal(1)"],
+        curr:"1", count:"3", ans:"null", step:"--count → 3",
+        trail:[{v:1,state:"visited"}],
+        log:[{t:"  traversal(1): visit node 1",h:true},{t:"  --count → 3  go right → traversal(2)"}]
+      },
+      {
+        desc: 'Visit node 2: <span class="hi">--count: 3→2</span>. Not found. No children.',
+        active:null, visited:["n1","n2"], foundNode:null, earlyExit:false,
+        stack:["traversal(3)"],
+        curr:"2", count:"2", ans:"null", step:"--count → 2",
+        trail:[{v:1,state:"visited"},{v:2,state:"visited"}],
+        log:[{t:"    traversal(2): visit node 2",h:true},{t:"    --count → 2  leaf node"}]
+      },
+      {
+        desc: 'Back in root(3). Visit node 3: <span class="hi">--count: 2→1</span>. Not found. Go right → traversal(4).',
+        active:null, visited:["n1","n2","n3"], foundNode:null, earlyExit:false,
+        stack:["traversal(3)","traversal(4)"],
+        curr:"3", count:"1", ans:"null", step:"--count → 1",
+        trail:[{v:1,state:"visited"},{v:2,state:"visited"},{v:3,state:"visited"}],
+        log:[{t:"  traversal(3): visit node 3",h:true},{t:"  --count → 1  go right → traversal(4)"}]
+      },
+      {
+        desc: 'Visit node 4: <span class="hi">--count: 1→0</span>. count==0 → <span class="found">ans = 4!</span> All 4 nodes were visited. No early exit possible.',
+        active:null, visited:["n1","n2","n3"], foundNode:"n4", earlyExit:false,
+        stack:[],
+        curr:"4", count:"0", ans:"4", step:"--count → 0 → FOUND!",
+        trail:[{v:1,state:"visited"},{v:2,state:"visited"},{v:3,state:"visited"},{v:4,state:"found"}],
+        log:[{t:"  traversal(4): visit node 4",h:true},{t:"  --count → 0 → ans = 4 ✓",h:true,css:"found"},{t:"  k=n: all nodes visited, no early exit"},{t:"→ return ans = 4 ✓",h:true,css:"found"}],
+        final:true
+      }
+    ]
+  }
+];
+
+let exIdx=0, cur=0, playTimer=null;
+const getEx=()=>EXAMPLES[exIdx];
+const getSteps=()=>getEx().steps;
+
+function renderSVG(ex, step) {
+  const svg = document.getElementById("tree-svg");
+  svg.setAttribute("viewBox", ex.svgViewBox);
+  const visitedSet = new Set(step.visited||[]);
+  let html = "";
+
+  ex.edges.forEach(e => {
+    html += `<line x1="${e.x1}" y1="${e.y1}" x2="${e.x2}" y2="${e.y2}" stroke="#1e2231" stroke-width="2"/>`;
+  });
+
+  ex.nodes.forEach(n => {
+    let fill="#13161d", stroke="#2a2f3e", sw="1.5", tf="#6b7280";
+    if (n.id === step.active) { fill="#0f1d14"; stroke="#10b981"; sw="2.5"; tf="#10b981"; }
+    else if (n.id === step.foundNode) { fill="#1e1a08"; stroke="#fbbf24"; sw="3"; tf="#fbbf24"; }
+    else if (visitedSet.has(n.id)) { fill="#0f1a1a"; stroke="#10b981"; sw="2"; tf="#10b981"; }
+
+    html += `<g>
+      <circle cx="${n.cx}" cy="${n.cy}" r="${n.r}" fill="${fill}" stroke="${stroke}" stroke-width="${sw}" style="transition:all .2s"/>
+      <text x="${n.cx}" y="${n.cy+4}" text-anchor="middle" dominant-baseline="middle"
+        font-family="'JetBrains Mono',monospace"
+        font-size="${String(n.val).length>2?11:n.r>24?14:12}"
+        font-weight="700" fill="${tf}" style="transition:fill .2s">${n.val}</text>
+    </g>`;
+
+    // Early exit X overlay
+    if (step.earlyExit && n.id !== step.foundNode && !visitedSet.has(n.id) && n.id !== step.active) {
+      html += `<text x="${n.cx}" y="${n.cy+4}" text-anchor="middle" dominant-baseline="middle"
+        font-family="'JetBrains Mono',monospace" font-size="${n.r>24?12:10}" font-weight="700" fill="#f87171" opacity="0.7">✕</text>`;
+    }
+  });
+
+  svg.innerHTML = html;
+}
+
+function renderTrail(trail) {
+  const el = document.getElementById("trail-track");
+  if (!trail || trail.length === 0) {
+    el.innerHTML = '<span style="font-family:var(--mono);font-size:11px;color:var(--text-dim)">none yet</span>';
+    return;
+  }
+  el.innerHTML = trail.map((t,i) =>
+    `<div class="trail-cell ${t.state}">${t.v}</div>${i<trail.length-1?'<span class="trail-arrow">→</span>':''}`
+  ).join("");
+}
+
+function renderStep(s) {
+  const ex = getEx();
+  renderSVG(ex, s);
+  renderTrail(s.trail);
+
+  // Call stack
+  const stackEl = document.getElementById("stack");
+  let sh = s.stack.map((f,i) => {
+    const isTop = i === s.stack.length-1;
+    const cls = isTop && s.earlyExit ? "frame skipped" : isTop ? "frame active" : "frame";
+    return `<div class="${cls}">${f}</div>`;
+  }).join("");
+  if (!s.stack.length && s.foundNode) {
+    sh = `<div class="frame returning">← returned ans = ${s.ans}</div>`;
+  }
+  stackEl.innerHTML = sh;
+
+  // Counter display
+  const countEl = document.getElementById("count-display");
+  const prevCount = countEl.textContent;
+  countEl.textContent = s.count;
+  if (s.count !== prevCount) {
+    countEl.className = s.count === "0" ? "counter-val done" : "counter-val ticking";
+    setTimeout(() => { if (s.count !== "0") countEl.className = "counter-val"; }, 500);
+  } else {
+    countEl.className = s.count === "0" ? "counter-val done" : "counter-val";
+  }
+
+  // Vars
+  document.getElementById("v-curr").textContent = s.curr;
+  const countVarEl = document.getElementById("v-count");
+  countVarEl.className = `var-val ${s.count==="0"?"found":s.count==="k"?"d":"b"}`;
+  countVarEl.textContent = s.count;
+  const ansEl = document.getElementById("v-ans");
+  ansEl.className = `var-val ${s.ans==="null"?"d":"found"}`;
+  ansEl.textContent = s.ans;
+  document.getElementById("v-step").textContent = s.step;
+
+  // Log
+  const logEl = document.getElementById("log");
+  logEl.innerHTML = s.log.map(e =>
+    `<div class="entry${e.h?" hl":""}${e.css?" "+e.css:""}">${e.t}</div>`
+  ).join("");
+  logEl.scrollTop = logEl.scrollHeight;
+
+  // Meta
+  const steps = getSteps();
+  document.getElementById("step-label").textContent = `Step ${cur+1} / ${steps.length}`;
+  document.getElementById("step-desc").innerHTML = s.desc;
+  document.getElementById("prog").style.width = ((cur+1)/steps.length*100)+"%";
+
+  const badge = document.getElementById("ans-badge");
+  if (s.final) {
+    badge.style.display = "inline-block";
+    badge.textContent = `✓ kthSmallest = ${ex.answer}`;
+  } else {
+    badge.style.display = "none";
+  }
+
+  document.getElementById("btn-prev").disabled = cur === 0;
+  document.getElementById("btn-next").disabled = cur === steps.length-1;
+}
+
+function move(d) {
+  cur = Math.max(0, Math.min(getSteps().length-1, cur+d));
+  renderStep(getSteps()[cur]);
+}
+
+function reset() { cur = 0; stopPlay(); renderStep(getSteps()[0]); }
+
+function loadExample(i) {
+  exIdx = i; cur = 0; stopPlay();
+  const ex = EXAMPLES[i];
+  document.getElementById("tree-panel-label").textContent = `// BST — ${ex.treeLabel} · k = ${ex.k}`;
+  renderStep(getSteps()[0]);
+}
+
+document.getElementById("examples-row").addEventListener("click", e => {
+  const b = e.target.closest(".ex-btn");
+  if (!b) return;
+  document.querySelectorAll(".ex-btn").forEach(x => x.classList.remove("active"));
+  b.classList.add("active");
+  loadExample(parseInt(b.dataset.ex));
+});
+
+document.addEventListener("keydown", e => {
+  if (e.key==="ArrowRight"||e.key==="ArrowDown") move(1);
+  if (e.key==="ArrowLeft" ||e.key==="ArrowUp") move(-1);
+});
+
+function stopPlay() {
+  if (playTimer) { clearInterval(playTimer); playTimer = null; }
+  const b = document.getElementById("btn-play");
+  b.textContent = "▶ Play";
+  b.className = "btn btn-play";
+}
+
+function togglePlay() {
+  const b = document.getElementById("btn-play");
+  if (playTimer) { stopPlay(); return; }
+  b.textContent = "⏸ Pause";
+  b.className = "btn btn-play";
+  playTimer = setInterval(() => {
+    if (cur >= getSteps().length-1) { stopPlay(); return; }
+    move(1);
+  }, 1400);
+}
+
+loadExample(0);
+</script>
+</body>
+</html>

@@ -1,0 +1,1871 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Subtree of Another Tree — Interactive Dry Run</title>
+  <meta name="description" content="Step-by-step interactive dry run of isSubtree — watch how trees are serialized into strings and compared using .includes()."/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Sora:wght@300;400;600;700&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0d0f14;
+      --surface: #13161d;
+      --surface2: #1a1e28;
+      --surface3: #212638;
+      --border: rgba(255,255,255,0.07);
+      --border-mid: rgba(255,255,255,0.12);
+      --text: #e8eaf0;
+      --text-muted: #6b7280;
+      --text-dim: #3d4251;
+      --accent: #7c6ef5;
+      --accent-glow: rgba(124,110,245,0.25);
+      --green: #34d399;
+      --green-bg: rgba(52,211,153,0.1);
+      --amber: #fbbf24;
+      --amber-bg: rgba(251,191,36,0.12);
+      --blue: #60a5fa;
+      --blue-bg: rgba(96,165,250,0.1);
+      --red: #f87171;
+      --red-bg: rgba(248,113,113,0.12);
+      --orange: #fb923c;
+      --orange-bg: rgba(251,146,60,0.12);
+      --teal: #2dd4bf;
+      --teal-bg: rgba(45,212,191,0.1);
+      --mono: 'JetBrains Mono', monospace;
+      --sans: 'Sora', sans-serif;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--sans);
+      font-size: 15px;
+      line-height: 1.6;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(124,110,245,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(124,110,245,0.03) 1px, transparent 1px);
+      background-size: 40px 40px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .page {
+      position: relative;
+      z-index: 1;
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 3rem 1.5rem 5rem;
+    }
+
+    .back-nav {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-family: var(--mono);
+      font-size: 12px;
+      color: var(--text-muted);
+      text-decoration: none;
+      padding: 7px 14px 7px 10px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      margin-bottom: 2rem;
+      transition: all .15s;
+    }
+    .back-nav:hover { border-color: var(--border-mid); color: var(--text); }
+
+    header { margin-bottom: 2.5rem; animation: fadeUp .6s ease both; }
+
+    .tag {
+      display: inline-block;
+      font-family: var(--mono);
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: var(--accent);
+      background: var(--accent-glow);
+      border: 1px solid rgba(124,110,245,0.3);
+      padding: 4px 12px;
+      border-radius: 100px;
+      margin-bottom: 1.2rem;
+    }
+
+    h1 {
+      font-family: var(--sans);
+      font-size: clamp(1.8rem, 5vw, 2.8rem);
+      font-weight: 700;
+      line-height: 1.15;
+      color: var(--text);
+      margin-bottom: .8rem;
+      letter-spacing: -.02em;
+    }
+
+    h1 span { color: var(--accent); }
+
+    .subtitle {
+      font-size: 15px;
+      color: var(--text-muted);
+      max-width: 640px;
+      line-height: 1.7;
+    }
+
+    .insight-banner {
+      background: var(--teal-bg);
+      border: 1px solid rgba(45,212,191,0.2);
+      border-left: 3px solid var(--teal);
+      border-radius: 10px;
+      padding: 14px 18px;
+      margin-bottom: 2rem;
+      font-size: 13px;
+      color: var(--text-muted);
+      font-family: var(--mono);
+      animation: fadeUp .6s ease .05s both;
+    }
+    .insight-banner strong { color: var(--teal); font-weight: 600; }
+
+    .tree-inputs {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-bottom: 2rem;
+      animation: fadeUp .6s ease .07s both;
+    }
+
+    .tree-input-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      overflow: hidden;
+    }
+
+    .tree-input-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border);
+      background: var(--surface2);
+    }
+
+    .tree-input-header .label {
+      font-family: var(--mono);
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+    }
+
+    .tree-input-header .pill {
+      font-family: var(--mono);
+      font-size: 11px;
+      padding: 3px 10px;
+      border-radius: 6px;
+    }
+
+    .pill-root { background: var(--blue-bg); color: var(--blue); border: 1px solid rgba(96,165,250,0.25); }
+    .pill-sub  { background: var(--orange-bg); color: var(--orange); border: 1px solid rgba(251,146,60,0.25); }
+
+    .tree-input-body { padding: 16px; display: flex; justify-content: center; }
+
+    .code-block {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      margin-bottom: 2rem;
+      animation: fadeUp .6s ease .1s both;
+    }
+
+    .code-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border);
+      background: var(--surface2);
+    }
+
+    .code-header span { font-family: var(--mono); font-size: 12px; color: var(--text-muted); }
+
+    .dots { display: flex; gap: 6px; }
+    .dot { width: 10px; height: 10px; border-radius: 50%; }
+    .dot-r { background: #ff5f57; }
+    .dot-y { background: #ffbd2e; }
+    .dot-g { background: #28c940; }
+
+    pre {
+      padding: 1.25rem 1.5rem;
+      overflow-x: auto;
+      font-family: var(--mono);
+      font-size: 13px;
+      line-height: 1.9;
+      color: #c9d1d9;
+    }
+
+    .kw  { color: #ff79c6; }
+    .fn  { color: #50fa7b; }
+    .cm  { color: #6272a4; font-style: italic; }
+    .num { color: #bd93f9; }
+    .var { color: #8be9fd; }
+    .str { color: #f1fa8c; }
+    .hl  { background: rgba(45,212,191,0.1); border-radius: 3px; padding: 0 3px; }
+
+    .section-label {
+      font-family: var(--mono);
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      margin-bottom: 1rem;
+      margin-top: 2.5rem;
+    }
+
+    /* Edge cases section */
+    .edge-cases { margin-bottom: 2.5rem; animation: fadeUp .6s ease .15s both; }
+
+    .edge-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    .edge-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      overflow: hidden;
+    }
+
+    .edge-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 11px 16px;
+      background: var(--surface2);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .edge-label {
+      font-family: var(--mono);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+    }
+
+    .edge-badge {
+      font-family: var(--mono);
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      padding: 3px 10px;
+      border-radius: 100px;
+    }
+
+    .edge-badge-red {
+      background: var(--red-bg);
+      color: var(--red);
+      border: 1px solid rgba(248,113,113,0.2);
+    }
+
+    .edge-body {
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .edge-example {
+      display: flex;
+      gap: 20px;
+    }
+
+    .edge-col { display: flex; flex-direction: column; gap: 6px; }
+
+    .edge-col-label {
+      font-family: var(--mono);
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+    }
+
+    .edge-tree {
+      font-family: var(--mono);
+      font-size: 12px;
+      line-height: 1.7;
+      color: var(--text-muted);
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 8px 12px;
+      white-space: pre;
+    }
+
+    .edge-strings {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .edge-str-row {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      padding: 8px 10px;
+      border-radius: 8px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      font-size: 11px;
+      font-family: var(--mono);
+    }
+
+    .edge-str-label {
+      color: var(--text-dim);
+      font-size: 10px;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      margin-bottom: 2px;
+    }
+
+    .edge-str-bad  { color: var(--text-muted); line-height: 1.6; }
+    .edge-str-good { color: var(--text-muted); line-height: 1.6; }
+
+    .str-highlight-bad  { color: var(--red);  background: var(--red-bg);   padding: 1px 4px; border-radius: 4px; }
+    .str-highlight-good { color: var(--green); background: var(--green-bg); padding: 1px 4px; border-radius: 4px; }
+
+    .edge-desc {
+      font-size: 12px;
+      color: var(--text-dim);
+      line-height: 1.7;
+    }
+
+    .edge-desc code {
+      font-family: var(--mono);
+      font-size: 11px;
+      background: var(--surface2);
+      padding: 1px 5px;
+      border-radius: 4px;
+      color: var(--accent);
+    }
+
+    @media (max-width: 680px) { .edge-grid { grid-template-columns: 1fr; } }
+
+    .viz-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      overflow: hidden;
+      animation: fadeUp .6s ease .2s both;
+    }
+
+    .progress-bar-wrap { height: 3px; background: var(--border); }
+    .progress-bar-inner {
+      height: 100%;
+      background: linear-gradient(90deg, var(--teal), var(--accent));
+      transition: width .35s cubic-bezier(.4,0,.2,1);
+      border-radius: 0 2px 2px 0;
+    }
+
+    .controls {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 14px 20px;
+      border-bottom: 1px solid var(--border);
+      background: var(--surface2);
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-family: var(--mono);
+      font-size: 12px;
+      font-weight: 500;
+      padding: 7px 16px;
+      border-radius: 8px;
+      border: 1px solid var(--border-mid);
+      background: var(--surface3);
+      color: var(--text);
+      cursor: pointer;
+      transition: all .15s;
+      letter-spacing: .02em;
+    }
+
+    .btn:hover:not(:disabled) { background: var(--accent-glow); border-color: var(--accent); color: var(--accent); }
+    .btn:disabled { opacity: .3; cursor: default; }
+
+    .btn-play-active {
+      background: rgba(45,212,191,0.12) !important;
+      border-color: rgba(45,212,191,0.4) !important;
+      color: var(--teal) !important;
+    }
+
+    .step-info { flex: 1; font-size: 13px; color: var(--text-muted); font-family: var(--mono); min-width: 110px; }
+
+    kbd {
+      font-size: 10px;
+      background: var(--surface3);
+      border: 1px solid var(--border-mid);
+      padding: 2px 5px;
+      border-radius: 4px;
+      color: var(--text-muted);
+      font-family: var(--mono);
+    }
+
+    .result-badge {
+      font-family: var(--mono);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: .06em;
+      padding: 4px 12px;
+      border-radius: 100px;
+      text-transform: uppercase;
+    }
+
+    .badge-true { background: var(--green-bg); color: var(--green); border: 1px solid rgba(52,211,153,0.25); }
+
+    .step-desc {
+      padding: 12px 20px;
+      font-size: 13px;
+      color: var(--text-muted);
+      background: var(--surface2);
+      border-bottom: 1px solid var(--border);
+      font-family: var(--mono);
+      min-height: 44px;
+      line-height: 1.6;
+    }
+
+    .step-desc em  { color: var(--amber); font-style: normal; }
+    .step-desc .ok { color: var(--green); font-weight: 600; }
+    .step-desc .hi { color: var(--teal); font-weight: 600; }
+    .step-desc .or { color: var(--orange); font-weight: 600; }
+
+    /* Two-tree + side layout */
+    .main-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 290px;
+    }
+
+    .tree-panel {
+      padding: 18px 14px;
+      border-right: 1px solid var(--border);
+    }
+
+    .tree-panel-label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+
+    .panel-label {
+      font-family: var(--mono);
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+    }
+
+    .tree-tag {
+      font-family: var(--mono);
+      font-size: 10px;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 4px;
+    }
+
+    .tree-tag-r { background: var(--blue-bg); color: var(--blue); }
+    .tree-tag-s { background: var(--orange-bg); color: var(--orange); }
+
+    /* Hash string display */
+    .hash-section {
+      padding: 14px 20px;
+      border-bottom: 1px solid var(--border);
+      background: var(--surface2);
+    }
+
+    .hash-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      margin-bottom: 10px;
+      font-size: 11px;
+      font-family: var(--mono);
+    }
+
+    .hash-row:last-child { margin-bottom: 0; }
+
+    .hash-label {
+      color: var(--text-dim);
+      min-width: 110px;
+      padding-top: 2px;
+      flex-shrink: 0;
+    }
+
+    .hash-value {
+      word-break: break-all;
+      line-height: 1.9;
+      flex: 1;
+      color: var(--text-muted);
+    }
+
+    .token {
+      display: inline;
+      border-radius: 3px;
+      padding: 1px 2px;
+      transition: background .25s, color .25s;
+    }
+
+    .token.node-token  { color: var(--blue); }
+    .token.null-token  { color: var(--text-dim); }
+    .token.being-added { background: rgba(251,191,36,0.25); color: var(--amber); }
+    .token.in-match    { background: rgba(52,211,153,0.18); color: var(--green); }
+
+    /* Check result pill */
+    .includes-result {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-family: var(--mono);
+      font-size: 12px;
+      font-weight: 700;
+      padding: 6px 14px;
+      border-radius: 8px;
+      margin-top: 10px;
+    }
+
+    .includes-pending { background: var(--surface3); color: var(--text-dim); border: 1px solid var(--border); }
+    .includes-true    { background: var(--green-bg); color: var(--green); border: 1px solid rgba(52,211,153,0.3); }
+
+    /* Side panel */
+    .side-panel { display: flex; flex-direction: column; }
+
+    .stack-panel { padding: 14px 16px; border-bottom: 1px solid var(--border); }
+
+    .call-stack {
+      display: flex;
+      flex-direction: column-reverse;
+      gap: 4px;
+      min-height: 50px;
+    }
+
+    .frame {
+      padding: 5px 10px;
+      border-radius: 6px;
+      font-size: 10px;
+      font-family: var(--mono);
+      border: 1px solid var(--border);
+      background: var(--surface2);
+      color: var(--text-muted);
+      transition: all .2s;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .frame.active     { border-color: rgba(96,165,250,0.4); background: var(--blue-bg); color: var(--blue); }
+    .frame.returning  { border-color: rgba(52,211,153,0.3); background: var(--green-bg); color: var(--green); }
+
+    .vars-panel { padding: 14px 16px; border-bottom: 1px solid var(--border); }
+
+    .var-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 4px 0;
+      border-bottom: 1px solid var(--border);
+      font-size: 12px;
+    }
+
+    .var-row:last-child { border-bottom: none; }
+    .var-name { font-family: var(--mono); color: var(--text-muted); font-size: 11px; }
+    .var-val  { font-family: var(--mono); font-weight: 700; color: var(--amber); font-size: 11px; max-width: 160px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .var-val.green  { color: var(--green); }
+    .var-val.blue   { color: var(--blue); }
+    .var-val.orange { color: var(--orange); }
+    .var-val.dim    { color: var(--text-dim); }
+    .var-val.teal   { color: var(--teal); }
+
+    .log-panel { padding: 14px 16px; flex: 1; }
+
+    .log {
+      font-size: 11px;
+      font-family: var(--mono);
+      line-height: 1.9;
+      color: var(--text-dim);
+      max-height: 180px;
+      overflow-y: auto;
+    }
+
+    .log::-webkit-scrollbar { width: 4px; }
+    .log::-webkit-scrollbar-thumb { background: var(--border-mid); border-radius: 2px; }
+
+    .log-entry.highlight   { color: var(--text); }
+    .log-entry.phase-done  { color: var(--teal); }
+    .log-entry.final-check { color: var(--green); font-weight: 600; }
+
+    /* Explanation */
+    .explanation { margin-top: 2.5rem; animation: fadeUp .6s ease .3s both; }
+
+    .explain-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+      gap: 12px;
+    }
+
+    .explain-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px 18px;
+    }
+
+    .explain-card .icon { font-size: 18px; margin-bottom: 8px; }
+    .explain-card h3 { font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 6px; }
+    .explain-card p { font-size: 12px; color: var(--text-muted); line-height: 1.7; }
+    .explain-card code {
+      font-family: var(--mono);
+      font-size: 11px;
+      background: var(--surface2);
+      padding: 1px 5px;
+      border-radius: 4px;
+      color: var(--accent);
+    }
+
+    .complexity { display: flex; gap: 10px; margin-top: 1.5rem; flex-wrap: wrap; }
+
+    .cpill {
+      font-family: var(--mono);
+      font-size: 12px;
+      padding: 6px 14px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+    }
+
+    .cpill strong { color: var(--accent); font-weight: 700; }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── PROBLEM OVERVIEW ───────────────────────────── */
+    .overview { margin-top: 2.5rem; animation: fadeUp .6s ease .25s both; }
+    .overview-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+    .overview-full { margin-bottom: 12px; }
+    .ov-card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 18px 20px; position: relative; overflow: hidden; }
+    .ov-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; }
+    .ov-card.blue::before   { background: linear-gradient(90deg, var(--blue), transparent); }
+    .ov-card.green::before  { background: linear-gradient(90deg, var(--green), transparent); }
+    .ov-card.amber::before  { background: linear-gradient(90deg, var(--amber), transparent); }
+    .ov-card.red::before    { background: linear-gradient(90deg, var(--red), transparent); }
+    .ov-card.accent::before { background: linear-gradient(90deg, var(--accent), transparent); }
+    .ov-card.teal::before   { background: linear-gradient(90deg, var(--teal), transparent); }
+    .ov-card-head { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+    .ov-icon { font-size: 16px; }
+    .ov-title { font-family: var(--mono); font-size: 10px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--text-muted); }
+    .ov-card p { font-size: 13px; color: var(--text-muted); line-height: 1.75; }
+    .ov-card p strong { color: var(--text); font-weight: 600; }
+    .ov-card code { font-family: var(--mono); font-size: 11px; background: var(--surface2); padding: 1px 6px; border-radius: 4px; color: var(--accent); }
+    .hint-list { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+    .hint-list li { display: flex; gap: 10px; align-items: flex-start; font-size: 13px; color: var(--text-muted); line-height: 1.65; }
+    .hint-list li .bullet { font-family: var(--mono); font-size: 10px; font-weight: 700; color: var(--accent); background: var(--accent-glow); border: 1px solid rgba(124,110,245,0.25); padding: 2px 7px; border-radius: 4px; flex-shrink: 0; margin-top: 2px; }
+    .hint-list li .bullet.green { color: var(--green); background: var(--green-bg); border-color: rgba(52,211,153,0.25); }
+    .hint-list li .bullet.amber { color: var(--amber); background: var(--amber-bg); border-color: rgba(251,191,36,0.25); }
+    .hint-list li .bullet.red   { color: var(--red);   background: var(--red-bg);   border-color: rgba(248,113,113,0.25); }
+    .hint-list li .bullet.blue  { color: var(--blue);  background: var(--blue-bg);  border-color: rgba(96,165,250,0.25); }
+    .edge-list { display: flex; flex-direction: column; gap: 8px; }
+    .edge-item { display: flex; gap: 10px; align-items: flex-start; }
+    .edge-label { font-family: var(--mono); font-size: 9px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; padding: 3px 8px; border-radius: 5px; flex-shrink: 0; margin-top: 2px; }
+    .edge-label.warn { background: var(--red-bg); color: var(--red); border: 1px solid rgba(248,113,113,0.25); }
+    .edge-label.ok   { background: var(--green-bg); color: var(--green); border: 1px solid rgba(52,211,153,0.25); }
+    .edge-text { font-size: 12px; color: var(--text-muted); line-height: 1.65; }
+    .edge-text code { font-family: var(--mono); font-size: 11px; background: var(--surface2); padding: 1px 5px; border-radius: 4px; color: var(--accent); }
+    .best-solution { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; margin-bottom: 12px; }
+    .best-solution-header { display: flex; align-items: center; justify-content: space-between; padding: 12px 18px; border-bottom: 1px solid var(--border); background: var(--surface2); }
+    .best-solution-title { display: flex; align-items: center; gap: 8px; font-family: var(--mono); font-size: 11px; font-weight: 700; color: var(--green); letter-spacing: .08em; }
+    .best-solution-pills { display: flex; gap: 6px; }
+    .sol-pill { font-family: var(--mono); font-size: 10px; padding: 3px 9px; border-radius: 6px; background: var(--surface3); border: 1px solid var(--border-mid); color: var(--text-muted); }
+    .best-solution pre { padding: 1rem 1.25rem; font-size: 12px; line-height: 1.8; overflow-x: auto; }
+    @media (max-width: 680px) { .overview-grid { grid-template-columns: 1fr; } }
+
+    @media (max-width: 780px) {
+      .main-grid { grid-template-columns: 1fr; }
+      .tree-panel { border-right: none; border-bottom: 1px solid var(--border); }
+      .tree-inputs { grid-template-columns: 1fr; }
+    }
+  
+    /* ── NEW TOP SECTIONS ── */
+    .pattern-banner-new { display:flex; align-items:flex-start; gap:16px; border-left-width:3px; border-left-style:solid; border-radius:10px; padding:14px 18px; margin-bottom:2rem; flex-wrap:wrap; animation:fadeUp .6s ease .03s both; }
+    .pb-label  { font-family:var(--mono); font-size:10px; font-weight:700; letter-spacing:.12em; text-transform:uppercase; color:var(--text-dim); margin-bottom:4px; }
+    .pb-name   { font-family:var(--mono); font-size:13px; font-weight:700; }
+    .pb-desc   { font-family:var(--mono); font-size:12px; color:var(--text-muted); flex:1; min-width:200px; line-height:1.7; }
+    .pb-solves { font-family:var(--mono); font-size:11px; color:var(--text-dim); }
+
+    .prob-section { background:var(--surface); border:1px solid var(--border); border-radius:14px; overflow:hidden; margin-bottom:2rem; animation:fadeUp .6s ease .04s both; }
+    .prob-section-hdr { display:flex; align-items:center; gap:10px; padding:14px 20px; border-bottom:1px solid var(--border); background:var(--surface2); }
+    .prob-section-icon  { font-size:16px; }
+    .prob-section-title { font-family:var(--mono); font-size:11px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:var(--text-muted); }
+    .prob-body { padding:20px; }
+    .prob-body p { font-size:13px; color:var(--text-muted); line-height:1.75; margin-bottom:10px; }
+    .prob-body p:last-child { margin-bottom:0; }
+    .prob-body p strong { color:var(--text); }
+    .prob-body code { font-family:var(--mono); font-size:11px; background:var(--surface2); padding:1px 6px; border-radius:4px; color:var(--accent); }
+
+    /* SVG example grid — replaces array [x,y,z] notation */
+    .svg-example-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:14px; margin-top:16px; }
+    .svg-ex-card { background:var(--surface2); border:1px solid var(--border); border-radius:10px; overflow:hidden; }
+    .svg-ex-header { display:flex; align-items:center; justify-content:space-between; padding:8px 14px; border-bottom:1px solid var(--border); }
+    .svg-ex-label  { font-family:var(--mono); font-size:10px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:var(--text-dim); }
+    .svg-ex-result { font-family:var(--mono); font-size:11px; font-weight:700; padding:2px 10px; border-radius:5px; }
+    .res-green  { background:rgba(52,211,153,.12); color:#34d399; border:1px solid rgba(52,211,153,.25); }
+    .res-red    { background:rgba(248,113,113,.12); color:#f87171; border:1px solid rgba(248,113,113,.25); }
+    .res-blue   { background:rgba(96,165,250,.12);  color:#60a5fa; border:1px solid rgba(96,165,250,.25); }
+    .res-orange { background:rgba(251,146,60,.12);  color:#fb923c; border:1px solid rgba(251,146,60,.25); }
+    .res-purple { background:rgba(192,132,252,.12); color:#c084fc; border:1px solid rgba(192,132,252,.25); }
+    .svg-ex-body { padding:12px; display:flex; justify-content:center; align-items:center; min-height:90px; }
+    .svg-ex-body svg { max-height:120px; width:100%; }
+
+    /* Hints */
+    .hints-list-new { display:flex; flex-direction:column; gap:10px; }
+    .hint-row { display:flex; gap:12px; align-items:flex-start; }
+    .hint-badge { font-family:var(--mono); font-size:11px; font-weight:700; padding:3px 8px; border-radius:6px; flex-shrink:0; margin-top:2px; min-width:28px; text-align:center; }
+    .hint-body { font-size:13px; color:var(--text-muted); line-height:1.7; }
+    .hint-body code { font-family:var(--mono); font-size:11px; background:var(--surface2); padding:1px 5px; border-radius:4px; color:var(--accent); }
+    .hint-body strong { color:var(--text); }
+    .intuition-new { border-radius:10px; padding:16px 18px; margin-top:14px; }
+    .intuition-new p { font-size:13px; color:var(--text-muted); line-height:1.75; }
+
+  </style>
+</head>
+<body>
+<div class="page">
+
+  <a class="back-nav" href="../dsa-hub.html">← All visualizers</a>
+
+  <header>
+    <div class="tag">Algorithm Dry Run · LeetCode #572</div>
+    <h1>Subtree of <span>Another Tree</span></h1>
+    <p class="subtitle">
+      Step-by-step trace of <code style="font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--accent);background:var(--surface);padding:2px 7px;border-radius:5px;">isSubtree</code> — watch how both trees are <strong>serialized into strings</strong> via pre-order traversal, then checked with a single <code style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--teal);background:var(--surface);padding:2px 6px;border-radius:5px;">.includes()</code> call.
+    </p>
+  </header>
+
+  <!-- PATTERN BANNER -->
+  <div style="display:flex;align-items:flex-start;gap:16px;background:rgba(52,211,153,0.06);border:1px solid rgba(52,211,153,0.25);border-left:3px solid #34d399;border-radius:10px;padding:14px 18px;margin-bottom:2rem;flex-wrap:wrap">
+    <div>
+      <div style="font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--text-dim);margin-bottom:4px">Pattern</div>
+      <div style="font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:700;color:#34d399">🎯 Serialization + Substring Match</div>
+    </div>
+    <div style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--text-muted);flex:1;min-width:200px">Convert both trees to unique strings via pre-order DFS, then use a single <code style="color:var(--accent)">includes()</code> call. One line of logic does all the heavy lifting.</div>
+    <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text-dim)">Same pattern unlocks: <span style="color:#34d399">#297 Serialize Tree · #449 Serialize BST</span></div>
+  </div>
+
+  <!-- PROBLEM STATEMENT -->
+  <div style="background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden;margin-bottom:2rem">
+    <div style="display:flex;align-items:center;gap:10px;padding:14px 20px;border-bottom:1px solid var(--border);background:var(--surface2)">
+      <span style="font-size:16px">📋</span>
+      <span style="font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text-muted)">Problem Statement</span>
+    </div>
+    <div style="padding:20px">
+      <p style="font-size:13px;color:var(--text-muted);line-height:1.75;margin-bottom:14px">Given two binary trees <strong style="color:var(--text)">root</strong> and <strong style="color:var(--text)">subRoot</strong>, return <code style="font-family:'JetBrains Mono',monospace;font-size:11px;background:var(--surface2);padding:1px 6px;border-radius:4px;color:var(--accent)">true</code> if <code style="font-family:'JetBrains Mono',monospace;font-size:11px;background:var(--surface2);padding:1px 6px;border-radius:4px;color:var(--accent)">subRoot</code> is a subtree of <code style="font-family:'JetBrains Mono',monospace;font-size:11px;background:var(--surface2);padding:1px 6px;border-radius:4px;color:var(--accent)">root</code>. A subtree must match <em>completely</em> — same structure and same values at every node.</p>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+        <!-- Example 1: subRoot IS a subtree -->
+        <div style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:14px">
+          <div style="font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text-dim);margin-bottom:10px">Example 1 — returns true</div>
+          <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+            <div>
+              <div style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--text-dim);margin-bottom:4px">root</div>
+              <svg width="110" height="100" viewBox="0 0 110 100">
+                <line x1="55" y1="22" x2="28" y2="52" stroke="#2a2f3e" stroke-width="1.5"/>
+                <line x1="55" y1="22" x2="82" y2="52" stroke="#2a2f3e" stroke-width="1.5"/>
+                <line x1="22" y1="65" x2="12" y2="85" stroke="#2a2f3e" stroke-width="1.5"/>
+                <line x1="34" y1="65" x2="44" y2="85" stroke="#2a2f3e" stroke-width="1.5"/>
+                <circle cx="55" cy="15" r="14" fill="#13161d" stroke="#60a5fa" stroke-width="1.5"/><text x="55" y="19" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="11" font-weight="700" fill="#60a5fa">3</text>
+                <circle cx="27" cy="58" r="14" fill="#0f1a14" stroke="#34d399" stroke-width="2"/><text x="27" y="62" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="11" font-weight="700" fill="#34d399">4</text>
+                <circle cx="83" cy="58" r="14" fill="#13161d" stroke="#2a2f3e" stroke-width="1.5"/><text x="83" y="62" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="11" font-weight="700" fill="#6b7280">5</text>
+                <circle cx="11" cy="88" r="11" fill="#0f1a14" stroke="#34d399" stroke-width="1.5"/><text x="11" y="92" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="10" font-weight="700" fill="#34d399">1</text>
+                <circle cx="45" cy="88" r="11" fill="#0f1a14" stroke="#34d399" stroke-width="1.5"/><text x="45" y="92" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="10" font-weight="700" fill="#34d399">2</text>
+              </svg>
+            </div>
+            <div style="font-family:'JetBrains Mono',monospace;font-size:18px;color:var(--green)">⊂</div>
+            <div>
+              <div style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--text-dim);margin-bottom:4px">subRoot</div>
+              <svg width="80" height="70" viewBox="0 0 80 70">
+                <line x1="40" y1="20" x2="18" y2="46" stroke="#2a2f3e" stroke-width="1.5"/>
+                <line x1="40" y1="20" x2="62" y2="46" stroke="#2a2f3e" stroke-width="1.5"/>
+                <circle cx="40" cy="14" r="14" fill="#0f1a14" stroke="#34d399" stroke-width="2"/><text x="40" y="18" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="11" font-weight="700" fill="#34d399">4</text>
+                <circle cx="18" cy="54" r="13" fill="#13161d" stroke="#2a2f3e" stroke-width="1.5"/><text x="18" y="58" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="10" font-weight="700" fill="#6b7280">1</text>
+                <circle cx="62" cy="54" r="13" fill="#13161d" stroke="#2a2f3e" stroke-width="1.5"/><text x="62" y="58" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="10" font-weight="700" fill="#6b7280">2</text>
+              </svg>
+            </div>
+            <div style="font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:700;color:var(--green)">true</div>
+          </div>
+          <p style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text-dim);margin-top:8px">The green subtree rooted at 4 in root exactly matches subRoot.</p>
+        </div>
+        <!-- Example 2: subRoot is NOT a subtree -->
+        <div style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:14px">
+          <div style="font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text-dim);margin-bottom:10px">Example 2 — returns false</div>
+          <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+            <div>
+              <div style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--text-dim);margin-bottom:4px">root</div>
+              <svg width="90" height="90" viewBox="0 0 90 90">
+                <line x1="45" y1="20" x2="22" y2="50" stroke="#2a2f3e" stroke-width="1.5"/>
+                <line x1="45" y1="20" x2="68" y2="50" stroke="#2a2f3e" stroke-width="1.5"/>
+                <line x1="19" y1="63" x2="11" y2="82" stroke="#2a2f3e" stroke-width="1.5"/>
+                <circle cx="45" cy="14" r="14" fill="#13161d" stroke="#60a5fa" stroke-width="1.5"/><text x="45" y="18" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="11" font-weight="700" fill="#60a5fa">3</text>
+                <circle cx="21" cy="56" r="14" fill="#13161d" stroke="#2a2f3e" stroke-width="1.5"/><text x="21" y="60" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="11" font-weight="700" fill="#6b7280">4</text>
+                <circle cx="69" cy="56" r="14" fill="#13161d" stroke="#2a2f3e" stroke-width="1.5"/><text x="69" y="60" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="11" font-weight="700" fill="#6b7280">5</text>
+                <circle cx="10" cy="84" r="10" fill="#13161d" stroke="#2a2f3e" stroke-width="1.5"/><text x="10" y="88" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="9" font-weight="700" fill="#6b7280">1</text>
+              </svg>
+            </div>
+            <div style="font-family:'JetBrains Mono',monospace;font-size:18px;color:var(--red)">⊄</div>
+            <div>
+              <div style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--text-dim);margin-bottom:4px">subRoot</div>
+              <svg width="70" height="65" viewBox="0 0 70 65">
+                <line x1="35" y1="18" x2="16" y2="44" stroke="#2a2f3e" stroke-width="1.5"/>
+                <line x1="35" y1="18" x2="54" y2="44" stroke="#2a2f3e" stroke-width="1.5"/>
+                <circle cx="35" cy="12" r="13" fill="#13161d" stroke="#2a2f3e" stroke-width="1.5"/><text x="35" y="16" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="11" font-weight="700" fill="#6b7280">4</text>
+                <circle cx="15" cy="51" r="12" fill="#13161d" stroke="#2a2f3e" stroke-width="1.5"/><text x="15" y="55" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="10" font-weight="700" fill="#6b7280">1</text>
+                <circle cx="55" cy="51" r="12" fill="#13161d" stroke="#2a2f3e" stroke-width="1.5"/><text x="55" y="55" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="10" font-weight="700" fill="#6b7280">2</text>
+              </svg>
+            </div>
+            <div style="font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:700;color:var(--red)">false</div>
+          </div>
+          <p style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text-dim);margin-top:8px">Node 4 in root has only one child (1), subRoot has two (1,2). No match.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- HINTS -->
+  <div style="background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden;margin-bottom:2rem">
+    <div style="display:flex;align-items:center;gap:10px;padding:14px 20px;border-bottom:1px solid var(--border);background:var(--surface2)">
+      <span style="font-size:16px">💡</span>
+      <span style="font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text-muted)">Intuition + Hints</span>
+    </div>
+    <div style="padding:20px;display:flex;flex-direction:column;gap:10px">
+      <div style="display:flex;gap:12px;align-items:flex-start"><span style="font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;color:#34d399;background:rgba(52,211,153,0.1);border:1px solid rgba(52,211,153,0.25);padding:3px 8px;border-radius:6px;flex-shrink:0;margin-top:2px">1</span><div style="font-size:13px;color:var(--text-muted);line-height:1.7">The naive approach: for every node in root, call <code style="font-family:'JetBrains Mono',monospace;font-size:11px;background:var(--surface2);padding:1px 5px;border-radius:4px;color:var(--accent)">isSameTree</code>. Works but is O(m×n) and verbose. There's a slicker way.</div></div>
+      <div style="display:flex;gap:12px;align-items:flex-start"><span style="font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;color:#34d399;background:rgba(52,211,153,0.1);border:1px solid rgba(52,211,153,0.25);padding:3px 8px;border-radius:6px;flex-shrink:0;margin-top:2px">2</span><div style="font-size:13px;color:var(--text-muted);line-height:1.7"><strong style="color:var(--text)">Key insight:</strong> A tree can be uniquely represented as a string via pre-order serialization. If subRoot's string is a <em>substring</em> of root's string, subRoot is a subtree.</div></div>
+      <div style="display:flex;gap:12px;align-items:flex-start"><span style="font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;color:#34d399;background:rgba(52,211,153,0.1);border:1px solid rgba(52,211,153,0.25);padding:3px 8px;border-radius:6px;flex-shrink:0;margin-top:2px">3</span><div style="font-size:13px;color:var(--text-muted);line-height:1.7">You <strong style="color:var(--text)">must</strong> prefix every token with <code style="font-family:'JetBrains Mono',monospace;font-size:11px;background:var(--surface2);padding:1px 5px;border-radius:4px;color:var(--accent)">-</code>. Without it, node 12 would match nodes 1+2. The dash acts as a left boundary for every value.</div></div>
+      <div style="display:flex;gap:12px;align-items:flex-start"><span style="font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;color:#34d399;background:rgba(52,211,153,0.1);border:1px solid rgba(52,211,153,0.25);padding:3px 8px;border-radius:6px;flex-shrink:0;margin-top:2px">4</span><div style="font-size:13px;color:var(--text-muted);line-height:1.7">You <strong style="color:var(--text)">must</strong> include <code style="font-family:'JetBrains Mono',monospace;font-size:11px;background:var(--surface2);padding:1px 5px;border-radius:4px;color:var(--accent)">-#</code> for null children. Without it, a left-only child and a right-only child produce the same string — a false match.</div></div>
+      <div style="background:rgba(52,211,153,0.06);border:1px solid rgba(52,211,153,0.2);border-radius:10px;padding:14px;margin-top:4px">
+        <p style="font-size:13px;color:var(--text-muted);line-height:1.75"><strong style="color:#34d399">Core insight:</strong> Serialize both trees → <code style="font-family:'JetBrains Mono',monospace;font-size:11px;background:var(--surface2);padding:1px 5px;border-radius:4px;color:var(--accent)">rootSerial.includes(subRootSerial)</code>. Three lines. That's the whole algorithm.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="insight-banner">
+    ⚡ <strong>Key insight:</strong> Instead of recursively comparing nodes, we convert each tree to a unique string. If <code style="color:var(--amber)">rootSerial</code> contains <code style="color:var(--amber)">subRootSerial</code> as a substring, <code style="color:var(--teal)">subRoot</code> is a subtree. The <code style="color:var(--amber)">-</code> prefix before every token prevents false matches (e.g. node 12 vs nodes 1, 2).
+  </div>
+
+  <div class="pattern-banner-new" style="background:rgba(52,211,153,.06);border:1px solid rgba(52,211,153,.25);border-left-color:#34d399">
+    <div>
+      <div class="pb-label">Pattern</div>
+      <div class="pb-name" style="color:#34d399">🎯 Serialization + String Substring Match</div>
+    </div>
+    <div class="pb-desc">Serialize both trees to pre-order strings with <code>-val</code> tokens and <code>-#</code> for nulls. If rootSerial contains subRootSerial, it's a subtree.</div>
+    <div class="pb-solves">Same pattern unlocks:<br/><span style="color:#34d399">#297 Serialize &amp; Deserialize · #449 Serialize BST · #652 Find Duplicate Subtrees</span></div>
+  </div>
+
+  <div class="prob-section">
+    <div class="prob-section-hdr">
+      <span class="prob-section-icon">📋</span>
+      <span class="prob-section-title">Problem Statement</span>
+    </div>
+    <div class="prob-body">
+      <p>Given two binary trees <strong>root</strong> and <strong>subRoot</strong>, return <code>true</code> if there exists a node in <code>root</code> whose subtree is <strong>structurally identical and value-identical</strong> to <code>subRoot</code>.</p>
+        <p>A subtree must match completely — every node, every position, every value.</p><div class="svg-example-grid">
+    <div class="svg-ex-card">
+      <div class="svg-ex-header">
+        <span class="svg-ex-label">root=[3,4,5,1,2]  sub=[4,1,2]</span>
+        <span class="svg-ex-result res-green">true ✓</span>
+      </div>
+      <div class="svg-ex-body"><svg viewBox="0 0 200 135"><line x1="78" y1="26" x2="44" y2="62" stroke="#1e2231" stroke-width="1.5"/><line x1="78" y1="26" x2="114" y2="62" stroke="#1e2231" stroke-width="1.5"/><line x1="32" y1="80" x2="18" y2="108" stroke="#1e2231" stroke-width="1.5"/><line x1="56" y1="80" x2="70" y2="108" stroke="#1e2231" stroke-width="1.5"/><circle cx="78" cy="18" r="22" fill="#1a1e28" stroke="#60a5fa" stroke-width="1.5"/><text x="78" y="22" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="13" font-weight="700" fill="#60a5fa">3</text><circle cx="42" cy="72" r="18" fill="#0f1a14" stroke="#34d399" stroke-width="2"/><text x="42" y="76" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="13" font-weight="700" fill="#34d399">4</text><circle cx="116" cy="72" r="18" fill="#13161d" stroke="#3d4251" stroke-width="1.5"/><text x="116" y="76" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="13" font-weight="700" fill="#6b7280">5</text><circle cx="16" cy="110" r="14" fill="#0f1a14" stroke="#34d399" stroke-width="1.5"/><text x="16" y="114" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="11" font-weight="700" fill="#34d399">1</text><circle cx="72" cy="110" r="14" fill="#0f1a14" stroke="#34d399" stroke-width="1.5"/><text x="72" y="114" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="11" font-weight="700" fill="#34d399">2</text><rect x="6" y="52" width="90" height="72" rx="7" fill="none" stroke="#34d399" stroke-width="1.5" stroke-dasharray="4 3" opacity=".8"/><text x="100" y="118" font-family="'JetBrains Mono',monospace" font-size="9" fill="#34d399">sub matches!</text></svg></div>
+    </div>
+    <div class="svg-ex-card">
+      <div class="svg-ex-header">
+        <span class="svg-ex-label">root=[3,4,5,1,2]  sub=[4,1]</span>
+        <span class="svg-ex-result res-red">false ✗</span>
+      </div>
+      <div class="svg-ex-body"><svg viewBox="0 0 200 110"><line x1="80" y1="26" x2="46" y2="62" stroke="#1e2231" stroke-width="1.5"/><line x1="80" y1="26" x2="116" y2="62" stroke="#1e2231" stroke-width="1.5"/><line x1="34" y1="80" x2="18" y2="106" stroke="#1e2231" stroke-width="1.5"/><line x1="58" y1="80" x2="74" y2="106" stroke="#1e2231" stroke-width="1.5"/><circle cx="80" cy="18" r="20" fill="#1a1e28" stroke="#60a5fa" stroke-width="1.5"/><text x="80" y="22" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="13" font-weight="700" fill="#60a5fa">3</text><circle cx="44" cy="72" r="18" fill="#13161d" stroke="#3d4251" stroke-width="1.5"/><text x="44" y="76" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="13" font-weight="700" fill="#6b7280">4</text><circle cx="118" cy="72" r="18" fill="#13161d" stroke="#3d4251" stroke-width="1.5"/><text x="118" y="76" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="13" font-weight="700" fill="#6b7280">5</text><circle cx="16" cy="108" r="14" fill="#13161d" stroke="#3d4251" stroke-width="1.5"/><text x="16" y="112" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="11" font-weight="700" fill="#6b7280">1</text><circle cx="76" cy="108" r="14" fill="#13161d" stroke="#3d4251" stroke-width="1.5"/><text x="76" y="112" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="11" font-weight="700" fill="#6b7280">2</text><text x="4" y="22" font-family="'JetBrains Mono',monospace" font-size="9" fill="#f87171">sub=[4,1]</text><text x="4" y="36" font-family="'JetBrains Mono',monospace" font-size="9" fill="#f87171">missing 2</text></svg></div>
+    </div>
+  </div>
+    </div>
+  </div>
+
+  <div class="prob-section">
+    <div class="prob-section-hdr">
+      <span class="prob-section-icon">💡</span>
+      <span class="prob-section-title">Intuition + Hints</span>
+    </div>
+    <div class="prob-body">
+      <div class="hints-list-new">
+      <div class="hint-row">
+        <span class="hint-badge" style="color:#34d399;background:rgba(52,211,153,.1);border:1px solid rgba(52,211,153,.25)">1</span>
+        <div class="hint-body"><strong>Key insight:</strong> Convert both trees to strings using pre-order DFS. If subRoot's string is a <em>substring</em> of root's string, the subtree exists.</div>
+      </div>
+      <div class="hint-row">
+        <span class="hint-badge" style="color:#34d399;background:rgba(52,211,153,.1);border:1px solid rgba(52,211,153,.25)">2</span>
+        <div class="hint-body">Serialize: append <code>-val</code> for each node, <code>-#</code> for null children. The <code>-</code> prefix before every token acts as a boundary delimiter.</div>
+      </div>
+      <div class="hint-row">
+        <span class="hint-badge" style="color:#34d399;background:rgba(52,211,153,.1);border:1px solid rgba(52,211,153,.25)">3</span>
+        <div class="hint-body">Without the <code>-</code> prefix, node <code>12</code> and nodes <code>1</code>,<code>2</code> would produce overlapping strings — false positives. The prefix prevents this entirely.</div>
+      </div>
+      <div class="hint-row">
+        <span class="hint-badge" style="color:#34d399;background:rgba(52,211,153,.1);border:1px solid rgba(52,211,153,.25)">4</span>
+        <div class="hint-body">Without <code>-#</code> null sentinels, trees with different shapes but same values become identical strings. Nulls encode structure, not just values.</div>
+      </div>
+    </div><div class="intuition-new" style="background:rgba(52,211,153,.06);border:1px solid rgba(52,211,153,.2);margin-top:14px"><p><strong style="color:#34d399">Core insight:</strong> A valid pre-order serialization uniquely fingerprints a tree. Once you have two strings, subtree checking collapses to one line: <code>rootSerial.includes(subRootSerial)</code>.</p></div>
+    </div>
+  </div>
+
+
+  <!-- Input tree previews -->
+  <div class="tree-inputs">
+    <div class="tree-input-card">
+      <div class="tree-input-header">
+        <span class="label">// root tree</span>
+        <span class="pill pill-root">[3, 4, 5, 1, 2]</span>
+      </div>
+      <div class="tree-input-body">
+        <svg width="220" height="150" viewBox="0 0 220 150">
+          <line x1="110" y1="34" x2="60" y2="80" stroke="#1e2231" stroke-width="2"/>
+          <line x1="110" y1="34" x2="162" y2="80" stroke="#1e2231" stroke-width="2"/>
+          <line x1="48" y1="100" x2="28" y2="132" stroke="#1e2231" stroke-width="2"/>
+          <line x1="72" y1="100" x2="96" y2="132" stroke="#1e2231" stroke-width="2"/>
+          <circle cx="110" cy="26" r="22" fill="#1a1e28" stroke="#60a5fa" stroke-width="1.5"/>
+          <text x="110" y="30" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="14" font-weight="700" fill="#60a5fa">3</text>
+          <circle cx="58" cy="92" r="20" fill="#13161d" stroke="#3d4251" stroke-width="1.5"/>
+          <text x="58" y="96" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="14" font-weight="700" fill="#6b7280">4</text>
+          <circle cx="164" cy="92" r="20" fill="#13161d" stroke="#3d4251" stroke-width="1.5"/>
+          <text x="164" y="96" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="14" font-weight="700" fill="#6b7280">5</text>
+          <circle cx="26" cy="138" r="16" fill="#13161d" stroke="#3d4251" stroke-width="1.5"/>
+          <text x="26" y="142" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="12" font-weight="700" fill="#6b7280">1</text>
+          <circle cx="98" cy="138" r="16" fill="#13161d" stroke="#3d4251" stroke-width="1.5"/>
+          <text x="98" y="142" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="12" font-weight="700" fill="#6b7280">2</text>
+        </svg>
+      </div>
+    </div>
+
+    <div class="tree-input-card">
+      <div class="tree-input-header">
+        <span class="label">// subRoot tree</span>
+        <span class="pill pill-sub">[4, 1, 2]</span>
+      </div>
+      <div class="tree-input-body">
+        <svg width="180" height="110" viewBox="0 0 180 110">
+          <line x1="90" y1="34" x2="46" y2="74" stroke="#1e2231" stroke-width="2"/>
+          <line x1="90" y1="34" x2="134" y2="74" stroke="#1e2231" stroke-width="2"/>
+          <circle cx="90" cy="26" r="22" fill="#1a1810" stroke="#fb923c" stroke-width="2"/>
+          <text x="90" y="30" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="14" font-weight="700" fill="#fb923c">4</text>
+          <circle cx="44" cy="82" r="20" fill="#13161d" stroke="#3d4251" stroke-width="1.5"/>
+          <text x="44" y="86" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="13" font-weight="700" fill="#6b7280">1</text>
+          <circle cx="136" cy="82" r="20" fill="#13161d" stroke="#3d4251" stroke-width="1.5"/>
+          <text x="136" y="86" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="13" font-weight="700" fill="#6b7280">2</text>
+        </svg>
+      </div>
+    </div>
+  </div>
+
+  <!-- Code -->
+  <div class="code-block">
+    <div class="code-header">
+      <div class="dots"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div></div>
+      <span>isSubtree.js</span>
+    </div>
+    <pre><span class="kw">var</span> <span class="fn">isSubtree</span> = <span class="kw">function</span>(<span class="var">root</span>, <span class="var">subRoot</span>) {
+  <span class="kw">const</span> <span class="var">rootSerial</span>    = <span class="fn">serializeTree</span>(<span class="var">root</span>)
+  <span class="kw">const</span> <span class="var">subRootSerial</span> = <span class="fn">serializeTree</span>(<span class="var">subRoot</span>)
+  <span class="hl"><span class="kw">return</span> <span class="var">rootSerial</span>.<span class="fn">includes</span>(<span class="var">subRootSerial</span>)</span>  <span class="cm">// substring check</span>
+};
+
+<span class="kw">function</span> <span class="fn">serializeTree</span>(<span class="var">rootNode</span>) {
+  <span class="kw">let</span> <span class="var">serialized</span> = <span class="str">""</span>
+
+  <span class="kw">function</span> <span class="fn">traversePreOrder</span>(<span class="var">currentNode</span>) {
+    <span class="kw">if</span> (!<span class="var">currentNode</span>) {
+      <span class="var">serialized</span> += <span class="str">'-#'</span>       <span class="cm">// null sentinel — marks missing child</span>
+      <span class="kw">return</span>
+    }
+    <span class="var">serialized</span> += <span class="str">'-'</span> + <span class="var">currentNode</span>.val  <span class="cm">// '-' prefix prevents false matches</span>
+    <span class="fn">traversePreOrder</span>(<span class="var">currentNode</span>.left)
+    <span class="fn">traversePreOrder</span>(<span class="var">currentNode</span>.right)
+  }
+
+  <span class="fn">traversePreOrder</span>(<span class="var">rootNode</span>)
+  <span class="kw">return</span> <span class="var">serialized</span>
+}</pre>
+  </div>
+
+  <!-- Edge cases -->
+  <div class="edge-cases">
+    <p class="section-label">// edge cases — why every design choice matters</p>
+    <div class="edge-grid">
+
+      <div class="edge-card">
+        <div class="edge-header">
+          <span class="edge-label">missing nulls</span>
+          <span class="edge-badge edge-badge-red">false positive</span>
+        </div>
+        <div class="edge-body">
+          <div class="edge-example">
+            <div class="edge-col">
+              <div class="edge-col-label">root</div>
+              <pre class="edge-tree">  1
+ /
+2
+ \
+  3</pre>
+            </div>
+            <div class="edge-col">
+              <div class="edge-col-label">subRoot</div>
+              <pre class="edge-tree">2
+ \
+  3</pre>
+            </div>
+          </div>
+          <div class="edge-strings">
+            <div class="edge-str-row">
+              <span class="edge-str-label">without <code>-#</code></span>
+              <span class="edge-str-bad">root: <span class="str-highlight-bad">"-1-2-3"</span> &nbsp;sub: <span class="str-highlight-bad">"-2-3"</span> → wrongly matches</span>
+            </div>
+            <div class="edge-str-row">
+              <span class="edge-str-label">with <code>-#</code></span>
+              <span class="edge-str-good">root: <span class="str-highlight-good">"-1-#-2-#-3-#-#"</span> &nbsp;sub: <span class="str-highlight-good">"-2-#-3-#-#"</span> → correctly no match</span>
+            </div>
+          </div>
+          <p class="edge-desc">Without null sentinels, two structurally different trees that share values produce identical strings. The <code>-#</code> encodes shape — a right-only child and a left-only child get different serializations.</p>
+        </div>
+      </div>
+
+      <div class="edge-card">
+        <div class="edge-header">
+          <span class="edge-label">delimiter after, not before</span>
+          <span class="edge-badge edge-badge-red">false positive</span>
+        </div>
+        <div class="edge-body">
+          <div class="edge-example">
+            <div class="edge-col">
+              <div class="edge-col-label">root has node</div>
+              <pre class="edge-tree">12</pre>
+            </div>
+            <div class="edge-col">
+              <div class="edge-col-label">subRoot has nodes</div>
+              <pre class="edge-tree">1
+ \
+  2</pre>
+            </div>
+          </div>
+          <div class="edge-strings">
+            <div class="edge-str-row">
+              <span class="edge-str-label">delimiter after <br/><code>"val-"</code></span>
+              <span class="edge-str-bad">root: <span class="str-highlight-bad">"12-#-#-"</span> &nbsp;sub: <span class="str-highlight-bad">"1-#-2-#-#-"</span> → <span style="color:var(--red)">safe here...</span></span>
+            </div>
+            <div class="edge-str-row">
+              <span class="edge-str-label">but consider</span>
+              <span class="edge-str-bad">root node <span class="str-highlight-bad">12</span>, sub node <span class="str-highlight-bad">1</span> → <span style="color:var(--red)">"1" appears inside "12" as a prefix</span></span>
+            </div>
+            <div class="edge-str-row">
+              <span class="edge-str-label">delimiter before <br/><code>"-val"</code></span>
+              <span class="edge-str-good">root: <span class="str-highlight-good">"-12-#-#"</span> &nbsp;sub: <span class="str-highlight-good">"-1-#-2-#-#"</span> → correctly no match, <code>-12</code> ≠ <code>-1</code></span>
+            </div>
+          </div>
+          <p class="edge-desc">Putting the <code>-</code> <em>before</em> the value means every token starts with a delimiter. A search for <code>"-1"</code> will never accidentally match the first character of <code>"-12"</code> — the delimiter acts as a left boundary for every token.</p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <p class="section-label">// Interactive dry run — root: [3,4,5,1,2] · subRoot: [4,1,2] → returns true</p>
+
+  <!-- Visualizer -->
+  <div class="viz-card">
+    <div class="progress-bar-wrap">
+      <div class="progress-bar-inner" id="progressBar" style="width:6%"></div>
+    </div>
+
+    <div class="controls">
+      <button class="btn" id="btnPrev" onclick="moveStep(-1)" disabled>← Prev</button>
+      <button class="btn" id="btnPlay" onclick="toggleAutoPlay()">▶ Play</button>
+      <button class="btn" id="btnNext" onclick="moveStep(1)">Next →</button>
+      <button class="btn" style="background:var(--red-bg)!important;border-color:rgba(248,113,113,0.3)!important;color:var(--red)!important" onclick="if(autoPlayTimer){toggleAutoPlay();}currentStepIndex=0;renderStep(STEPS[0]);">↺ Reset</button>
+      <span class="step-info" id="stepLabel">Step 1 / 17</span>
+      <span style="font-family:var(--mono);font-size:11px;color:var(--text-dim);display:flex;gap:4px;align-items:center"><kbd>←</kbd><kbd>→</kbd></span>
+      <span class="result-badge badge-true" id="resultBadge" style="display:none">✓ isSubtree = true</span>
+    </div>
+
+    <div class="step-desc" id="stepDescription">Call <em>serializeTree(root)</em> — starting pre-order traversal of the main tree.</div>
+
+    <div class="main-grid">
+
+      <!-- Root tree -->
+      <div class="tree-panel">
+        <div class="tree-panel-label">
+          <span class="panel-label">// root tree</span>
+          <span class="tree-tag tree-tag-r">root</span>
+        </div>
+        <svg id="rootTreeSvg" width="100%" viewBox="0 0 230 220">
+          <line x1="115" y1="46" x2="62" y2="106" stroke="#1e2231" stroke-width="2"/>
+          <line x1="115" y1="46" x2="172" y2="106" stroke="#1e2231" stroke-width="2"/>
+          <line x1="49" y1="126" x2="28" y2="185" stroke="#1e2231" stroke-width="2"/>
+          <line x1="75" y1="126" x2="100" y2="185" stroke="#1e2231" stroke-width="2"/>
+          <!-- node 3 -->
+          <g id="rn3">
+            <circle cx="115" cy="38" r="28" fill="#13161d" stroke="#2a2f3e" stroke-width="1.5"/>
+            <text x="115" y="42" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="15" font-weight="700" fill="#6b7280">3</text>
+          </g>
+          <!-- node 4 -->
+          <g id="rn4">
+            <circle cx="60" cy="118" r="26" fill="#13161d" stroke="#2a2f3e" stroke-width="1.5"/>
+            <text x="60" y="122" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="15" font-weight="700" fill="#6b7280">4</text>
+          </g>
+          <!-- node 5 -->
+          <g id="rn5">
+            <circle cx="174" cy="118" r="26" fill="#13161d" stroke="#2a2f3e" stroke-width="1.5"/>
+            <text x="174" y="122" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="15" font-weight="700" fill="#6b7280">5</text>
+          </g>
+          <!-- node 1 -->
+          <g id="rn1">
+            <circle cx="26" cy="196" r="22" fill="#13161d" stroke="#2a2f3e" stroke-width="1.5"/>
+            <text x="26" y="200" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="13" font-weight="700" fill="#6b7280">1</text>
+          </g>
+          <!-- node 2 -->
+          <g id="rn2">
+            <circle cx="102" cy="196" r="22" fill="#13161d" stroke="#2a2f3e" stroke-width="1.5"/>
+            <text x="102" y="200" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="13" font-weight="700" fill="#6b7280">2</text>
+          </g>
+        </svg>
+      </div>
+
+      <!-- SubRoot tree -->
+      <div class="tree-panel">
+        <div class="tree-panel-label">
+          <span class="panel-label">// subRoot tree</span>
+          <span class="tree-tag tree-tag-s">subRoot</span>
+        </div>
+        <svg id="subRootTreeSvg" width="100%" viewBox="0 0 230 160">
+          <line x1="115" y1="46" x2="64" y2="106" stroke="#1e2231" stroke-width="2"/>
+          <line x1="115" y1="46" x2="168" y2="106" stroke="#1e2231" stroke-width="2"/>
+          <!-- node 4 (subRoot) -->
+          <g id="sn4">
+            <circle cx="115" cy="38" r="28" fill="#13161d" stroke="#2a2f3e" stroke-width="1.5"/>
+            <text x="115" y="42" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="15" font-weight="700" fill="#6b7280">4</text>
+          </g>
+          <!-- node 1 (subRoot) -->
+          <g id="sn1">
+            <circle cx="62" cy="118" r="26" fill="#13161d" stroke="#2a2f3e" stroke-width="1.5"/>
+            <text x="62" y="122" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="15" font-weight="700" fill="#6b7280">1</text>
+          </g>
+          <!-- node 2 (subRoot) -->
+          <g id="sn2">
+            <circle cx="170" cy="118" r="26" fill="#13161d" stroke="#2a2f3e" stroke-width="1.5"/>
+            <text x="170" y="122" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="15" font-weight="700" fill="#6b7280">2</text>
+          </g>
+        </svg>
+      </div>
+
+      <!-- Side panel -->
+      <div class="side-panel">
+        <!-- Call stack -->
+        <div class="stack-panel">
+          <div class="panel-label">// call stack</div>
+          <div class="call-stack" id="callStack"></div>
+        </div>
+
+        <!-- Variables -->
+        <div class="vars-panel">
+          <div class="panel-label">// variables</div>
+          <div class="var-row"><span class="var-name">phase</span>         <span class="var-val blue"   id="varPhase">—</span></div>
+          <div class="var-row"><span class="var-name">currentNode.val</span><span class="var-val orange" id="varCurrentNode">—</span></div>
+          <div class="var-row"><span class="var-name">serialized</span>    <span class="var-val"        id="varSerialized">""</span></div>
+        </div>
+
+        <!-- Log -->
+        <div class="log-panel">
+          <div class="panel-label">// execution log</div>
+          <div class="log" id="executionLog"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Hash string display (full width below) -->
+    <div class="hash-section">
+      <div class="panel-label" style="margin-bottom:10px">// serialized strings — building token by token</div>
+
+      <div class="hash-row">
+        <span class="hash-label">rootSerial =</span>
+        <span class="hash-value" id="rootSerialDisplay"><span style="color:var(--text-dim)">""</span></span>
+      </div>
+
+      <div class="hash-row">
+        <span class="hash-label">subRootSerial =</span>
+        <span class="hash-value" id="subRootSerialDisplay"><span style="color:var(--text-dim)">""</span></span>
+      </div>
+
+      <div>
+        <span class="includes-result includes-pending" id="includesResult">rootSerial.includes(subRootSerial) → pending…</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── PROBLEM OVERVIEW ── -->
+  <div class="overview">
+    <p class="section-label">// problem overview — everything you need for revision</p>
+
+    <div class="overview-grid">
+      <div class="ov-card blue">
+        <div class="ov-card-head"><span class="ov-icon">📋</span><span class="ov-title">What the problem is asking</span></div>
+        <p>Given two trees <strong>root</strong> and <strong>subRoot</strong>, return <code>true</code> if <code>subRoot</code> is a <strong>subtree of root</strong> — meaning there exists a node in <code>root</code> whose subtree is <strong>structurally identical and value-identical</strong> to <code>subRoot</code>.</p>
+        <p style="margin-top:8px">A subtree must match <em>completely</em>. If <code>subRoot</code> has 3 nodes, you need to find a node in <code>root</code> whose exact subtree (including all children and nulls) matches those 3 nodes.</p>
+      </div>
+      <div class="ov-card teal">
+        <div class="ov-card-head"><span class="ov-icon">💡</span><span class="ov-title">Core intuition</span></div>
+        <p>Instead of comparing trees node-by-node recursively (the naive approach), we can <strong>convert each tree to a string</strong> using pre-order traversal. If <code>subRoot</code>'s string is a <strong>substring</strong> of <code>root</code>'s string, then it's a subtree.</p>
+        <p style="margin-top:8px">This works because a valid pre-order serialization uniquely identifies a tree's structure and values. Substring matching gives us an O(m·n) check in a single line: <code>rootSerial.includes(subRootSerial)</code>.</p>
+      </div>
+    </div>
+
+    <div class="overview-grid">
+      <div class="ov-card accent">
+        <div class="ov-card-head"><span class="ov-icon">🧩</span><span class="ov-title">Hints to reach the solution</span></div>
+        <ul class="hint-list">
+          <li><span class="bullet">1</span>Write a <code>serialize(node)</code> helper that does pre-order DFS, building a string: <code>"-val"</code> for each node, <code>"-#"</code> for null.</li>
+          <li><span class="bullet">2</span>Serialize both trees. Then just check: <code>rootSerial.includes(subRootSerial)</code>.</li>
+          <li><span class="bullet blue">3</span>The <strong><code>-</code> prefix before every token</strong> is non-optional — it prevents false matches like node 12 matching nodes 1 and 2.</li>
+          <li><span class="bullet green">4</span>Including <code>-#</code> for nulls encodes the tree's shape — otherwise structurally different trees could produce the same string.</li>
+        </ul>
+      </div>
+      <div class="ov-card amber">
+        <div class="ov-card-head"><span class="ov-icon">⚡</span><span class="ov-title">Key trick / pattern</span></div>
+        <p><strong>Why the <code>-</code> prefix?</strong> Without it, serializing node 12 gives <code>"12"</code> and serializing nodes 1, 2 gives <code>"12"</code> — identical! With the prefix: <code>"-12"</code> vs <code>"-1-2"</code> — now they're distinct. The delimiter goes <em>before</em> each token so every token has a clean left boundary.</p>
+        <p style="margin-top:8px"><strong>Why nulls matter:</strong> These two trees look similar but are structurally different:</p>
+        <div style="display:flex;gap:20px;align-items:center;margin-top:10px;flex-wrap:wrap">
+          <div style="text-align:center">
+            <div style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--text-dim);margin-bottom:4px">2 is LEFT child</div>
+            <svg width="70" height="60" viewBox="0 0 70 60"><line x1="35" y1="18" x2="18" y2="42" stroke="#2a2f3e" stroke-width="1.5"/><circle cx="35" cy="12" r="13" fill="#13161d" stroke="#60a5fa" stroke-width="1.5"/><text x="35" y="16" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="11" font-weight="700" fill="#60a5fa">1</text><circle cx="17" cy="48" r="12" fill="#13161d" stroke="#2a2f3e" stroke-width="1.5"/><text x="17" y="52" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="10" font-weight="700" fill="#6b7280">2</text></svg>
+            <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--green);margin-top:2px">"-1-2-#-#-#"</div>
+          </div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:16px;color:var(--text-dim)">≠</div>
+          <div style="text-align:center">
+            <div style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--text-dim);margin-bottom:4px">2 is RIGHT child</div>
+            <svg width="70" height="60" viewBox="0 0 70 60"><line x1="35" y1="18" x2="52" y2="42" stroke="#2a2f3e" stroke-width="1.5"/><circle cx="35" cy="12" r="13" fill="#13161d" stroke="#60a5fa" stroke-width="1.5"/><text x="35" y="16" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="11" font-weight="700" fill="#60a5fa">1</text><circle cx="53" cy="48" r="12" fill="#13161d" stroke="#2a2f3e" stroke-width="1.5"/><text x="53" y="52" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="10" font-weight="700" fill="#6b7280">2</text></svg>
+            <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--red);margin-top:2px">"-1-#-2-#-#"</div>
+          </div>
+        </div>
+        <p style="margin-top:8px;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text-dim)">Without <code style="color:var(--accent)">-#</code> sentinels both would serialize to <code style="color:var(--red)">"-1-2"</code> — a false match. The nulls encode shape.</p>
+      </div>
+    </div>
+
+    <div class="overview-full">
+      <div class="ov-card red">
+        <div class="ov-card-head"><span class="ov-icon">⚠️</span><span class="ov-title">Edge cases to watch out for</span></div>
+        <div class="edge-list">
+          <div class="edge-item"><span class="edge-label warn">prefix</span><span class="edge-text"><strong>Missing the <code>-</code> prefix:</strong> The most common mistake. Without it, node value 12 in root would match a subRoot containing nodes 1 and 2. Always prefix every token.</span></div>
+          <div class="edge-item"><span class="edge-label warn">no nulls</span><span class="edge-text"><strong>Skipping null sentinels:</strong> Without <code>-#</code> for null children, structurally different trees can produce the same string. The nulls encode the tree's shape.</span></div>
+          <div class="edge-item"><span class="edge-label warn">empty sub</span><span class="edge-text"><strong>subRoot is null:</strong> <svg viewBox="0 0 110 70" style="display:inline-block;vertical-align:middle;margin:0 4px;border-radius:6px;background:var(--surface2);padding:4px" width="120" height="70"><circle cx="55" cy="20" r="14" fill="#1a1e28" stroke="#60a5fa" stroke-width="1.5"/><text x="55" y="23" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="10" font-weight="700" fill="#60a5fa">1</text><line x1="55" y1="34" x2="35" y2="52" stroke="#1e2231" stroke-width="1.5"/><line x1="55" y1="34" x2="76" y2="52" stroke="#1e2231" stroke-width="1.5"/><circle cx="33" cy="58" r="12" fill="#13161d" stroke="#3d4251" stroke-width="1.5"/><text x="33" y="61" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="10" font-weight="700" fill="#6b7280">2</text><circle cx="78" cy="58" r="12" fill="#13161d" stroke="#3d4251" stroke-width="1.5"/><text x="78" y="61" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="10" font-weight="700" fill="#6b7280">3</text><text x="4" y="68" font-family="'JetBrains Mono',monospace" font-size="7" fill="#34d399">sub=null → true</text></svg> An empty tree is a subtree of any tree. <code>serialize(null)</code> returns <code>"-#"</code>, which always appears inside any root serialization. Returns <code>true</code>.</span></div>
+          <div class="edge-item"><span class="edge-label ok">alt</span><span class="edge-text"><strong>Recursive alternative:</strong> You can also solve this with two recursive functions — <code>isSubtree</code> traverses root, and for each node calls <code>isSameTree</code>. O(m·n) same complexity, but more code. The serialization approach is more elegant.</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="overview-full">
+      <div class="best-solution">
+        <div class="best-solution-header">
+          <span class="best-solution-title">✦ Best solution for learning</span>
+          <div class="best-solution-pills">
+            <span class="sol-pill">O(m·n) time</span>
+            <span class="sol-pill">O(m+n) space</span>
+            <span class="sol-pill">Serialization</span>
+            <span class="sol-pill">Pre-order DFS</span>
+          </div>
+        </div>
+        <pre><span class="kw">var</span> <span class="fn">isSubtree</span> = <span class="kw">function</span>(<span class="var">root</span>, <span class="var">subRoot</span>) {
+  <span class="kw">const</span> <span class="var">rootSerial</span>    = <span class="fn">serialize</span>(<span class="var">root</span>);
+  <span class="kw">const</span> <span class="var">subRootSerial</span> = <span class="fn">serialize</span>(<span class="var">subRoot</span>);
+  <span class="kw">return</span> <span class="var">rootSerial</span>.<span class="fn">includes</span>(<span class="var">subRootSerial</span>);  <span class="cm">// substring check = subtree check</span>
+};
+
+<span class="kw">function</span> <span class="fn">serialize</span>(<span class="var">node</span>) {
+  <span class="kw">let</span> <span class="var">result</span> = <span class="str">""</span>;
+  <span class="kw">function</span> <span class="fn">dfs</span>(<span class="var">curr</span>) {
+    <span class="kw">if</span> (!<span class="var">curr</span>) { <span class="var">result</span> += <span class="str">"-#"</span>; <span class="kw">return</span>; }  <span class="cm">// null sentinel</span>
+    <span class="var">result</span> += <span class="str">"-"</span> + <span class="var">curr</span>.val;               <span class="cm">// "-" prefix prevents false matches</span>
+    <span class="fn">dfs</span>(<span class="var">curr</span>.left);
+    <span class="fn">dfs</span>(<span class="var">curr</span>.right);
+  }
+  <span class="fn">dfs</span>(<span class="var">node</span>);
+  <span class="kw">return</span> <span class="var">result</span>;
+}
+
+<span class="cm">// Why this works:
+// - Pre-order serialization uniquely identifies a tree's structure + values
+// - "-" prefix ensures "-12" ≠ "-1-2" (prevents value-boundary false matches)
+// - "-#" for nulls ensures "-1-2-#-#-#" ≠ "-1-#-2-#-#" (shape matters)
+// - includes() does a single substring scan — if found, subRoot IS a subtree</span></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- Explanation -->
+  <div class="explanation">
+    <p class="section-label">// how it works</p>
+    <div class="explain-grid">
+      <div class="explain-card">
+        <div class="icon">📝</div>
+        <h3>Serialize = pre-order string</h3>
+        <p>Visit root → left → right. Each node appends <code>-value</code>. Each null appends <code>-#</code>. The result is a unique string fingerprint of the tree's structure + values.</p>
+      </div>
+      <div class="explain-card">
+        <div class="icon">🛡️</div>
+        <h3>Why the <code>-</code> prefix matters</h3>
+        <p>Without it, node 12 and nodes 1, 2 could produce overlapping strings. The <code>-</code> before every token acts as a delimiter — guaranteeing each token is distinct.</p>
+      </div>
+      <div class="explain-card">
+        <div class="icon">🔍</div>
+        <h3>Substring = subtree</h3>
+        <p>If <code>rootSerial.includes(subRootSerial)</code> is true, the subRoot's exact serialization appears inside root's serialization — meaning it's a real subtree, not just a partial match.</p>
+      </div>
+      <div class="explain-card">
+        <div class="icon">📐</div>
+        <h3>Nulls encode structure</h3>
+        <p>Including <code>-#</code> for null children means trees with different shapes get different strings — even if node values match. Structure and values are both captured.</p>
+      </div>
+    </div>
+
+    <div class="complexity">
+      <div class="cpill">Time: <strong>O(m·n)</strong> — string includes() scan</div>
+      <div class="cpill">Space: <strong>O(m+n)</strong> — two serialized strings</div>
+      <div class="cpill">Traversal: <strong>pre-order DFS</strong></div>
+      <div class="cpill">Key trick: <strong>-prefix delimiter</strong></div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+/*
+  Root tree:        subRoot tree:
+       3                 4
+      / \               / \
+     4   5             1   2
+    / \
+   1   2
+
+  serializeTree(root)    → "-3-4-1-#-#-2-#-#-5-#-#"
+  serializeTree(subRoot) → "-4-1-#-#-2-#-#"
+
+  rootSerial.includes(subRootSerial) → true  (found at index 2)
+*/
+
+// ─── Step definitions ──────────────────────────────────────────────────────
+
+const STEPS = [
+  // PHASE 1: Serializing root tree
+  {
+    description: 'Phase 1: Call <em>serializeTree(root)</em>. Start <em>traversePreOrder</em> at node 3 (root).',
+    phase: 'serialize root',
+    rootActiveNode: 'rn3', rootReturnNode: null,
+    subRootActiveNode: null, subRootReturnNode: null,
+    callStack: ['serializeTree(root)', 'traversePreOrder(node=3)'],
+    currentNodeVal: '3',
+    rootTokensBuilt: 0,
+    subRootTokensBuilt: 0,
+    showIncludes: false,
+    log: [
+      { text: '── Phase 1: serialize root tree ──', css: 'phase-done' },
+      { text: '→ serializeTree(root)', css: 'highlight' },
+      { text: '  → traversePreOrder(node=3)' }
+    ]
+  },
+  {
+    description: 'Node 3 exists → append <em>"-3"</em> to serialized. Recurse left → call <em>traversePreOrder(node=4)</em>.',
+    phase: 'serialize root',
+    rootActiveNode: 'rn4', rootReturnNode: null,
+    subRootActiveNode: null, subRootReturnNode: null,
+    callStack: ['serializeTree(root)', 'traversePreOrder(node=3)', 'traversePreOrder(node=4)'],
+    currentNodeVal: '4',
+    rootTokensBuilt: 1,
+    subRootTokensBuilt: 0,
+    showIncludes: false,
+    log: [
+      { text: '  → traversePreOrder(node=3)', css: 'highlight' },
+      { text: '  serialized += "-3"' },
+      { text: '  → traversePreOrder(node=4) [left]' }
+    ]
+  },
+  {
+    description: 'Node 4 exists → append <em>"-4"</em>. Recurse left → call <em>traversePreOrder(node=1)</em>.',
+    phase: 'serialize root',
+    rootActiveNode: 'rn1', rootReturnNode: null,
+    subRootActiveNode: null, subRootReturnNode: null,
+    callStack: ['serializeTree(root)', 'traversePreOrder(node=3)', 'traversePreOrder(node=4)', 'traversePreOrder(node=1)'],
+    currentNodeVal: '1',
+    rootTokensBuilt: 2,
+    subRootTokensBuilt: 0,
+    showIncludes: false,
+    log: [
+      { text: '  → traversePreOrder(node=4)', css: 'highlight' },
+      { text: '  serialized += "-4"' },
+      { text: '  → traversePreOrder(node=1) [left]' }
+    ]
+  },
+  {
+    description: 'Node 1 exists → append <em>"-1"</em>. Node 1 is a leaf — left child is null → append <em>"-#"</em>.',
+    phase: 'serialize root',
+    rootActiveNode: null, rootReturnNode: 'rn1',
+    subRootActiveNode: null, subRootReturnNode: null,
+    callStack: ['serializeTree(root)', 'traversePreOrder(node=3)', 'traversePreOrder(node=4)'],
+    currentNodeVal: '1',
+    rootTokensBuilt: 4,
+    subRootTokensBuilt: 0,
+    showIncludes: false,
+    log: [
+      { text: '  → traversePreOrder(node=1)', css: 'highlight' },
+      { text: '  serialized += "-1"' },
+      { text: '  left=null  → serialized += "-#"' },
+      { text: '  right=null → serialized += "-#"' },
+      { text: '  ← node 1 done' }
+    ]
+  },
+  {
+    description: 'Back in node 4 — left done. Recurse right → call <em>traversePreOrder(node=2)</em>.',
+    phase: 'serialize root',
+    rootActiveNode: 'rn2', rootReturnNode: null,
+    subRootActiveNode: null, subRootReturnNode: null,
+    callStack: ['serializeTree(root)', 'traversePreOrder(node=3)', 'traversePreOrder(node=4)', 'traversePreOrder(node=2)'],
+    currentNodeVal: '2',
+    rootTokensBuilt: 4,
+    subRootTokensBuilt: 0,
+    showIncludes: false,
+    log: [
+      { text: '  ← node 1 returned' },
+      { text: '  → traversePreOrder(node=2) [right]', css: 'highlight' }
+    ]
+  },
+  {
+    description: 'Node 2 exists → append <em>"-2"</em>. Leaf node — both children null → append <em>"-#-#"</em>. Node 4 subtree complete.',
+    phase: 'serialize root',
+    rootActiveNode: null, rootReturnNode: 'rn4',
+    subRootActiveNode: null, subRootReturnNode: null,
+    callStack: ['serializeTree(root)', 'traversePreOrder(node=3)'],
+    currentNodeVal: '2',
+    rootTokensBuilt: 8,
+    subRootTokensBuilt: 0,
+    showIncludes: false,
+    log: [
+      { text: '  → traversePreOrder(node=2)', css: 'highlight' },
+      { text: '  serialized += "-2"' },
+      { text: '  left=null  → serialized += "-#"' },
+      { text: '  right=null → serialized += "-#"' },
+      { text: '  ← node 2 done  ← node 4 subtree done' }
+    ]
+  },
+  {
+    description: 'Back in node 3 — left subtree done. Recurse right → call <em>traversePreOrder(node=5)</em>.',
+    phase: 'serialize root',
+    rootActiveNode: 'rn5', rootReturnNode: null,
+    subRootActiveNode: null, subRootReturnNode: null,
+    callStack: ['serializeTree(root)', 'traversePreOrder(node=3)', 'traversePreOrder(node=5)'],
+    currentNodeVal: '5',
+    rootTokensBuilt: 8,
+    subRootTokensBuilt: 0,
+    showIncludes: false,
+    log: [
+      { text: '  ← node 4 subtree returned' },
+      { text: '  → traversePreOrder(node=5) [right]', css: 'highlight' }
+    ]
+  },
+  {
+    description: 'Node 5 is a leaf → append <em>"-5"</em>, then <em>"-#-#"</em> for both null children. <span class="hi">rootSerial complete!</span>',
+    phase: 'serialize root',
+    rootActiveNode: null, rootReturnNode: 'rn3',
+    subRootActiveNode: null, subRootReturnNode: null,
+    callStack: [],
+    currentNodeVal: '5',
+    rootTokensBuilt: 11,
+    subRootTokensBuilt: 0,
+    showIncludes: false,
+    rootSerialComplete: true,
+    log: [
+      { text: '  → traversePreOrder(node=5)', css: 'highlight' },
+      { text: '  serialized += "-5"' },
+      { text: '  left=null  → serialized += "-#"' },
+      { text: '  right=null → serialized += "-#"' },
+      { text: '← serializeTree(root) complete', css: 'phase-done' }
+    ]
+  },
+  // PHASE 2: Serializing subRoot tree
+  {
+    description: 'Phase 2: Call <em>serializeTree(subRoot)</em>. Start <em>traversePreOrder</em> at node 4 (subRoot root).',
+    phase: 'serialize subRoot',
+    rootActiveNode: null, rootReturnNode: null,
+    subRootActiveNode: 'sn4', subRootReturnNode: null,
+    callStack: ['serializeTree(subRoot)', 'traversePreOrder(node=4)'],
+    currentNodeVal: '4',
+    rootTokensBuilt: 11,
+    subRootTokensBuilt: 0,
+    showIncludes: false,
+    log: [
+      { text: '── Phase 2: serialize subRoot tree ──', css: 'phase-done' },
+      { text: '→ serializeTree(subRoot)', css: 'highlight' },
+      { text: '  → traversePreOrder(node=4)' }
+    ]
+  },
+  {
+    description: 'Node 4 exists → append <em>"-4"</em>. Recurse left → call <em>traversePreOrder(node=1)</em>.',
+    phase: 'serialize subRoot',
+    rootActiveNode: null, rootReturnNode: null,
+    subRootActiveNode: 'sn1', subRootReturnNode: null,
+    callStack: ['serializeTree(subRoot)', 'traversePreOrder(node=4)', 'traversePreOrder(node=1)'],
+    currentNodeVal: '1',
+    rootTokensBuilt: 11,
+    subRootTokensBuilt: 1,
+    showIncludes: false,
+    log: [
+      { text: '  → traversePreOrder(node=4)', css: 'highlight' },
+      { text: '  serialized += "-4"' },
+      { text: '  → traversePreOrder(node=1) [left]' }
+    ]
+  },
+  {
+    description: 'Node 1 is a leaf → append <em>"-1"</em>, then <em>"-#-#"</em> for null children.',
+    phase: 'serialize subRoot',
+    rootActiveNode: null, rootReturnNode: null,
+    subRootActiveNode: null, subRootReturnNode: 'sn1',
+    callStack: ['serializeTree(subRoot)', 'traversePreOrder(node=4)'],
+    currentNodeVal: '1',
+    rootTokensBuilt: 11,
+    subRootTokensBuilt: 4,
+    showIncludes: false,
+    log: [
+      { text: '  → traversePreOrder(node=1)', css: 'highlight' },
+      { text: '  serialized += "-1"' },
+      { text: '  left=null  → serialized += "-#"' },
+      { text: '  right=null → serialized += "-#"' },
+      { text: '  ← node 1 done' }
+    ]
+  },
+  {
+    description: 'Back in node 4 — recurse right → call <em>traversePreOrder(node=2)</em>.',
+    phase: 'serialize subRoot',
+    rootActiveNode: null, rootReturnNode: null,
+    subRootActiveNode: 'sn2', subRootReturnNode: null,
+    callStack: ['serializeTree(subRoot)', 'traversePreOrder(node=4)', 'traversePreOrder(node=2)'],
+    currentNodeVal: '2',
+    rootTokensBuilt: 11,
+    subRootTokensBuilt: 4,
+    showIncludes: false,
+    log: [
+      { text: '  ← node 1 returned' },
+      { text: '  → traversePreOrder(node=2) [right]', css: 'highlight' }
+    ]
+  },
+  {
+    description: 'Node 2 is a leaf → append <em>"-2"</em>, then <em>"-#-#"</em>. <span class="hi">subRootSerial complete!</span>',
+    phase: 'serialize subRoot',
+    rootActiveNode: null, rootReturnNode: null,
+    subRootActiveNode: null, subRootReturnNode: 'sn4',
+    callStack: [],
+    currentNodeVal: '2',
+    rootTokensBuilt: 11,
+    subRootTokensBuilt: 7,
+    showIncludes: false,
+    subRootSerialComplete: true,
+    log: [
+      { text: '  → traversePreOrder(node=2)', css: 'highlight' },
+      { text: '  serialized += "-2"' },
+      { text: '  left=null  → serialized += "-#"' },
+      { text: '  right=null → serialized += "-#"' },
+      { text: '← serializeTree(subRoot) complete', css: 'phase-done' }
+    ]
+  },
+  // PHASE 3: The includes() check
+  {
+    description: '🎯 Phase 3: Call <em>rootSerial.includes(subRootSerial)</em>. Does the big string contain the small string as a substring?',
+    phase: 'includes check',
+    rootActiveNode: null, rootReturnNode: null,
+    subRootActiveNode: null, subRootReturnNode: null,
+    callStack: ['isSubtree(root, subRoot)'],
+    currentNodeVal: '—',
+    rootTokensBuilt: 11,
+    subRootTokensBuilt: 7,
+    showIncludes: true,
+    includesResult: false,
+    log: [
+      { text: '── Phase 3: substring check ──', css: 'phase-done' },
+      { text: 'rootSerial.includes(subRootSerial)', css: 'highlight' },
+      { text: 'Scanning rootSerial for subRootSerial…' }
+    ]
+  },
+  {
+    description: '<span class="ok">Found it!</span> <em>subRootSerial ("-4-1-#-#-2-#-#")</em> starts at index 2 inside <em>rootSerial</em>. The highlighted section is an exact match. <span class="ok">Returns true.</span>',
+    phase: 'includes check',
+    rootActiveNode: null, rootReturnNode: null,
+    subRootActiveNode: null, subRootReturnNode: null,
+    callStack: [],
+    currentNodeVal: '—',
+    rootTokensBuilt: 11,
+    subRootTokensBuilt: 7,
+    showIncludes: true,
+    includesResult: true,
+    showMatch: true,
+    log: [
+      { text: 'rootSerial.includes(subRootSerial)' },
+      { text: '  match found at index 2!', css: 'highlight' },
+      { text: '  "-4-1-#-#-2-#-#" is a substring ✓' },
+      { text: '→ isSubtree returns true ✓', css: 'final-check' }
+    ]
+  },
+  {
+    description: '✅ <span class="ok">isSubtree(root, subRoot) = true</span>. The subtree rooted at node 4 in the main tree is structurally and numerically identical to subRoot.',
+    phase: 'done',
+    rootActiveNode: null, rootReturnNode: null,
+    subRootActiveNode: null, subRootReturnNode: null,
+    callStack: [],
+    currentNodeVal: '—',
+    rootTokensBuilt: 11,
+    subRootTokensBuilt: 7,
+    showIncludes: true,
+    includesResult: true,
+    showMatch: true,
+    final: true,
+    log: [
+      { text: 'rootSerial    = "-3-4-1-#-#-2-#-#-5-#-#"' },
+      { text: 'subRootSerial =    "-4-1-#-#-2-#-#"' },
+      { text: 'includes() → true ✓', css: 'final-check' },
+      { text: '→ isSubtree returns true ✓', css: 'final-check' }
+    ]
+  }
+];
+
+// ─── Token definitions for the two serial strings ─────────────────────────
+
+const ROOT_TOKENS = [
+  { text: '-3', type: 'node-token' },
+  { text: '-4', type: 'node-token' },
+  { text: '-1', type: 'node-token' },
+  { text: '-#', type: 'null-token' },
+  { text: '-#', type: 'null-token' },
+  { text: '-2', type: 'node-token' },
+  { text: '-#', type: 'null-token' },
+  { text: '-#', type: 'null-token' },
+  { text: '-5', type: 'node-token' },
+  { text: '-#', type: 'null-token' },
+  { text: '-#', type: 'null-token' }
+];
+
+const SUBROOT_TOKENS = [
+  { text: '-4', type: 'node-token' },
+  { text: '-1', type: 'node-token' },
+  { text: '-#', type: 'null-token' },
+  { text: '-#', type: 'null-token' },
+  { text: '-2', type: 'node-token' },
+  { text: '-#', type: 'null-token' },
+  { text: '-#', type: 'null-token' }
+];
+
+// Tokens in rootSerial that match subRootSerial (indices 1–7 in ROOT_TOKENS)
+const MATCH_START_INDEX = 1;
+const MATCH_END_INDEX   = 7;
+
+// ─── State ────────────────────────────────────────────────────────────────
+
+let currentStepIndex = 0;
+let autoPlayTimer     = null;
+
+// ─── Node styling helpers ─────────────────────────────────────────────────
+
+function styleTreeNode(nodeId, state) {
+  const group  = document.getElementById(nodeId);
+  if (!group) return;
+  const circle = group.querySelector('circle');
+  const label  = group.querySelector('text');
+
+  const styles = {
+    active:   { fill: '#1a2035', stroke: '#60a5fa', sw: '2.5', text: '#60a5fa' },
+    active_s: { fill: '#1a1810', stroke: '#fb923c', sw: '2.5', text: '#fb923c' },
+    returning:{ fill: '#0f1f16', stroke: '#34d399', sw: '2.5', text: '#34d399' },
+    matched:  { fill: '#0f1a1a', stroke: '#2dd4bf', sw: '2',   text: '#2dd4bf' },
+    default:  { fill: '#13161d', stroke: '#2a2f3e', sw: '1.5', text: '#6b7280' }
+  };
+
+  const s = styles[state] || styles.default;
+  circle.setAttribute('fill',         s.fill);
+  circle.setAttribute('stroke',       s.stroke);
+  circle.setAttribute('stroke-width', s.sw);
+  label.setAttribute('fill',          s.text);
+}
+
+function resetAllNodes() {
+  ['rn3','rn4','rn5','rn1','rn2'].forEach(id => styleTreeNode(id, 'default'));
+  ['sn4','sn1','sn2'].forEach(id => styleTreeNode(id, 'default'));
+}
+
+// ─── Serial string renderer ───────────────────────────────────────────────
+
+function buildSerialHtml(tokens, builtCount, showMatch, isRootString) {
+  if (builtCount === 0) return '<span style="color:var(--text-dim)">""</span>';
+
+  return tokens.slice(0, builtCount).map((token, index) => {
+    let extraClass = '';
+    if (showMatch && isRootString && index >= MATCH_START_INDEX && index < MATCH_END_INDEX) {
+      extraClass = ' in-match';
+    }
+    const isNewest = (index === builtCount - 1);
+    const activeClass = isNewest ? ' being-added' : '';
+    return `<span class="token ${token.type}${activeClass}${extraClass}">${token.text}</span>`;
+  }).join('');
+}
+
+// ─── Main render function ─────────────────────────────────────────────────
+
+function renderStep(step) {
+  // Node colors
+  resetAllNodes();
+
+  if (step.rootActiveNode)   styleTreeNode(step.rootActiveNode, 'active');
+  if (step.rootReturnNode)   styleTreeNode(step.rootReturnNode, 'returning');
+  if (step.subRootActiveNode) styleTreeNode(step.subRootActiveNode, 'active_s');
+  if (step.subRootReturnNode) styleTreeNode(step.subRootReturnNode, 'returning');
+
+  if (step.showMatch) {
+    ['rn4','rn1','rn2'].forEach(id => styleTreeNode(id, 'matched'));
+    ['sn4','sn1','sn2'].forEach(id => styleTreeNode(id, 'matched'));
+  }
+
+  // Call stack
+  const stackEl = document.getElementById('callStack');
+  const frames  = step.callStack.map((frame, i) => {
+    const isTop = i === step.callStack.length - 1;
+    return `<div class="frame ${isTop ? 'active' : ''}">${frame}</div>`;
+  }).join('');
+  stackEl.innerHTML = frames || '<div class="frame dim" style="color:var(--text-dim)">— empty —</div>';
+
+  // Variables
+  const phaseColors = { 'serialize root': 'blue', 'serialize subRoot': 'orange', 'includes check': 'teal', 'done': 'green' };
+  document.getElementById('varPhase').className       = `var-val ${phaseColors[step.phase] || ''}`;
+  document.getElementById('varPhase').textContent      = step.phase;
+  document.getElementById('varCurrentNode').textContent = step.currentNodeVal;
+
+  const serializedPreview = step.phase === 'serialize root'
+    ? (step.rootTokensBuilt > 0 ? '"' + ROOT_TOKENS.slice(0, step.rootTokensBuilt).map(t => t.text).join('') + '"' : '""')
+    : step.phase === 'serialize subRoot'
+    ? (step.subRootTokensBuilt > 0 ? '"' + SUBROOT_TOKENS.slice(0, step.subRootTokensBuilt).map(t => t.text).join('') + '"' : '""')
+    : '—';
+  document.getElementById('varSerialized').textContent = serializedPreview;
+
+  // Serial strings
+  const showMatch = !!step.showMatch;
+  document.getElementById('rootSerialDisplay').innerHTML =
+    buildSerialHtml(ROOT_TOKENS, step.rootTokensBuilt, showMatch, true);
+
+  document.getElementById('subRootSerialDisplay').innerHTML =
+    buildSerialHtml(SUBROOT_TOKENS, step.subRootTokensBuilt, showMatch, false);
+
+  // Includes result
+  const includesEl = document.getElementById('includesResult');
+  if (!step.showIncludes) {
+    includesEl.className   = 'includes-result includes-pending';
+    includesEl.textContent = 'rootSerial.includes(subRootSerial) → pending…';
+  } else if (step.includesResult) {
+    includesEl.className   = 'includes-result includes-true';
+    includesEl.textContent = '✓ rootSerial.includes(subRootSerial) → true';
+  } else {
+    includesEl.className   = 'includes-result includes-pending';
+    includesEl.textContent = 'rootSerial.includes(subRootSerial) → scanning…';
+  }
+
+  // Log
+  const logEl = document.getElementById('executionLog');
+  logEl.innerHTML = step.log.map(entry =>
+    `<div class="log-entry ${entry.css || ''}">${entry.text}</div>`
+  ).join('');
+  logEl.scrollTop = logEl.scrollHeight;
+
+  // Step label + description
+  document.getElementById('stepLabel').textContent    = `Step ${currentStepIndex + 1} / ${STEPS.length}`;
+  document.getElementById('stepDescription').innerHTML = step.description;
+
+  // Progress bar
+  document.getElementById('progressBar').style.width =
+    ((currentStepIndex + 1) / STEPS.length * 100) + '%';
+
+  // Final badge
+  document.getElementById('resultBadge').style.display = step.final ? 'inline-block' : 'none';
+
+  // Button states
+  document.getElementById('btnPrev').disabled = currentStepIndex === 0;
+  document.getElementById('btnNext').disabled = currentStepIndex === STEPS.length - 1;
+}
+
+// ─── Navigation ───────────────────────────────────────────────────────────
+
+function moveStep(direction) {
+  currentStepIndex = Math.max(0, Math.min(STEPS.length - 1, currentStepIndex + direction));
+  renderStep(STEPS[currentStepIndex]);
+}
+
+document.addEventListener('keydown', event => {
+  if (event.key === 'ArrowRight' || event.key === 'ArrowDown') moveStep(1);
+  if (event.key === 'ArrowLeft'  || event.key === 'ArrowUp')   moveStep(-1);
+});
+
+// ─── Auto-play ────────────────────────────────────────────────────────────
+
+function toggleAutoPlay() {
+  const playButton = document.getElementById('btnPlay');
+  if (autoPlayTimer) {
+    clearInterval(autoPlayTimer);
+    autoPlayTimer = null;
+    playButton.textContent = '▶ Play';
+    playButton.classList.remove('btn-play-active');
+  } else {
+    playButton.textContent = '⏸ Pause';
+    playButton.classList.add('btn-play-active');
+    autoPlayTimer = setInterval(() => {
+      if (currentStepIndex >= STEPS.length - 1) {
+        clearInterval(autoPlayTimer);
+        autoPlayTimer = null;
+        playButton.textContent = '▶ Play';
+        playButton.classList.remove('btn-play-active');
+        return;
+      }
+      moveStep(1);
+    }, 1500);
+  }
+}
+
+// ─── Init ─────────────────────────────────────────────────────────────────
+
+renderStep(STEPS[0]);
+</script>
+</body>
+</html>

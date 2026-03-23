@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Diameter of Binary Tree — Interactive Dry Run</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Sora:wght@300;400;600;700&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #0d0f14; --surface: #13161d; --surface2: #1a1e28; --surface3: #212638;
+      --border: rgba(255,255,255,0.07); --border-mid: rgba(255,255,255,0.12);
+      --text: #e8eaf0; --text-muted: #6b7280; --text-dim: #3d4251;
+      --accent: #7c6ef5; --accent-glow: rgba(124,110,245,0.25);
+      --green: #34d399; --green-bg: rgba(52,211,153,0.1);
+      --amber: #fbbf24; --amber-bg: rgba(251,191,36,0.12);
+      --blue: #60a5fa; --blue-bg: rgba(96,165,250,0.1);
+      --red: #f87171; --red-bg: rgba(248,113,113,0.1);
+      --orange: #fb923c; --orange-bg: rgba(251,146,60,0.1);
+      --purple: #c084fc; --purple-bg: rgba(192,132,252,0.1);
+      --mono: 'JetBrains Mono', monospace; --sans: 'Sora', sans-serif;
+    }
+    html { scroll-behavior: smooth; }
+    body { background: var(--bg); color: var(--text); font-family: var(--sans); font-size: 15px; line-height: 1.6; min-height: 100vh; overflow-x: hidden; }
+    body::before { content: ''; position: fixed; inset: 0; background-image: linear-gradient(rgba(124,110,245,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(124,110,245,0.03) 1px, transparent 1px); background-size: 40px 40px; pointer-events: none; z-index: 0; }
+    .page { position: relative; z-index: 1; max-width: 960px; margin: 0 auto; padding: 3rem 1.5rem 5rem; }
+    .back-nav { display: inline-flex; align-items: center; gap: 8px; font-family: var(--mono); font-size: 12px; color: var(--text-muted); text-decoration: none; padding: 7px 14px 7px 10px; border-radius: 8px; border: 1px solid var(--border); background: var(--surface); margin-bottom: 2rem; transition: all .15s; }
+    .back-nav:hover { border-color: var(--border-mid); color: var(--text); }
+    header { margin-bottom: 2rem; animation: fadeUp .6s ease both; }
+    .tag { display: inline-block; font-family: var(--mono); font-size: 11px; font-weight: 500; letter-spacing: .12em; text-transform: uppercase; color: var(--purple); background: var(--purple-bg); border: 1px solid rgba(192,132,252,0.3); padding: 4px 12px; border-radius: 100px; margin-bottom: 1.2rem; }
+    h1 { font-size: clamp(1.8rem, 5vw, 2.8rem); font-weight: 700; line-height: 1.15; color: var(--text); margin-bottom: .8rem; letter-spacing: -.02em; }
+    h1 span { color: var(--purple); }
+    .subtitle { font-size: 15px; color: var(--text-muted); max-width: 600px; line-height: 1.7; }
+
+    .pattern-banner { display: flex; align-items: flex-start; gap: 16px; background: var(--purple-bg); border: 1px solid rgba(192,132,252,0.25); border-left: 3px solid var(--purple); border-radius: 10px; padding: 14px 18px; margin-bottom: 2rem; animation: fadeUp .6s ease .03s both; flex-wrap: wrap; }
+    .pattern-label { font-family: var(--mono); font-size: 10px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--text-dim); margin-bottom: 4px; }
+    .pattern-name { font-family: var(--mono); font-size: 13px; font-weight: 700; color: var(--purple); }
+    .pattern-desc { font-family: var(--mono); font-size: 12px; color: var(--text-muted); flex: 1; min-width: 200px; }
+    .pattern-solves { font-family: var(--mono); font-size: 11px; color: var(--text-dim); }
+    .pattern-solves span { color: var(--purple); }
+
+    .problem-section { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; margin-bottom: 2rem; animation: fadeUp .6s ease .04s both; }
+    .section-header { display: flex; align-items: center; gap: 10px; padding: 14px 20px; border-bottom: 1px solid var(--border); background: var(--surface2); }
+    .section-header-icon { font-size: 16px; }
+    .section-header-title { font-family: var(--mono); font-size: 11px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--text-muted); }
+    .section-body { padding: 20px; }
+    .section-body p { font-size: 13px; color: var(--text-muted); line-height: 1.75; margin-bottom: 10px; }
+    .section-body p:last-child { margin-bottom: 0; }
+    .section-body p strong { color: var(--text); }
+    .section-body code { font-family: var(--mono); font-size: 11px; background: var(--surface2); padding: 1px 6px; border-radius: 4px; color: var(--accent); }
+
+    .io-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 14px; }
+    .io-card { background: var(--surface2); border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; }
+    .io-label { font-family: var(--mono); font-size: 10px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--text-dim); margin-bottom: 8px; }
+    .io-row { display: flex; justify-content: space-between; font-family: var(--mono); font-size: 12px; padding: 4px 0; border-bottom: 1px solid var(--border); color: var(--text-muted); }
+    .io-row:last-child { border-bottom: none; }
+    .io-row .io-in { color: var(--blue); } .io-row .io-out { color: var(--purple); font-weight: 700; }
+
+    .hints-grid { display: flex; flex-direction: column; gap: 10px; }
+    .hint-step { display: flex; gap: 12px; align-items: flex-start; }
+    .hint-num { font-family: var(--mono); font-size: 11px; font-weight: 700; color: var(--purple); background: var(--purple-bg); border: 1px solid rgba(192,132,252,0.25); padding: 3px 8px; border-radius: 6px; flex-shrink: 0; margin-top: 2px; min-width: 28px; text-align: center; }
+    .hint-text { font-size: 13px; color: var(--text-muted); line-height: 1.7; }
+    .hint-text code { font-family: var(--mono); font-size: 11px; background: var(--surface2); padding: 1px 5px; border-radius: 4px; color: var(--accent); }
+    .hint-text strong { color: var(--text); }
+    .intuition-box { background: var(--purple-bg); border: 1px solid rgba(192,132,252,0.2); border-radius: 10px; padding: 16px 18px; margin-top: 14px; }
+    .intuition-box p { font-size: 13px; color: var(--text-muted); line-height: 1.75; }
+    .intuition-box p strong { color: var(--purple); }
+
+    .key-insight { background: var(--amber-bg); border: 1px solid rgba(251,191,36,0.2); border-left: 3px solid var(--amber); border-radius: 10px; padding: 14px 18px; margin-bottom: 2rem; font-size: 13px; color: var(--text-muted); font-family: var(--mono); animation: fadeUp .6s ease .05s both; line-height: 1.7; }
+    .key-insight strong { color: var(--amber); }
+
+    .code-block { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; margin-bottom: 2rem; animation: fadeUp .6s ease .1s both; }
+    .code-header { display: flex; align-items: center; gap: 8px; padding: 12px 16px; border-bottom: 1px solid var(--border); background: var(--surface2); }
+    .code-header span { font-family: var(--mono); font-size: 12px; color: var(--text-muted); }
+    .dots { display: flex; gap: 6px; }
+    .dot { width: 10px; height: 10px; border-radius: 50%; }
+    .dot-r { background: #ff5f57; } .dot-y { background: #ffbd2e; } .dot-g { background: #28c940; }
+    pre { padding: 1.25rem 1.5rem; overflow-x: auto; font-family: var(--mono); font-size: 13px; line-height: 1.8; color: #c9d1d9; }
+    .kw { color: #ff79c6; } .fn { color: #50fa7b; } .cm { color: #6272a4; font-style: italic; } .num { color: #bd93f9; } .var { color: #8be9fd; } .hl { background: rgba(192,132,252,0.12); border-radius: 3px; padding: 0 3px; }
+
+    .section-label { font-family: var(--mono); font-size: 11px; font-weight: 500; letter-spacing: .1em; text-transform: uppercase; color: var(--text-dim); margin-bottom: 1rem; margin-top: 2.5rem; }
+
+    .examples-row { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 1.5rem; }
+    .ex-btn { display: inline-flex; align-items: center; gap: 8px; padding: 9px 16px; border-radius: 10px; border: 1px solid var(--border); background: var(--surface); cursor: pointer; transition: all .18s; font-family: var(--mono); font-size: 12px; font-weight: 600; color: var(--text-muted); user-select: none; }
+    .ex-btn:hover { border-color: var(--border-mid); color: var(--text); transform: translateY(-1px); }
+    .ex-btn.active { background: var(--purple-bg); border-color: rgba(192,132,252,0.4); color: var(--purple); transform: translateY(-1px); }
+    .ex-badge { font-size: 9px; font-weight: 700; padding: 2px 7px; border-radius: 5px; background: var(--surface3); color: var(--text-dim); }
+    .ex-btn.active .ex-badge { background: rgba(255,255,255,0.1); color: inherit; }
+
+    .viz-card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; overflow: hidden; animation: fadeUp .6s ease .2s both; }
+    .progress-bar-wrap { height: 3px; background: var(--border); }
+    .progress-bar-inner { height: 100%; background: linear-gradient(90deg, var(--purple), #a78bfa); transition: width .35s cubic-bezier(.4,0,.2,1); border-radius: 0 2px 2px 0; }
+    .controls { display: flex; align-items: center; gap: 10px; padding: 14px 20px; border-bottom: 1px solid var(--border); background: var(--surface2); flex-wrap: wrap; }
+    .btn { display: inline-flex; align-items: center; gap: 6px; font-family: var(--mono); font-size: 12px; font-weight: 500; padding: 7px 16px; border-radius: 8px; border: 1px solid var(--border-mid); background: var(--surface3); color: var(--text); cursor: pointer; transition: all .15s; }
+    .btn:hover:not(:disabled) { background: var(--purple-bg); border-color: var(--purple); color: var(--purple); }
+    .btn:disabled { opacity: .3; cursor: default; }
+    .btn-play { background: var(--purple-bg) !important; border-color: rgba(192,132,252,0.4) !important; color: var(--purple) !important; }
+    .btn-reset { background: var(--red-bg) !important; border-color: rgba(248,113,113,0.3) !important; color: var(--red) !important; }
+    .step-info { flex: 1; font-size: 13px; color: var(--text-muted); font-family: var(--mono); }
+    kbd { font-size: 10px; background: var(--surface3); border: 1px solid var(--border-mid); padding: 2px 5px; border-radius: 4px; color: var(--text-muted); font-family: var(--mono); }
+    .result-badge { font-family: var(--mono); font-size: 11px; font-weight: 700; letter-spacing: .06em; padding: 4px 12px; border-radius: 100px; text-transform: uppercase; }
+    .badge-done { background: var(--purple-bg); color: var(--purple); border: 1px solid rgba(192,132,252,0.3); }
+    .step-desc { padding: 12px 20px; font-size: 13px; color: var(--text-muted); background: var(--surface2); border-bottom: 1px solid var(--border); font-family: var(--mono); min-height: 44px; line-height: 1.6; }
+    .step-desc em { color: var(--amber); font-style: normal; }
+    .step-desc .ok { color: var(--green); font-weight: 600; }
+    .step-desc .new { color: var(--purple); font-weight: 700; }
+
+    .main-grid { display: grid; grid-template-columns: 1fr 310px; }
+    .tree-panel { padding: 24px 20px; border-right: 1px solid var(--border); }
+    .panel-label { font-family: var(--mono); font-size: 10px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--text-dim); margin-bottom: 10px; }
+    #tree-svg { width: 100%; }
+    .side-panel { display: flex; flex-direction: column; }
+
+    .diam-tracker { margin: 14px 16px 12px; padding: 12px 14px; background: var(--surface3); border: 1px solid var(--border-mid); border-radius: 10px; display: flex; align-items: center; justify-content: space-between; }
+    .diam-label { font-family: var(--mono); font-size: 11px; color: var(--text-muted); }
+    .diam-val { font-family: var(--mono); font-size: 20px; font-weight: 700; color: var(--amber); transition: color .3s, transform .2s; }
+    .diam-val.updated { color: var(--purple); transform: scale(1.3); }
+
+    .stack-panel { padding: 14px 16px; border-bottom: 1px solid var(--border); }
+    .call-stack { display: flex; flex-direction: column-reverse; gap: 4px; min-height: 52px; }
+    .frame { padding: 5px 10px; border-radius: 6px; font-size: 11px; font-family: var(--mono); border: 1px solid var(--border); background: var(--surface2); color: var(--text-muted); transition: all .2s; }
+    .frame.active { border-color: rgba(96,165,250,0.4); background: var(--blue-bg); color: var(--blue); }
+    .frame.returning { border-color: rgba(52,211,153,0.3); background: var(--green-bg); color: var(--green); }
+    .vars-panel { padding: 14px 16px; border-bottom: 1px solid var(--border); }
+    .var-row { display: flex; justify-content: space-between; align-items: center; padding: 4px 0; border-bottom: 1px solid var(--border); font-size: 12px; }
+    .var-row:last-child { border-bottom: none; }
+    .var-name { font-family: var(--mono); color: var(--text-muted); }
+    .var-val { font-family: var(--mono); font-weight: 700; color: var(--amber); }
+    .var-val.good { color: var(--green); } .var-val.neutral { color: var(--text); } .var-val.purple { color: var(--purple); }
+    .log-panel { padding: 14px 16px; flex: 1; }
+    .log { font-size: 11px; font-family: var(--mono); line-height: 1.9; color: var(--text-dim); max-height: 160px; overflow-y: auto; }
+    .log::-webkit-scrollbar { width: 4px; }
+    .log::-webkit-scrollbar-thumb { background: var(--border-mid); border-radius: 2px; }
+    .entry.hl { color: var(--text); } .entry.upd { color: var(--purple); font-weight: 600; } .entry.ok { color: var(--green); }
+
+    .revision-section { margin-top: 2.5rem; animation: fadeUp .6s ease .3s both; }
+    .explain-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-bottom: 16px; }
+    .explain-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 16px 18px; }
+    .explain-card .icon { font-size: 18px; margin-bottom: 8px; }
+    .explain-card h3 { font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 6px; }
+    .explain-card p { font-size: 12px; color: var(--text-muted); line-height: 1.7; }
+    .explain-card code { font-family: var(--mono); font-size: 11px; background: var(--surface2); padding: 1px 5px; border-radius: 4px; color: var(--accent); }
+    .mental-model { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; margin-bottom: 16px; }
+    .mental-model-header { display: flex; align-items: center; gap: 8px; padding: 12px 18px; border-bottom: 1px solid var(--border); background: var(--surface2); }
+    .mental-model-title { font-family: var(--mono); font-size: 11px; font-weight: 700; color: var(--amber); }
+    .mental-model-body { padding: 18px; display: flex; flex-direction: column; gap: 10px; }
+    .mm-item { display: flex; gap: 10px; align-items: flex-start; }
+    .mm-bullet { font-family: var(--mono); font-size: 12px; color: var(--amber); font-weight: 700; flex-shrink: 0; margin-top: 2px; }
+    .mm-text { font-size: 13px; color: var(--text-muted); line-height: 1.7; }
+    .mm-text strong { color: var(--text); } .mm-text code { font-family: var(--mono); font-size: 11px; background: var(--surface2); padding: 1px 5px; border-radius: 4px; color: var(--accent); }
+    .edge-cases-card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; margin-bottom: 16px; }
+    .edge-cases-header { display: flex; align-items: center; gap: 8px; padding: 12px 18px; border-bottom: 1px solid var(--border); background: var(--surface2); }
+    .edge-title { font-family: var(--mono); font-size: 11px; font-weight: 700; color: var(--red); }
+    .edge-list-wrap { display: flex; flex-direction: column; }
+    .edge-item { display: flex; gap: 12px; align-items: flex-start; padding: 12px 18px; border-bottom: 1px solid var(--border); }
+    .edge-item:last-child { border-bottom: none; }
+    .edge-lbl { font-family: var(--mono); font-size: 9px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; padding: 3px 8px; border-radius: 5px; flex-shrink: 0; margin-top: 2px; }
+    .edge-lbl.warn { background: var(--red-bg); color: var(--red); border: 1px solid rgba(248,113,113,0.25); }
+    .edge-lbl.ok { background: var(--green-bg); color: var(--green); border: 1px solid rgba(52,211,153,0.25); }
+    .edge-txt { font-size: 12px; color: var(--text-muted); line-height: 1.65; }
+    .edge-txt code { font-family: var(--mono); font-size: 11px; background: var(--surface2); padding: 1px 5px; border-radius: 4px; color: var(--accent); }
+    .best-solution { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; margin-bottom: 16px; }
+    .best-solution-header { display: flex; align-items: center; justify-content: space-between; padding: 12px 18px; border-bottom: 1px solid var(--border); background: var(--surface2); flex-wrap: wrap; gap: 8px; }
+    .best-solution-title { font-family: var(--mono); font-size: 11px; font-weight: 700; color: var(--green); }
+    .sol-pills { display: flex; gap: 6px; flex-wrap: wrap; }
+    .sol-pill { font-family: var(--mono); font-size: 10px; padding: 3px 9px; border-radius: 6px; background: var(--surface3); border: 1px solid var(--border-mid); color: var(--text-muted); }
+    .complexity { display: flex; gap: 10px; margin-top: 1.5rem; flex-wrap: wrap; }
+    .cpill { font-family: var(--mono); font-size: 12px; padding: 6px 14px; border-radius: 8px; border: 1px solid var(--border); background: var(--surface); }
+    .cpill strong { color: var(--accent); font-weight: 700; }
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+    @media (max-width: 680px) { .main-grid { grid-template-columns: 1fr; } .tree-panel { border-right: none; border-bottom: 1px solid var(--border); } .io-grid { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+<div class="page">
+  <a class="back-nav" href="../dsa-hub.html">← All problems</a>
+
+  <header>
+    <div class="tag">LeetCode #543 · Algorithm Dry Run</div>
+    <h1><span>Diameter</span> of Binary Tree</h1>
+    <p class="subtitle">Step-by-step trace of <code style="font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--accent);background:var(--surface);padding:2px 7px;border-radius:5px;">diameterOfBinaryTree</code> — watch depth propagate bottom-up and the diameter captured at the right node, not necessarily the root.</p>
+  </header>
+
+  <div class="pattern-banner">
+    <div>
+      <div class="pattern-label">Pattern</div>
+      <div class="pattern-name">🎯 Post-order DFS + Global Max Closure</div>
+    </div>
+    <div class="pattern-desc">At every node compute leftDepth + rightDepth as a path candidate. Update global max. Return only one arm upward.</div>
+    <div class="pattern-solves">Same pattern unlocks: <span>#124 Max Path Sum · #110 Balanced Tree · #687 Longest Univalue Path</span></div>
+  </div>
+
+  <div class="problem-section">
+    <div class="section-header"><span class="section-header-icon">📋</span><span class="section-header-title">Problem Statement</span></div>
+    <div class="section-body">
+      <p>Given a binary tree, return the length of the <strong>diameter</strong> — the longest path between any two nodes. The path length is measured in <strong>number of edges</strong>.</p>
+      <p>🔑 The path <strong>does NOT need to pass through the root</strong>. It can bend at any node. This is the most important insight.</p>
+
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;margin-top:16px">
+        <!-- Ex 1: [1,2,3,4,5] → diameter = 3 -->
+        <div style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;overflow:hidden">
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 14px;border-bottom:1px solid var(--border)">
+            <span style="font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--text-dim)">Tree [1,2,3,4,5]</span>
+            <span style="font-family:var(--mono);font-size:11px;font-weight:700;padding:2px 10px;border-radius:5px;background:rgba(192,132,252,.12);color:#c084fc;border:1px solid rgba(192,132,252,.25)">diameter = 3</span>
+          </div>
+          <div style="padding:12px;display:flex;justify-content:center">
+            <svg viewBox="0 0 200 130" style="max-height:110px;width:100%">
+              <line x1="100" y1="28" x2="58" y2="62" stroke="#1e2231" stroke-width="2"/>
+              <line x1="100" y1="28" x2="148" y2="62" stroke="#1e2231" stroke-width="2"/>
+              <line x1="46" y1="80" x2="24" y2="108" stroke="#1e2231" stroke-width="2"/>
+              <line x1="70" y1="80" x2="94" y2="108" stroke="#1e2231" stroke-width="2"/>
+              <!-- diameter path: 4→2→1→3 highlighted -->
+              <line x1="24" y1="106" x2="46" y2="82" stroke="#c084fc" stroke-width="2.5" stroke-linecap="round"/>
+              <line x1="70" y1="82" x2="100" y2="30" stroke="#c084fc" stroke-width="2.5" stroke-linecap="round"/>
+              <line x1="100" y1="30" x2="148" y2="62" stroke="#c084fc" stroke-width="2.5" stroke-linecap="round"/>
+              <circle cx="100" cy="20" r="18" fill="#13161d" stroke="#3d4251" stroke-width="1.5"/>
+              <text x="100" y="24" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="12" font-weight="700" fill="#6b7280">1</text>
+              <circle cx="56" cy="72" r="17" fill="#1a1030" stroke="#c084fc" stroke-width="2"/>
+              <text x="56" y="76" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="12" font-weight="700" fill="#c084fc">2</text>
+              <circle cx="150" cy="72" r="17" fill="#1a1030" stroke="#c084fc" stroke-width="2"/>
+              <text x="150" y="76" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="12" font-weight="700" fill="#c084fc">3</text>
+              <circle cx="22" cy="112" r="13" fill="#1a1030" stroke="#c084fc" stroke-width="2"/>
+              <text x="22" y="116" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="11" font-weight="700" fill="#c084fc">4</text>
+              <circle cx="96" cy="112" r="13" fill="#13161d" stroke="#3d4251" stroke-width="1.5"/>
+              <text x="96" y="116" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="11" font-weight="700" fill="#6b7280">5</text>
+              <text x="4" y="8" font-family="'JetBrains Mono',monospace" font-size="8" fill="#c084fc">path: 4→2→1→3 = 3 edges</text>
+            </svg>
+          </div>
+        </div>
+        <!-- Ex 2: [1,2] → diameter = 1 -->
+        <div style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;overflow:hidden">
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 14px;border-bottom:1px solid var(--border)">
+            <span style="font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--text-dim)">Tree [1,2]</span>
+            <span style="font-family:var(--mono);font-size:11px;font-weight:700;padding:2px 10px;border-radius:5px;background:rgba(192,132,252,.12);color:#c084fc;border:1px solid rgba(192,132,252,.25)">diameter = 1</span>
+          </div>
+          <div style="padding:12px;display:flex;justify-content:center">
+            <svg viewBox="0 0 160 90" style="max-height:80px;width:100%">
+              <line x1="100" y1="30" x2="60" y2="60" stroke="#c084fc" stroke-width="2.5" stroke-linecap="round"/>
+              <circle cx="100" cy="22" r="18" fill="#1a1030" stroke="#c084fc" stroke-width="2"/>
+              <text x="100" y="26" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="12" font-weight="700" fill="#c084fc">1</text>
+              <circle cx="58" cy="68" r="18" fill="#1a1030" stroke="#c084fc" stroke-width="2"/>
+              <text x="58" y="72" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="12" font-weight="700" fill="#c084fc">2</text>
+              <text x="4" y="10" font-family="'JetBrains Mono',monospace" font-size="8" fill="#c084fc">1 edge = diameter 1</text>
+            </svg>
+          </div>
+        </div>
+        <!-- Ex 3: [1] → diameter = 0 -->
+        <div style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;overflow:hidden">
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 14px;border-bottom:1px solid var(--border)">
+            <span style="font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--text-dim)">Tree [1] — single node</span>
+            <span style="font-family:var(--mono);font-size:11px;font-weight:700;padding:2px 10px;border-radius:5px;background:rgba(192,132,252,.12);color:#c084fc;border:1px solid rgba(192,132,252,.25)">diameter = 0</span>
+          </div>
+          <div style="padding:12px;display:flex;justify-content:center">
+            <svg viewBox="0 0 160 80" style="max-height:70px;width:100%">
+              <circle cx="80" cy="38" r="22" fill="#13161d" stroke="#3d4251" stroke-width="1.5"/>
+              <text x="80" y="42" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="14" font-weight="700" fill="#6b7280">1</text>
+              <text x="10" y="14" font-family="'JetBrains Mono',monospace" font-size="8" fill="#3d4251">no edges → diameter 0</text>
+            </svg>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="problem-section">
+    <div class="section-header"><span class="section-header-icon">💡</span><span class="section-header-title">Intuition + Hints</span></div>
+    <div class="section-body">
+      <div class="hints-grid">
+        <div class="hint-step"><span class="hint-num">1</span><div class="hint-text">Every path has one <strong>highest point</strong> — a "bend" node where it turns. At that bend, path length = <code>leftDepth + rightDepth</code>. Think of the path as two arms stretching from a single peak node.
+          <div style="margin-top:10px">
+            <svg viewBox="0 0 220 100" style="max-height:90px;width:100%;border-radius:8px;background:var(--surface2);padding:4px">
+              <line x1="110" y1="28" x2="60" y2="64" stroke="#1e2231" stroke-width="1.5"/>
+              <line x1="110" y1="28" x2="160" y2="64" stroke="#1e2231" stroke-width="1.5"/>
+              <line x1="48" y1="80" x2="30" y2="96" stroke="#1e2231" stroke-width="1.5"/>
+              <line x1="72" y1="80" x2="92" y2="96" stroke="#1e2231" stroke-width="1.5"/>
+              <line x1="148" y1="80" x2="130" y2="96" stroke="#1e2231" stroke-width="1.5"/>
+              <line x1="172" y1="80" x2="190" y2="96" stroke="#1e2231" stroke-width="1.5"/>
+              <!-- bend at node 2, path stretches left and right -->
+              <line x1="30" y1="95" x2="48" y2="82" stroke="#c084fc" stroke-width="2" stroke-linecap="round"/>
+              <line x1="48" y1="82" x2="60" y2="65" stroke="#c084fc" stroke-width="2" stroke-linecap="round"/>
+              <line x1="60" y1="65" x2="72" y2="82" stroke="#c084fc" stroke-width="2" stroke-linecap="round"/>
+              <line x1="72" y1="82" x2="92" y2="95" stroke="#c084fc" stroke-width="2" stroke-linecap="round"/>
+              <circle cx="110" cy="20" r="16" fill="#13161d" stroke="#2a2f3e" stroke-width="1.5"/>
+              <text x="110" y="24" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="11" font-weight="700" fill="#6b7280">1</text>
+              <circle cx="58" cy="72" r="16" fill="#1a1030" stroke="#c084fc" stroke-width="2.5"/>
+              <text x="58" y="76" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="11" font-weight="700" fill="#c084fc">2</text>
+              <text x="14" y="64" font-family="'JetBrains Mono',monospace" font-size="8" fill="#c084fc">bend!</text>
+              <circle cx="160" cy="72" r="16" fill="#13161d" stroke="#2a2f3e" stroke-width="1.5"/>
+              <text x="160" y="76" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="11" font-weight="700" fill="#6b7280">3</text>
+              <circle cx="28" cy="97" r="12" fill="#1a1030" stroke="#c084fc" stroke-width="1.5"/>
+              <text x="28" y="101" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="9" font-weight="700" fill="#c084fc">4</text>
+              <circle cx="92" cy="97" r="12" fill="#1a1030" stroke="#c084fc" stroke-width="1.5"/>
+              <text x="92" y="101" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="9" font-weight="700" fill="#c084fc">5</text>
+              <circle cx="130" cy="97" r="12" fill="#13161d" stroke="#2a2f3e" stroke-width="1.5"/>
+              <text x="130" y="101" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="9" font-weight="700" fill="#6b7280">6</text>
+              <circle cx="190" cy="97" r="12" fill="#13161d" stroke="#2a2f3e" stroke-width="1.5"/>
+              <text x="190" y="101" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="9" font-weight="700" fill="#6b7280">7</text>
+              <text x="36" y="58" font-family="'JetBrains Mono',monospace" font-size="7" fill="#c084fc">leftD=1   rightD=1  →  diam@2=2</text>
+            </svg>
+          </div>
+        </div></div>
+        <div class="hint-step"><span class="hint-num">2</span><div class="hint-text">You don't know which node is the bend in advance. So check <strong>every node</strong> as a potential bend, keeping a running max.</div></div>
+        <div class="hint-step"><span class="hint-num">3</span><div class="hint-text">What does a node <strong>return</strong> to its parent? Its <strong>depth</strong> — so the parent can compute its own candidate diameter. Return <code>1 + max(leftDepth, rightDepth)</code>.</div></div>
+        <div class="hint-step"><span class="hint-num">4</span><div class="hint-text">Use a <strong>closure variable</strong> <code>maxDiameter = 0</code>. Update it at every node. Helper returns a number (depth), not the answer.</div></div>
+      </div>
+      <div class="intuition-box">
+        <p><strong>Core insight:</strong> The function has two roles — it <em>returns depth</em> (for the parent's use) while <em>computing diameter internally</em> (updating maxDiameter). One traversal, two purposes. This separation is the entire trick.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="key-insight">
+    ⚡ <strong>Critical:</strong> The widest path might NOT pass through the root. In the tree [1,2,3,4,5,null,null,6,7], the diameter goes through node 2, not node 1. Always update <code>maxDiameter</code> at <em>every</em> node — not just the root.
+  </div>
+
+  <div class="code-block">
+    <div class="code-header"><div class="dots"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div></div><span>diameterOfBinaryTree.js</span></div>
+    <pre><span class="kw">var</span> <span class="fn">diameterOfBinaryTree</span> = <span class="kw">function</span>(<span class="var">root</span>) {
+  <span class="kw">let</span> <span class="var">maxDiameter</span> = <span class="num">0</span>;                          <span class="cm">// single node = 0 edges</span>
+
+  <span class="kw">function</span> <span class="fn">getDepth</span>(<span class="var">curr</span>) {
+    <span class="kw">if</span> (!<span class="var">curr</span>) <span class="kw">return</span> <span class="num">0</span>;                        <span class="cm">// null → 0 depth</span>
+
+    <span class="kw">let</span> <span class="var">leftD</span>  = <span class="fn">getDepth</span>(<span class="var">curr</span>.left);
+    <span class="kw">let</span> <span class="var">rightD</span> = <span class="fn">getDepth</span>(<span class="var">curr</span>.right);
+
+    <span class="hl"><span class="var">maxDiameter</span> = Math.<span class="fn">max</span>(<span class="var">maxDiameter</span>, <span class="var">leftD</span> + <span class="var">rightD</span>);</span> <span class="cm">// ← THE KEY LINE</span>
+
+    <span class="kw">return</span> <span class="num">1</span> + Math.<span class="fn">max</span>(<span class="var">leftD</span>, <span class="var">rightD</span>);          <span class="cm">// return depth to parent</span>
+  }
+
+  <span class="fn">getDepth</span>(<span class="var">root</span>);
+  <span class="kw">return</span> <span class="var">maxDiameter</span>;
+};</pre>
+  </div>
+
+  <p class="section-label">// Interactive dry run — choose an example</p>
+
+  <div class="examples-row" id="examples-row">
+    <button class="ex-btn active" data-ex="0">Example 1 <span class="ex-badge">Diameter at Node 2</span></button>
+    <button class="ex-btn" data-ex="1">Example 2 <span class="ex-badge">Root is Bend</span></button>
+    <button class="ex-btn" data-ex="2">Example 3 <span class="ex-badge">Single Node</span></button>
+    <button class="ex-btn" data-ex="3">Example 4 <span class="ex-badge">Linear Chain</span></button>
+  </div>
+
+  <div class="viz-card">
+    <div class="progress-bar-wrap"><div class="progress-bar-inner" id="prog" style="width:5%"></div></div>
+    <div class="controls">
+      <button class="btn" id="btn-prev" onclick="move(-1)" disabled>← Prev</button>
+      <button class="btn btn-play" id="btn-play" onclick="togglePlay()">▶ Play</button>
+      <button class="btn" id="btn-next" onclick="move(1)">Next →</button>
+      <button class="btn btn-reset" onclick="reset()">↺ Reset</button>
+      <span class="step-info" id="step-label">Step 1 / ?</span>
+      <span style="font-family:var(--mono);font-size:11px;color:var(--text-dim);display:flex;gap:4px;align-items:center"><kbd>←</kbd><kbd>→</kbd></span>
+      <span class="result-badge badge-done" id="ans-badge" style="display:none">⬦ diameter = ?</span>
+    </div>
+    <div class="step-desc" id="step-desc">Loading...</div>
+    <div class="main-grid">
+      <div class="tree-panel">
+        <div class="panel-label" id="tree-label">// binary tree</div>
+        <svg id="tree-svg" viewBox="0 0 460 280" width="100%"></svg>
+      </div>
+      <div class="side-panel">
+        <div style="padding:14px 16px 0">
+          <div class="panel-label">// maxDiameter (global)</div>
+          <div class="diam-tracker">
+            <span class="diam-label">maxDiameter =</span>
+            <span class="diam-val" id="diam-display">0</span>
+          </div>
+        </div>
+        <div class="stack-panel">
+          <div class="panel-label">// call stack</div>
+          <div class="call-stack" id="stack"></div>
+        </div>
+        <div class="vars-panel">
+          <div class="panel-label">// local variables</div>
+          <div class="var-row"><span class="var-name">curr.val</span>    <span class="var-val neutral" id="v-curr">—</span></div>
+          <div class="var-row"><span class="var-name">leftDepth</span>   <span class="var-val" id="v-ld">—</span></div>
+          <div class="var-row"><span class="var-name">rightDepth</span>  <span class="var-val" id="v-rd">—</span></div>
+          <div class="var-row"><span class="var-name">currDiam</span>    <span class="var-val purple" id="v-cd">—</span></div>
+          <div class="var-row"><span class="var-name">returns</span>     <span class="var-val good" id="v-ret">—</span></div>
+        </div>
+        <div class="log-panel">
+          <div class="panel-label">// execution log</div>
+          <div class="log" id="log"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="revision-section">
+    <p class="section-label">// revision — lock this in your memory</p>
+
+    <div class="mental-model">
+      <div class="mental-model-header"><span style="font-size:16px">🧠</span><span class="mental-model-title">Mental Model — 30-second recall</span></div>
+      <div class="mental-model-body">
+        <div class="mm-item"><span class="mm-bullet">▸</span><div class="mm-text"><strong>Every path bends at exactly one node.</strong> At that bend node, path length = left arm + right arm. Your job: try every node as the bend, pick the biggest.</div></div>
+        <div class="mm-item"><span class="mm-bullet">▸</span><div class="mm-text"><strong>Two different computations at every node:</strong> (1) compute <code>leftD + rightD</code> for the diameter candidate, (2) return <code>1 + max(leftD, rightD)</code> as your depth to the parent. Don't confuse them.</div></div>
+        <div class="mm-item"><span class="mm-bullet">▸</span><div class="mm-text"><strong>Why closure variable?</strong> The helper returns depth (a number). If it also returned the diameter, you'd need to return two values. Easier to capture diameter in an outer variable.</div></div>
+        <div class="mm-item"><span class="mm-bullet">▸</span><div class="mm-text"><strong>Initialize maxDiameter = 0</strong>, not -Infinity. A single node has diameter 0 (no edges). This is correct by default.</div></div>
+      </div>
+    </div>
+
+    <div class="explain-grid">
+      <div class="explain-card"><div class="icon">🌿</div><h3>Base case</h3><p><code>curr === null</code> returns 0. Leaf nodes get depth 1 because <code>1 + max(0,0) = 1</code>.</p></div>
+      <div class="explain-card"><div class="icon">📏</div><h3>Diameter at a node</h3><p><code>leftDepth + rightDepth</code> counts edges of the longest path where <code>curr</code> is the highest (bend) point.</p></div>
+      <div class="explain-card"><div class="icon">🔝</div><h3>Why update everywhere</h3><p>The widest path could bend at <em>any</em> node. We can't know which one, so check at every node and keep the global max.</p></div>
+      <div class="explain-card"><div class="icon">↑</div><h3>What gets returned</h3><p>Returns <code>1 + max(lD, rD)</code> — depth of this subtree — so the parent can compute its own diameter check.</p></div>
+    </div>
+
+    <div class="edge-cases-card">
+      <div class="edge-cases-header"><span style="font-size:16px">⚠️</span><span class="edge-title">Edge Cases</span></div>
+      <div class="edge-list-wrap">
+        <div class="edge-item"><span class="edge-lbl warn">null</span><span class="edge-txt">Empty tree → return 0. <code>getDepth(null)</code> returns 0. <code>maxDiameter</code> never updated, stays 0.</span></div>
+        <div class="edge-item"><span class="edge-lbl warn">single</span><span class="edge-txt">Single node → lD=0, rD=0, diameter=0+0=0. Correct — no edges exist.</span></div>
+        <div class="edge-item"><span class="edge-lbl warn">not root</span><span class="edge-txt"><strong>Diameter does NOT go through root</strong> in many trees. Always update at every node, not just root.</span></div>
+        <div class="edge-item"><span class="edge-lbl ok">edges</span><span class="edge-txt"><code>leftD + rightD</code> counts edges naturally. No need to subtract 1. Depth measures edges from a node to deepest leaf.</span></div>
+      </div>
+    </div>
+
+    <div class="best-solution">
+      <div class="best-solution-header">
+        <span class="best-solution-title">✦ Clean solution for revision</span>
+        <div class="sol-pills"><span class="sol-pill">O(n) time</span><span class="sol-pill">O(h) space</span><span class="sol-pill">Post-order DFS</span><span class="sol-pill">Closure var</span></div>
+      </div>
+      <pre><span class="kw">var</span> <span class="fn">diameterOfBinaryTree</span> = <span class="kw">function</span>(<span class="var">root</span>) {
+  <span class="kw">let</span> <span class="var">max</span> = <span class="num">0</span>;
+  <span class="kw">function</span> <span class="fn">depth</span>(<span class="var">n</span>) {
+    <span class="kw">if</span> (!<span class="var">n</span>) <span class="kw">return</span> <span class="num">0</span>;
+    <span class="kw">let</span> <span class="var">l</span> = <span class="fn">depth</span>(<span class="var">n</span>.left), <span class="var">r</span> = <span class="fn">depth</span>(<span class="var">n</span>.right);
+    <span class="var">max</span> = Math.<span class="fn">max</span>(<span class="var">max</span>, <span class="var">l</span> + <span class="var">r</span>);           <span class="cm">// diameter candidate at this bend</span>
+    <span class="kw">return</span> <span class="num">1</span> + Math.<span class="fn">max</span>(<span class="var">l</span>, <span class="var">r</span>);             <span class="cm">// depth reported to parent</span>
+  }
+  <span class="fn">depth</span>(<span class="var">root</span>);
+  <span class="kw">return</span> <span class="var">max</span>;
+};
+<span class="cm">// Pattern: Post-order DFS + Closure Variable
+// At every node: update max with l+r, return 1+max(l,r)</span></pre>
+    </div>
+
+    <div class="complexity">
+      <div class="cpill">Time: <strong>O(n)</strong> — each node visited once</div>
+      <div class="cpill">Space: <strong>O(h)</strong> — call stack = tree height</div>
+      <div class="cpill">Pattern: <strong>post-order</strong> traversal</div>
+      <div class="cpill">Global state: <strong>closure variable</strong></div>
+    </div>
+  </div>
+</div>
+
+<script>
+/*
+  Example 1: [1,2,3,4,5]  tree:      1          Diameter at node 2: path 4-2-5 = 2
+                                     /\          Wait: depth(4)=1, depth(5)=1
+                                    2   3        at node 2: lD=1, rD=1, diam=2
+                                   / \           at node 1: lD=2, rD=1, diam=3
+                                  4    5         maxDiameter = 3 (path 4-2-1-3)
+  Actually the path 4→2→1→3 has 3 edges. And 5→2→1→3 also 3. Answer=3.
+  But at node 2: lD=1+rD=1 → diam=2 (path 4-2-5)
+  At node 1: lD=depth(2)=2, rD=depth(3)=1, diam=3 → max updates to 3
+  So actually diameter IS at root here. Let me use [1,2,3,4,5,null,null,6,7] for "not at root"
+
+  Example 1: tree [1,2,3,4,5] — diameter=3, found at root node 1 (path 4-2-1-3)
+  Example 2: tree [1,2,null,3,4] — diameter found at node 2 not root
+    tree:    1        depth(3)=1, depth(4)=1
+            /         at node 2: lD=1,rD=1,diam=2 ← found here
+           2           at node 1: lD=2,rD=0,diam=2 (stays 2)
+          / \          Answer: 2
+         3    4
+*/
+
+const EXAMPLES = [
+  {
+    label:"[1, 2, 3, 4, 5] — Diameter at Root",
+    treeLabel:"[1, 2, 3, 4, 5]",
+    answer:3,
+    viewBox:"0 0 500 280",
+    nodes:[
+      {id:"n1",val:1,cx:250,cy:38,r:26},
+      {id:"n2",val:2,cx:130,cy:120,r:24},
+      {id:"n3",val:3,cx:380,cy:120,r:24},
+      {id:"n4",val:4,cx:65,cy:202,r:21},
+      {id:"n5",val:5,cx:195,cy:202,r:21},
+    ],
+    edges:[
+      {x1:228,y1:52,x2:152,y2:106},{x1:272,y1:52,x2:358,y2:106},
+      {x1:112,y1:138,x2:80,y2:186},{x1:148,y1:138,x2:178,y2:186},
+    ],
+    pathEdges:[
+      {id:"pe1",x1:80,y1:184,x2:113,y2:140},{id:"pe2",x1:149,y1:139,x2:232,y2:55},
+      {id:"pe3",x1:268,y1:55,x2:356,y2:107}
+    ],
+    depthBadges:[
+      {id:"d1",x:280,y:28},{id:"d2",x:158,y:110},{id:"d3",x:408,y:110},
+      {id:"d4",x:90,y:194},{id:"d5",x:220,y:194},
+    ],
+    steps:[
+      {desc:'Call <em>getDepth(1)</em> — root. Recursing left.',active:"n1",ret:null,pathNodes:[],stack:["getDepth(1)"],curr:"1",ld:"—",rd:"—",cd:"—",ret:"—",maxD:0,mu:false,depths:{},log:[{t:"→ getDepth(1)",h:true}]},
+      {desc:'Recurse left → <em>getDepth(2)</em>.',active:"n2",ret:null,pathNodes:[],stack:["getDepth(1)","getDepth(2)"],curr:"2",ld:"—",rd:"—",cd:"—",ret:"—",maxD:0,mu:false,depths:{},log:[{t:"→ getDepth(1)"},{t:"  → getDepth(2)",h:true}]},
+      {desc:'Recurse left of 2 → <em>getDepth(4)</em>. Leaf.',active:"n4",ret:null,pathNodes:[],stack:["getDepth(1)","getDepth(2)","getDepth(4)"],curr:"4",ld:"—",rd:"—",cd:"—",ret:"—",maxD:0,mu:false,depths:{},log:[{t:"    → getDepth(4)",h:true}]},
+      {desc:'Node 4: leaf. lD=0, rD=0. diam=0. Returns <em>1</em>.',active:null,ret:"n4",pathNodes:["n4"],stack:["getDepth(1)","getDepth(2)"],curr:"4",ld:"0",rd:"0",cd:"0",ret:"1",maxD:0,mu:false,depths:{d4:"d=1"},log:[{t:"    lD=0,rD=0 diam=0  returns 1",h:true}]},
+      {desc:'Back in 2: recurse right → <em>getDepth(5)</em>.',active:"n5",ret:null,pathNodes:["n4"],stack:["getDepth(1)","getDepth(2)","getDepth(5)"],curr:"5",ld:"—",rd:"—",cd:"—",ret:"—",maxD:0,mu:false,depths:{d4:"d=1"},log:[{t:"    → getDepth(5)",h:true}]},
+      {desc:'Node 5: leaf. lD=0, rD=0. diam=0. Returns <em>1</em>.',active:null,ret:"n5",pathNodes:["n4","n5"],stack:["getDepth(1)","getDepth(2)"],curr:"5",ld:"0",rd:"0",cd:"0",ret:"1",maxD:0,mu:false,depths:{d4:"d=1",d5:"d=1"},log:[{t:"    lD=0,rD=0 diam=0  returns 1",h:true}]},
+      {desc:'Node 2: lD=1(4), rD=1(5). currDiam=1+1=<span class="new">2</span>. maxDiameter updated to 2. Returns 2.',active:null,ret:"n2",pathNodes:["n4","n2","n5"],stack:["getDepth(1)"],curr:"2",ld:"1",rd:"1",cd:"2",ret:"2",maxD:2,mu:true,depths:{d4:"d=1",d5:"d=1",d2:"d=2"},log:[{t:"  lD=1,rD=1  diam=2  maxD=2",h:true},{t:"  returns 2"}]},
+      {desc:'Back in root 1. lD=2. Recurse right → <em>getDepth(3)</em>.',active:"n3",ret:null,pathNodes:["n4","n2","n5"],stack:["getDepth(1)","getDepth(3)"],curr:"3",ld:"—",rd:"—",cd:"—",ret:"—",maxD:2,mu:false,depths:{d4:"d=1",d5:"d=1",d2:"d=2"},log:[{t:"  → getDepth(3)",h:true}]},
+      {desc:'Node 3: leaf. lD=0, rD=0. diam=0. Returns <em>1</em>.',active:null,ret:"n3",pathNodes:["n4","n2","n5"],stack:["getDepth(1)"],curr:"3",ld:"0",rd:"0",cd:"0",ret:"1",maxD:2,mu:false,depths:{d4:"d=1",d5:"d=1",d2:"d=2",d3:"d=1"},log:[{t:"  lD=0,rD=0 diam=0  returns 1",h:true}]},
+      {desc:'🎯 Root 1: lD=2, rD=1. currDiam=2+1=<span class="new">3</span>. maxDiameter updated to <span class="ok">3</span>! Path 4→2→1→3. Returns maxDiameter=3.',active:null,ret:"n1",pathNodes:["n4","n2","n1","n3"],stack:[],curr:"1",ld:"2",rd:"1",cd:"3",ret:"3",maxD:3,mu:true,depths:{d4:"d=1",d5:"d=1",d2:"d=2",d3:"d=1",d1:"d=3"},log:[{t:"lD=2,rD=1  diam=3  maxD=3 ✓",h:true},{t:"→ return maxDiameter = 3"}],final:true},
+    ]
+  },
+  {
+    label:"[1,2,null,3,4] — Diameter NOT at Root",
+    treeLabel:"[1, 2, null, 3, 4]",
+    answer:2,
+    viewBox:"0 0 400 260",
+    nodes:[
+      {id:"n1",val:1,cx:200,cy:38,r:26},
+      {id:"n2",val:2,cx:100,cy:118,r:24},
+      {id:"n3",val:3,cx:40,cy:198,r:21},
+      {id:"n4",val:4,cx:160,cy:198,r:21},
+    ],
+    edges:[
+      {x1:178,y1:52,x2:120,y2:104},
+      {x1:82,y1:136,x2:54,y2:182},{x1:116,y1:136,x2:144,y2:182},
+    ],
+    pathEdges:[
+      {id:"pe1",x1:54,y1:181,x2:82,y2:138},{id:"pe2",x1:116,y1:138,x2:144,y2:182}
+    ],
+    depthBadges:[
+      {id:"d1",x:230,y:28},{id:"d2",x:128,y:108},{id:"d3",x:64,y:190},{id:"d4",x:184,y:190},
+    ],
+    steps:[
+      {desc:'Tree: [1,2,null,3,4]. Node 1 has only left child. Call <em>getDepth(1)</em>.',active:"n1",ret:null,pathNodes:[],stack:["getDepth(1)"],curr:"1",ld:"—",rd:"—",cd:"—",ret:"—",maxD:0,mu:false,depths:{},log:[{t:"→ getDepth(1)",h:true},{t:"  Note: diameter is at node 2, NOT root!"}]},
+      {desc:'Recurse left → <em>getDepth(2)</em>.',active:"n2",ret:null,pathNodes:[],stack:["getDepth(1)","getDepth(2)"],curr:"2",ld:"—",rd:"—",cd:"—",ret:"—",maxD:0,mu:false,depths:{},log:[{t:"  → getDepth(2)",h:true}]},
+      {desc:'Node 3: leaf. Returns <em>1</em>.',active:null,ret:"n3",pathNodes:["n3"],stack:["getDepth(1)","getDepth(2)"],curr:"3",ld:"0",rd:"0",cd:"0",ret:"1",maxD:0,mu:false,depths:{d3:"d=1"},log:[{t:"    getDepth(3): leaf → returns 1",h:true}]},
+      {desc:'Node 4: leaf. Returns <em>1</em>.',active:null,ret:"n4",pathNodes:["n3","n4"],stack:["getDepth(1)","getDepth(2)"],curr:"4",ld:"0",rd:"0",cd:"0",ret:"1",maxD:0,mu:false,depths:{d3:"d=1",d4:"d=1"},log:[{t:"    getDepth(4): leaf → returns 1",h:true}]},
+      {desc:'🎯 Node 2: lD=1(3), rD=1(4). currDiam=1+1=<span class="new">2</span>! maxDiameter=2. This is NOT the root — diameter found mid-tree! Returns 2.',active:null,ret:"n2",pathNodes:["n3","n2","n4"],stack:["getDepth(1)"],curr:"2",ld:"1",rd:"1",cd:"2",ret:"2",maxD:2,mu:true,depths:{d3:"d=1",d4:"d=1",d2:"d=2"},log:[{t:"  lD=1,rD=1  diam=2  maxD=2 ✓",h:true},{t:"  returns 2"}]},
+      {desc:'Root 1: lD=2, rD=0 (no right child). currDiam=2+0=2. maxD stays 2. Returns maxDiameter=<span class="ok">2</span>.',active:null,ret:"n1",pathNodes:["n3","n2","n4"],stack:[],curr:"1",ld:"2",rd:"0",cd:"2",ret:"3",maxD:2,mu:false,depths:{d3:"d=1",d4:"d=1",d2:"d=2",d1:"d=3"},log:[{t:"lD=2,rD=0  diam=2 (same)  no update"},{t:"→ return maxDiameter = 2 ✓",h:true}],final:true},
+    ]
+  },
+  {
+    label:"[5] — Single Node",
+    treeLabel:"[5]",
+    answer:0,
+    viewBox:"0 0 400 160",
+    nodes:[{id:"n5",val:5,cx:200,cy:75,r:30}],
+    edges:[],pathEdges:[],
+    depthBadges:[{id:"d5",x:236,y:58}],
+    steps:[
+      {desc:'Single node. Call <em>getDepth(5)</em>.',active:"n5",ret:null,pathNodes:[],stack:["getDepth(5)"],curr:"5",ld:"—",rd:"—",cd:"—",ret:"—",maxD:0,mu:false,depths:{},log:[{t:"→ getDepth(5)",h:true},{t:"  Single node — no edges, diameter = 0"}]},
+      {desc:'Node 5: lD=0, rD=0. currDiam=0+0=<span class="ok">0</span>. maxDiameter stays 0. Returns 1.',active:null,ret:"n5",pathNodes:["n5"],stack:[],curr:"5",ld:"0",rd:"0",cd:"0",ret:"1",maxD:0,mu:false,depths:{d5:"d=1"},log:[{t:"lD=0,rD=0  diam=0  maxD=0",h:true},{t:"→ return maxDiameter = 0 ✓"}],final:true},
+    ]
+  },
+  {
+    label:"[1,2,3,4] — Linear Left Chain",
+    treeLabel:"[1, 2, null, 3, null, 4]",
+    answer:3,
+    viewBox:"0 0 400 300",
+    nodes:[
+      {id:"n1",val:1,cx:220,cy:36,r:24},
+      {id:"n2",val:2,cx:150,cy:112,r:23},
+      {id:"n3",val:3,cx:90,cy:186,r:22},
+      {id:"n4",val:4,cx:50,cy:255,r:20},
+    ],
+    edges:[
+      {x1:200,y1:50,x2:168,y2:98},{x1:134,y1:126,x2:106,y2:172},{x1:75,y1:200,x2:56,y2:240}
+    ],
+    pathEdges:[],
+    depthBadges:[
+      {id:"d1",x:248,y:26},{id:"d2",x:178,y:102},{id:"d3",x:116,y:178},{id:"d4",x:74,y:248}
+    ],
+    steps:[
+      {desc:'Skewed tree — all nodes chain left. Answer = 3 (the full chain is the diameter).',active:"n1",ret:null,pathNodes:[],stack:["getDepth(1)"],curr:"1",ld:"—",rd:"—",cd:"—",ret:"—",maxD:0,mu:false,depths:{},log:[{t:"→ getDepth(1)",h:true},{t:"  Skewed tree — diameter = full chain length"}]},
+      {desc:'Keep recursing left... getDepth(4) → leaf, returns 1.',active:null,ret:"n4",pathNodes:["n4"],stack:["getDepth(1)","getDepth(2)","getDepth(3)"],curr:"4",ld:"0",rd:"0",cd:"0",ret:"1",maxD:0,mu:false,depths:{d4:"d=1"},log:[{t:"    getDepth(4): leaf → diam=0  returns 1",h:true}]},
+      {desc:'Node 3: lD=1(4), rD=0. diam=1. maxD=1. Returns 2.',active:null,ret:"n3",pathNodes:["n3","n4"],stack:["getDepth(1)","getDepth(2)"],curr:"3",ld:"1",rd:"0",cd:"1",ret:"2",maxD:1,mu:true,depths:{d4:"d=1",d3:"d=2"},log:[{t:"  lD=1,rD=0  diam=1  maxD=1  returns 2",h:true}]},
+      {desc:'Node 2: lD=2(3), rD=0. diam=2. maxD=2. Returns 3.',active:null,ret:"n2",pathNodes:["n2","n3","n4"],stack:["getDepth(1)"],curr:"2",ld:"2",rd:"0",cd:"2",ret:"3",maxD:2,mu:true,depths:{d4:"d=1",d3:"d=2",d2:"d=3"},log:[{t:"  lD=2,rD=0  diam=2  maxD=2  returns 3",h:true}]},
+      {desc:'Node 1: lD=3(2), rD=0. diam=3+0=<span class="new">3</span>. maxD=<span class="ok">3</span>. Full chain is the diameter!',active:null,ret:"n1",pathNodes:["n1","n2","n3","n4"],stack:[],curr:"1",ld:"3",rd:"0",cd:"3",ret:"4",maxD:3,mu:true,depths:{d4:"d=1",d3:"d=2",d2:"d=3",d1:"d=4"},log:[{t:"lD=3,rD=0  diam=3  maxD=3 ✓",h:true},{t:"→ return maxDiameter = 3"}],final:true},
+    ]
+  }
+];
+
+let exIdx=0, cur=0, playTimer=null;
+const getEx=()=>EXAMPLES[exIdx];
+const getSteps=()=>getEx().steps;
+
+function renderSVG(ex, step) {
+  const svg = document.getElementById("tree-svg");
+  svg.setAttribute("viewBox", ex.viewBox);
+  const pathSet = new Set(step.pathNodes||[]);
+  let html = "";
+  (ex.pathEdges||[]).forEach(e => {
+    const show = pathSet.size > 1;
+    html += `<line id="${e.id}" x1="${e.x1}" y1="${e.y1}" x2="${e.x2}" y2="${e.y2}" stroke="${show?"#c084fc":"transparent"}" stroke-width="3" stroke-linecap="round" opacity="${show?0.7:0}"/>`;
+  });
+  ex.edges.forEach(e => html += `<line x1="${e.x1}" y1="${e.y1}" x2="${e.x2}" y2="${e.y2}" stroke="#1e2231" stroke-width="2"/>`);
+  ex.nodes.forEach(n => {
+    let fill="#13161d", stroke="#2a2f3e", sw="1.5", tf="#6b7280";
+    if (n.id===step.active){fill="#1a2035";stroke="#60a5fa";sw="2.5";tf="#60a5fa";}
+    else if (n.id===step.ret){fill="#0f1f16";stroke="#34d399";sw="2.5";tf="#34d399";}
+    else if (pathSet.has(n.id)){fill="#1a1030";stroke="#c084fc";sw="2";tf="#c084fc";}
+    html += `<g><circle cx="${n.cx}" cy="${n.cy}" r="${n.r}" fill="${fill}" stroke="${stroke}" stroke-width="${sw}" style="transition:all .2s"/><text x="${n.cx}" y="${n.cy+4}" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="${n.r>24?14:12}" font-weight="700" fill="${tf}" style="transition:fill .2s">${n.val}</text></g>`;
+  });
+  ex.depthBadges.forEach(b => {
+    const val = step.depths&&step.depths[b.id];
+    if (val) html += `<text x="${b.x}" y="${b.y}" font-family="'JetBrains Mono',monospace" font-size="11" fill="#7c6ef5">${val}</text>`;
+  });
+  svg.innerHTML = html;
+}
+
+function renderStep(step) {
+  const ex = getEx();
+  renderSVG(ex, step);
+  const stackEl=document.getElementById("stack");
+  let sh = step.stack.map((f,i)=>`<div class="frame ${i===step.stack.length-1?"active":""}">${f}</div>`).join("");
+  if (!step.stack.length&&step.ret) sh=`<div class="frame returning">← returned ${step.ret}</div>`;
+  stackEl.innerHTML=sh;
+  const dm=document.getElementById("diam-display");
+  dm.textContent=step.maxD;
+  if(step.mu){dm.classList.add("updated");setTimeout(()=>dm.classList.remove("updated"),500);}else dm.classList.remove("updated");
+  document.getElementById("v-curr").textContent=step.curr;
+  document.getElementById("v-ld").textContent=step.ld;
+  document.getElementById("v-rd").textContent=step.rd;
+  document.getElementById("v-cd").textContent=step.cd;
+  document.getElementById("v-ret").textContent=step.ret;
+  const logEl=document.getElementById("log");
+  logEl.innerHTML=step.log.map(e=>`<div class="entry${e.h?" hl":""}">${e.t}</div>`).join("");
+  logEl.scrollTop=logEl.scrollHeight;
+  const steps=getSteps();
+  document.getElementById("step-label").textContent=`Step ${cur+1} / ${steps.length}`;
+  document.getElementById("step-desc").innerHTML=step.desc;
+  document.getElementById("prog").style.width=((cur+1)/steps.length*100)+"%";
+  const badge=document.getElementById("ans-badge");
+  if(step.final){badge.style.display="inline-block";badge.textContent=`⬦ diameter = ${ex.answer}`;}else badge.style.display="none";
+  document.getElementById("btn-prev").disabled=cur===0;
+  document.getElementById("btn-next").disabled=cur===steps.length-1;
+}
+
+function move(d){cur=Math.max(0,Math.min(getSteps().length-1,cur+d));renderStep(getSteps()[cur]);}
+function reset(){cur=0;stopPlay();renderStep(getSteps()[0]);}
+function loadExample(i){exIdx=i;cur=0;stopPlay();document.getElementById("tree-label").textContent="// binary tree — "+getEx().treeLabel;renderStep(getSteps()[0]);}
+document.getElementById("examples-row").addEventListener("click",e=>{const b=e.target.closest(".ex-btn");if(!b)return;document.querySelectorAll(".ex-btn").forEach(x=>x.classList.remove("active"));b.classList.add("active");loadExample(parseInt(b.dataset.ex));});
+document.addEventListener("keydown",e=>{if(e.key==="ArrowRight"||e.key==="ArrowDown")move(1);if(e.key==="ArrowLeft"||e.key==="ArrowUp")move(-1);});
+function stopPlay(){if(playTimer){clearInterval(playTimer);playTimer=null;}const b=document.getElementById("btn-play");b.textContent="▶ Play";b.classList.add("btn-play");}
+function togglePlay(){const b=document.getElementById("btn-play");if(playTimer){stopPlay();return;}b.textContent="⏸ Pause";b.classList.add("btn-play");playTimer=setInterval(()=>{if(cur>=getSteps().length-1){stopPlay();return;}move(1);},1400);}
+loadExample(0);
+</script>
+</body>
+</html>

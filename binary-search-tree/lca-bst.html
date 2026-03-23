@@ -1,0 +1,1011 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>LCA of BST — Interactive Dry Run</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Sora:wght@300;400;600;700&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #0d0f14; --surface: #13161d; --surface2: #1a1e28; --surface3: #212638;
+      --border: rgba(255,255,255,0.07); --border-mid: rgba(255,255,255,0.12);
+      --text: #e8eaf0; --text-muted: #6b7280; --text-dim: #3d4251;
+      --accent: #7c6ef5; --accent-glow: rgba(124,110,245,0.25);
+      --green: #34d399; --green-bg: rgba(52,211,153,0.1);
+      --amber: #fbbf24; --amber-bg: rgba(251,191,36,0.12);
+      --blue: #60a5fa; --blue-bg: rgba(96,165,250,0.1);
+      --red: #f87171; --red-bg: rgba(248,113,113,0.12);
+      --emerald: #10b981; --emerald-bg: rgba(16,185,129,0.1);
+      --rose: #f472b6; --rose-bg: rgba(244,114,182,0.12);
+      --purple: #c084fc; --purple-bg: rgba(192,132,252,0.1);
+      --mono: 'JetBrains Mono', monospace; --sans: 'Sora', sans-serif;
+    }
+    html { scroll-behavior: smooth; }
+    body { background: var(--bg); color: var(--text); font-family: var(--sans); font-size: 15px; line-height: 1.6; min-height: 100vh; overflow-x: hidden; }
+    body::before { content: ''; position: fixed; inset: 0; background-image: linear-gradient(rgba(16,185,129,0.025) 1px, transparent 1px), linear-gradient(90deg, rgba(16,185,129,0.025) 1px, transparent 1px); background-size: 40px 40px; pointer-events: none; z-index: 0; }
+    .page { position: relative; z-index: 1; max-width: 1020px; margin: 0 auto; padding: 3rem 1.5rem 5rem; }
+
+    .back-nav { display: inline-flex; align-items: center; gap: 8px; font-family: var(--mono); font-size: 12px; color: var(--text-muted); text-decoration: none; padding: 7px 14px 7px 10px; border-radius: 8px; border: 1px solid var(--border); background: var(--surface); margin-bottom: 2rem; transition: all .15s; }
+    .back-nav:hover { border-color: var(--border-mid); color: var(--text); }
+
+    header { margin-bottom: 2rem; animation: fadeUp .6s ease both; }
+    .tag { display: inline-block; font-family: var(--mono); font-size: 11px; font-weight: 500; letter-spacing: .12em; text-transform: uppercase; color: var(--emerald); background: var(--emerald-bg); border: 1px solid rgba(16,185,129,0.3); padding: 4px 12px; border-radius: 100px; margin-bottom: 1.2rem; }
+    h1 { font-size: clamp(1.8rem, 5vw, 2.8rem); font-weight: 700; line-height: 1.15; color: var(--text); margin-bottom: .8rem; letter-spacing: -.02em; }
+    h1 span { color: var(--emerald); }
+    .subtitle { font-size: 15px; color: var(--text-muted); max-width: 620px; line-height: 1.7; }
+
+    /* PATTERN BANNER */
+    .pattern-banner { display: flex; align-items: flex-start; gap: 16px; background: var(--emerald-bg); border: 1px solid rgba(16,185,129,0.25); border-left: 3px solid var(--emerald); border-radius: 10px; padding: 14px 18px; margin-bottom: 2rem; animation: fadeUp .6s ease .03s both; flex-wrap: wrap; }
+    .pattern-label { font-family: var(--mono); font-size: 10px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--text-dim); margin-bottom: 4px; }
+    .pattern-name { font-family: var(--mono); font-size: 13px; font-weight: 700; color: var(--emerald); }
+    .pattern-desc { font-family: var(--mono); font-size: 12px; color: var(--text-muted); flex: 1; min-width: 200px; line-height: 1.7; }
+    .pattern-solves { font-family: var(--mono); font-size: 11px; color: var(--text-dim); }
+    .pattern-solves span { color: var(--emerald); }
+
+    /* SECTIONS */
+    .prob-section { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; margin-bottom: 2rem; animation: fadeUp .6s ease .04s both; }
+    .prob-section-hdr { display: flex; align-items: center; gap: 10px; padding: 14px 20px; border-bottom: 1px solid var(--border); background: var(--surface2); }
+    .prob-section-title { font-family: var(--mono); font-size: 11px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--text-muted); }
+    .prob-body { padding: 20px; }
+    .prob-body p { font-size: 13px; color: var(--text-muted); line-height: 1.75; margin-bottom: 10px; }
+    .prob-body p:last-child { margin-bottom: 0; }
+    .prob-body p strong { color: var(--text); }
+    .prob-body code { font-family: var(--mono); font-size: 11px; background: var(--surface2); padding: 1px 6px; border-radius: 4px; color: var(--accent); }
+
+    /* BST rule box */
+    .bst-rule { background: var(--emerald-bg); border: 1px solid rgba(16,185,129,0.2); border-radius: 10px; padding: 14px 18px; margin-bottom: 16px; font-family: var(--mono); font-size: 12px; color: var(--text-muted); line-height: 1.75; }
+    .bst-rule strong { color: var(--emerald); }
+
+    /* SVG example grid */
+    .svg-example-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; margin-top: 16px; }
+    .svg-ex-card { background: var(--surface2); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+    .svg-ex-header { display: flex; align-items: center; justify-content: space-between; padding: 8px 14px; border-bottom: 1px solid var(--border); }
+    .svg-ex-label { font-family: var(--mono); font-size: 10px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--text-dim); }
+    .svg-ex-result { font-family: var(--mono); font-size: 11px; font-weight: 700; padding: 2px 10px; border-radius: 5px; }
+    .res-green { background: rgba(52,211,153,.12); color: #34d399; border: 1px solid rgba(52,211,153,.25); }
+    .res-blue  { background: rgba(96,165,250,.12); color: #60a5fa; border: 1px solid rgba(96,165,250,.25); }
+    .svg-ex-body { padding: 12px; display: flex; justify-content: center; align-items: center; min-height: 90px; }
+    .svg-ex-body svg { max-height: 130px; width: 100%; }
+
+    /* HINTS */
+    .hints-list { display: flex; flex-direction: column; gap: 10px; }
+    .hint-row { display: flex; gap: 12px; align-items: flex-start; }
+    .hint-badge { font-family: var(--mono); font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 6px; flex-shrink: 0; margin-top: 2px; min-width: 28px; text-align: center; color: var(--emerald); background: var(--emerald-bg); border: 1px solid rgba(16,185,129,0.25); }
+    .hint-body { font-size: 13px; color: var(--text-muted); line-height: 1.7; }
+    .hint-body code { font-family: var(--mono); font-size: 11px; background: var(--surface2); padding: 1px 5px; border-radius: 4px; color: var(--accent); }
+    .hint-body strong { color: var(--text); }
+    .intuition-box { background: var(--emerald-bg); border: 1px solid rgba(16,185,129,0.2); border-radius: 10px; padding: 16px 18px; margin-top: 14px; }
+    .intuition-box p { font-size: 13px; color: var(--text-muted); line-height: 1.75; }
+    .intuition-box p strong { color: var(--emerald); }
+
+    /* KEY INSIGHT BANNER */
+    .key-insight { background: var(--amber-bg); border: 1px solid rgba(251,191,36,0.2); border-left: 3px solid var(--amber); border-radius: 10px; padding: 14px 18px; margin-bottom: 2rem; font-size: 13px; color: var(--text-muted); font-family: var(--mono); animation: fadeUp .6s ease .05s both; line-height: 1.7; }
+    .key-insight strong { color: var(--amber); }
+
+    /* CODE BLOCK */
+    .code-block { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; margin-bottom: 2rem; animation: fadeUp .6s ease .1s both; }
+    .code-header { display: flex; align-items: center; gap: 8px; padding: 12px 16px; border-bottom: 1px solid var(--border); background: var(--surface2); }
+    .code-header span { font-family: var(--mono); font-size: 12px; color: var(--text-muted); }
+    .dots { display: flex; gap: 6px; }
+    .dot { width: 10px; height: 10px; border-radius: 50%; }
+    .dot-r { background: #ff5f57; } .dot-y { background: #ffbd2e; } .dot-g { background: #28c940; }
+    pre { padding: 1.25rem 1.5rem; overflow-x: auto; font-family: var(--mono); font-size: 13px; line-height: 1.8; color: #c9d1d9; }
+    .kw { color: #ff79c6; } .fn { color: #50fa7b; } .cm { color: #6272a4; font-style: italic; } .num { color: #bd93f9; } .var { color: #8be9fd; } .hl { background: rgba(16,185,129,0.12); border-radius: 3px; padding: 0 3px; }
+
+    .section-label { font-family: var(--mono); font-size: 11px; font-weight: 500; letter-spacing: .1em; text-transform: uppercase; color: var(--text-dim); margin-bottom: 1rem; margin-top: 2.5rem; }
+
+    /* EXAMPLE SELECTOR */
+    .examples-row { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 1.5rem; }
+    .ex-btn { display: inline-flex; align-items: center; gap: 8px; padding: 9px 16px; border-radius: 10px; border: 1px solid var(--border); background: var(--surface); cursor: pointer; transition: all .18s; font-family: var(--mono); font-size: 12px; font-weight: 600; color: var(--text-muted); user-select: none; }
+    .ex-btn:hover { border-color: var(--border-mid); color: var(--text); transform: translateY(-1px); }
+    .ex-btn.active { background: var(--emerald-bg); border-color: rgba(16,185,129,0.4); color: var(--emerald); transform: translateY(-1px); }
+    .ex-badge { font-size: 9px; font-weight: 700; padding: 2px 7px; border-radius: 5px; background: var(--surface3); color: var(--text-dim); }
+    .ex-btn.active .ex-badge { background: rgba(255,255,255,0.1); color: inherit; }
+
+    /* VIZ CARD */
+    .viz-card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; overflow: hidden; animation: fadeUp .6s ease .2s both; }
+    .progress-bar-wrap { height: 3px; background: var(--border); }
+    .progress-bar-inner { height: 100%; background: linear-gradient(90deg, var(--emerald), #34d399); transition: width .35s cubic-bezier(.4,0,.2,1); border-radius: 0 2px 2px 0; }
+    .controls { display: flex; align-items: center; gap: 10px; padding: 14px 20px; border-bottom: 1px solid var(--border); background: var(--surface2); flex-wrap: wrap; }
+    .btn { display: inline-flex; align-items: center; gap: 6px; font-family: var(--mono); font-size: 12px; font-weight: 500; padding: 7px 16px; border-radius: 8px; border: 1px solid var(--border-mid); background: var(--surface3); color: var(--text); cursor: pointer; transition: all .15s; }
+    .btn:hover:not(:disabled) { background: var(--emerald-bg); border-color: var(--emerald); color: var(--emerald); }
+    .btn:disabled { opacity: .3; cursor: default; }
+    .btn-play { background: var(--emerald-bg) !important; border-color: rgba(16,185,129,0.4) !important; color: var(--emerald) !important; }
+    .btn-reset { background: var(--red-bg) !important; border-color: rgba(248,113,113,0.3) !important; color: var(--red) !important; }
+    .step-info { flex: 1; font-size: 13px; color: var(--text-muted); font-family: var(--mono); }
+    kbd { font-size: 10px; background: var(--surface3); border: 1px solid var(--border-mid); padding: 2px 5px; border-radius: 4px; color: var(--text-muted); font-family: var(--mono); }
+    .result-badge { font-family: var(--mono); font-size: 11px; font-weight: 700; letter-spacing: .06em; padding: 4px 12px; border-radius: 100px; text-transform: uppercase; }
+    .badge-found { background: var(--green-bg); color: var(--green); border: 1px solid rgba(52,211,153,0.3); }
+
+    /* STEP DESC */
+    .step-desc { padding: 12px 20px; font-size: 13px; color: var(--text-muted); background: var(--surface2); border-bottom: 1px solid var(--border); font-family: var(--mono); min-height: 44px; line-height: 1.6; }
+    .step-desc em { color: var(--amber); font-style: normal; }
+    .step-desc .ok { color: var(--green); font-weight: 600; }
+    .step-desc .go-left { color: var(--blue); font-weight: 600; }
+    .step-desc .go-right { color: var(--rose); font-weight: 600; }
+    .step-desc .split { color: var(--emerald); font-weight: 700; }
+
+    /* DECISION DISPLAY */
+    .decision-banner { padding: 12px 20px; border-bottom: 1px solid var(--border); background: var(--surface); display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+    .decision-pill { font-family: var(--mono); font-size: 12px; font-weight: 700; padding: 6px 14px; border-radius: 8px; transition: all .3s; }
+    .decision-label { font-family: var(--mono); font-size: 11px; color: var(--text-dim); }
+    .decision-neutral { background: var(--surface2); color: var(--text-dim); border: 1px solid var(--border-mid); }
+    .decision-left { background: var(--blue-bg); color: var(--blue); border: 1px solid rgba(96,165,250,0.35); }
+    .decision-right { background: var(--rose-bg); color: var(--rose); border: 1px solid rgba(244,114,182,0.35); }
+    .decision-split { background: var(--emerald-bg); color: var(--emerald); border: 1px solid rgba(16,185,129,0.35); }
+
+    /* MAIN GRID */
+    .main-grid { display: grid; grid-template-columns: 1fr 320px; }
+    .tree-panel { padding: 24px 20px; border-right: 1px solid var(--border); }
+    .panel-label { font-family: var(--mono); font-size: 10px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--text-dim); margin-bottom: 10px; }
+    #tree-svg { width: 100%; }
+
+    /* SIDE PANEL */
+    .side-panel { display: flex; flex-direction: column; }
+
+    /* LCA tracker */
+    .lca-tracker { margin: 14px 16px 12px; padding: 12px 14px; background: var(--surface3); border: 1px solid var(--border-mid); border-radius: 10px; display: flex; align-items: center; justify-content: space-between; }
+    .lca-label { font-family: var(--mono); font-size: 11px; color: var(--text-muted); }
+    .lca-val { font-family: var(--mono); font-size: 20px; font-weight: 700; color: var(--text-dim); transition: color .3s, transform .2s; }
+    .lca-val.updated { color: var(--emerald); transform: scale(1.3); }
+
+    /* Call stack */
+    .stack-panel { padding: 14px 16px; border-bottom: 1px solid var(--border); }
+    .call-stack { display: flex; flex-direction: column-reverse; gap: 4px; min-height: 52px; }
+    .frame { padding: 5px 10px; border-radius: 6px; font-size: 10px; font-family: var(--mono); border: 1px solid var(--border); background: var(--surface2); color: var(--text-muted); transition: all .2s; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .frame.active { border-color: rgba(16,185,129,0.4); background: var(--emerald-bg); color: var(--emerald); }
+    .frame.returning { border-color: rgba(52,211,153,0.3); background: var(--green-bg); color: var(--green); }
+
+    /* Vars */
+    .vars-panel { padding: 14px 16px; border-bottom: 1px solid var(--border); }
+    .var-row { display: flex; justify-content: space-between; align-items: center; padding: 4px 0; border-bottom: 1px solid var(--border); font-size: 12px; }
+    .var-row:last-child { border-bottom: none; }
+    .var-name { font-family: var(--mono); color: var(--text-muted); font-size: 11px; }
+    .var-val { font-family: var(--mono); font-weight: 700; color: var(--amber); font-size: 11px; }
+    .var-val.g { color: var(--green); } .var-val.b { color: var(--blue); } .var-val.r { color: var(--rose); } .var-val.em { color: var(--emerald); } .var-val.d { color: var(--text-dim); }
+
+    /* Log */
+    .log-panel { padding: 14px 16px; flex: 1; }
+    .log { font-size: 11px; font-family: var(--mono); line-height: 1.9; color: var(--text-dim); max-height: 180px; overflow-y: auto; }
+    .log::-webkit-scrollbar { width: 4px; }
+    .log::-webkit-scrollbar-thumb { background: var(--border-mid); border-radius: 2px; }
+    .entry.hl { color: var(--text); } .entry.ok { color: var(--green); } .entry.left { color: var(--blue); } .entry.right { color: var(--rose); } .entry.split { color: var(--emerald); font-weight: 600; }
+
+    /* REVISION SECTION */
+    .revision-section { margin-top: 2.5rem; animation: fadeUp .6s ease .3s both; }
+    .explain-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-bottom: 16px; }
+    .explain-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 16px 18px; }
+    .explain-card .icon { font-size: 18px; margin-bottom: 8px; }
+    .explain-card h3 { font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 6px; }
+    .explain-card p { font-size: 12px; color: var(--text-muted); line-height: 1.7; }
+    .explain-card code { font-family: var(--mono); font-size: 11px; background: var(--surface2); padding: 1px 5px; border-radius: 4px; color: var(--accent); }
+
+    .mental-model { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; margin-bottom: 16px; }
+    .mm-header { display: flex; align-items: center; gap: 8px; padding: 12px 18px; border-bottom: 1px solid var(--border); background: var(--surface2); }
+    .mm-title { font-family: var(--mono); font-size: 11px; font-weight: 700; color: var(--amber); }
+    .mm-body { padding: 18px; display: flex; flex-direction: column; gap: 10px; }
+    .mm-item { display: flex; gap: 10px; align-items: flex-start; }
+    .mm-b { font-family: var(--mono); font-size: 12px; color: var(--amber); font-weight: 700; flex-shrink: 0; margin-top: 2px; }
+    .mm-t { font-size: 13px; color: var(--text-muted); line-height: 1.7; }
+    .mm-t strong { color: var(--text); } .mm-t code { font-family: var(--mono); font-size: 11px; background: var(--surface2); padding: 1px 5px; border-radius: 4px; color: var(--accent); }
+
+    /* Comparison table */
+    .compare-section { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; margin-bottom: 16px; }
+    .compare-header { display: flex; align-items: center; gap: 8px; padding: 12px 18px; border-bottom: 1px solid var(--border); background: var(--surface2); font-family: var(--mono); font-size: 11px; font-weight: 700; color: var(--blue); letter-spacing: .08em; }
+    .compare-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0; }
+    .compare-col { padding: 16px 18px; }
+    .compare-col:first-child { border-right: 1px solid var(--border); }
+    .compare-col-title { font-family: var(--mono); font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 10px; }
+    .compare-col li { font-size: 12px; color: var(--text-muted); line-height: 1.75; margin-left: 14px; margin-bottom: 6px; }
+    .compare-col li::marker { color: var(--text-dim); }
+
+    .edge-cases-card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; margin-bottom: 16px; }
+    .ec-header { display: flex; align-items: center; gap: 8px; padding: 12px 18px; border-bottom: 1px solid var(--border); background: var(--surface2); font-family: var(--mono); font-size: 11px; font-weight: 700; color: var(--red); }
+    .el { display: flex; flex-direction: column; }
+    .ei { display: flex; gap: 12px; align-items: flex-start; padding: 12px 18px; border-bottom: 1px solid var(--border); }
+    .ei:last-child { border-bottom: none; }
+    .el-w { font-family: var(--mono); font-size: 9px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; padding: 3px 8px; border-radius: 5px; flex-shrink: 0; margin-top: 2px; }
+    .el-w.w { background: var(--red-bg); color: var(--red); border: 1px solid rgba(248,113,113,0.25); }
+    .el-w.ok { background: var(--green-bg); color: var(--green); border: 1px solid rgba(52,211,153,0.25); }
+    .et { font-size: 12px; color: var(--text-muted); line-height: 1.65; }
+    .et code { font-family: var(--mono); font-size: 11px; background: var(--surface2); padding: 1px 5px; border-radius: 4px; color: var(--accent); }
+
+    .best-solution { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; margin-bottom: 16px; }
+    .bs-header { display: flex; align-items: center; justify-content: space-between; padding: 12px 18px; border-bottom: 1px solid var(--border); background: var(--surface2); flex-wrap: wrap; gap: 8px; }
+    .bs-title { font-family: var(--mono); font-size: 11px; font-weight: 700; color: var(--green); }
+    .sol-pills { display: flex; gap: 6px; flex-wrap: wrap; }
+    .sol-pill { font-family: var(--mono); font-size: 10px; padding: 3px 9px; border-radius: 6px; background: var(--surface3); border: 1px solid var(--border-mid); color: var(--text-muted); }
+
+    .complexity { display: flex; gap: 10px; margin-top: 1.5rem; flex-wrap: wrap; }
+    .cpill { font-family: var(--mono); font-size: 12px; padding: 6px 14px; border-radius: 8px; border: 1px solid var(--border); background: var(--surface); }
+    .cpill strong { color: var(--accent); font-weight: 700; }
+
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+    @media (max-width: 680px) { .main-grid { grid-template-columns: 1fr; } .tree-panel { border-right: none; border-bottom: 1px solid var(--border); } .compare-grid { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+<div class="page">
+
+  <a class="back-nav" href="../dsa-hub.html">← All problems</a>
+
+  <header>
+    <div class="tag">LeetCode #235 · BST · Algorithm Dry Run</div>
+    <h1>LCA of a <span>Binary Search Tree</span></h1>
+    <p class="subtitle">Step-by-step trace of <code style="font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--accent);background:var(--surface);padding:2px 7px;border-radius:5px;">lowestCommonAncestor</code> — watch how the BST ordering lets you eliminate entire subtrees instantly. No counting, no post-order — just compare and go.</p>
+  </header>
+
+  <div class="pattern-banner">
+    <div>
+      <div class="pattern-label">Pattern</div>
+      <div class="pattern-name">🎯 Pre-order DFS + BST Split Detection</div>
+    </div>
+    <div class="pattern-desc">At every node: if both p and q are smaller → go left. If both larger → go right. Otherwise → you're at the split point = LCA. Return immediately.</div>
+    <div class="pattern-solves">Same pattern unlocks: <span>#700 Search BST · #98 Validate BST · #236 LCA (General Tree)</span></div>
+  </div>
+
+  <!-- PROBLEM STATEMENT -->
+  <div class="prob-section">
+    <div class="prob-section-hdr">
+      <span style="font-size:16px">📋</span>
+      <span class="prob-section-title">Problem Statement</span>
+    </div>
+    <div class="prob-body">
+      <div class="bst-rule">
+        <strong>BST Superpower:</strong> For every node, all values to the <strong>left are smaller</strong> and all values to the <strong>right are larger</strong>. This means one comparison tells you exactly where p and q live — without searching.
+      </div>
+      <p>Given a BST and two nodes <strong>p</strong> and <strong>q</strong> that are guaranteed to exist in the tree, find their <strong>Lowest Common Ancestor</strong> — the deepest node that is an ancestor of both.</p>
+      <p>⚡ Because it's a BST (not just any tree), you don't need post-order count propagation. The ordering directly tells you when p and q <em>split</em> across a node — and that split point IS the LCA.</p>
+      <div class="svg-example-grid">
+        <div class="svg-ex-card">
+          <div class="svg-ex-header">
+            <span class="svg-ex-label">p=2, q=8  →  split at root</span>
+            <span class="svg-ex-result res-blue">LCA = 6</span>
+          </div>
+          <div class="svg-ex-body">
+            <svg viewBox="0 0 240 150">
+              <line x1="120" y1="28" x2="68" y2="68" stroke="#1e2231" stroke-width="1.5"/>
+              <line x1="120" y1="28" x2="178" y2="68" stroke="#1e2231" stroke-width="1.5"/>
+              <line x1="56" y1="86" x2="34" y2="116" stroke="#1e2231" stroke-width="1.5"/>
+              <line x1="80" y1="86" x2="100" y2="116" stroke="#1e2231" stroke-width="1.5"/>
+              <circle cx="120" cy="20" r="20" fill="#0c1d14" stroke="#10b981" stroke-width="2.5"/>
+              <text x="120" y="24" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="13" font-weight="700" fill="#10b981">6</text>
+              <circle cx="66" cy="78" r="18" fill="#1a1520" stroke="#f472b6" stroke-width="2"/>
+              <text x="66" y="82" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="13" font-weight="700" fill="#f472b6">2</text>
+              <circle cx="180" cy="78" r="18" fill="#1e1a08" stroke="#fbbf24" stroke-width="2"/>
+              <text x="180" y="82" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="13" font-weight="700" fill="#fbbf24">8</text>
+              <circle cx="32" cy="120" r="14" fill="#13161d" stroke="#3d4251" stroke-width="1.5"/>
+              <text x="32" y="124" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="11" font-weight="700" fill="#6b7280">0</text>
+              <circle cx="102" cy="120" r="14" fill="#13161d" stroke="#3d4251" stroke-width="1.5"/>
+              <text x="102" y="124" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="11" font-weight="700" fill="#6b7280">4</text>
+              <text x="4" y="18" font-family="'JetBrains Mono',monospace" font-size="8" fill="#10b981">LCA!</text>
+              <text x="4" y="78" font-family="'JetBrains Mono',monospace" font-size="8" fill="#f472b6">p</text>
+              <text x="190" y="68" font-family="'JetBrains Mono',monospace" font-size="8" fill="#fbbf24">q</text>
+              <text x="130" y="8" font-family="'JetBrains Mono',monospace" font-size="8" fill="#10b981">2&lt;6&lt;8 → SPLIT ✓</text>
+            </svg>
+          </div>
+        </div>
+        <div class="svg-ex-card">
+          <div class="svg-ex-header">
+            <span class="svg-ex-label">p=2, q=4  →  both left, split deeper</span>
+            <span class="svg-ex-result res-green">LCA = 2</span>
+          </div>
+          <div class="svg-ex-body">
+            <svg viewBox="0 0 240 160">
+              <line x1="120" y1="28" x2="68" y2="68" stroke="#1e2231" stroke-width="1.5"/>
+              <line x1="120" y1="28" x2="178" y2="68" stroke="#1e2231" stroke-width="1.5"/>
+              <line x1="56" y1="86" x2="34" y2="116" stroke="#1e2231" stroke-width="1.5"/>
+              <line x1="80" y1="86" x2="100" y2="116" stroke="#1e2231" stroke-width="1.5"/>
+              <circle cx="120" cy="20" r="20" fill="#13161d" stroke="#3d4251" stroke-width="1.5"/>
+              <text x="120" y="24" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="13" font-weight="700" fill="#6b7280">6</text>
+              <circle cx="66" cy="78" r="18" fill="#0c1d14" stroke="#10b981" stroke-width="2.5"/>
+              <text x="66" y="82" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="13" font-weight="700" fill="#10b981">2</text>
+              <circle cx="180" cy="78" r="18" fill="#13161d" stroke="#3d4251" stroke-width="1.5" opacity=".3"/>
+              <text x="180" y="82" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="13" font-weight="700" fill="#2a2f3e" opacity=".3">8</text>
+              <circle cx="32" cy="120" r="14" fill="#1a1520" stroke="#f472b6" stroke-width="2"/>
+              <text x="32" y="124" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="11" font-weight="700" fill="#f472b6">0</text>
+              <circle cx="102" cy="120" r="14" fill="#1e1a08" stroke="#fbbf24" stroke-width="2"/>
+              <text x="102" y="124" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="11" font-weight="700" fill="#fbbf24">4</text>
+              <text x="4" y="78" font-family="'JetBrains Mono',monospace" font-size="8" fill="#10b981">LCA!</text>
+              <text x="4" y="120" font-family="'JetBrains Mono',monospace" font-size="8" fill="#f472b6">p=0</text>
+              <text x="108" y="110" font-family="'JetBrains Mono',monospace" font-size="8" fill="#fbbf24">q=4</text>
+              <text x="130" y="8" font-family="'JetBrains Mono',monospace" font-size="8" fill="#3d4251">2&lt;6 & 4&lt;6 → go left</text>
+            </svg>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- HINTS -->
+  <div class="prob-section">
+    <div class="prob-section-hdr">
+      <span style="font-size:16px">💡</span>
+      <span class="prob-section-title">Intuition + Hints — Three Possible Cases</span>
+    </div>
+    <div class="prob-body">
+      <div class="hints-list">
+        <div class="hint-row">
+          <span class="hint-badge">1</span>
+          <div class="hint-body"><strong>Both p and q are smaller than root?</strong> Then both must be in the left subtree (BST guarantee). The LCA can't be here — go left. <code>lowestCommonAncestor(root.left, p, q)</code></div>
+        </div>
+        <div class="hint-row">
+          <span class="hint-badge">2</span>
+          <div class="hint-body"><strong>Both p and q are larger than root?</strong> Then both must be in the right subtree. Go right. <code>lowestCommonAncestor(root.right, p, q)</code></div>
+        </div>
+        <div class="hint-row">
+          <span class="hint-badge">3</span>
+          <div class="hint-body"><strong>Neither of the above?</strong> That means they're on opposite sides of root — OR one of them IS root. This is the split point. Root is the LCA! Return <code>root</code> immediately.</div>
+        </div>
+        <div class="hint-row">
+          <span class="hint-badge">4</span>
+          <div class="hint-body"><strong>Why does case 3 handle "p === root"?</strong> If <code>p.val === root.val</code>, then p is NOT smaller than root (case 1 fails) and NOT larger (case 2 fails) → we hit case 3 → return root. Correct! p is an ancestor of q in this case.</div>
+        </div>
+      </div>
+      <div class="intuition-box">
+        <p><strong>Core insight:</strong> In a BST, the LCA is the first node where p and q "split" — one goes left, the other goes right (or one IS the current node). Before the split they travel together in the same direction. That traveling-together property is what the BST ordering gives you for free. No counting, no marking, no post-order needed.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="key-insight">
+    ⚡ <strong>BST vs General Tree LCA:</strong> The general tree version (#236) needs post-order + count propagation to find where p and q meet. The BST version is simpler: the ordering directly tells you the meeting point in O(log n). Same goal, completely different approach. The BST superpower at work again.
+  </div>
+
+  <!-- CODE -->
+  <div class="code-block">
+    <div class="code-header"><div class="dots"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div></div><span>lcaBST.js</span></div>
+    <pre><span class="kw">var</span> <span class="fn">lowestCommonAncestor</span> = <span class="kw">function</span>(<span class="var">root</span>, <span class="var">p</span>, <span class="var">q</span>) {
+  <span class="cm">// Case 1: both smaller → LCA must be left subtree</span>
+  <span class="kw">if</span> (<span class="var">p</span>.val &lt; <span class="var">root</span>.val &amp;&amp; <span class="var">q</span>.val &lt; <span class="var">root</span>.val) {
+    <span class="kw">return</span> <span class="fn">lowestCommonAncestor</span>(<span class="var">root</span>.left, <span class="var">p</span>, <span class="var">q</span>)
+  }
+  <span class="cm">// Case 2: both larger → LCA must be right subtree</span>
+  <span class="kw">else if</span> (<span class="var">p</span>.val &gt; <span class="var">root</span>.val &amp;&amp; <span class="var">q</span>.val &gt; <span class="var">root</span>.val) {
+    <span class="kw">return</span> <span class="fn">lowestCommonAncestor</span>(<span class="var">root</span>.right, <span class="var">p</span>, <span class="var">q</span>)
+  }
+  <span class="cm">// Case 3: split here (or one IS root) → root is the LCA</span>
+  <span class="kw">else</span> {
+    <span class="hl"><span class="kw">return</span> <span class="var">root</span></span>    <span class="cm">// ← this node is the LOWEST COMMON ANCESTOR</span>
+  }
+};</pre>
+  </div>
+
+  <p class="section-label">// Interactive dry run — choose an example</p>
+  <div class="examples-row" id="examples-row">
+    <button class="ex-btn active" data-ex="0">Example 1 <span class="ex-badge">p=2 q=8</span></button>
+    <button class="ex-btn" data-ex="1">Example 2 <span class="ex-badge">p=2 q=4</span></button>
+    <button class="ex-btn" data-ex="2">Example 3 <span class="ex-badge">p IS ancestor</span></button>
+    <button class="ex-btn" data-ex="3">Example 4 <span class="ex-badge">Deep BST</span></button>
+  </div>
+
+  <div class="viz-card">
+    <div class="progress-bar-wrap"><div class="progress-bar-inner" id="prog" style="width:5%"></div></div>
+    <div class="controls">
+      <button class="btn" id="btn-prev" onclick="move(-1)" disabled>← Prev</button>
+      <button class="btn btn-play" id="btn-play" onclick="togglePlay()">▶ Play</button>
+      <button class="btn" id="btn-next" onclick="move(1)">Next →</button>
+      <button class="btn btn-reset" onclick="reset()">↺ Reset</button>
+      <span class="step-info" id="step-label">Step 1 / ?</span>
+      <span style="font-family:var(--mono);font-size:11px;color:var(--text-dim);display:flex;gap:4px;align-items:center"><kbd>←</kbd><kbd>→</kbd></span>
+      <span class="result-badge badge-found" id="ans-badge" style="display:none">✓ LCA = ?</span>
+    </div>
+    <div class="step-desc" id="step-desc">Loading...</div>
+    <div class="decision-banner" id="decision-banner">
+      <span class="decision-label">Decision:</span>
+      <span class="decision-pill decision-neutral" id="decision-pill">— waiting —</span>
+    </div>
+    <div class="main-grid">
+      <div class="tree-panel">
+        <div class="panel-label" id="tree-panel-label">// BST</div>
+        <svg id="tree-svg" viewBox="0 0 500 300" width="100%"></svg>
+      </div>
+      <div class="side-panel">
+        <div style="padding:14px 16px 0;">
+          <div class="panel-label">// LCA (answer)</div>
+          <div class="lca-tracker">
+            <span class="lca-label">LCA =</span>
+            <span class="lca-val" id="lca-display">?</span>
+          </div>
+        </div>
+        <div class="stack-panel">
+          <div class="panel-label">// call stack</div>
+          <div class="call-stack" id="stack"></div>
+        </div>
+        <div class="vars-panel">
+          <div class="panel-label">// variables</div>
+          <div class="var-row"><span class="var-name">root.val</span>  <span class="var-val em" id="v-root">—</span></div>
+          <div class="var-row"><span class="var-name">p.val</span>     <span class="var-val r"  id="v-p">—</span></div>
+          <div class="var-row"><span class="var-name">q.val</span>     <span class="var-val b"  id="v-q">—</span></div>
+          <div class="var-row"><span class="var-name">case</span>      <span class="var-val"    id="v-case">—</span></div>
+          <div class="var-row"><span class="var-name">returns</span>  <span class="var-val g"  id="v-ret">—</span></div>
+        </div>
+        <div class="log-panel">
+          <div class="panel-label">// execution log</div>
+          <div class="log" id="log"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- REVISION -->
+  <div class="revision-section">
+    <p class="section-label">// revision — lock this in</p>
+
+    <div class="mental-model">
+      <div class="mm-header"><span style="font-size:16px">🧠</span><span class="mm-title">Mental Model — The Fork in the Road</span></div>
+      <div class="mm-body">
+        <div class="mm-item"><span class="mm-b">▸</span><div class="mm-t"><strong>Think of descending a mountain path.</strong> You're walking down. At every fork, you check: are both destinations to the left? Go left. Both to the right? Go right. If they split here — THIS fork is the last common point. That's the LCA.</div></div>
+        <div class="mm-item"><span class="mm-b">▸</span><div class="mm-t"><strong>The three conditions are exhaustive.</strong> "Both left" + "Both right" + "else" covers every possible case. The "else" also catches when <code>root.val === p.val</code> or <code>root.val === q.val</code> — node is an ancestor of itself.</div></div>
+        <div class="mm-item"><span class="mm-b">▸</span><div class="mm-t"><strong>Why pre-order?</strong> You check root BEFORE recursing. The moment you hit the split case, you return immediately — no need to go deeper.</div></div>
+        <div class="mm-item"><span class="mm-b">▸</span><div class="mm-t"><strong>O(log n) not O(n).</strong> Unlike the general tree LCA which must potentially visit all nodes, this BST version eliminates one half of the tree at every step — just like BST search.</div></div>
+      </div>
+    </div>
+
+    <!-- BST vs General LCA comparison -->
+    <div class="compare-section">
+      <div class="compare-header">⚖️  BST LCA vs General Tree LCA — Know the Difference</div>
+      <div class="compare-grid">
+        <div class="compare-col">
+          <div class="compare-col-title" style="color:var(--emerald)">BST LCA (#235) — This problem</div>
+          <ul>
+            <li>Uses BST ordering property</li>
+            <li>Pre-order traversal (top-down)</li>
+            <li>3 cases: left / right / split-here</li>
+            <li>O(log n) time in balanced BST</li>
+            <li>No counting, no post-order needed</li>
+            <li>Returns immediately at split point</li>
+          </ul>
+        </div>
+        <div class="compare-col">
+          <div class="compare-col-title" style="color:var(--rose)">General Tree LCA (#236)</div>
+          <ul>
+            <li>No ordering to exploit</li>
+            <li>Post-order traversal (bottom-up)</li>
+            <li>Count propagation + <code>!lca</code> guard</li>
+            <li>O(n) time — must visit all nodes</li>
+            <li>Uses closure variable to capture answer</li>
+            <li>Returns count up the tree</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="explain-grid">
+      <div class="explain-card"><div class="icon">⬅️</div><h3>Case 1: Both Left</h3><p><code>p &lt; root && q &lt; root</code> → BST guarantees both nodes are in left subtree. Skip right entirely. Recurse left.</p></div>
+      <div class="explain-card"><div class="icon">➡️</div><h3>Case 2: Both Right</h3><p><code>p &gt; root && q &gt; root</code> → BST guarantees both nodes are in right subtree. Skip left entirely. Recurse right.</p></div>
+      <div class="explain-card"><div class="icon">🎯</div><h3>Case 3: Split / Hit</h3><p>Everything else: they split across root, OR one of them equals root. Either way, root is the deepest ancestor of both. Return root.</p></div>
+      <div class="explain-card"><div class="icon">📐</div><h3>No base case needed</h3><p>The problem guarantees p and q exist. You'll always reach the split case before hitting null. The three cases are exhaustive.</p></div>
+    </div>
+
+    <div class="edge-cases-card">
+      <div class="ec-header"><span style="font-size:16px">⚠️</span>Edge Cases</div>
+      <div class="el">
+        <div class="ei"><span class="el-w w">p IS ancestor</span><span class="et"><strong>One node is an ancestor of the other:</strong> e.g. p=2, q=4 in tree rooted at 6. When you reach node 2 (p), its value is not smaller than itself, not larger, so case 3 fires — returns node 2. Correct! p is ancestor of q.</span></div>
+        <div class="ei"><span class="el-w w">adjacent</span><span class="et"><strong>Parent-child pair:</strong> Same logic as above. When you reach the parent, the split condition fires immediately since the child must be on one specific side (but parent doesn't satisfy "both smaller" or "both larger").</span></div>
+        <div class="ei"><span class="el-w ok">guaranteed</span><span class="et"><strong>Both nodes guaranteed to exist:</strong> The problem guarantees p and q are in the tree. So you'll always hit the split case. No null checks needed inside the recursion.</span></div>
+        <div class="ei"><span class="el-w ok">iterative</span><span class="et"><strong>Can be written iteratively:</strong> Replace recursion with a <code>while(root)</code> loop using the same three-case logic. Same O(log n) time, O(1) space instead of O(h) call stack.</span></div>
+      </div>
+    </div>
+
+    <div class="best-solution">
+      <div class="bs-header">
+        <span class="bs-title">✦ Clean solution — recursive + iterative</span>
+        <div class="sol-pills"><span class="sol-pill">O(log n) avg</span><span class="sol-pill">O(h) space recursive</span><span class="sol-pill">O(1) space iterative</span></div>
+      </div>
+      <pre><span class="cm">// Recursive — clean and readable</span>
+<span class="kw">var</span> <span class="fn">lowestCommonAncestor</span> = <span class="kw">function</span>(<span class="var">root</span>, <span class="var">p</span>, <span class="var">q</span>) {
+  <span class="kw">if</span> (<span class="var">p</span>.val &lt; <span class="var">root</span>.val &amp;&amp; <span class="var">q</span>.val &lt; <span class="var">root</span>.val)
+    <span class="kw">return</span> <span class="fn">lowestCommonAncestor</span>(<span class="var">root</span>.left, <span class="var">p</span>, <span class="var">q</span>);
+  <span class="kw">if</span> (<span class="var">p</span>.val &gt; <span class="var">root</span>.val &amp;&amp; <span class="var">q</span>.val &gt; <span class="var">root</span>.val)
+    <span class="kw">return</span> <span class="fn">lowestCommonAncestor</span>(<span class="var">root</span>.right, <span class="var">p</span>, <span class="var">q</span>);
+  <span class="kw">return</span> <span class="var">root</span>;   <span class="cm">// split point or one of them IS root → LCA!</span>
+};
+
+<span class="cm">// Iterative — O(1) space, same logic</span>
+<span class="kw">var</span> <span class="fn">lowestCommonAncestor</span> = <span class="kw">function</span>(<span class="var">root</span>, <span class="var">p</span>, <span class="var">q</span>) {
+  <span class="kw">let</span> <span class="var">curr</span> = <span class="var">root</span>;
+  <span class="kw">while</span> (<span class="var">curr</span>) {
+    <span class="kw">if</span>      (<span class="var">p</span>.val &lt; <span class="var">curr</span>.val &amp;&amp; <span class="var">q</span>.val &lt; <span class="var">curr</span>.val) <span class="var">curr</span> = <span class="var">curr</span>.left;
+    <span class="kw">else if</span> (<span class="var">p</span>.val &gt; <span class="var">curr</span>.val &amp;&amp; <span class="var">q</span>.val &gt; <span class="var">curr</span>.val) <span class="var">curr</span> = <span class="var">curr</span>.right;
+    <span class="kw">else</span> <span class="kw">return</span> <span class="var">curr</span>;   <span class="cm">// split or match → LCA!</span>
+  }
+};
+<span class="cm">// Pattern: BST Split Detection
+// Key: The split point = LCA. BST ordering reveals it in O(log n).</span></pre>
+    </div>
+
+    <div class="complexity">
+      <div class="cpill">Time: <strong>O(log n)</strong> balanced BST</div>
+      <div class="cpill">Time: <strong>O(n)</strong> skewed BST</div>
+      <div class="cpill">Space: <strong>O(h)</strong> recursive call stack</div>
+      <div class="cpill">Space: <strong>O(1)</strong> iterative version</div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ─── EXAMPLES ─────────────────────────────────────────────────────────────
+
+const EXAMPLES = [
+  {
+    /*
+      BST:       6
+                / \
+               2    8
+              / \
+             0    4
+                 / \
+                3    5
+      p=2, q=8 → LCA=6 (split at root, 2<6 but 8>6)
+    */
+    label: "[6,2,8,0,4,...], p=2, q=8",
+    treeLabel: "BST [6,2,8,0,4] · p=2, q=8",
+    pVal: 2, qVal: 8, lcaVal: 6,
+    svgViewBox: "0 0 500 290",
+    nodes: [
+      {id:"n6", val:6, cx:250, cy:44, r:28},
+      {id:"n2", val:2, cx:120, cy:134, r:26},
+      {id:"n8", val:8, cx:390, cy:134, r:26},
+      {id:"n0", val:0, cx:55,  cy:222, r:22},
+      {id:"n4", val:4, cx:188, cy:222, r:22},
+    ],
+    edges:[
+      {x1:228,y1:58, x2:143,y2:118},
+      {x1:272,y1:58, x2:367,y2:118},
+      {x1:102,y1:152,x2:71,  y2:205},
+      {x1:138,y1:152,x2:172, y2:205},
+    ],
+    steps: [
+      {
+        desc: 'Call <em>lowestCommonAncestor(root=6, p=2, q=8)</em>. Entering root.',
+        active:"n6", lca:null,
+        stack:["LCA(root=6, p=2, q=8)"],
+        rootV:"6", pV:"2", qV:"8", cas:"—", ret:"—",
+        decision:{text:"— evaluating —", cls:"decision-neutral"},
+        log:[{t:"→ LCA(root=6, p=2, q=8)",h:true},{t:"  checking: both < 6? both > 6? or split?"}]
+      },
+      {
+        desc: 'Check case 1: <em>p(2) < 6 AND q(8) < 6</em>? → 2<6 ✓ but 8<6 ✗ → <span class="go-left">NOT both left</span>.',
+        active:"n6", lca:null,
+        stack:["LCA(root=6, p=2, q=8)"],
+        rootV:"6", pV:"2", qV:"8", cas:"not both left", ret:"—",
+        decision:{text:"p(2) < 6 but q(8) > 6 → not both same side", cls:"decision-neutral"},
+        log:[{t:"→ LCA(root=6, p=2, q=8)"},{t:"  case 1: 2<6 ✓ but 8<6 ✗ → NOT both left"}]
+      },
+      {
+        desc: 'Check case 2: <em>p(2) > 6 AND q(8) > 6</em>? → 2>6 ✗ → <span class="go-right">NOT both right</span>. Neither case 1 nor case 2 fired → <span class="split">SPLIT POINT!</span>',
+        active:"n6", lca:null,
+        stack:["LCA(root=6, p=2, q=8)"],
+        rootV:"6", pV:"2", qV:"8", cas:"SPLIT → return root", ret:"—",
+        decision:{text:"← p=2 left / q=8 right → SPLIT HERE!", cls:"decision-split"},
+        log:[{t:"  case 2: 2>6 ✗ → NOT both right"},{t:"  else → SPLIT DETECTED at node 6!",h:true},{t:"  p(2) is left, q(8) is right of root"}]
+      },
+      {
+        desc: '🎯 <span class="split">LCA = node 6!</span> p=2 lives in left subtree, q=8 lives in right subtree — they split at this node. Root 6 is the deepest ancestor of both. <span class="ok">return root</span>.',
+        active:null, lca:"n6",
+        stack:[],
+        rootV:"6", pV:"2", qV:"8", cas:"SPLIT → return root", ret:"node(6)",
+        decision:{text:"✓ node 6 is the LCA", cls:"decision-split"},
+        log:[{t:"  else → return root (node 6)",h:true},{t:"← LCA(root=6, p=2, q=8) = node 6 ✓",h:true}],
+        final:true, lcaAnswer:"node 6"
+      }
+    ]
+  },
+
+  {
+    /*
+      BST:       6
+                / \
+               2    8
+              / \
+             0    4
+      p=2, q=4 → LCA=2
+      At 6: both (2,4) < 6 → go left
+      At 2: p==root → split/match → return 2
+    */
+    label: "[6,2,8,0,4], p=2, q=4",
+    treeLabel: "BST [6,2,8,0,4] · p=2, q=4",
+    pVal: 2, qVal: 4, lcaVal: 2,
+    svgViewBox: "0 0 500 290",
+    nodes: [
+      {id:"n6", val:6, cx:250, cy:44, r:28},
+      {id:"n2", val:2, cx:120, cy:134, r:26},
+      {id:"n8", val:8, cx:390, cy:134, r:26},
+      {id:"n0", val:0, cx:55,  cy:222, r:22},
+      {id:"n4", val:4, cx:188, cy:222, r:22},
+    ],
+    edges:[
+      {x1:228,y1:58, x2:143,y2:118},
+      {x1:272,y1:58, x2:367,y2:118},
+      {x1:102,y1:152,x2:71,  y2:205},
+      {x1:138,y1:152,x2:172, y2:205},
+    ],
+    steps: [
+      {
+        desc: 'Call <em>LCA(root=6, p=2, q=4)</em>. Root is 6, check which case fires.',
+        active:"n6", lca:null,
+        stack:["LCA(root=6, p=2, q=4)"],
+        rootV:"6", pV:"2", qV:"8→4", cas:"—", ret:"—",
+        decision:{text:"— evaluating node 6 —", cls:"decision-neutral"},
+        log:[{t:"→ LCA(root=6, p=2, q=4)",h:true},{t:"  check: p=2, q=4, root=6"}]
+      },
+      {
+        desc: 'Case 1: <em>p(2) < 6 AND q(4) < 6</em>? → 2<6 ✓ AND 4<6 ✓ → <span class="go-left">BOTH left!</span> LCA must be in left subtree. Go left.',
+        active:"n6", lca:null,
+        stack:["LCA(root=6, p=2, q=4)"],
+        rootV:"6", pV:"2", qV:"4", cas:"both < root → go LEFT", ret:"—",
+        decision:{text:"← p(2)<6 AND q(4)<6 → both LEFT, go left", cls:"decision-left"},
+        log:[{t:"→ LCA(root=6, p=2, q=4)"},{t:"  case 1: 2<6 ✓ AND 4<6 ✓ → BOTH LEFT",h:true},{t:"  → recurse left: LCA(root=2, p=2, q=4)"}]
+      },
+      {
+        desc: 'Recurse left → <em>LCA(root=2, p=2, q=4)</em>. Now at node 2. Check cases.',
+        active:"n2", lca:null,
+        stack:["LCA(root=6, p=2, q=4)","LCA(root=2, p=2, q=4)"],
+        rootV:"2", pV:"2", qV:"4", cas:"—", ret:"—",
+        decision:{text:"— evaluating node 2 —", cls:"decision-neutral"},
+        log:[{t:"  → LCA(root=2, p=2, q=4)",h:true},{t:"    check: p=2, q=4, root=2"}]
+      },
+      {
+        desc: 'Case 1: <em>p(2) < 2 AND q(4) < 2</em>? → 2<2 ✗ → fails. Case 2: <em>p(2) > 2 AND q(4) > 2</em>? → 2>2 ✗ → fails. → <span class="split">SPLIT / MATCH!</span> p equals root.',
+        active:"n2", lca:null,
+        stack:["LCA(root=6, p=2, q=4)","LCA(root=2, p=2, q=4)"],
+        rootV:"2", pV:"2", qV:"4", cas:"p==root → SPLIT/MATCH!", ret:"—",
+        decision:{text:"p.val(2) == root.val(2) → p IS root → return here!", cls:"decision-split"},
+        log:[{t:"    case 1: 2<2 ✗ → NOT both left"},{t:"    case 2: 2>2 ✗ → NOT both right"},{t:"    else → SPLIT/MATCH at node 2!",h:true},{t:"    p equals root → node 2 is ancestor of q=4"}]
+      },
+      {
+        desc: '🎯 <span class="split">LCA = node 2!</span> p=2 IS the current root, and q=4 is in its right subtree — making node 2 an ancestor of both. <span class="ok">return root</span>.',
+        active:null, lca:"n2",
+        stack:[],
+        rootV:"2", pV:"2", qV:"4", cas:"p==root → return root", ret:"node(2)",
+        decision:{text:"✓ node 2 is the LCA", cls:"decision-split"},
+        log:[{t:"    else → return root (node 2)",h:true},{t:"← LCA = node 2 ✓  (p was an ancestor of q)",h:true}],
+        final:true, lcaAnswer:"node 2"
+      }
+    ]
+  },
+
+  {
+    /*
+      BST:       6
+                / \
+               2    8
+              / \
+             0    4
+      p=6 (root), q=4 → LCA=6
+      At 6: not both < 6, not both > 6 → split/match immediately
+    */
+    label: "[6,2,8,0,4], p=6 q=4 (p is root)",
+    treeLabel: "BST [6,2,8,0,4] · p=6 (root), q=4",
+    pVal: 6, qVal: 4, lcaVal: 6,
+    svgViewBox: "0 0 500 290",
+    nodes: [
+      {id:"n6", val:6, cx:250, cy:44, r:28},
+      {id:"n2", val:2, cx:120, cy:134, r:26},
+      {id:"n8", val:8, cx:390, cy:134, r:26},
+      {id:"n0", val:0, cx:55,  cy:222, r:22},
+      {id:"n4", val:4, cx:188, cy:222, r:22},
+    ],
+    edges:[
+      {x1:228,y1:58, x2:143,y2:118},
+      {x1:272,y1:58, x2:367,y2:118},
+      {x1:102,y1:152,x2:71,  y2:205},
+      {x1:138,y1:152,x2:172, y2:205},
+    ],
+    steps: [
+      {
+        desc: 'Call <em>LCA(root=6, p=6, q=4)</em>. p equals the root! Watch how the else-case handles this correctly without any special code.',
+        active:"n6", lca:null,
+        stack:["LCA(root=6, p=6, q=4)"],
+        rootV:"6", pV:"6", qV:"4", cas:"—", ret:"—",
+        decision:{text:"— evaluating node 6 — p equals root!", cls:"decision-neutral"},
+        log:[{t:"→ LCA(root=6, p=6, q=4)",h:true},{t:"  p.val=6 equals root.val=6"}]
+      },
+      {
+        desc: 'Case 1: <em>p(6) < 6 AND q(4) < 6</em>? → 6<6 ✗ → fails. Case 2: <em>p(6) > 6 AND q(4) > 6</em>? → 6>6 ✗ → fails. → <span class="split">Else fires immediately!</span>',
+        active:"n6", lca:null,
+        stack:["LCA(root=6, p=6, q=4)"],
+        rootV:"6", pV:"6", qV:"4", cas:"p==root → MATCH → return root", ret:"—",
+        decision:{text:"p.val(6) == root.val(6) → return root immediately!", cls:"decision-split"},
+        log:[{t:"  case 1: 6<6 ✗ → fails"},{t:"  case 2: 6>6 ✗ → fails"},{t:"  else → fires! p IS root → return root",h:true}]
+      },
+      {
+        desc: '🎯 <span class="split">LCA = node 6 (root itself)!</span> p is the root node, so root is trivially an ancestor of q. The else-case handles this in one step — no special code needed. <span class="ok">return root</span>.',
+        active:null, lca:"n6",
+        stack:[],
+        rootV:"6", pV:"6", qV:"4", cas:"p==root → return root", ret:"node(6)",
+        decision:{text:"✓ node 6 is the LCA (p was root)", cls:"decision-split"},
+        log:[{t:"  else → return root (node 6)",h:true},{t:"← LCA = node 6 ✓  (p was the root itself)",h:true}],
+        final:true, lcaAnswer:"node 6"
+      }
+    ]
+  },
+
+  {
+    /*
+      BST:          20
+                   /  \
+                 10    30
+                /  \
+               5    15
+              / \
+             3    7
+      p=3, q=7 → LCA=5
+      20: both(3,7)<20 → go left
+      10: both(3,7)<10 → go left
+      5:  3<5 but 7>5 → SPLIT → LCA=5
+    */
+    label: "Deep BST, p=3, q=7",
+    treeLabel: "BST [20,10,30,5,15,null,null,3,7] · p=3, q=7",
+    pVal: 3, qVal: 7, lcaVal: 5,
+    svgViewBox: "0 0 520 300",
+    nodes: [
+      {id:"n20", val:20, cx:260, cy:42, r:28},
+      {id:"n10", val:10, cx:140, cy:122, r:26},
+      {id:"n30", val:30, cx:390, cy:122, r:26},
+      {id:"n5",  val:5,  cx:70,  cy:203, r:23},
+      {id:"n15", val:15, cx:210, cy:203, r:23},
+      {id:"n3",  val:3,  cx:28,  cy:272, r:19},
+      {id:"n7",  val:7,  cx:116, cy:272, r:19},
+    ],
+    edges:[
+      {x1:238,y1:56, x2:163,y2:106},
+      {x1:282,y1:56, x2:367,y2:106},
+      {x1:122,y1:140,x2:88,  y2:185},
+      {x1:158,y1:140,x2:192, y2:185},
+      {x1:56, y1:221,x2:37,  y2:256},
+      {x1:84, y1:221,x2:103, y2:256},
+    ],
+    steps: [
+      {
+        desc: 'Call <em>LCA(root=20, p=3, q=7)</em>. Starting at root. p=3 and q=7 are both deep in the left subtree.',
+        active:"n20", lca:null,
+        stack:["LCA(root=20, p=3, q=7)"],
+        rootV:"20", pV:"3", qV:"7", cas:"—", ret:"—",
+        decision:{text:"— evaluating node 20 —", cls:"decision-neutral"},
+        log:[{t:"→ LCA(root=20, p=3, q=7)",h:true},{t:"  p=3, q=7, root=20"}]
+      },
+      {
+        desc: 'Case 1: <em>p(3) < 20 AND q(7) < 20</em>? → ✓ ✓ → <span class="go-left">BOTH LEFT!</span> Both 3 and 7 are smaller than 20. Go left. Prune entire right subtree (30).',
+        active:"n20", lca:null,
+        stack:["LCA(root=20, p=3, q=7)"],
+        rootV:"20", pV:"3", qV:"7", cas:"both < root → go LEFT", ret:"—",
+        decision:{text:"← p(3)<20 AND q(7)<20 → both LEFT, recurse left", cls:"decision-left"},
+        log:[{t:"  case 1: 3<20 ✓ AND 7<20 ✓ → BOTH LEFT",h:true},{t:"  → recurse left (skip entire right subtree: 30)"}]
+      },
+      {
+        desc: 'Recurse left → <em>LCA(root=10, p=3, q=7)</em>. Now at node 10. Again both p and q are smaller.',
+        active:"n10", lca:null,
+        stack:["LCA(root=20, p=3, q=7)","LCA(root=10, p=3, q=7)"],
+        rootV:"10", pV:"3", qV:"7", cas:"—", ret:"—",
+        decision:{text:"— evaluating node 10 —", cls:"decision-neutral"},
+        log:[{t:"  → LCA(root=10, p=3, q=7)",h:true}]
+      },
+      {
+        desc: 'Case 1: <em>p(3) < 10 AND q(7) < 10</em>? → ✓ ✓ → <span class="go-left">BOTH LEFT again!</span> Skip node 15. Go further left to node 5.',
+        active:"n10", lca:null,
+        stack:["LCA(root=20, p=3, q=7)","LCA(root=10, p=3, q=7)"],
+        rootV:"10", pV:"3", qV:"7", cas:"both < root → go LEFT", ret:"—",
+        decision:{text:"← p(3)<10 AND q(7)<10 → both LEFT, recurse left", cls:"decision-left"},
+        log:[{t:"    case 1: 3<10 ✓ AND 7<10 ✓ → BOTH LEFT",h:true},{t:"    → recurse left (skip node 15)"}]
+      },
+      {
+        desc: 'Recurse left → <em>LCA(root=5, p=3, q=7)</em>. At node 5. Now p=3 < 5 but q=7 > 5 — they\'re on different sides!',
+        active:"n5", lca:null,
+        stack:["LCA(root=20, p=3, q=7)","LCA(root=10, p=3, q=7)","LCA(root=5, p=3, q=7)"],
+        rootV:"5", pV:"3", qV:"7", cas:"—", ret:"—",
+        decision:{text:"— evaluating node 5 — p=3 left, q=7 right?", cls:"decision-neutral"},
+        log:[{t:"    → LCA(root=5, p=3, q=7)",h:true},{t:"      check: p=3, q=7, root=5"}]
+      },
+      {
+        desc: 'Case 1: <em>p(3) < 5 AND q(7) < 5</em>? → 3<5 ✓ but 7<5 ✗ → fails. Case 2: <em>p(3) > 5 AND q(7) > 5</em>? → 3>5 ✗ → fails. → <span class="split">SPLIT DETECTED!</span>',
+        active:"n5", lca:null,
+        stack:["LCA(root=20, p=3, q=7)","LCA(root=10, p=3, q=7)","LCA(root=5, p=3, q=7)"],
+        rootV:"5", pV:"3", qV:"7", cas:"p<root<q → SPLIT!", ret:"—",
+        decision:{text:"← p(3) left | q(7) right → SPLIT at node 5!", cls:"decision-split"},
+        log:[{t:"      case 1: 3<5 ✓ but 7<5 ✗ → fails"},{t:"      case 2: 3>5 ✗ → fails"},{t:"      else → SPLIT! p left of 5, q right of 5",h:true}]
+      },
+      {
+        desc: '🎯 <span class="split">LCA = node 5!</span> p=3 is in 5\'s left subtree and q=7 is in 5\'s right subtree. Node 5 is the deepest node where they split. We travelled: 20→10→5, each time knowing both went left until they separated.',
+        active:null, lca:"n5",
+        stack:[],
+        rootV:"5", pV:"3", qV:"7", cas:"SPLIT → return root(5)", ret:"node(5)",
+        decision:{text:"✓ node 5 is the LCA (after 3 steps)", cls:"decision-split"},
+        log:[{t:"      else → return root (node 5)",h:true},{t:"← LCA = node 5 ✓",h:true},{t:"  Path taken: 20→10→5  (2 hops, BST O(log n))"}],
+        final:true, lcaAnswer:"node 5"
+      }
+    ]
+  }
+];
+
+// ─── STATE ─────────────────────────────────────────────────────────────────
+let exIdx = 0, cur = 0, playTimer = null;
+const getEx = () => EXAMPLES[exIdx];
+const getSteps = () => getEx().steps;
+
+// ─── RENDER SVG ─────────────────────────────────────────────────────────────
+function renderSVG(ex, step) {
+  const svg = document.getElementById("tree-svg");
+  svg.setAttribute("viewBox", ex.svgViewBox);
+
+  let html = "";
+
+  // Edges
+  ex.edges.forEach(e => {
+    html += `<line x1="${e.x1}" y1="${e.y1}" x2="${e.x2}" y2="${e.y2}" stroke="#1e2231" stroke-width="2"/>`;
+  });
+
+  // Nodes
+  ex.nodes.forEach(n => {
+    const isP = n.val === ex.pVal;
+    const isQ = n.val === ex.qVal;
+
+    let fill = "#13161d", stroke = "#2a2f3e", sw = "1.5", tf = "#6b7280";
+
+    if (n.id === step.lca) {
+      // Found LCA — emerald glow
+      fill = "#0c1d14"; stroke = "#10b981"; sw = "3"; tf = "#10b981";
+    } else if (n.id === step.active) {
+      // Currently visiting
+      fill = "#0f1d14"; stroke = "#10b981"; sw = "2.5"; tf = "#10b981";
+    } else if (isP) {
+      fill = "#1a1520"; stroke = "#f472b6"; sw = "2"; tf = "#f472b6";
+    } else if (isQ) {
+      fill = "#1e1a08"; stroke = "#fbbf24"; sw = "2"; tf = "#fbbf24";
+    }
+
+    const valStr = String(n.val);
+    const fontSize = valStr.length > 2 ? 11 : (n.r > 24 ? 14 : 12);
+
+    html += `<g id="${n.id}">
+      <circle cx="${n.cx}" cy="${n.cy}" r="${n.r}" fill="${fill}" stroke="${stroke}" stroke-width="${sw}" style="transition:all .25s"/>
+      <text x="${n.cx}" y="${n.cy+4}" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="${fontSize}" font-weight="700" fill="${tf}" style="transition:fill .25s">${n.val}</text>
+    </g>`;
+  });
+
+  // LCA glow ring
+  if (step.lca) {
+    const nd = ex.nodes.find(n => n.id === step.lca);
+    if (nd) {
+      html += `<circle cx="${nd.cx}" cy="${nd.cy}" r="${nd.r + 10}" fill="none" stroke="rgba(16,185,129,0.25)" stroke-width="5"/>`;
+    }
+  }
+
+  // p and q labels
+  ex.nodes.forEach(n => {
+    const isP = n.val === ex.pVal;
+    const isQ = n.val === ex.qVal;
+    if (isP && n.id !== step.lca) html += `<text x="${n.cx + n.r + 4}" y="${n.cy - n.r + 4}" font-family="'JetBrains Mono',monospace" font-size="9" font-weight="700" fill="#f472b6">p</text>`;
+    if (isQ && n.id !== step.lca) html += `<text x="${n.cx + n.r + 4}" y="${n.cy - n.r + 4}" font-family="'JetBrains Mono',monospace" font-size="9" font-weight="700" fill="#fbbf24">q</text>`;
+  });
+
+  svg.innerHTML = html;
+}
+
+// ─── RENDER STEP ─────────────────────────────────────────────────────────────
+function renderStep(step) {
+  const ex = getEx();
+  renderSVG(ex, step);
+
+  // Decision banner
+  const pill = document.getElementById("decision-pill");
+  pill.textContent = step.decision.text;
+  pill.className = "decision-pill " + step.decision.cls;
+
+  // Call stack
+  const stackEl = document.getElementById("stack");
+  let sh = step.stack.map((f, i) => {
+    const isTop = i === step.stack.length - 1;
+    return `<div class="frame ${isTop ? (step.lca ? "returning" : "active") : ""}">${f}</div>`;
+  }).join("");
+  if (!step.stack.length && step.lca) {
+    sh = `<div class="frame returning">← returned node(${ex.lcaVal})</div>`;
+  }
+  stackEl.innerHTML = sh;
+
+  // LCA display
+  const lcaEl = document.getElementById("lca-display");
+  if (step.lca) {
+    lcaEl.textContent = "node " + ex.lcaVal;
+    lcaEl.classList.add("updated");
+    setTimeout(() => lcaEl.classList.remove("updated"), 500);
+  } else {
+    lcaEl.textContent = "?";
+    lcaEl.className = "lca-val";
+  }
+
+  // Vars
+  document.getElementById("v-root").textContent = step.rootV;
+  document.getElementById("v-p").textContent = step.pV;
+  document.getElementById("v-q").textContent = step.qV;
+  const caseEl = document.getElementById("v-case");
+  caseEl.textContent = step.cas;
+  caseEl.className = step.cas.includes("SPLIT") ? "var-val em" : step.cas.includes("LEFT") ? "var-val b" : step.cas.includes("RIGHT") ? "var-val r" : "var-val d";
+  const retEl = document.getElementById("v-ret");
+  retEl.textContent = step.ret;
+  retEl.className = step.ret === "—" ? "var-val d" : "var-val g";
+
+  // Log
+  const logEl = document.getElementById("log");
+  logEl.innerHTML = step.log.map(e => {
+    let cls = "";
+    if (e.h) cls = "hl";
+    else if (e.t.includes("BOTH LEFT") || e.t.includes("go left") || e.t.includes("go LEFT")) cls = "left";
+    else if (e.t.includes("BOTH RIGHT") || e.t.includes("go right")) cls = "right";
+    else if (e.t.includes("SPLIT") || e.t.includes("LCA")) cls = "split";
+    return `<div class="entry ${cls}">${e.t}</div>`;
+  }).join("");
+  logEl.scrollTop = logEl.scrollHeight;
+
+  // Meta
+  const steps = getSteps();
+  document.getElementById("step-label").textContent = `Step ${cur + 1} / ${steps.length}`;
+  document.getElementById("step-desc").innerHTML = step.desc;
+  document.getElementById("prog").style.width = ((cur + 1) / steps.length * 100) + "%";
+
+  const badge = document.getElementById("ans-badge");
+  if (step.final) {
+    badge.style.display = "inline-block";
+    badge.textContent = "✓ LCA = " + step.lcaAnswer;
+  } else {
+    badge.style.display = "none";
+  }
+
+  document.getElementById("btn-prev").disabled = cur === 0;
+  document.getElementById("btn-next").disabled = cur === steps.length - 1;
+}
+
+function move(d) {
+  cur = Math.max(0, Math.min(getSteps().length - 1, cur + d));
+  renderStep(getSteps()[cur]);
+}
+
+function reset() { cur = 0; stopPlay(); renderStep(getSteps()[0]); }
+
+function loadExample(idx) {
+  exIdx = idx; cur = 0; stopPlay();
+  const ex = EXAMPLES[idx];
+  document.getElementById("tree-panel-label").textContent = "// " + ex.treeLabel;
+  document.getElementById("v-p").textContent = ex.pVal;
+  document.getElementById("v-q").textContent = ex.qVal;
+  renderStep(getSteps()[0]);
+}
+
+document.getElementById("examples-row").addEventListener("click", e => {
+  const btn = e.target.closest(".ex-btn");
+  if (!btn) return;
+  document.querySelectorAll(".ex-btn").forEach(b => b.classList.remove("active"));
+  btn.classList.add("active");
+  loadExample(parseInt(btn.dataset.ex));
+});
+
+document.addEventListener("keydown", e => {
+  if (e.key === "ArrowRight" || e.key === "ArrowDown") move(1);
+  if (e.key === "ArrowLeft"  || e.key === "ArrowUp")   move(-1);
+});
+
+function stopPlay() {
+  if (playTimer) { clearInterval(playTimer); playTimer = null; }
+  const btn = document.getElementById("btn-play");
+  btn.textContent = "▶ Play"; btn.classList.add("btn-play");
+}
+
+function togglePlay() {
+  const btn = document.getElementById("btn-play");
+  if (playTimer) { stopPlay(); return; }
+  btn.textContent = "⏸ Pause"; btn.classList.add("btn-play");
+  playTimer = setInterval(() => {
+    if (cur >= getSteps().length - 1) { stopPlay(); return; }
+    move(1);
+  }, 1500);
+}
+
+loadExample(0);
+</script>
+</body>
+</html>

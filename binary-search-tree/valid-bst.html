@@ -1,0 +1,838 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Validate Binary Search Tree — Interactive Dry Run</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Sora:wght@300;400;600;700&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #0d0f14; --surface: #13161d; --surface2: #1a1e28; --surface3: #212638;
+      --border: rgba(255,255,255,0.07); --border-mid: rgba(255,255,255,0.12);
+      --text: #e8eaf0; --text-muted: #6b7280; --text-dim: #3d4251;
+      --accent: #7c6ef5; --accent-glow: rgba(124,110,245,0.25);
+      --green: #34d399; --green-bg: rgba(52,211,153,0.1);
+      --amber: #fbbf24; --amber-bg: rgba(251,191,36,0.12);
+      --blue: #60a5fa; --blue-bg: rgba(96,165,250,0.1);
+      --red: #f87171; --red-bg: rgba(248,113,113,0.12);
+      --emerald: #10b981; --emerald-bg: rgba(16,185,129,0.1);
+      --mono: 'JetBrains Mono', monospace; --sans: 'Sora', sans-serif;
+    }
+    html { scroll-behavior: smooth; }
+    body { background: var(--bg); color: var(--text); font-family: var(--sans); font-size: 15px; line-height: 1.6; min-height: 100vh; overflow-x: hidden; }
+    body::before { content: ''; position: fixed; inset: 0; background-image: linear-gradient(rgba(16,185,129,0.025) 1px, transparent 1px), linear-gradient(90deg, rgba(16,185,129,0.025) 1px, transparent 1px); background-size: 40px 40px; pointer-events: none; z-index: 0; }
+    .page { position: relative; z-index: 1; max-width: 1000px; margin: 0 auto; padding: 3rem 1.5rem 5rem; }
+
+    .back-nav { display: inline-flex; align-items: center; gap: 8px; font-family: var(--mono); font-size: 12px; color: var(--text-muted); text-decoration: none; padding: 7px 14px 7px 10px; border-radius: 8px; border: 1px solid var(--border); background: var(--surface); margin-bottom: 2rem; transition: all .15s; }
+    .back-nav:hover { border-color: var(--border-mid); color: var(--text); }
+
+    header { margin-bottom: 2rem; animation: fadeUp .6s ease both; }
+    .tag { display: inline-block; font-family: var(--mono); font-size: 11px; font-weight: 500; letter-spacing: .12em; text-transform: uppercase; color: var(--emerald); background: var(--emerald-bg); border: 1px solid rgba(16,185,129,0.3); padding: 4px 12px; border-radius: 100px; margin-bottom: 1.2rem; }
+    h1 { font-size: clamp(1.8rem, 5vw, 2.8rem); font-weight: 700; line-height: 1.15; color: var(--text); margin-bottom: .8rem; letter-spacing: -.02em; }
+    h1 span { color: var(--emerald); }
+    .subtitle { font-size: 15px; color: var(--text-muted); max-width: 580px; line-height: 1.7; }
+
+    /* Pattern banner */
+    .pattern-banner { display: flex; align-items: flex-start; gap: 16px; background: var(--emerald-bg); border: 1px solid rgba(16,185,129,0.25); border-left: 3px solid var(--emerald); border-radius: 10px; padding: 14px 18px; margin-bottom: 2rem; animation: fadeUp .6s ease .03s both; flex-wrap: wrap; }
+    .pattern-label { font-family: var(--mono); font-size: 10px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--text-dim); margin-bottom: 4px; }
+    .pattern-name { font-family: var(--mono); font-size: 13px; font-weight: 700; color: var(--emerald); }
+    .pattern-desc { font-family: var(--mono); font-size: 12px; color: var(--text-muted); flex: 1; min-width: 200px; line-height: 1.7; }
+    .pattern-solves { font-family: var(--mono); font-size: 11px; color: var(--text-dim); }
+    .pattern-solves span { color: var(--emerald); }
+
+    /* Problem section */
+    .problem-section { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; margin-bottom: 2rem; animation: fadeUp .6s ease .04s both; }
+    .section-header { display: flex; align-items: center; gap: 10px; padding: 14px 20px; border-bottom: 1px solid var(--border); background: var(--surface2); }
+    .section-header-title { font-family: var(--mono); font-size: 11px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--text-muted); }
+    .section-body { padding: 20px; }
+    .section-body p { font-size: 13px; color: var(--text-muted); line-height: 1.75; margin-bottom: 10px; }
+    .section-body p:last-child { margin-bottom: 0; }
+    .section-body p strong { color: var(--text); }
+    .section-body code { font-family: var(--mono); font-size: 11px; background: var(--surface2); padding: 1px 6px; border-radius: 4px; color: var(--accent); }
+
+    /* BST property box */
+    .bst-property { background: var(--emerald-bg); border: 1px solid rgba(16,185,129,0.2); border-radius: 10px; padding: 16px 18px; margin-bottom: 14px; }
+    .bst-property p { font-size: 13px; color: var(--text-muted); line-height: 1.75; }
+    .bst-property p strong { color: var(--emerald); }
+    .bst-property code { font-family: var(--mono); font-size: 11px; background: var(--surface2); padding: 1px 5px; border-radius: 4px; color: var(--accent); }
+
+    /* IO grid */
+    .io-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 14px; }
+    .io-card { background: var(--surface2); border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; }
+    .io-label { font-family: var(--mono); font-size: 10px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--text-dim); margin-bottom: 8px; }
+    .io-row { display: flex; justify-content: space-between; font-family: var(--mono); font-size: 12px; padding: 4px 0; border-bottom: 1px solid var(--border); color: var(--text-muted); }
+    .io-row:last-child { border-bottom: none; }
+    .io-t { color: var(--green); font-weight: 700; } .io-f { color: var(--red); font-weight: 700; }
+
+    /* Hints */
+    .hints-grid { display: flex; flex-direction: column; gap: 10px; }
+    .hint-step { display: flex; gap: 12px; align-items: flex-start; }
+    .hint-num { font-family: var(--mono); font-size: 11px; font-weight: 700; color: var(--emerald); background: var(--emerald-bg); border: 1px solid rgba(16,185,129,0.25); padding: 3px 8px; border-radius: 6px; flex-shrink: 0; margin-top: 2px; min-width: 28px; text-align: center; }
+    .hint-text { font-size: 13px; color: var(--text-muted); line-height: 1.7; }
+    .hint-text code { font-family: var(--mono); font-size: 11px; background: var(--surface2); padding: 1px 5px; border-radius: 4px; color: var(--accent); }
+    .hint-text strong { color: var(--text); }
+
+    /* Code block */
+    .code-block { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; margin-bottom: 2rem; animation: fadeUp .6s ease .1s both; }
+    .code-header { display: flex; align-items: center; gap: 8px; padding: 12px 16px; border-bottom: 1px solid var(--border); background: var(--surface2); }
+    .code-header span { font-family: var(--mono); font-size: 12px; color: var(--text-muted); }
+    .dots { display: flex; gap: 6px; }
+    .dot { width: 10px; height: 10px; border-radius: 50%; }
+    .dot-r { background: #ff5f57; } .dot-y { background: #ffbd2e; } .dot-g { background: #28c940; }
+    pre { padding: 1.25rem 1.5rem; overflow-x: auto; font-family: var(--mono); font-size: 13px; line-height: 1.8; color: #c9d1d9; }
+    .kw { color: #ff79c6; } .fn { color: #50fa7b; } .cm { color: #6272a4; font-style: italic; } .num { color: #bd93f9; } .var { color: #8be9fd; }
+    .hl { background: rgba(16,185,129,0.12); border-radius: 3px; padding: 0 3px; }
+
+    .section-label { font-family: var(--mono); font-size: 11px; font-weight: 500; letter-spacing: .1em; text-transform: uppercase; color: var(--text-dim); margin-bottom: 1rem; margin-top: 2.5rem; }
+
+    /* Example selector */
+    .examples-row { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 1.5rem; animation: fadeUp .6s ease .15s both; }
+    .ex-btn { display: inline-flex; align-items: center; gap: 8px; padding: 9px 16px; border-radius: 10px; border: 1px solid var(--border); background: var(--surface); cursor: pointer; transition: all .18s; font-family: var(--mono); font-size: 12px; font-weight: 600; color: var(--text-muted); user-select: none; }
+    .ex-btn:hover { border-color: var(--border-mid); color: var(--text); transform: translateY(-1px); }
+    .ex-btn.active { background: var(--emerald-bg); border-color: rgba(16,185,129,0.4); color: var(--emerald); transform: translateY(-1px); }
+    .ex-badge { font-size: 9px; font-weight: 700; padding: 2px 7px; border-radius: 5px; background: var(--surface3); color: var(--text-dim); }
+    .ex-btn.active .ex-badge { background: rgba(255,255,255,0.1); color: inherit; }
+
+    /* Visualizer */
+    .viz-card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; overflow: hidden; animation: fadeUp .6s ease .2s both; }
+    .progress-bar-wrap { height: 3px; background: var(--border); }
+    .progress-bar-inner { height: 100%; background: linear-gradient(90deg, var(--emerald), #34d399); transition: width .35s cubic-bezier(.4,0,.2,1); border-radius: 0 2px 2px 0; }
+    .controls { display: flex; align-items: center; gap: 10px; padding: 14px 20px; border-bottom: 1px solid var(--border); background: var(--surface2); flex-wrap: wrap; }
+    .btn { display: inline-flex; align-items: center; gap: 6px; font-family: var(--mono); font-size: 12px; font-weight: 500; padding: 7px 16px; border-radius: 8px; border: 1px solid var(--border-mid); background: var(--surface3); color: var(--text); cursor: pointer; transition: all .15s; }
+    .btn:hover:not(:disabled) { background: var(--emerald-bg); border-color: var(--emerald); color: var(--emerald); }
+    .btn:disabled { opacity: .3; cursor: default; }
+    .btn-play-active { background: var(--emerald-bg) !important; border-color: rgba(16,185,129,0.4) !important; color: var(--emerald) !important; }
+    .btn-reset { background: var(--red-bg) !important; border-color: rgba(248,113,113,0.3) !important; color: var(--red) !important; }
+    .step-info { flex: 1; font-size: 13px; color: var(--text-muted); font-family: var(--mono); }
+    kbd { font-size: 10px; background: var(--surface3); border: 1px solid var(--border-mid); padding: 2px 5px; border-radius: 4px; color: var(--text-muted); font-family: var(--mono); }
+    .result-badge { font-family: var(--mono); font-size: 11px; font-weight: 700; letter-spacing: .06em; padding: 4px 12px; border-radius: 100px; text-transform: uppercase; }
+    .badge-true { background: var(--green-bg); color: var(--green); border: 1px solid rgba(52,211,153,0.25); }
+    .badge-false { background: var(--red-bg); color: var(--red); border: 1px solid rgba(248,113,113,0.25); }
+    .step-desc { padding: 12px 20px; font-size: 13px; color: var(--text-muted); background: var(--surface2); border-bottom: 1px solid var(--border); font-family: var(--mono); min-height: 44px; line-height: 1.6; }
+    .step-desc em { color: var(--amber); font-style: normal; }
+    .step-desc .ok { color: var(--green); font-weight: 600; }
+    .step-desc .fail { color: var(--red); font-weight: 600; }
+    .step-desc .hi { color: var(--emerald); font-weight: 600; }
+
+    /* Main grid */
+    .main-grid { display: grid; grid-template-columns: 1fr 320px; }
+    .tree-panel { padding: 24px; border-right: 1px solid var(--border); }
+    .panel-label { font-family: var(--mono); font-size: 10px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--text-dim); margin-bottom: 12px; }
+    #tree-svg { width: 100%; }
+
+    /* Side panel */
+    .side-panel { display: flex; flex-direction: column; }
+
+    /* Bounds tracker — THE KEY UI ELEMENT */
+    .bounds-panel { padding: 14px 16px; border-bottom: 1px solid var(--border); }
+    .bounds-display { display: flex; align-items: center; gap: 8px; background: var(--surface2); border: 1px solid var(--border-mid); border-radius: 10px; padding: 10px 14px; font-family: var(--mono); font-size: 12px; flex-wrap: wrap; gap: 6px; }
+    .bound-min { color: var(--blue); font-weight: 700; }
+    .bound-curr { color: var(--emerald); font-weight: 700; font-size: 14px; }
+    .bound-max { color: var(--amber); font-weight: 700; }
+    .bound-sep { color: var(--text-dim); }
+    .bounds-valid { color: var(--green); font-size: 11px; font-weight: 700; margin-left: auto; }
+    .bounds-invalid { color: var(--red); font-size: 11px; font-weight: 700; margin-left: auto; }
+
+    /* Call stack */
+    .stack-panel { padding: 14px 16px; border-bottom: 1px solid var(--border); }
+    .call-stack { display: flex; flex-direction: column-reverse; gap: 4px; min-height: 60px; }
+    .frame { padding: 5px 10px; border-radius: 6px; font-size: 10px; font-family: var(--mono); border: 1px solid var(--border); background: var(--surface2); color: var(--text-muted); transition: all .2s; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .frame.active { border-color: rgba(16,185,129,0.4); background: var(--emerald-bg); color: var(--emerald); }
+    .frame.ret-true { border-color: rgba(52,211,153,0.3); background: var(--green-bg); color: var(--green); }
+    .frame.ret-false { border-color: rgba(248,113,113,0.3); background: var(--red-bg); color: var(--red); }
+
+    /* Variables */
+    .vars-panel { padding: 14px 16px; border-bottom: 1px solid var(--border); }
+    .var-row { display: flex; justify-content: space-between; align-items: center; padding: 4px 0; border-bottom: 1px solid var(--border); font-size: 12px; }
+    .var-row:last-child { border-bottom: none; }
+    .var-name { font-family: var(--mono); color: var(--text-muted); font-size: 11px; }
+    .var-val { font-family: var(--mono); font-weight: 700; color: var(--amber); font-size: 11px; }
+    .var-val.g { color: var(--green); } .var-val.r { color: var(--red); }
+    .var-val.b { color: var(--blue); } .var-val.em { color: var(--emerald); }
+    .var-val.d { color: var(--text-dim); }
+
+    /* Log */
+    .log-panel { padding: 14px 16px; flex: 1; }
+    .log { font-size: 11px; font-family: var(--mono); line-height: 1.9; color: var(--text-dim); max-height: 160px; overflow-y: auto; }
+    .log::-webkit-scrollbar { width: 4px; }
+    .log::-webkit-scrollbar-thumb { background: var(--border-mid); border-radius: 2px; }
+    .entry.hl { color: var(--text); }
+    .entry.ok { color: var(--green); }
+    .entry.fail { color: var(--red); font-weight: 600; }
+
+    /* Revision section */
+    .revision-section { margin-top: 2.5rem; animation: fadeUp .6s ease .3s both; }
+    .explain-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-bottom: 16px; }
+    .explain-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 16px 18px; }
+    .explain-card .icon { font-size: 18px; margin-bottom: 8px; }
+    .explain-card h3 { font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 6px; }
+    .explain-card p { font-size: 12px; color: var(--text-muted); line-height: 1.7; }
+    .explain-card code { font-family: var(--mono); font-size: 11px; background: var(--surface2); padding: 1px 5px; border-radius: 4px; color: var(--accent); }
+
+    .mental-model { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; margin-bottom: 16px; }
+    .mental-model-header { display: flex; align-items: center; gap: 8px; padding: 12px 18px; border-bottom: 1px solid var(--border); background: var(--surface2); }
+    .mm-title { font-family: var(--mono); font-size: 11px; font-weight: 700; color: var(--amber); }
+    .mm-body { padding: 18px; display: flex; flex-direction: column; gap: 10px; }
+    .mm-item { display: flex; gap: 10px; align-items: flex-start; }
+    .mm-b { font-family: var(--mono); font-size: 12px; color: var(--amber); font-weight: 700; flex-shrink: 0; margin-top: 2px; }
+    .mm-t { font-size: 13px; color: var(--text-muted); line-height: 1.7; }
+    .mm-t strong { color: var(--text); }
+    .mm-t code { font-family: var(--mono); font-size: 11px; background: var(--surface2); padding: 1px 5px; border-radius: 4px; color: var(--accent); }
+
+    .edge-cases-card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; margin-bottom: 16px; }
+    .ec-header { display: flex; align-items: center; gap: 8px; padding: 12px 18px; border-bottom: 1px solid var(--border); background: var(--surface2); }
+    .ec-title { font-family: var(--mono); font-size: 11px; font-weight: 700; color: var(--red); }
+    .el { display: flex; flex-direction: column; }
+    .ei { display: flex; gap: 12px; align-items: flex-start; padding: 12px 18px; border-bottom: 1px solid var(--border); }
+    .ei:last-child { border-bottom: none; }
+    .el-w { font-family: var(--mono); font-size: 9px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; padding: 3px 8px; border-radius: 5px; flex-shrink: 0; margin-top: 2px; }
+    .el-w.w { background: var(--red-bg); color: var(--red); border: 1px solid rgba(248,113,113,0.25); }
+    .el-w.ok { background: var(--green-bg); color: var(--green); border: 1px solid rgba(52,211,153,0.25); }
+    .et { font-size: 12px; color: var(--text-muted); line-height: 1.65; }
+    .et code { font-family: var(--mono); font-size: 11px; background: var(--surface2); padding: 1px 5px; border-radius: 4px; color: var(--accent); }
+
+    .best-solution { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; margin-bottom: 16px; }
+    .best-solution-header { display: flex; align-items: center; justify-content: space-between; padding: 12px 18px; border-bottom: 1px solid var(--border); background: var(--surface2); flex-wrap: wrap; gap: 8px; }
+    .bs-title { font-family: var(--mono); font-size: 11px; font-weight: 700; color: var(--green); }
+    .sol-pills { display: flex; gap: 6px; flex-wrap: wrap; }
+    .sol-pill { font-family: var(--mono); font-size: 10px; padding: 3px 9px; border-radius: 6px; background: var(--surface3); border: 1px solid var(--border-mid); color: var(--text-muted); }
+    .complexity { display: flex; gap: 10px; margin-top: 1.5rem; flex-wrap: wrap; }
+    .cpill { font-family: var(--mono); font-size: 12px; padding: 6px 14px; border-radius: 8px; border: 1px solid var(--border); background: var(--surface); }
+    .cpill strong { color: var(--accent); font-weight: 700; }
+
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+    @media (max-width: 680px) { .main-grid { grid-template-columns: 1fr; } .tree-panel { border-right: none; border-bottom: 1px solid var(--border); } .io-grid { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+<div class="page">
+
+  <a class="back-nav" href="../dsa-hub.html">← All problems</a>
+
+  <header>
+    <div class="tag">LeetCode #98 · BST · Algorithm Dry Run</div>
+    <h1>Validate <span>Binary Search Tree</span></h1>
+    <p class="subtitle">Step-by-step trace of <code style="font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--accent);background:var(--surface);padding:2px 7px;border-radius:5px;">isValidBST</code> — watch how a valid range [min, max] tightens at every node, catching violations anywhere in the subtree.</p>
+  </header>
+
+  <!-- Pattern banner -->
+  <div class="pattern-banner">
+    <div>
+      <div class="pattern-label">Pattern</div>
+      <div class="pattern-name">🎯 Pre-order DFS + Bound Propagation</div>
+    </div>
+    <div class="pattern-desc">Pass a valid range [min, max] down to every node. Tighten max when going left, tighten min when going right. Any violation = false immediately.</div>
+    <div class="pattern-solves">Same pattern unlocks: <span>#701 Insert into BST · #700 Search BST · #230 Kth Smallest in BST</span></div>
+  </div>
+
+  <!-- Problem statement -->
+  <div class="problem-section" style="animation: fadeUp .6s ease .04s both">
+    <div class="section-header"><span style="font-size:16px">📋</span><span class="section-header-title">Problem Statement</span></div>
+    <div class="section-body">
+      <div class="bst-property">
+        <p><strong>BST Property:</strong> For every node, <strong>all values in the left subtree</strong> must be <code>strictly less than</code> the node's value, and <strong>all values in the right subtree</strong> must be <code>strictly greater than</code> it. This must hold for <em>every single node</em> — not just the root!</p>
+      </div>
+      <p>Given the root of a binary tree, return <code>true</code> if it is a valid BST, <code>false</code> otherwise.</p>
+      <p>⚠️ The classic trap: a node that looks valid compared to its immediate parent might still violate the BST property due to an ancestor constraint.</p>
+
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;margin-top:16px">
+        <!-- Valid: [2,1,3] -->
+        <div style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;overflow:hidden">
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 14px;border-bottom:1px solid var(--border)">
+            <span style="font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--text-dim)">Tree [2,1,3]</span>
+            <span style="font-family:var(--mono);font-size:11px;font-weight:700;padding:2px 10px;border-radius:5px;background:rgba(52,211,153,.12);color:#34d399;border:1px solid rgba(52,211,153,.25)">true ✓</span>
+          </div>
+          <div style="padding:12px;display:flex;justify-content:center">
+            <svg viewBox="0 0 180 100" style="max-height:90px;width:100%">
+              <line x1="90" y1="26" x2="50" y2="58" stroke="#1e2231" stroke-width="1.5"/>
+              <line x1="90" y1="26" x2="132" y2="58" stroke="#1e2231" stroke-width="1.5"/>
+              <circle cx="90" cy="18" r="18" fill="#0f1d14" stroke="#10b981" stroke-width="2"/>
+              <text x="90" y="22" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="13" font-weight="700" fill="#10b981">2</text>
+              <circle cx="48" cy="68" r="18" fill="#13161d" stroke="#2a2f3e" stroke-width="1.5"/>
+              <text x="48" y="72" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="13" font-weight="700" fill="#6b7280">1</text>
+              <circle cx="134" cy="68" r="18" fill="#13161d" stroke="#2a2f3e" stroke-width="1.5"/>
+              <text x="134" y="72" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="13" font-weight="700" fill="#6b7280">3</text>
+              <text x="4" y="8" font-family="'JetBrains Mono',monospace" font-size="8" fill="#34d399">1&lt;2&lt;3 — valid BST</text>
+            </svg>
+          </div>
+        </div>
+        <!-- Invalid: [5,1,4,null,null,3,6] — 4 < 5 but is right child -->
+        <div style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;overflow:hidden">
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 14px;border-bottom:1px solid var(--border)">
+            <span style="font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--text-dim)">Tree [5,1,4,…,3,6]</span>
+            <span style="font-family:var(--mono);font-size:11px;font-weight:700;padding:2px 10px;border-radius:5px;background:rgba(248,113,113,.12);color:#f87171;border:1px solid rgba(248,113,113,.25)">false ✗</span>
+          </div>
+          <div style="padding:12px;display:flex;justify-content:center">
+            <svg viewBox="0 0 200 120" style="max-height:100px;width:100%">
+              <line x1="90" y1="26" x2="46" y2="58" stroke="#1e2231" stroke-width="1.5"/>
+              <line x1="90" y1="26" x2="142" y2="58" stroke="#1e2231" stroke-width="1.5"/>
+              <line x1="130" y1="76" x2="112" y2="100" stroke="#1e2231" stroke-width="1.5"/>
+              <line x1="154" y1="76" x2="174" y2="100" stroke="#1e2231" stroke-width="1.5"/>
+              <circle cx="90" cy="18" r="18" fill="#13161d" stroke="#2a2f3e" stroke-width="1.5"/>
+              <text x="90" y="22" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="13" font-weight="700" fill="#6b7280">5</text>
+              <circle cx="44" cy="68" r="18" fill="#13161d" stroke="#2a2f3e" stroke-width="1.5"/>
+              <text x="44" y="72" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="13" font-weight="700" fill="#6b7280">1</text>
+              <circle cx="142" cy="68" r="18" fill="#1e0f0f" stroke="#f87171" stroke-width="2.5"/>
+              <text x="142" y="72" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="13" font-weight="700" fill="#f87171">4</text>
+              <circle cx="110" cy="104" r="14" fill="#13161d" stroke="#2a2f3e" stroke-width="1.5"/>
+              <text x="110" y="108" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="11" font-weight="700" fill="#6b7280">3</text>
+              <circle cx="176" cy="104" r="14" fill="#13161d" stroke="#2a2f3e" stroke-width="1.5"/>
+              <text x="176" y="108" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="11" font-weight="700" fill="#6b7280">6</text>
+              <text x="154" y="56" font-family="'JetBrains Mono',monospace" font-size="8" fill="#f87171">4 &lt; 5!</text>
+            </svg>
+          </div>
+        </div>
+        <!-- Tricky: [5,4,6,null,null,3,7] — ancestor violation -->
+        <div style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;overflow:hidden">
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 14px;border-bottom:1px solid var(--border)">
+            <span style="font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--text-dim)">Tree [5,4,6,…,3,7] — tricky!</span>
+            <span style="font-family:var(--mono);font-size:11px;font-weight:700;padding:2px 10px;border-radius:5px;background:rgba(248,113,113,.12);color:#f87171;border:1px solid rgba(248,113,113,.25)">false ✗</span>
+          </div>
+          <div style="padding:12px;display:flex;justify-content:center">
+            <svg viewBox="0 0 200 130" style="max-height:110px;width:100%">
+              <line x1="90" y1="26" x2="46" y2="58" stroke="#1e2231" stroke-width="1.5"/>
+              <line x1="90" y1="26" x2="142" y2="58" stroke="#1e2231" stroke-width="1.5"/>
+              <line x1="130" y1="76" x2="108" y2="102" stroke="#1e2231" stroke-width="1.5"/>
+              <line x1="154" y1="76" x2="176" y2="102" stroke="#1e2231" stroke-width="1.5"/>
+              <circle cx="90" cy="18" r="18" fill="#13161d" stroke="#2a2f3e" stroke-width="1.5"/>
+              <text x="90" y="22" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="13" font-weight="700" fill="#6b7280">5</text>
+              <circle cx="44" cy="68" r="18" fill="#13161d" stroke="#2a2f3e" stroke-width="1.5"/>
+              <text x="44" y="72" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="13" font-weight="700" fill="#6b7280">4</text>
+              <circle cx="142" cy="68" r="18" fill="#13161d" stroke="#2a2f3e" stroke-width="1.5"/>
+              <text x="142" y="72" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="13" font-weight="700" fill="#6b7280">6</text>
+              <circle cx="106" cy="106" r="14" fill="#1e0f0f" stroke="#f87171" stroke-width="2.5"/>
+              <text x="106" y="110" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="11" font-weight="700" fill="#f87171">3</text>
+              <circle cx="178" cy="106" r="14" fill="#13161d" stroke="#2a2f3e" stroke-width="1.5"/>
+              <text x="178" y="110" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="11" font-weight="700" fill="#6b7280">7</text>
+              <text x="4" y="118" font-family="'JetBrains Mono',monospace" font-size="8" fill="#f87171">3 is left of 6 (ok) BUT 3 must be &gt; 5 — fails!</text>
+            </svg>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Intuition + Hints -->
+  <div class="problem-section" style="animation: fadeUp .6s ease .05s both">
+    <div class="section-header"><span style="font-size:16px">💡</span><span class="section-header-title">Intuition + Hints</span></div>
+    <div class="section-body">
+      <div class="hints-grid">
+        <div class="hint-step"><span class="hint-num">1</span><div class="hint-text"><strong>Why can't you just compare with parent?</strong> Look at this tree: node 3 is in the right subtree of 5 (via node 6), so it MUST be &gt; 5. But 3 &lt; 5 — invalid! Just checking 3 &gt; 6 (its immediate parent) isn't enough — ancestor constraints also apply.
+          <div style="margin-top:10px">
+            <svg viewBox="0 0 200 120" style="max-height:100px;width:100%;border-radius:8px;background:var(--surface2);padding:4px">
+              <line x1="90" y1="22" x2="50" y2="52" stroke="#1e2231" stroke-width="1.5"/>
+              <line x1="90" y1="22" x2="138" y2="52" stroke="#1e2231" stroke-width="1.5"/>
+              <line x1="126" y1="70" x2="106" y2="96" stroke="#1e2231" stroke-width="1.5"/>
+              <line x1="150" y1="70" x2="170" y2="96" stroke="#1e2231" stroke-width="1.5"/>
+              <circle cx="90" cy="14" r="16" fill="#13161d" stroke="#10b981" stroke-width="2"/>
+              <text x="90" y="18" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="12" font-weight="700" fill="#10b981">5</text>
+              <circle cx="48" cy="62" r="16" fill="#13161d" stroke="#2a2f3e" stroke-width="1.5"/>
+              <text x="48" y="66" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="12" font-weight="700" fill="#6b7280">4</text>
+              <circle cx="140" cy="62" r="16" fill="#13161d" stroke="#2a2f3e" stroke-width="1.5"/>
+              <text x="140" y="66" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="12" font-weight="700" fill="#6b7280">6</text>
+              <circle cx="104" cy="100" r="14" fill="#1e0f0f" stroke="#f87171" stroke-width="2.5"/>
+              <text x="104" y="104" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="11" font-weight="700" fill="#f87171">3</text>
+              <circle cx="172" cy="100" r="14" fill="#13161d" stroke="#2a2f3e" stroke-width="1.5"/>
+              <text x="172" y="104" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="11" font-weight="700" fill="#6b7280">7</text>
+              <text x="106" y="8" font-family="'JetBrains Mono',monospace" font-size="8" fill="#f87171">3 &lt; 6 (ok locally)</text>
+              <text x="106" y="18" font-family="'JetBrains Mono',monospace" font-size="8" fill="#f87171">BUT 3 must be &gt; 5!</text>
+            </svg>
+          </div>
+        </div></div>
+        <div class="hint-step"><span class="hint-num">2</span><div class="hint-text"><strong>The key idea:</strong> Pass a valid range [min, max] to every node. A node is valid only if <code>min &lt; curr.val &lt; max</code>.</div></div>
+        <div class="hint-step"><span class="hint-num">3</span><div class="hint-text"><strong>When going left:</strong> The new max becomes <code>curr.val</code> — everything left must be smaller. <strong>When going right:</strong> The new min becomes <code>curr.val</code> — everything right must be larger.</div></div>
+        <div class="hint-step"><span class="hint-num">4</span><div class="hint-text">Start with <code>validate(root, -Infinity, +Infinity)</code>. The root has no ancestors, so it can be anything initially.</div></div>
+        <div class="hint-step"><span class="hint-num">5</span><div class="hint-text">Use <code>&&</code> short-circuit: <code>return validate(left, min, curr.val) && validate(right, curr.val, max)</code>. First false stops everything.</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Code -->
+  <div class="code-block">
+    <div class="code-header"><div class="dots"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div></div><span>isValidBST.js</span></div>
+    <pre><span class="kw">var</span> <span class="fn">isValidBST</span> = <span class="kw">function</span>(<span class="var">root</span>) {
+  <span class="kw">function</span> <span class="fn">validate</span>(<span class="var">curr</span>, <span class="var">min</span>, <span class="var">max</span>) {
+    <span class="kw">if</span> (!<span class="var">curr</span>) <span class="kw">return</span> <span class="kw">true</span>;               <span class="cm">// null = valid base case</span>
+
+    <span class="hl"><span class="kw">if</span> (<span class="var">curr</span>.val &lt;= <span class="var">min</span> || <span class="var">curr</span>.val &gt;= <span class="var">max</span>)  <span class="cm">// bounds violated!</span>
+      <span class="kw">return</span> <span class="kw">false</span>;</span>
+
+    <span class="kw">return</span> <span class="fn">validate</span>(<span class="var">curr</span>.left,  <span class="var">min</span>, <span class="var">curr</span>.val)  <span class="cm">// left: tighten max</span>
+        && <span class="fn">validate</span>(<span class="var">curr</span>.right, <span class="var">curr</span>.val, <span class="var">max</span>); <span class="cm">// right: tighten min</span>
+  }
+
+  <span class="kw">return</span> <span class="fn">validate</span>(<span class="var">root</span>, -Infinity, +Infinity);
+};</pre>
+  </div>
+
+  <p class="section-label">// Interactive dry run — choose an example</p>
+
+  <!-- Example selector -->
+  <div class="examples-row" id="examples-row">
+    <button class="ex-btn active" data-ex="0">Example 1 <span class="ex-badge">Valid BST</span></button>
+    <button class="ex-btn" data-ex="1">Example 2 <span class="ex-badge">Root Invalid</span></button>
+    <button class="ex-btn" data-ex="2">Example 3 <span class="ex-badge">Tricky! Deep Violation</span></button>
+    <button class="ex-btn" data-ex="3">Example 4 <span class="ex-badge">Single Node</span></button>
+  </div>
+
+  <!-- Visualizer -->
+  <div class="viz-card">
+    <div class="progress-bar-wrap"><div class="progress-bar-inner" id="prog" style="width:10%"></div></div>
+    <div class="controls">
+      <button class="btn" id="btn-prev" onclick="move(-1)" disabled>← Prev</button>
+      <button class="btn btn-play-active" id="btn-play" onclick="togglePlay()">▶ Play</button>
+      <button class="btn" id="btn-next" onclick="move(1)">Next →</button>
+      <button class="btn btn-reset" onclick="reset()">↺ Reset</button>
+      <span class="step-info" id="step-label">Step 1 / ?</span>
+      <span style="font-family:var(--mono);font-size:11px;color:var(--text-dim);display:flex;gap:4px;align-items:center"><kbd>←</kbd><kbd>→</kbd></span>
+      <span class="result-badge" id="ans-badge" style="display:none">✓</span>
+    </div>
+    <div class="step-desc" id="step-desc">Loading...</div>
+    <div class="main-grid">
+      <div class="tree-panel">
+        <div class="panel-label" id="tree-panel-label">// binary search tree</div>
+        <svg id="tree-svg" viewBox="0 0 460 280"></svg>
+      </div>
+      <div class="side-panel">
+        <!-- Bounds tracker -->
+        <div class="bounds-panel">
+          <div class="panel-label">// current bounds — valid range for curr.val</div>
+          <div class="bounds-display" id="bounds-display">
+            <span class="bound-min" id="bound-min">min=-∞</span>
+            <span class="bound-sep">&lt;</span>
+            <span class="bound-curr" id="bound-curr">?</span>
+            <span class="bound-sep">&lt;</span>
+            <span class="bound-max" id="bound-max">max=+∞</span>
+            <span class="bounds-valid" id="bounds-status">—</span>
+          </div>
+        </div>
+
+        <div class="stack-panel">
+          <div class="panel-label">// call stack</div>
+          <div class="call-stack" id="stack"></div>
+        </div>
+
+        <div class="vars-panel">
+          <div class="panel-label">// variables</div>
+          <div class="var-row"><span class="var-name">curr.val</span> <span class="var-val em" id="v-curr">—</span></div>
+          <div class="var-row"><span class="var-name">min</span>      <span class="var-val b"  id="v-min">—</span></div>
+          <div class="var-row"><span class="var-name">max</span>      <span class="var-val" style="color:var(--amber)"   id="v-max">—</span></div>
+          <div class="var-row"><span class="var-name">valid?</span>  <span class="var-val"  id="v-valid">—</span></div>
+          <div class="var-row"><span class="var-name">returns</span> <span class="var-val g" id="v-ret">—</span></div>
+        </div>
+
+        <div class="log-panel">
+          <div class="panel-label">// execution log</div>
+          <div class="log" id="log"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Revision -->
+  <div class="revision-section">
+    <p class="section-label">// revision — lock this in</p>
+
+    <div class="mental-model">
+      <div class="mental-model-header"><span style="font-size:16px">🧠</span><span class="mm-title">Mental Model — The Corridor of Valid Values</span></div>
+      <div class="mm-body">
+        <div class="mm-item"><span class="mm-b">▸</span><div class="mm-t"><strong>Think of a narrowing corridor.</strong> Every node lives inside a valid range [min, max]. The root's corridor is (-∞, +∞). Each step narrows it — going left shrinks the ceiling, going right raises the floor.</div></div>
+        <div class="mm-item"><span class="mm-b">▸</span><div class="mm-t"><strong>Going left?</strong> You set <code>max = curr.val</code>. The entire left subtree must be smaller than where you just came from. The corridor ceiling drops.</div></div>
+        <div class="mm-item"><span class="mm-b">▸</span><div class="mm-t"><strong>Going right?</strong> You set <code>min = curr.val</code>. The entire right subtree must be larger. The corridor floor rises.</div></div>
+        <div class="mm-item"><span class="mm-b">▸</span><div class="mm-t"><strong>The tricky case:</strong> A node deep in a right-then-left path must satisfy BOTH its parent's constraint AND its grandparent's constraint. The corridor captures this automatically — both bounds travel down together.</div></div>
+      </div>
+    </div>
+
+    <div class="explain-grid">
+      <div class="explain-card"><div class="icon">🚪</div><h3>Bounds propagation</h3><p>The range [min, max] flows top-down. Left child inherits the parent's min but gets a tighter max. Right child inherits the parent's max but gets a tighter min.</p></div>
+      <div class="explain-card"><div class="icon">⚡</div><h3>Strict inequalities</h3><p>BST requires <em>strictly</em> less and greater. Equal values violate the property. So the check is <code>val &lt;= min || val &gt;= max</code> — equals are failures too.</p></div>
+      <div class="explain-card"><div class="icon">🔁</div><h3>Pre-order DFS</h3><p>Root first, then left, then right. We check the current node's validity before recursing. First false anywhere immediately bubbles up through the <code>&&</code> chain.</p></div>
+      <div class="explain-card"><div class="icon">∞</div><h3>Start with ±Infinity</h3><p>The root has no ancestor constraints — it can legally be any value. So we start with (-∞, +∞) which every valid integer satisfies.</p></div>
+    </div>
+
+    <div class="edge-cases-card">
+      <div class="ec-header"><span style="font-size:16px">⚠️</span><span class="ec-title">Edge Cases — The Gotchas</span></div>
+      <div class="el">
+        <div class="ei"><span class="el-w w">ancestor</span><span class="et"><strong>Ancestor constraint violation:</strong> Tree [5,4,6,null,null,3,7]. Node 3 is right child of 6, so 3 > 6 looks… wait, 3 is NOT > 6! But more importantly 3 must be > 5 (root). The bound passed down catches this: min=5 when checking right subtree.</span></div>
+        <div class="ei"><span class="el-w w">duplicate</span><span class="et"><strong>Duplicate values:</strong> A BST cannot have duplicate values — strictly less/greater. So <code>[1,1]</code> is invalid. The <code>&lt;=</code> check catches this.</span></div>
+        <div class="ei"><span class="el-w ok">integers</span><span class="et"><strong>Integer limits:</strong> Node values can be <code>Integer.MIN_VALUE</code> or <code>Integer.MAX_VALUE</code>. Don't use those as initial bounds — use <code>-Infinity</code> and <code>+Infinity</code> in JavaScript.</span></div>
+        <div class="ei"><span class="el-w ok">single</span><span class="et"><strong>Single node:</strong> Always valid — no children to violate the property. validate(root, -∞, +∞) → root.val is always between -∞ and +∞ → true.</span></div>
+      </div>
+    </div>
+
+    <div class="best-solution">
+      <div class="best-solution-header">
+        <span class="bs-title">✦ Clean solution for revision</span>
+        <div class="sol-pills"><span class="sol-pill">O(n) time</span><span class="sol-pill">O(h) space</span><span class="sol-pill">Pre-order DFS</span><span class="sol-pill">Bound propagation</span></div>
+      </div>
+      <pre><span class="kw">var</span> <span class="fn">isValidBST</span> = <span class="kw">function</span>(<span class="var">root</span>) {
+  <span class="kw">function</span> <span class="fn">validate</span>(<span class="var">curr</span>, <span class="var">min</span>, <span class="var">max</span>) {
+    <span class="kw">if</span> (!<span class="var">curr</span>) <span class="kw">return</span> <span class="kw">true</span>;               <span class="cm">// null nodes are valid</span>
+    <span class="kw">if</span> (<span class="var">curr</span>.val &lt;= <span class="var">min</span> || <span class="var">curr</span>.val &gt;= <span class="var">max</span>) <span class="kw">return</span> <span class="kw">false</span>; <span class="cm">// out of corridor</span>
+    <span class="kw">return</span> <span class="fn">validate</span>(<span class="var">curr</span>.left,  <span class="var">min</span>, <span class="var">curr</span>.val)  <span class="cm">// left: tighten max</span>
+        && <span class="fn">validate</span>(<span class="var">curr</span>.right, <span class="var">curr</span>.val, <span class="var">max</span>); <span class="cm">// right: tighten min</span>
+  }
+  <span class="kw">return</span> <span class="fn">validate</span>(<span class="var">root</span>, -Infinity, +Infinity);
+};
+<span class="cm">// Pattern: Pre-order DFS + Narrowing Bounds
+// Key: bounds = corridor of valid values that narrows as we descend</span></pre>
+    </div>
+
+    <div class="complexity">
+      <div class="cpill">Time: <strong>O(n)</strong> — each node visited once</div>
+      <div class="cpill">Space: <strong>O(h)</strong> — call stack depth = tree height</div>
+      <div class="cpill">Best: <strong>O(1)</strong> root violates bounds</div>
+      <div class="cpill">Worst: <strong>O(n)</strong> valid tree, full traversal</div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ─── EXAMPLES ─────────────────────────────────────────────────────────────
+
+const EXAMPLES = [
+  {
+    // Valid BST: [2, 1, 3]
+    label: "[2, 1, 3] — Valid BST",
+    treeLabel: "[2, 1, 3]",
+    answer: true,
+    svgViewBox: "0 0 460 220",
+    nodes: [
+      {id:"n2", val:2, cx:230, cy:50, r:28},
+      {id:"n1", val:1, cx:120, cy:150, r:26},
+      {id:"n3", val:3, cx:350, cy:150, r:26},
+    ],
+    edges: [
+      {x1:208,y1:64, x2:142,y2:134},
+      {x1:252,y1:64, x2:328,y2:134},
+    ],
+    steps: [
+      {
+        desc: 'Call <em>validate(2, -∞, +∞)</em>. Check: -∞ < 2 < +∞ ✓ Root is valid. Recurse left.',
+        active:"n2", returning:null, failNode:null,
+        stack:["validate(2, -∞, +∞)"],
+        curr:"2", min:"-∞", max:"+∞", valid:"✓ in bounds", ret:"—",
+        log:[{t:"→ validate(root=2, min=-∞, max=+∞)",h:true},{t:"  -∞ < 2 < +∞  ✓  in bounds"},{t:"  recurse left with (min=-∞, max=2)"}]
+      },
+      {
+        desc: 'Recurse left → <em>validate(1, -∞, 2)</em>. Max tightened to 2 (parent\'s value). Check: -∞ < 1 < 2 ✓',
+        active:"n1", returning:null, failNode:null,
+        stack:["validate(2,-∞,+∞)","validate(1,-∞,2)"],
+        curr:"1", min:"-∞", max:"2", valid:"✓ in bounds", ret:"—",
+        log:[{t:"  → validate(node=1, min=-∞, max=2)",h:true},{t:"    went LEFT: max tightened to 2"},{t:"    -∞ < 1 < 2  ✓  in bounds"}]
+      },
+      {
+        desc: 'Recurse left of 1 → <em>validate(null)</em>. null → return <em>true</em>.',
+        active:null, returning:"n1", failNode:null,
+        stack:["validate(2,-∞,+∞)","validate(1,-∞,2)"],
+        curr:"null", min:"-∞", max:"2", valid:"—", ret:"true",
+        log:[{t:"    → validate(null, -∞, 2)  ← null → true",h:true}]
+      },
+      {
+        desc: 'Recurse right of 1 → <em>validate(null)</em>. null → return <em>true</em>. Node 1 returns <span class="ok">true</span>.',
+        active:null, returning:"n1", failNode:null,
+        stack:["validate(2,-∞,+∞)"],
+        curr:"null", min:"1", max:"2", valid:"—", ret:"true",
+        log:[{t:"    → validate(null, 1, 2)  ← null → true"},{t:"  ← node 1 returns true ✓",h:true}]
+      },
+      {
+        desc: 'Back in root. Left done ✓. Recurse right → <em>validate(3, 2, +∞)</em>. Min tightened to 2. Check: 2 < 3 < +∞ ✓',
+        active:"n3", returning:null, failNode:null,
+        stack:["validate(2,-∞,+∞)","validate(3,2,+∞)"],
+        curr:"3", min:"2", max:"+∞", valid:"✓ in bounds", ret:"—",
+        log:[{t:"  → validate(node=3, min=2, max=+∞)",h:true},{t:"    went RIGHT: min tightened to 2"},{t:"    2 < 3 < +∞  ✓  in bounds"}]
+      },
+      {
+        desc: 'Node 3 is a leaf. Both children null → return <em>true</em>. Node 3 returns <span class="ok">true</span>.',
+        active:null, returning:"n3", failNode:null,
+        stack:["validate(2,-∞,+∞)"],
+        curr:"3", min:"2", max:"+∞", valid:"✓ leaf", ret:"true",
+        log:[{t:"    both children null → true"},{t:"  ← node 3 returns true ✓",h:true}]
+      },
+      {
+        desc: 'Root node 2: left ✓ && right ✓. All nodes valid! <span class="ok">Returns true</span> — this is a valid BST.',
+        active:null, returning:"n2", failNode:null,
+        stack:[],
+        curr:"2", min:"-∞", max:"+∞", valid:"✓ all valid", ret:"true",
+        log:[{t:"→ validate(root=2)"},{t:"  left subtree: true  right subtree: true"},{t:"→ return true ✓  Valid BST!",h:true}],
+        final:true, answerTrue:true
+      }
+    ]
+  },
+
+  {
+    // Invalid: [5, 1, 4, null, null, 3, 6]  Node 4 < 5 but is right child of 5
+    label: "[5,1,4,null,null,3,6] — Invalid (4 < 5)",
+    treeLabel: "[5, 1, 4, null, null, 3, 6]",
+    answer: false,
+    svgViewBox: "0 0 460 260",
+    nodes: [
+      {id:"n5",  val:5,  cx:230, cy:48,  r:28},
+      {id:"n1",  val:1,  cx:110, cy:140, r:26},
+      {id:"n4",  val:4,  cx:360, cy:140, r:26},
+      {id:"n3",  val:3,  cx:290, cy:225, r:22},
+      {id:"n6",  val:6,  cx:430, cy:225, r:22},
+    ],
+    edges: [
+      {x1:207,y1:62, x2:133,y2:124},
+      {x1:253,y1:62, x2:337,y2:124},
+      {x1:343,y1:159,x2:306,y2:208},
+      {x1:377,y1:159,x2:414,y2:208},
+    ],
+    steps: [
+      {
+        desc: 'Call <em>validate(5, -∞, +∞)</em>. Check: -∞ < 5 < +∞ ✓ Root valid. Recurse left first.',
+        active:"n5", returning:null, failNode:null,
+        stack:["validate(5,-∞,+∞)"],
+        curr:"5", min:"-∞", max:"+∞", valid:"✓ in bounds", ret:"—",
+        log:[{t:"→ validate(5, -∞, +∞)",h:true},{t:"  -∞ < 5 < +∞  ✓  recurse left"}]
+      },
+      {
+        desc: 'Recurse left → <em>validate(1, -∞, 5)</em>. 1 < 5 ✓. Node 1 has no children → returns <span class="ok">true</span>.',
+        active:null, returning:"n1", failNode:null,
+        stack:["validate(5,-∞,+∞)"],
+        curr:"1", min:"-∞", max:"5", valid:"✓ in bounds", ret:"true",
+        log:[{t:"  → validate(1, -∞, 5)",h:true},{t:"    -∞ < 1 < 5  ✓  leaf → returns true"}]
+      },
+      {
+        desc: 'Back in root. Left ✓. Now recurse right → <em>validate(4, 5, +∞)</em>. Wait — min is now 5, but node 4\'s value is 4. Check: <span class="fail">4 ≤ 5 → VIOLATION!</span>',
+        active:"n4", returning:null, failNode:"n4",
+        stack:["validate(5,-∞,+∞)","validate(4,5,+∞)"],
+        curr:"4", min:"5", max:"+∞", valid:"✗ 4 ≤ min(5)!", ret:"false",
+        log:[{t:"  → validate(4, min=5, +∞)",h:true},{t:"    went RIGHT from 5: min tightened to 5"},{t:"    CHECK: 4 <= 5  ← VIOLATION!",h:true},{t:"    return false immediately"}]
+      },
+      {
+        desc: '<span class="fail">validate(4) returns false</span>. Right subtree invalid. Root returns <span class="fail">false</span>. Not a valid BST — 4 is in the right subtree of 5 but 4 < 5!',
+        active:null, returning:null, failNode:"n4",
+        stack:[],
+        curr:"4", min:"5", max:"+∞", valid:"✗ INVALID", ret:"false",
+        log:[{t:"  ← node 4 returned false"},{t:"→ root: left && false = false"},{t:"→ return false ✗  NOT a valid BST",h:true}],
+        final:true, answerTrue:false
+      }
+    ]
+  },
+
+  {
+    // Tricky: [5, 4, 6, null, null, 3, 7]  Node 3 violates ancestor constraint (must be > 5)
+    label: "[5,4,6,null,null,3,7] — Tricky! Ancestor Violation",
+    treeLabel: "[5, 4, 6, null, null, 3, 7]",
+    answer: false,
+    svgViewBox: "0 0 480 270",
+    nodes: [
+      {id:"n5",  val:5,  cx:240, cy:48,  r:28},
+      {id:"n4",  val:4,  cx:110, cy:140, r:26},
+      {id:"n6",  val:6,  cx:370, cy:140, r:26},
+      {id:"n3",  val:3,  cx:300, cy:225, r:22},
+      {id:"n7",  val:7,  cx:440, cy:225, r:22},
+    ],
+    edges: [
+      {x1:217,y1:62, x2:133,y2:124},
+      {x1:263,y1:62, x2:347,y2:124},
+      {x1:353,y1:159,x2:316,y2:208},
+      {x1:387,y1:159,x2:424,y2:208},
+    ],
+    steps: [
+      {
+        desc: 'Tricky example! Node 3 is the left child of 6, so 3 < 6 looks valid locally. But 3 is in the RIGHT subtree of root 5, so 3 must also be > 5. Watch the bounds catch this!',
+        active:"n5", returning:null, failNode:null,
+        stack:["validate(5,-∞,+∞)"],
+        curr:"5", min:"-∞", max:"+∞", valid:"✓ in bounds", ret:"—",
+        log:[{t:"⚠️  TRICKY example — ancestor constraint violation",h:true},{t:"→ validate(5, -∞, +∞)"},{t:"  -∞ < 5 < +∞  ✓  recurse left"}]
+      },
+      {
+        desc: 'Left → <em>validate(4, -∞, 5)</em>. 4 < 5 ✓. Leaf → returns <span class="ok">true</span>.',
+        active:null, returning:"n4", failNode:null,
+        stack:["validate(5,-∞,+∞)"],
+        curr:"4", min:"-∞", max:"5", valid:"✓ in bounds", ret:"true",
+        log:[{t:"  → validate(4, -∞, 5)  ← leaf → true",h:true}]
+      },
+      {
+        desc: 'Recurse right → <em>validate(6, 5, +∞)</em>. Min tightened to 5. 5 < 6 < +∞ ✓ Valid. Now recurse into 6\'s children.',
+        active:"n6", returning:null, failNode:null,
+        stack:["validate(5,-∞,+∞)","validate(6,5,+∞)"],
+        curr:"6", min:"5", max:"+∞", valid:"✓ in bounds", ret:"—",
+        log:[{t:"  → validate(6, min=5, +∞)",h:true},{t:"    went RIGHT from 5 → min=5"},{t:"    5 < 6 < +∞  ✓  recurse left"}]
+      },
+      {
+        desc: '🎯 Now recurse LEFT of 6 → <em>validate(3, 5, 6)</em>. Notice the bounds: <span class="hi">min=5</span> (inherited from grandparent!) and max=6. Check: <span class="fail">3 ≤ 5 → VIOLATION!</span>',
+        active:"n3", returning:null, failNode:"n3",
+        stack:["validate(5,-∞,+∞)","validate(6,5,+∞)","validate(3,5,6)"],
+        curr:"3", min:"5", max:"6", valid:"✗ 3 ≤ min(5)!", ret:"false",
+        log:[{t:"    → validate(3, min=5, max=6)",h:true},{t:"    went LEFT from 6 → max=6"},{t:"    BUT min=5 inherited from root 5!",h:true},{t:"    CHECK: 3 <= 5  ← ANCESTOR VIOLATION!",h:true},{t:"    return false"}]
+      },
+      {
+        desc: '<span class="fail">validate(3) returns false</span>. Node 3 locally looks valid as left child of 6, but it violates the ancestor constraint (must be > 5 since it\'s in 5\'s right subtree). <span class="fail">Returns false</span>.',
+        active:null, returning:null, failNode:"n3",
+        stack:[],
+        curr:"3", min:"5", max:"6", valid:"✗ INVALID", ret:"false",
+        log:[{t:"  ← validate(3) = false  bubbles up"},{t:"  ← validate(6) = false  bubbles up"},{t:"→ return false ✗",h:true},{t:"  Node 3 violates ANCESTOR bound from node 5"}],
+        final:true, answerTrue:false
+      }
+    ]
+  },
+
+  {
+    // Single node
+    label: "[7] — Single Node",
+    treeLabel: "[7]",
+    answer: true,
+    svgViewBox: "0 0 460 160",
+    nodes: [{id:"n7", val:7, cx:230, cy:70, r:32}],
+    edges: [],
+    steps: [
+      {
+        desc: 'Single node tree. Call <em>validate(7, -∞, +∞)</em>. Check: -∞ < 7 < +∞ ✓',
+        active:"n7", returning:null, failNode:null,
+        stack:["validate(7,-∞,+∞)"],
+        curr:"7", min:"-∞", max:"+∞", valid:"✓ in bounds", ret:"—",
+        log:[{t:"→ validate(7, -∞, +∞)",h:true},{t:"  -∞ < 7 < +∞  ✓  in bounds"}]
+      },
+      {
+        desc: 'Node 7 has no children. Both children null → both return true. validate(7) returns <span class="ok">true</span>. Valid BST!',
+        active:null, returning:"n7", failNode:null,
+        stack:[],
+        curr:"7", min:"-∞", max:"+∞", valid:"✓ leaf", ret:"true",
+        log:[{t:"  both children null → true && true"},{t:"→ return true ✓  Single node is always valid BST",h:true}],
+        final:true, answerTrue:true
+      }
+    ]
+  }
+];
+
+// ─── STATE ─────────────────────────────────────────────────────────────────
+let exIdx = 0, cur = 0, playTimer = null;
+const getEx = () => EXAMPLES[exIdx];
+const getSteps = () => getEx().steps;
+
+// ─── RENDER SVG ────────────────────────────────────────────────────────────
+function renderSVG(ex, step) {
+  const svg = document.getElementById("tree-svg");
+  svg.setAttribute("viewBox", ex.svgViewBox);
+  let html = "";
+
+  ex.edges.forEach(e => {
+    html += `<line x1="${e.x1}" y1="${e.y1}" x2="${e.x2}" y2="${e.y2}" stroke="#1e2231" stroke-width="2"/>`;
+  });
+
+  ex.nodes.forEach(n => {
+    let fill="#13161d", stroke="#2a2f3e", sw="1.5", tf="#6b7280";
+    if (n.id === step.active) { fill="#0f1d14"; stroke="#10b981"; sw="2.5"; tf="#10b981"; }
+    else if (n.id === step.returning && !step.failNode) { fill="#0f1f16"; stroke="#34d399"; sw="2.5"; tf="#34d399"; }
+    else if (n.id === step.failNode) { fill="#1e0f0f"; stroke="#f87171"; sw="3"; tf="#f87171"; }
+    else if (n.id === step.returning) { fill="#0f1f16"; stroke="#34d399"; sw="2"; tf="#34d399"; }
+    html += `<g><circle cx="${n.cx}" cy="${n.cy}" r="${n.r}" fill="${fill}" stroke="${stroke}" stroke-width="${sw}" style="transition:all .2s"/>
+      <text x="${n.cx}" y="${n.cy+4}" text-anchor="middle" dominant-baseline="middle" font-family="'JetBrains Mono',monospace" font-size="${String(n.val).length > 2 ? 11 : 14}" font-weight="700" fill="${tf}">${n.val}</text></g>`;
+  });
+
+  svg.innerHTML = html;
+}
+
+// ─── RENDER STEP ───────────────────────────────────────────────────────────
+function renderStep(step) {
+  const ex = getEx();
+  renderSVG(ex, step);
+
+  // Bounds display
+  document.getElementById("bound-min").textContent = "min=" + step.min;
+  document.getElementById("bound-curr").textContent = step.curr;
+  document.getElementById("bound-max").textContent = "max=" + step.max;
+  const statusEl = document.getElementById("bounds-status");
+  statusEl.className = step.valid.startsWith("✓") ? "bounds-valid" : "bounds-invalid";
+  statusEl.textContent = step.valid;
+
+  // Stack
+  const stackEl = document.getElementById("stack");
+  let sh = step.stack.map((f,i) => {
+    const isTop = i === step.stack.length-1;
+    const cls = isTop && step.ret === "false" ? "frame ret-false" : isTop ? "frame active" : "frame";
+    return `<div class="${cls}">${f}</div>`;
+  }).join("");
+  if (!step.stack.length && step.ret) {
+    sh = `<div class="frame ${step.ret==="false"?"ret-false":"ret-true"}">← returned ${step.ret}</div>`;
+  }
+  stackEl.innerHTML = sh;
+
+  // Vars
+  document.getElementById("v-curr").textContent = step.curr;
+  document.getElementById("v-min").textContent = step.min;
+  document.getElementById("v-max").textContent = step.max;
+  const validEl = document.getElementById("v-valid");
+  validEl.className = `var-val ${step.valid.startsWith("✓") ? "g" : step.valid.startsWith("✗") ? "r" : "d"}`;
+  validEl.textContent = step.valid;
+  const retEl = document.getElementById("v-ret");
+  retEl.className = `var-val ${step.ret==="true"?"g":step.ret==="false"?"r":"d"}`;
+  retEl.textContent = step.ret;
+
+  // Log
+  const logEl = document.getElementById("log");
+  logEl.innerHTML = step.log.map(e => `<div class="entry${e.h?" hl":""}">${e.t}</div>`).join("");
+  logEl.scrollTop = logEl.scrollHeight;
+
+  // Meta
+  const steps = getSteps();
+  document.getElementById("step-label").textContent = `Step ${cur+1} / ${steps.length}`;
+  document.getElementById("step-desc").innerHTML = step.desc;
+  document.getElementById("prog").style.width = ((cur+1)/steps.length*100)+"%";
+
+  const badge = document.getElementById("ans-badge");
+  if (step.final) {
+    badge.style.display = "inline-block";
+    badge.className = step.answerTrue ? "result-badge badge-true" : "result-badge badge-false";
+    badge.textContent = step.answerTrue ? "✓ isValidBST = true" : "✗ isValidBST = false";
+  } else {
+    badge.style.display = "none";
+  }
+
+  document.getElementById("btn-prev").disabled = cur === 0;
+  document.getElementById("btn-next").disabled = cur === steps.length-1;
+}
+
+function move(d) {
+  cur = Math.max(0, Math.min(getSteps().length-1, cur+d));
+  renderStep(getSteps()[cur]);
+}
+
+function reset() { cur = 0; stopPlay(); renderStep(getSteps()[0]); }
+
+function loadExample(idx) {
+  exIdx = idx; cur = 0; stopPlay();
+  document.getElementById("tree-panel-label").textContent = "// BST — " + EXAMPLES[idx].treeLabel;
+  renderStep(getSteps()[0]);
+}
+
+document.getElementById("examples-row").addEventListener("click", e => {
+  const btn = e.target.closest(".ex-btn");
+  if (!btn) return;
+  document.querySelectorAll(".ex-btn").forEach(b => b.classList.remove("active"));
+  btn.classList.add("active");
+  loadExample(parseInt(btn.dataset.ex));
+});
+
+document.addEventListener("keydown", e => {
+  if (e.key==="ArrowRight"||e.key==="ArrowDown") move(1);
+  if (e.key==="ArrowLeft" ||e.key==="ArrowUp") move(-1);
+});
+
+function stopPlay() {
+  if (playTimer) { clearInterval(playTimer); playTimer = null; }
+  const btn = document.getElementById("btn-play");
+  btn.textContent = "▶ Play"; btn.classList.add("btn-play-active");
+}
+
+function togglePlay() {
+  const btn = document.getElementById("btn-play");
+  if (playTimer) { stopPlay(); return; }
+  btn.textContent = "⏸ Pause"; btn.classList.add("btn-play-active");
+  playTimer = setInterval(() => {
+    if (cur >= getSteps().length-1) { stopPlay(); return; }
+    move(1);
+  }, 1500);
+}
+
+loadExample(0);
+</script>
+</body>
+</html>
