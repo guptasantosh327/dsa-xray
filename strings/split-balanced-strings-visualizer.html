@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>#1221 · Split a String in Balanced Strings — DSA Visualizer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Sora:wght@300;400;600;700;800&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0d0f14;--surface:#13161d;--surface2:#1a1e28;--surface3:#212638;
+  --border:rgba(255,255,255,0.07);--border-mid:rgba(255,255,255,0.12);
+  --text:#e8eaf0;--text-muted:#6b7280;--text-dim:#3d4251;
+  --accent:#fbbf24; /* Amber base for this vis */
+  --green:#34d399;--amber:#fbbf24;
+  --blue:#60a5fa;--red:#f87171;--orange:#fb923c;
+  --cyan:#22d3ee;
+  --mono:'JetBrains Mono',monospace;--sans:'Sora',sans-serif;
+}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:15px;line-height:1.6;min-height:100vh;overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;
+  background-image:linear-gradient(rgba(251,191,36,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(251,191,36,0.03) 1px,transparent 1px);
+  background-size:40px 40px;pointer-events:none;z-index:0}
+.page{position:relative;z-index:1;max-width:980px;margin:0 auto;padding:3rem 1.5rem 6rem}
+@keyframes fadeUp{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
+
+/* HEADER */
+.back-link{display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:11px;color:var(--text-muted);text-decoration:none;margin-bottom:2rem;opacity:.7;transition:opacity .2s}
+.back-link:hover{opacity:1}
+.prob-meta{display:flex;align-items:center;gap:10px;margin-bottom:.75rem;flex-wrap:wrap}
+.badge{display:inline-block;font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:3px 10px;border-radius:100px}
+.badge-easy{background:rgba(52,211,153,0.12);color:var(--green);border:1px solid rgba(52,211,153,0.25)}
+.badge-pat{background:rgba(251,191,36,0.12);color:var(--accent);border:1px solid rgba(251,191,36,0.25)}
+h1.prob-title{font-size:clamp(1.8rem,5vw,2.8rem);font-weight:800;letter-spacing:-.03em;margin-bottom:.5rem;animation:fadeUp .6s ease both}
+.prob-num{color:var(--text-dim);font-family:var(--mono)}
+
+/* SECTIONS */
+section{margin-bottom:2.75rem;animation:fadeUp .6s ease both}
+section:nth-child(2){animation-delay:.08s}
+section:nth-child(3){animation-delay:.13s}
+section:nth-child(4){animation-delay:.18s}
+section:nth-child(5){animation-delay:.23s}
+section:nth-child(6){animation-delay:.28s}
+.sec-label{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);margin-bottom:.6rem}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:1.4rem}
+
+/* PATTERN BANNER */
+.pat-banner{background:linear-gradient(135deg,rgba(251,191,36,0.08),rgba(251,146,60,0.05));border:1px solid rgba(251,191,36,0.2);border-radius:14px;padding:1.4rem}
+.pat-name{font-size:1.05rem;font-weight:700;color:var(--accent);margin-bottom:.35rem}
+.pat-why{color:var(--text-muted);font-size:13.5px;line-height:1.65;margin-bottom:.9rem}
+.related{display:flex;gap:.4rem;flex-wrap:wrap}
+.chip{font-family:var(--mono);font-size:11px;padding:3px 11px;border-radius:100px;background:var(--surface2);border:1px solid var(--border-mid);color:var(--text-muted)}
+
+/* PROBLEM */
+.ex-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:.75rem;margin-top:.9rem}
+.ex-card{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:.85rem}
+.ex-lbl{font-family:var(--mono);font-size:10px;color:var(--text-dim);letter-spacing:.1em;text-transform:uppercase;margin-bottom:.35rem}
+.ex-in{font-family:var(--mono);font-size:12px;color:var(--accent);margin-bottom:.2rem}
+.ex-out{font-family:var(--mono);font-size:12px;color:var(--green)}
+
+/* INTUITION */
+.hint-list{list-style:none;counter-reset:h;display:flex;flex-direction:column;gap:.65rem}
+.hint-list li{counter-increment:h;display:flex;gap:.7rem;font-size:13.5px;color:var(--text-muted);line-height:1.6}
+.hint-list li::before{content:counter(h);display:flex;align-items:center;justify-content:center;min-width:21px;height:21px;border-radius:50%;background:var(--surface3);border:1px solid var(--border-mid);font-family:var(--mono);font-size:11px;font-weight:700;color:var(--accent);margin-top:2px;flex-shrink:0}
+.key-trick{margin-top:.9rem;background:rgba(52,211,153,0.07);border:1px solid rgba(52,211,153,0.18);border-radius:8px;padding:.7rem 1rem;font-size:13px;color:var(--green);line-height:1.6}
+.km{font-family:var(--mono);font-size:12px}
+
+/* CODE BLOCK */
+.code-wrap{background:#090b10;border:1px solid var(--border);border-radius:12px;overflow:hidden}
+.code-hdr{display:flex;justify-content:space-between;align-items:center;padding:.5rem 1rem;background:var(--surface);border-bottom:1px solid var(--border)}
+.code-lang{font-family:var(--mono);font-size:10px;color:var(--text-dim);letter-spacing:.1em;text-transform:uppercase}
+pre.code-body{padding:1.1rem 1.4rem;overflow-x:auto;font-family:var(--mono);font-size:13px;line-height:1.85;tab-size:4}
+.cl{display:block;padding:0 .4rem;margin:0 -.4rem;border-radius:4px;transition:background .2s;border-left:2px solid transparent}
+.cl.al{background:rgba(251,191,36,0.1);border-left-color:var(--amber)}
+.kw{color:#c792ea}.fn{color:#82aaff}.str{color:#c3e88d}.num{color:#f78c6c}
+.vr{color:#eeffff}.op{color:#89ddff}.mt{color:#ffcb6b}
+
+/* VISUALIZER */
+.viz-wrap{background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden}
+.viz-topbar{display:flex;align-items:center;justify-content:space-between;padding:.65rem 1.1rem;border-bottom:1px solid var(--border);flex-wrap:wrap;gap:.5rem}
+.ex-sel{display:flex;gap:.35rem;flex-wrap:wrap}
+.eb{font-family:var(--mono);font-size:11px;padding:4px 12px;border-radius:100px;background:var(--surface2);border:1px solid var(--border-mid);color:var(--text-muted);cursor:pointer;transition:all .18s}
+.eb.on{background:rgba(251,191,36,0.15);color:var(--accent);border-color:rgba(251,191,36,0.35)}
+.res-badge{font-family:var(--mono);font-size:12px;padding:4px 14px;border-radius:100px;background:var(--surface2);border:1px solid var(--border-mid);color:var(--text-muted);transition:all .3s}
+.res-badge.show{background:rgba(52,211,153,0.12);color:var(--green);border-color:rgba(52,211,153,0.3)}
+.prog-track{height:3px;background:var(--surface2)}
+.prog-fill{height:100%;background:linear-gradient(90deg,var(--orange),var(--amber));transition:width .3s ease;border-radius:0 3px 3px 0}
+
+/* Viz body layout */
+.viz-body{display:grid;grid-template-columns:1fr 260px;min-height:360px}
+@media(max-width:768px){.viz-body{grid-template-columns:1fr}}
+.viz-left{padding:1.4rem;border-right:1px solid var(--border)}
+.viz-right{padding:1.4rem;display:flex;flex-direction:column;gap:.8rem}
+.viz-sub-lbl{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--text-dim);margin-bottom:.65rem}
+
+/* Array/Cells display */
+.cell-row{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:1.5rem}
+.sc{width:36px;height:36px;display:inline-flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:15px;font-weight:700;border-radius:8px;border:1.5px solid;transition:all .22s;margin-right:2px;margin-bottom:2px;}
+.sc.dim{opacity:0.3;filter:grayscale(1);}
+.sc.act{box-shadow:0 0 10px rgba(251,191,36,0.3);transform:translateY(-2px);border-color:var(--amber);}
+.sc.L{background:rgba(34,211,238,0.1);border-color:rgba(34,211,238,0.3);color:var(--cyan);}
+.sc.R{background:rgba(251,146,60,0.1);border-color:rgba(251,146,60,0.3);color:var(--orange);}
+.sc.chunk-done{background:rgba(52,211,153,0.1) !important;border-color:rgba(52,211,153,0.4) !important;color:var(--green) !important;}
+
+/* Variables panel */
+.var-rows{display:flex;flex-direction:column;gap:5px}
+.var-r{display:flex;justify-content:space-between;align-items:center;padding:.4rem .65rem;background:var(--surface2);border-radius:7px;border:1px solid var(--border)}
+.vn{font-family:var(--mono);font-size:11px;color:var(--text-dim)}
+.vv{font-family:var(--mono);font-size:12px;font-weight:700;color:var(--text);max-width:130px;text-align:right;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.vv.b{color:var(--blue)} .vv.c{color:var(--accent)} .vv.g{color:var(--green)}
+.phase-box{padding:.45rem .65rem;background:var(--surface2);border-radius:7px;border:1px solid var(--border)}
+.ph-lbl{font-family:var(--mono);font-size:10px;color:var(--text-dim);margin-bottom:2px}
+.ph-val{font-family:var(--mono);font-size:12px;font-weight:700;text-transform:capitalize}
+
+/* Step desc + log */
+.step-desc-bar{padding:.65rem 1.1rem;border-top:1px solid var(--border);border-bottom:1px solid var(--border);background:var(--surface2)}
+.sd{font-size:13px;color:var(--text-muted);line-height:1.65;min-height:43px}
+.sd em{color:var(--text);font-style:normal;font-weight:600;font-family:var(--mono)}
+.exec-log{padding:.65rem 1.1rem;max-height:140px;overflow-y:auto}
+.elt{font-family:var(--mono);font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--text-dim);margin-bottom:.35rem}
+.ll{font-family:var(--mono);font-size:11px;color:var(--text-dim);padding:1px 0;display:flex;gap:5px}
+.ll::before{content:'›';color:var(--text-dim);flex-shrink:0}
+.ll.lh{color:var(--text-muted)}.ll.lh::before{content:'▶';color:var(--accent)}
+
+/* Controls */
+.ctrl-bar{display:flex;align-items:center;justify-content:center;gap:.65rem;padding:.65rem 1.1rem;border-top:1px solid var(--border);flex-wrap:wrap}
+.cb{display:flex;align-items:center;gap:5px;font-family:var(--mono);font-size:12px;padding:6px 16px;border-radius:8px;background:var(--surface2);border:1px solid var(--border-mid);color:var(--text-muted);cursor:pointer;transition:all .18s}
+.cb:hover{background:var(--surface3);color:var(--text)}
+.cb.pri{background:rgba(251,191,36,0.14);color:var(--accent);border-color:rgba(251,191,36,0.3)}
+.cb.pri:hover{background:rgba(251,191,36,0.22)}
+.cb:disabled{opacity:.3;cursor:not-allowed}
+.sc-ctr{font-family:var(--mono);font-size:11px;color:var(--text-dim);min-width:60px;text-align:center}
+
+/* COMPLEXITY */
+.cx-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:.9rem}
+.cx-c{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:.9rem;text-align:center}
+.cx-lbl{font-family:var(--mono);font-size:10px;color:var(--text-dim);text-transform:uppercase;letter-spacing:.1em;margin-bottom:.35rem}
+.cx-v{font-family:var(--mono);font-size:1.35rem;font-weight:700;color:var(--accent)}
+.cx-n{font-size:12px;color:var(--text-dim);margin-top:.25rem}
+.tks{margin-top:.9rem;display:flex;flex-direction:column;gap:.45rem}
+.tk{padding:.55rem .9rem;background:var(--surface2);border-left:3px solid var(--accent);border-radius:0 8px 8px 0;font-size:13px;color:var(--text-muted);line-height:1.55}
+.tk code{font-family:var(--mono);font-size:12px;color:var(--text);background:var(--surface3);padding:1px 5px;border-radius:4px}
+</style>
+</head>
+<body>
+<div class="page">
+
+<a href="../index.html" class="back-link">← back to hub</a>
+
+<!-- HEADER -->
+<div class="prob-meta">
+  <span class="badge badge-easy">Easy</span>
+  <span class="badge badge-pat">Greedy State Tracking</span>
+</div>
+<h1 class="prob-title"><span class="prob-num">#1221 · </span>Split Balanced Strings</h1>
+
+<!-- 1. PATTERN BANNER -->
+<section>
+  <div class="sec-label">Pattern</div>
+  <div class="pat-banner">
+    <div class="pat-name">Greedy Counter / State Tracking</div>
+    <div class="pat-why">For problems checking contiguous balanced states, keep a single <code>balanceCount</code>. Increment for 'L', decrement for 'R'. Whenever the counter returns to exactly 0, you've found a balanced substring! You can greedily cut it right there.</div>
+    <div class="related">
+      <span class="chip">#20 Valid Parentheses</span>
+      <span class="chip">#1249 Minimum Remove to Make Valid Parentheses</span>
+    </div>
+  </div>
+</section>
+
+<!-- 2. PROBLEM STATEMENT -->
+<section>
+  <div class="sec-label">Problem</div>
+  <div class="card">
+    <p style="color:var(--text-muted);font-size:14px;margin-bottom:.85rem">Balanced strings are those that have an equal quantity of <code>'L'</code> and <code>'R'</code> characters. Given a balanced string <code>s</code>, split it uniformly into some number of balanced strings. Return the maximum number of balanced strings you can obtain.</p>
+    <p style="color:var(--text-muted);font-size:14px;margin-bottom:.85rem"><strong style="color:var(--text)">Analogy:</strong> Imagine a seesaw. Every time someone sits on the Left side, it tilts. Same for the Right side. You wait and watch. Every time the seesaw levels out perfectly horizontally, you draw a line and start counting again.</p>
+    <div class="ex-row">
+      <div class="ex-card">
+        <div class="ex-lbl">Example 1</div>
+        <div class="ex-in">s = "RLRRLLRLRL"</div>
+        <div class="ex-out">→ 4 (RL | RRLL | RL | RL)</div>
+      </div>
+      <div class="ex-card">
+        <div class="ex-lbl">Example 2</div>
+        <div class="ex-in">s = "RLLLLRRRLR"</div>
+        <div class="ex-out">→ 3 (RL | LLLRRR | LR)</div>
+      </div>
+      <div class="ex-card">
+        <div class="ex-lbl">Example 3</div>
+        <div class="ex-in">s = "LLLLRRRR"</div>
+        <div class="ex-out">→ 1 (LLLLRRRR)</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 3. INTUITION -->
+<section>
+  <div class="sec-label">Intuition &amp; Hints</div>
+  <div class="card">
+    <ul class="hint-list">
+      <li><strong style="color:var(--text)">Local vs Global:</strong> We don't need a stack. We just need to know the net difference of L's and R's seen so far.</li>
+      <li><strong style="color:var(--text)">Variable Tracking:</strong> Use a simple integer <code>balanceCount</code>. Add 1 for 'R', subtract 1 for 'L'.</li>
+      <li><strong style="color:var(--text)">Greedy Cut:</strong> As soon as <code>balanceCount === 0</code>, we know the substring ending right here has perfectly matched 'L's and 'R's. Increment your <code>count</code> of completed substrings.</li>
+      <li><strong style="color:var(--text)">Why Greedy?</strong> If you have a balanced string "RL", cutting it immediately gives you 1 point. If you merged it with another balanced string "RL" to form a bigger "RLRL", you'd only get 1 point instead of 2. So cut blindly whenever possible.</li>
+    </ul>
+    <div class="key-trick">
+      ✦ Key trick: We only care about crossing 0. If it climbs to 5 or drops to -3, we just wait until the moment it returns to 0 to increment the final chunk count.
+    </div>
+  </div>
+</section>
+
+<!-- 4. CODE BLOCK -->
+<section>
+  <div class="sec-label">Solution Code</div>
+  <div class="code-wrap">
+    <div class="code-hdr">
+      <span class="code-lang">javascript</span>
+      <span style="font-family:var(--mono);font-size:10px;color:var(--text-dim)">your solution — exact</span>
+    </div>
+    <pre class="code-body"><span id="cl1" class="cl"><span class="kw">var</span> <span class="fn">balancedStringSplit</span> <span class="op">=</span> <span class="kw">function</span>(<span class="vr">s</span>) {</span>
+<span id="cl2" class="cl">    <span class="kw">let</span> <span class="vr">balanceCount</span> <span class="op">=</span> <span class="num">0</span>;</span>
+<span id="cl3" class="cl">    <span class="kw">let</span> <span class="vr">count</span> <span class="op">=</span> <span class="num">0</span></span>
+<span id="cl4" class="cl">    <span class="kw">for</span>(<span class="kw">let</span> <span class="vr">i</span> <span class="op">=</span> <span class="num">0</span>; <span class="vr">i</span> <span class="op">&lt;</span> <span class="vr">s</span>.<span class="mt">length</span>; <span class="vr">i</span><span class="op">++</span>) {</span>
+<span id="cl5" class="cl">        <span class="kw">if</span>(<span class="str">"R"</span> <span class="op">==</span> <span class="vr">s</span>[<span class="vr">i</span>]) {</span>
+<span id="cl6" class="cl">            <span class="vr">balanceCount</span><span class="op">++</span></span>
+<span id="cl7" class="cl">        } <span class="kw">else</span> {</span>
+<span id="cl8" class="cl">            <span class="vr">balanceCount</span><span class="op">--</span></span>
+<span id="cl9" class="cl">        }</span>
+<span id="cl10" class="cl"></span>
+<span id="cl11" class="cl">        <span class="kw">if</span>(<span class="vr">balanceCount</span> <span class="op">==</span> <span class="num">0</span>){</span>
+<span id="cl12" class="cl">            <span class="vr">count</span><span class="op">++</span></span>
+<span id="cl13" class="cl">        }</span>
+<span id="cl14" class="cl">    }</span>
+<span id="cl15" class="cl">    <span class="kw">return</span> <span class="vr">count</span></span>
+<span id="cl16" class="cl">};</span></pre>
+  </div>
+</section>
+
+<!-- 5. VISUALIZER -->
+<section>
+  <div class="sec-label">Interactive Visualizer</div>
+  <div class="viz-wrap">
+    <div class="viz-topbar">
+      <div class="ex-sel" id="exSel"></div>
+      <div class="res-badge" id="resBadge">result: —</div>
+    </div>
+    <div class="prog-track"><div class="prog-fill" id="progFill" style="width:0%"></div></div>
+    <div class="viz-body">
+      <!-- LEFT -->
+      <div class="viz-left">
+        <div class="viz-sub-lbl">Original string (s)</div>
+        <div class="cell-row" id="sGrid"></div>
+      </div>
+      <!-- RIGHT -->
+      <div class="viz-right">
+        <div>
+          <div class="viz-sub-lbl">variables</div>
+          <div class="var-rows">
+            <div class="var-r"><span class="vn">i</span><span class="vv b" id="vI">—</span></div>
+            <div class="var-r"><span class="vn">char (s[i])</span><span class="vv" id="vCHAR">—</span></div>
+            <div class="var-r"><span class="vn">balanceCount</span><span class="vv c" id="vBAL">—</span></div>
+            <div class="var-r"><span class="vn">count</span><span class="vv g" id="vCNT">—</span></div>
+          </div>
+        </div>
+        <div class="phase-box">
+          <div class="ph-lbl">Seesaw Tracker</div>
+          <div class="ph-val" id="vSEE">—</div>
+        </div>
+      </div>
+    </div>
+    <div class="step-desc-bar">
+      <div class="sd" id="stepDesc">Press Next or ▶ Play to step through the algorithm.</div>
+    </div>
+    <div class="exec-log">
+      <div class="elt">execution log</div>
+      <div id="execLog"></div>
+    </div>
+    <div class="ctrl-bar">
+      <button class="cb" id="btnPrev" onclick="prevStep()" disabled>← Prev</button>
+      <button class="cb pri" id="btnPlay" onclick="togglePlay()">▶ Play</button>
+      <span class="sc-ctr" id="stpCtr">0 / 0</span>
+      <button class="cb" id="btnNext" onclick="nextStep()">Next →</button>
+    </div>
+  </div>
+</section>
+
+<!-- 6. COMPLEXITY -->
+<section>
+  <div class="sec-label">Complexity</div>
+  <div class="cx-grid">
+    <div class="cx-c">
+      <div class="cx-lbl">Time</div>
+      <div class="cx-v">O(N)</div>
+      <div class="cx-n">N = string length</div>
+    </div>
+    <div class="cx-c">
+      <div class="cx-lbl">Space</div>
+      <div class="cx-v">O(1)</div>
+      <div class="cx-n">Just two integer variables</div>
+    </div>
+  </div>
+  <div class="tks">
+    <div class="tk">All characters are visited exactly once. No complex inner loops or look-aheads needed. Gives O(N).</div>
+    <div class="tk">Because we only increment and decrement a single counter instead of tracking sequences, space is perfectly minimal at O(1).</div>
+  </div>
+</section>
+
+</div><!-- /page -->
+
+<script>
+// ─── STEP ENGINE ───────────────────────────────────────────────────────────
+
+function computeSteps(s) {
+  const steps = [];
+  let balanceCount = 0;
+  let count = 0;
+
+  steps.push({
+    desc: `Initialize variables: <em>balanceCount</em> = 0, <em>count</em> = 0.<br/>Input string length is ${s.length}.`,
+    log: [{t:`Initialize vars`, h:true}],
+    phase: 'init', s, i:-1, balanceCount, count,
+    lines: [2,3], vResult:'—', balancedChunks:[], currentChunkStart:0
+  });
+
+  let chunks = [];
+  let chunkStart = 0;
+
+  for (let i = 0; i < s.length; i++) {
+    steps.push({
+      desc: `<em>i</em> = ${i}. Read character '${s[i]}'.`,
+      log: [{t:`for i=${i}: read '${s[i]}'`, h:true}],
+      phase: 'read', s, i, balanceCount, count,
+      lines: [4], vResult:'—', balancedChunks:[...chunks], currentChunkStart:chunkStart
+    });
+
+    if ("R" == s[i]) {
+      balanceCount++;
+      steps.push({
+        desc: `Character is 'R'. Increment <em>balanceCount</em> to ${balanceCount}.`,
+        log: [{t:`"R" == s[i] → balanceCount++`, h:true}],
+        phase: 'update', s, i, balanceCount, count,
+        lines: [5,6], vResult:'—', balancedChunks:[...chunks], currentChunkStart:chunkStart
+      });
+    } else {
+      balanceCount--;
+      steps.push({
+        desc: `Character is 'L' (not 'R'). Decrement <em>balanceCount</em> to ${balanceCount}.`,
+        log: [{t:`else → balanceCount--`, h:true}],
+        phase: 'update', s, i, balanceCount, count,
+        lines: [7,8], vResult:'—', balancedChunks:[...chunks], currentChunkStart:chunkStart
+      });
+    }
+
+    if (balanceCount == 0) {
+      count++;
+      chunks.push({ start: chunkStart, end: i });
+      chunkStart = i + 1;
+      
+      steps.push({
+        desc: `<em>balanceCount</em> reached 0! A balanced substring is finalized. Increment <em>count</em> to ${count}.`,
+        log: [{t:`balanceCount == 0 → count++`, h:true}],
+        phase: 'match', s, i, balanceCount, count,
+        lines: [11,12], vResult:'—', balancedChunks:[...chunks], currentChunkStart:chunkStart
+      });
+    } else {
+      steps.push({
+        desc: `<em>balanceCount</em> is ${balanceCount} (≠ 0). String is not balanced yet, continuing...`,
+        log: [{t:`balanceCount != 0 → continue`, h:false}],
+        phase: 'continue', s, i, balanceCount, count,
+        lines: [11], vResult:'—', balancedChunks:[...chunks], currentChunkStart:chunkStart
+      });
+    }
+  }
+
+  steps.push({
+    desc: `Loop complete. Return total balanced strings: <em>${count}</em>.`,
+    log: [{t:`return ${count}`, h:true}],
+    phase: 'done', s, i: s.length, balanceCount, count,
+    lines: [15], vResult: count, balancedChunks:[...chunks], currentChunkStart:chunkStart
+  });
+
+  return steps;
+}
+
+// ─── EXAMPLES ──────────────────────────────────────────────────────────────
+
+const EXAMPLES = [
+  { label:'Ex 1: "RLRRLLRLRL"', s:'RLRRLLRLRL'},
+  { label:'Ex 2: "RLLLLRRRLR"', s:'RLLLLRRRLR'},
+  { label:'Ex 3: "LLLLRRRR"', s:'LLLLRRRR'},
+  { label:'Ex 4: "RL"', s:'RL'},
+];
+
+// ─── STATE ─────────────────────────────────────────────────────────────────
+
+let exIdx   = 0;
+let stepIdx = 0;
+let steps   = [];
+let playing = false;
+let playTimer = null;
+
+// ─── INIT ───────────────────────────────────────────────────────────────────
+
+(function init() {
+  const sel = document.getElementById('exSel');
+  sel.innerHTML = EXAMPLES.map((e,idx) =>
+    `<button class="eb${idx===0?' on':''}" onclick="loadEx(${idx})">${e.label}</button>`
+  ).join('');
+  loadEx(0);
+})();
+
+function loadEx(idx) {
+  stopPlay();
+  exIdx   = idx;
+  stepIdx = 0;
+  steps   = computeSteps(EXAMPLES[idx].s);
+  document.querySelectorAll('.eb').forEach((b,i) => b.classList.toggle('on', i===idx));
+  render(steps[0]);
+  updateCtrl();
+}
+
+// ─── RENDER ─────────────────────────────────────────────────────────────────
+
+function render(sItem) {
+  
+  // ── "s" Grid ──────────────────────────────────────────────────
+  const strArr = sItem.s.split('');
+  const cells = strArr.map((ch, idx) => {
+    let clss = [];
+    if (ch === 'L') clss.push('L'); else if (ch === 'R') clss.push('R');
+
+    // Dim cells not yet reached
+    if (idx > sItem.i && sItem.phase !== 'done') {
+      clss.push('dim');
+    }
+    
+    // Check if within a completed chunk
+    for (let bc of sItem.balancedChunks) {
+      if (idx >= bc.start && idx <= bc.end) {
+        clss.push('chunk-done');
+        break;
+      }
+    }
+    
+    // Highlight currently processed cell
+    if (idx === sItem.i) {
+      clss.push('act');
+    }
+
+    return `<div style="display:flex; flex-direction:column; align-items:center; margin-right:5px; margin-bottom:10px;">
+              <span class="sc ${clss.join(' ')}">${ch}</span>
+              <span style="font-size:9px;color:var(--text-dim);font-family:var(--mono);margin-top:3px;">${idx}</span>
+            </div>`;
+  }).join('');
+  document.getElementById('sGrid').innerHTML = cells;
+
+  // ── Variables ────────────────────────────────────────────────────
+  document.getElementById('vI').textContent    = sItem.i >= 0 && sItem.i < sItem.s.length ? sItem.i : '—';
+  document.getElementById('vCHAR').textContent = sItem.i >= 0 && sItem.i < sItem.s.length ? `'${sItem.s[sItem.i]}'` : '—';
+  
+  document.getElementById('vBAL').textContent  = sItem.balanceCount;
+  document.getElementById('vCNT').textContent  = sItem.count;
+
+  // Seesaw tracker string illustration: e.g. "R", "L", etc. based on count
+  let seeStr = "⚖️ Level";
+  if (sItem.balanceCount > 0) seeStr = `Right Heavy (+${sItem.balanceCount})`;
+  else if (sItem.balanceCount < 0) seeStr = `Left Heavy (${sItem.balanceCount})`;
+  if(sItem.phase == 'done' || sItem.phase == 'init') seeStr = "⚖️ Level";
+  document.getElementById('vSEE').innerHTML = seeStr;
+
+  // ── Code highlight ────────────────────────────────────────────────
+  for (let n = 1; n <= 16; n++) {
+    const el = document.getElementById(`cl${n}`);
+    if (el) el.classList.remove('al');
+  }
+  (sItem.lines || []).forEach(n => {
+    const el = document.getElementById(`cl${n}`);
+    if (el) el.classList.add('al');
+  });
+
+  // ── Description ──────────────────────────────────────────────────
+  document.getElementById('stepDesc').innerHTML = sItem.desc;
+
+  // ── Log ──────────────────────────────────────────────────────────
+  document.getElementById('execLog').innerHTML =
+    (sItem.log || []).map(l => `<div class="ll${l.h?' lh':''}">${l.t}</div>`).join('');
+
+  // ── Result badge ─────────────────────────────────────────────────
+  const rb = document.getElementById('resBadge');
+  if (sItem.phase === 'done') {
+    rb.textContent = `result: ${sItem.vResult}`;
+    rb.classList.add('show');
+  } else {
+    rb.textContent = 'result: —';
+    rb.classList.remove('show');
+  }
+
+  // ── Progress ─────────────────────────────────────────────────────
+  const pct = steps.length > 1 ? (stepIdx / (steps.length - 1)) * 100 : 0;
+  document.getElementById('progFill').style.width = pct + '%';
+  document.getElementById('stpCtr').textContent   = `${stepIdx + 1} / ${steps.length}`;
+}
+
+// ─── CONTROLS ───────────────────────────────────────────────────────────────
+
+function nextStep() {
+  if (stepIdx < steps.length - 1) { stepIdx++; render(steps[stepIdx]); updateCtrl(); }
+  else stopPlay();
+}
+
+function prevStep() {
+  if (stepIdx > 0) { stepIdx--; render(steps[stepIdx]); updateCtrl(); }
+}
+
+function updateCtrl() {
+  document.getElementById('btnPrev').disabled = stepIdx === 0;
+  document.getElementById('btnNext').disabled = stepIdx === steps.length - 1;
+}
+
+function togglePlay() { playing ? stopPlay() : startPlay(); }
+
+function startPlay() {
+  playing = true;
+  document.getElementById('btnPlay').textContent = '⏸ Pause';
+  playTimer = setInterval(() => {
+    if (stepIdx < steps.length - 1) { stepIdx++; render(steps[stepIdx]); updateCtrl(); }
+    else stopPlay();
+  }, 950);
+}
+
+function stopPlay() {
+  playing = false;
+  clearInterval(playTimer);
+  const b = document.getElementById('btnPlay');
+  if (b) b.textContent = '▶ Play';
+}
+
+// ─── KEYBOARD ───────────────────────────────────────────────────────────────
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight' || e.key === 'ArrowDown') { e.preventDefault(); nextStep(); }
+  if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp')   { e.preventDefault(); prevStep(); }
+  if (e.key === ' ') { e.preventDefault(); togglePlay(); }
+});
+</script>
+</body>
+</html>

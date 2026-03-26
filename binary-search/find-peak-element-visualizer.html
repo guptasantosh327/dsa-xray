@@ -1,0 +1,889 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>#162 Find Peak Element — DSA X-Ray</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Sora:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0d0f14;
+  --surface: #13161d;
+  --surface2: #1a1e28;
+  --surface3: #212638;
+  --border: rgba(255,255,255,0.07);
+  --border-mid: rgba(255,255,255,0.12);
+  --text: #e8eaf0;
+  --text-muted: #6b7280;
+  --text-dim: #3d4251;
+  --accent: #7c6ef5;
+  --green: #34d399;
+  --amber: #fbbf24;
+  --blue: #60a5fa;
+  --red: #f87171;
+  --orange: #fb923c;
+  --mono: 'JetBrains Mono', monospace;
+  --sans: 'Sora', sans-serif;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--sans);
+  min-height: 100vh;
+  background-image:
+    repeating-linear-gradient(0deg, transparent, transparent 39px, rgba(124,110,245,0.03) 40px),
+    repeating-linear-gradient(90deg, transparent, transparent 39px, rgba(124,110,245,0.03) 40px);
+}
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+/* ── Layout ─────────────────────────────── */
+.page { max-width: 960px; margin: 0 auto; padding: 40px 20px 80px; }
+.section { margin-bottom: 48px; opacity: 0; animation: fadeUp 0.5s forwards; }
+.section:nth-child(1) { animation-delay: 0.05s; }
+.section:nth-child(2) { animation-delay: 0.10s; }
+.section:nth-child(3) { animation-delay: 0.15s; }
+.section:nth-child(4) { animation-delay: 0.20s; }
+.section:nth-child(5) { animation-delay: 0.25s; }
+.section:nth-child(6) { animation-delay: 0.30s; }
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Pattern Banner ─────────────────────── */
+.pattern-banner {
+  background: linear-gradient(135deg, rgba(124,110,245,0.15), rgba(96,165,250,0.08));
+  border: 1px solid rgba(124,110,245,0.3);
+  border-radius: 14px;
+  padding: 24px 28px;
+}
+.pattern-tag {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: rgba(124,110,245,0.2); border: 1px solid rgba(124,110,245,0.4);
+  border-radius: 20px; padding: 4px 14px;
+  font-size: 12px; font-weight: 600; color: var(--accent);
+  text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 12px;
+}
+.pattern-banner h1 { font-size: 22px; font-weight: 700; margin-bottom: 8px; }
+.pattern-banner h1 span { color: var(--text-muted); font-weight: 400; }
+.pattern-banner p { color: var(--text-muted); font-size: 14px; line-height: 1.6; margin-bottom: 16px; }
+.related-problems { display: flex; flex-wrap: wrap; gap: 8px; }
+.related-pill {
+  background: var(--surface2); border: 1px solid var(--border);
+  border-radius: 8px; padding: 4px 12px;
+  font-size: 12px; color: var(--text-muted);
+}
+
+/* ── Section titles ─────────────────────── */
+.section-title {
+  font-size: 11px; font-weight: 600; text-transform: uppercase;
+  letter-spacing: 0.1em; color: var(--text-dim);
+  margin-bottom: 16px; display: flex; align-items: center; gap: 8px;
+}
+.section-title::after {
+  content: ''; flex: 1; height: 1px; background: var(--border);
+}
+
+/* ── Problem statement ──────────────────── */
+.problem-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 12px; padding: 24px;
+}
+.diff-badge {
+  display: inline-block; padding: 2px 10px; border-radius: 6px;
+  font-size: 11px; font-weight: 600; margin-bottom: 14px;
+}
+.diff-badge.medium { background: rgba(251,191,36,0.15); color: var(--amber); border: 1px solid rgba(251,191,36,0.3); }
+.problem-card h2 { font-size: 18px; margin-bottom: 14px; }
+.problem-card p { color: var(--text-muted); font-size: 14px; line-height: 1.7; margin-bottom: 14px; }
+.analogy-box {
+  background: var(--surface2); border-left: 3px solid var(--accent);
+  border-radius: 0 8px 8px 0; padding: 12px 16px;
+  font-size: 13px; color: var(--text-muted); margin: 16px 0;
+}
+.worked-examples { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; margin-top: 16px; }
+.worked-ex {
+  background: var(--surface2); border: 1px solid var(--border);
+  border-radius: 10px; padding: 14px;
+}
+.worked-ex .label { font-size: 11px; color: var(--text-dim); margin-bottom: 6px; font-family: var(--mono); }
+.worked-ex .arr { font-family: var(--mono); font-size: 13px; color: var(--text); margin-bottom: 4px; }
+.worked-ex .result { font-size: 12px; color: var(--green); }
+
+/* ── Intuition ──────────────────────────── */
+.hint-list { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+.hint-list li {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 10px; padding: 14px 16px;
+  font-size: 14px; color: var(--text-muted); line-height: 1.6;
+  display: flex; gap: 12px;
+}
+.hint-num {
+  min-width: 24px; height: 24px; border-radius: 50%;
+  background: var(--surface3); border: 1px solid var(--border-mid);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 700; color: var(--accent); flex-shrink: 0;
+}
+.key-trick {
+  background: rgba(251,191,36,0.08); border: 1px solid rgba(251,191,36,0.25);
+  border-radius: 10px; padding: 14px 16px; margin-top: 10px;
+  font-size: 14px; line-height: 1.6;
+}
+.key-trick strong { color: var(--amber); }
+
+/* ── Code Block ─────────────────────────── */
+.code-wrap {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 12px; overflow: hidden;
+}
+.code-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 10px 16px; background: var(--surface2);
+  border-bottom: 1px solid var(--border);
+  font-size: 12px; color: var(--text-muted);
+}
+.code-header .lang { color: var(--accent); font-weight: 600; }
+.code-body { padding: 16px; overflow-x: auto; }
+.code-body pre { font-family: var(--mono); font-size: 13px; line-height: 1.8; }
+.code-line {
+  display: block; padding: 0 8px; border-radius: 4px;
+  transition: background 0.2s, border-color 0.2s;
+  border-left: 2px solid transparent;
+  white-space: pre;
+}
+.code-line.active {
+  background: rgba(251,191,36,0.12);
+  border-left-color: var(--amber);
+}
+/* syntax colors */
+.kw  { color: #c792ea; }
+.fn  { color: #82aaff; }
+.var { color: #e8eaf0; }
+.num { color: #f78c6c; }
+.str { color: #c3e88d; }
+.cmt { color: #546e7a; font-style: italic; }
+.op  { color: #89ddff; }
+.punc { color: #89ddff; }
+
+/* ── Visualizer ─────────────────────────── */
+.viz-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 14px; overflow: hidden;
+}
+.viz-topbar {
+  display: flex; align-items: center; gap: 0;
+  border-bottom: 1px solid var(--border);
+  overflow-x: auto;
+}
+.ex-tab {
+  padding: 10px 16px; font-size: 12px; font-weight: 600;
+  color: var(--text-muted); cursor: pointer;
+  border-bottom: 2px solid transparent;
+  white-space: nowrap; transition: color 0.15s, border-color 0.15s;
+  background: none; border-left: none; border-right: none; border-top: none;
+}
+.ex-tab:hover { color: var(--text); }
+.ex-tab.active { color: var(--amber); border-bottom-color: var(--amber); }
+
+.viz-body { padding: 24px; }
+
+/* Step description */
+.step-desc {
+  background: var(--surface2); border: 1px solid var(--border);
+  border-radius: 10px; padding: 14px 16px;
+  font-size: 14px; line-height: 1.6; margin-bottom: 20px;
+  min-height: 52px;
+}
+.step-desc em { color: var(--amber); font-style: normal; font-weight: 600; }
+
+/* Phase badge */
+.phase-row { display: flex; align-items: center; gap: 10px; margin-bottom: 20px; }
+.phase-badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 4px 12px; border-radius: 20px; font-size: 11px;
+  font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em;
+}
+.phase-badge.init    { background: rgba(124,110,245,0.15); color: var(--accent); border: 1px solid rgba(124,110,245,0.3); }
+.phase-badge.compare { background: rgba(251,191,36,0.15); color: var(--amber);  border: 1px solid rgba(251,191,36,0.3); }
+.phase-badge.shrink  { background: rgba(96,165,250,0.15); color: var(--blue);   border: 1px solid rgba(96,165,250,0.3); }
+.phase-badge.done    { background: rgba(52,211,153,0.15); color: var(--green);  border: 1px solid rgba(52,211,153,0.3); }
+
+.result-badge {
+  margin-left: auto;
+  font-family: var(--mono); font-size: 12px;
+  color: var(--text-muted);
+}
+.result-badge span { color: var(--green); font-weight: 700; }
+
+/* Array visualization */
+.array-section { margin-bottom: 24px; }
+.array-label { font-size: 11px; color: var(--text-dim); margin-bottom: 10px; font-family: var(--mono); }
+.array-outer { overflow-x: auto; padding-bottom: 4px; }
+.array-row { display: inline-flex; gap: 6px; min-width: max-content; }
+.cell-wrap { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.cell {
+  width: 38px; height: 38px; border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--mono); font-size: 14px; font-weight: 600;
+  border: 2px solid var(--border);
+  background: var(--surface2);
+  transition: background 0.25s, border-color 0.25s, opacity 0.25s, transform 0.2s, box-shadow 0.25s;
+}
+.cell.dimmed   { opacity: 0.25; }
+.cell.active   { background: var(--surface3); border-color: var(--border-mid); }
+.cell.is-mid   { background: rgba(251,191,36,0.2); border-color: var(--amber); color: var(--amber); }
+.cell.cmp-a    { border-color: var(--amber); box-shadow: 0 0 10px rgba(251,191,36,0.3); }
+.cell.cmp-b    { border-color: var(--orange); box-shadow: 0 0 10px rgba(251,146,60,0.3); }
+.cell.peak     {
+  background: rgba(52,211,153,0.2); border-color: var(--green);
+  color: var(--green); transform: translateY(-4px);
+  box-shadow: 0 0 16px rgba(52,211,153,0.4);
+}
+
+.cell-index { font-size: 10px; color: var(--text-dim); font-family: var(--mono); }
+.cell-ptrs { display: flex; gap: 3px; min-height: 18px; }
+.ptr {
+  font-size: 10px; font-weight: 700; padding: 1px 5px;
+  border-radius: 4px; font-family: var(--mono);
+}
+.ptr.L   { background: rgba(96,165,250,0.2); color: var(--blue); }
+.ptr.R   { background: rgba(96,165,250,0.2); color: var(--blue); }
+.ptr.mid { background: rgba(251,191,36,0.2); color: var(--amber); }
+
+/* Comparison panel */
+.cmp-panel {
+  display: flex; align-items: center; gap: 16px;
+  background: var(--surface2); border: 1px solid var(--border);
+  border-radius: 10px; padding: 14px 20px; margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+.cmp-side { text-align: center; }
+.cmp-label { font-size: 10px; color: var(--text-dim); font-family: var(--mono); margin-bottom: 4px; }
+.cmp-val {
+  font-family: var(--mono); font-size: 22px; font-weight: 700;
+  transition: color 0.3s;
+}
+.cmp-val.amber  { color: var(--amber); }
+.cmp-val.orange { color: var(--orange); }
+.cmp-val.green  { color: var(--green); }
+.cmp-val.muted  { color: var(--text-dim); }
+.cmp-op {
+  font-family: var(--mono); font-size: 20px; font-weight: 700;
+  color: var(--text-muted); transition: color 0.3s; min-width: 28px; text-align: center;
+}
+.cmp-op.gt   { color: var(--green); }
+.cmp-op.lte  { color: var(--red); }
+.cmp-op.q    { color: var(--text-dim); }
+.cmp-direction {
+  margin-left: auto; font-size: 12px; font-weight: 600;
+  padding: 6px 14px; border-radius: 8px;
+}
+.cmp-direction.left  { background: rgba(96,165,250,0.15); color: var(--blue); }
+.cmp-direction.right { background: rgba(251,146,60,0.15); color: var(--orange); }
+.cmp-direction.found { background: rgba(52,211,153,0.15); color: var(--green); }
+.cmp-direction.none  { color: var(--text-dim); }
+
+/* Variables panel */
+.vars-row {
+  display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 20px;
+}
+.var-chip {
+  background: var(--surface2); border: 1px solid var(--border);
+  border-radius: 8px; padding: 8px 14px;
+  font-family: var(--mono); font-size: 13px;
+  display: flex; gap: 8px; align-items: center;
+}
+.var-chip .vname { color: var(--text-muted); }
+.var-chip .vval  { color: var(--text); font-weight: 600; }
+.var-chip .vval.amber  { color: var(--amber); }
+.var-chip .vval.blue   { color: var(--blue); }
+.var-chip .vval.green  { color: var(--green); }
+
+/* Execution log */
+.log-box {
+  background: var(--surface2); border: 1px solid var(--border);
+  border-radius: 10px; padding: 12px 14px; margin-bottom: 20px;
+  max-height: 110px; overflow-y: auto;
+}
+.log-line {
+  font-family: var(--mono); font-size: 12px; color: var(--text-muted);
+  line-height: 1.7; display: flex; gap: 8px; align-items: flex-start;
+}
+.log-line::before { content: '>'; color: var(--text-dim); flex-shrink: 0; }
+.log-line.hl { color: var(--text); }
+.log-line.hl::before { color: var(--accent); }
+
+/* Progress bar */
+.progress-wrap {
+  height: 3px; background: var(--surface3); border-radius: 2px;
+  margin-bottom: 16px; overflow: hidden;
+}
+.progress-bar {
+  height: 100%; border-radius: 2px;
+  background: linear-gradient(90deg, var(--amber), var(--orange));
+  transition: width 0.3s ease;
+}
+
+/* Controls */
+.controls {
+  display: flex; align-items: center; gap: 12px; justify-content: center;
+}
+.btn {
+  padding: 8px 20px; border-radius: 8px; font-size: 13px; font-weight: 600;
+  cursor: pointer; transition: background 0.15s, opacity 0.15s;
+  border: 1px solid var(--border-mid); background: var(--surface2);
+  color: var(--text); font-family: var(--sans);
+}
+.btn:hover:not(:disabled) { background: var(--surface3); }
+.btn:disabled { opacity: 0.35; cursor: not-allowed; }
+.btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+.btn.primary:hover:not(:disabled) { background: #6b5de0; }
+.step-counter {
+  font-family: var(--mono); font-size: 12px; color: var(--text-muted);
+  min-width: 80px; text-align: center;
+}
+
+/* ── Complexity ─────────────────────────── */
+.complexity-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; margin-bottom: 20px; }
+.cx-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 10px; padding: 16px; text-align: center;
+}
+.cx-card .cx-label { font-size: 11px; color: var(--text-dim); margin-bottom: 6px; }
+.cx-card .cx-val   { font-family: var(--mono); font-size: 20px; font-weight: 700; color: var(--green); }
+.cx-card .cx-why   { font-size: 11px; color: var(--text-muted); margin-top: 4px; }
+.takeaways { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+.takeaways li {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 8px; padding: 12px 14px;
+  font-size: 13px; color: var(--text-muted); line-height: 1.5;
+  display: flex; gap: 10px;
+}
+.takeaways li::before { content: '"'; color: var(--accent); font-size: 18px; line-height: 1; }
+
+/* ── Responsive ─────────────────────────── */
+@media (max-width: 600px) {
+  .page { padding: 20px 14px 60px; }
+  .cmp-panel { gap: 10px; }
+  .cmp-direction { margin-left: 0; width: 100%; text-align: center; }
+  .vars-row .var-chip { font-size: 12px; }
+}
+</style>
+</head>
+<body>
+<div class="page">
+
+  <!-- 1. Pattern Banner -->
+  <div class="section">
+    <div class="pattern-banner">
+      <div class="pattern-tag">⚡ Binary Search</div>
+      <h1>#162 <span>—</span> Find Peak Element</h1>
+      <p>
+        The array has no global sort order, but locally it does — at any midpoint, the slope tells
+        you which side holds a peak. Binary search on this local slope guarantees O(log n).
+      </p>
+      <div class="related-problems">
+        <span class="related-pill">🔗 #153 Find Min in Rotated Sorted Array</span>
+        <span class="related-pill">🔗 #852 Peak Index in Mountain Array</span>
+        <span class="related-pill">🔗 #1901 Find Peak Element II (2D)</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. Problem Statement -->
+  <div class="section">
+    <div class="section-title">Problem Statement</div>
+    <div class="problem-card">
+      <div class="diff-badge medium">Medium</div>
+      <h2>Find Peak Element</h2>
+      <p>
+        Given an integer array <code style="color:var(--accent);font-family:var(--mono)">nums</code>,
+        find a peak element and return its index. A peak element is one that is
+        <strong>strictly greater than its neighbors</strong>.
+        Assume <code style="color:var(--accent);font-family:var(--mono)">nums[-1] = nums[n] = -∞</code>.
+        If multiple peaks exist, return the index to <em>any</em> peak.
+        You must write an algorithm that runs in <strong>O(log n)</strong> time.
+      </p>
+      <div class="analogy-box">
+        🏔️ Imagine walking a mountain range in fog. At any point you can only see the next step
+        forward. If the ground rises ahead, keep going — a peak is further. If the ground
+        drops ahead, you might be at or past a peak — turn back. You'll always find high ground.
+      </div>
+      <div class="worked-examples">
+        <div class="worked-ex">
+          <div class="label">Input</div>
+          <div class="arr">nums = [1, 2, 3, 1]</div>
+          <div class="result">→ index 2 (value 3)</div>
+        </div>
+        <div class="worked-ex">
+          <div class="label">Input</div>
+          <div class="arr">nums = [1,2,1,3,5,6,4]</div>
+          <div class="result">→ index 5 (value 6)</div>
+        </div>
+        <div class="worked-ex">
+          <div class="label">Edge: single element</div>
+          <div class="arr">nums = [1]</div>
+          <div class="result">→ index 0 (trivially a peak)</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. Intuition + Hints -->
+  <div class="section">
+    <div class="section-title">Intuition + Hints</div>
+    <ul class="hint-list">
+      <li>
+        <span class="hint-num">1</span>
+        <span><strong>Brute force O(n):</strong> Scan every element and check if it's greater than both neighbors. Works, but wastes the log-n opportunity.</span>
+      </li>
+      <li>
+        <span class="hint-num">2</span>
+        <span><strong>The slope insight:</strong> Pick <code style="font-family:var(--mono);color:var(--accent)">mid</code>.
+          Compare <code style="font-family:var(--mono);color:var(--accent)">array[mid]</code> with <code style="font-family:var(--mono);color:var(--accent)">array[mid+1]</code>.
+          If <code style="font-family:var(--mono);color:var(--accent)">array[mid] &gt; array[mid+1]</code>, the slope is falling — a peak exists at or before <code style="font-family:var(--mono);color:var(--accent)">mid</code>.
+          If rising, a peak is strictly ahead.</span>
+      </li>
+      <li>
+        <span class="hint-num">3</span>
+        <span><strong>Why does it work?</strong> Because the problem guarantees <code style="font-family:var(--mono);color:var(--accent)">nums[-1] = nums[n] = -∞</code>.
+          The array must eventually come back down, so any upslope necessarily leads to a peak.</span>
+      </li>
+      <li>
+        <span class="hint-num">4</span>
+        <span><strong>Convergence:</strong> Each iteration halves the search space. When <code style="font-family:var(--mono);color:var(--accent)">left == right</code>, that index is surrounded by lower values (or -∞ boundaries) — it <em>is</em> the peak.</span>
+      </li>
+    </ul>
+    <div class="key-trick">
+      <strong>Key Trick:</strong> You never need to compare <code style="font-family:var(--mono);color:var(--amber)">array[mid-1]</code>.
+      One comparison (<code style="font-family:var(--mono);color:var(--amber)">array[mid] vs array[mid+1]</code>) determines the slope direction — and slope direction tells you which half to search.
+    </div>
+  </div>
+
+  <!-- 4. Code Block -->
+  <div class="section">
+    <div class="section-title">Your Solution</div>
+    <div class="code-wrap">
+      <div class="code-header">
+        <span>find-peak-element.js</span>
+        <span class="lang">JavaScript</span>
+      </div>
+      <div class="code-body">
+        <pre id="codeBlock"><span class="code-line" data-line="1"><span class="kw">var</span> <span class="fn">findPeakElement</span> <span class="op">=</span> <span class="kw">function</span><span class="punc">(</span><span class="var">array</span><span class="punc">) {</span></span>
+<span class="code-line" data-line="2"><span class="kw"> let</span> <span class="var">left</span> <span class="op">=</span> <span class="num">0</span><span class="punc">,</span> <span class="var">right</span> <span class="op">=</span> <span class="var">array</span><span class="punc">.</span><span class="var">length</span><span class="op">-</span><span class="num">1</span></span>
+<span class="code-line" data-line="3"></span>
+<span class="code-line" data-line="4">  <span class="kw">while</span><span class="punc">(</span><span class="var">left</span> <span class="op">&lt;</span> <span class="var">right</span><span class="punc">){</span></span>
+<span class="code-line" data-line="5">     <span class="kw">let</span> <span class="var">mid</span> <span class="op">=</span> <span class="var">Math</span><span class="punc">.</span><span class="fn">floor</span><span class="punc">((</span><span class="var">left</span> <span class="op">+</span> <span class="var">right</span><span class="punc">)</span><span class="op">/</span><span class="num">2</span><span class="punc">)</span></span>
+<span class="code-line" data-line="6">    <span class="kw">if</span><span class="punc">(</span><span class="var">array</span><span class="punc">[</span><span class="var">mid</span><span class="punc">]</span> <span class="op">&gt;</span> <span class="var">array</span><span class="punc">[</span><span class="var">mid</span><span class="op">+</span><span class="num">1</span><span class="punc">]){</span></span>
+<span class="code-line" data-line="7">      <span class="var">right</span> <span class="op">=</span> <span class="var">mid</span></span>
+<span class="code-line" data-line="8">    <span class="punc">}</span><span class="kw">else</span><span class="punc">{</span></span>
+<span class="code-line" data-line="9">      <span class="var">left</span> <span class="op">=</span> <span class="var">mid</span> <span class="op">+</span><span class="num">1</span></span>
+<span class="code-line" data-line="10">    <span class="punc">}</span></span>
+<span class="code-line" data-line="11">  <span class="punc">}</span></span>
+<span class="code-line" data-line="12">  <span class="kw">return</span> <span class="var">left</span></span>
+<span class="code-line" data-line="13"><span class="punc">};</span></span></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5. Interactive Visualizer -->
+  <div class="section">
+    <div class="section-title">Interactive Visualizer</div>
+    <div class="viz-card">
+      <div class="viz-topbar" id="exTabs"></div>
+      <div class="viz-body">
+        <div class="step-desc" id="stepDesc">Select an example and press Next to begin.</div>
+
+        <div class="phase-row">
+          <div class="phase-badge init" id="phaseBadge">init</div>
+          <div class="result-badge" id="resultBadge">result: <span id="resultVal">—</span></div>
+        </div>
+
+        <div class="array-section">
+          <div class="array-label" id="arrayLabel">array = []</div>
+          <div class="array-outer">
+            <div class="array-row" id="arrayRow"></div>
+          </div>
+        </div>
+
+        <div class="cmp-panel" id="cmpPanel">
+          <div class="cmp-side">
+            <div class="cmp-label" id="cmpLabelA">array[mid]</div>
+            <div class="cmp-val muted" id="cmpValA">—</div>
+          </div>
+          <div class="cmp-op q" id="cmpOp">?</div>
+          <div class="cmp-side">
+            <div class="cmp-label" id="cmpLabelB">array[mid+1]</div>
+            <div class="cmp-val muted" id="cmpValB">—</div>
+          </div>
+          <div class="cmp-direction none" id="cmpDir">—</div>
+        </div>
+
+        <div class="vars-row" id="varsRow">
+          <div class="var-chip"><span class="vname">left</span><span class="vval blue" id="vLeft">0</span></div>
+          <div class="var-chip"><span class="vname">right</span><span class="vval blue" id="vRight">—</span></div>
+          <div class="var-chip"><span class="vname">mid</span><span class="vval amber" id="vMid">—</span></div>
+        </div>
+
+        <div class="log-box" id="logBox"></div>
+
+        <div class="progress-wrap">
+          <div class="progress-bar" id="progressBar" style="width:0%"></div>
+        </div>
+
+        <div class="controls">
+          <button class="btn" id="btnPrev" onclick="navigate(-1)" disabled>← Prev</button>
+          <span class="step-counter" id="stepCounter">0 / 0</span>
+          <button class="btn" id="btnNext" onclick="navigate(1)">Next →</button>
+          <button class="btn primary" id="btnPlay" onclick="togglePlay()">▶ Play</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 6. Complexity + Memory Hooks -->
+  <div class="section">
+    <div class="section-title">Complexity + Memory Hooks</div>
+    <div class="complexity-grid">
+      <div class="cx-card">
+        <div class="cx-label">Time</div>
+        <div class="cx-val">O(log n)</div>
+        <div class="cx-why">Search space halves each loop iteration</div>
+      </div>
+      <div class="cx-card">
+        <div class="cx-label">Space</div>
+        <div class="cx-val">O(1)</div>
+        <div class="cx-why">Only three integer pointers</div>
+      </div>
+      <div class="cx-card">
+        <div class="cx-label">Iterations</div>
+        <div class="cx-val">⌈log₂n⌉</div>
+        <div class="cx-why">Each step eliminates half the remaining candidates</div>
+      </div>
+    </div>
+    <ul class="takeaways">
+      <li>"If mid is on an upslope, the peak is ahead. If on a downslope, it's behind."</li>
+      <li>"Binary search doesn't need a fully sorted array — just a monotone decision function."</li>
+      <li>"left == right isn't just a termination condition — it's proof that you've found a peak."</li>
+    </ul>
+  </div>
+
+</div><!-- /.page -->
+
+<script>
+// ── Examples ─────────────────────────────────────────────
+const EXAMPLES = [
+  { label: "Ex 1: [1,2,3,1]",       nums: [1, 2, 3, 1],          expected: 2 },
+  { label: "Ex 2: [1,2,1,3,5,6,4]", nums: [1, 2, 1, 3, 5, 6, 4], expected: 5 },
+  { label: "Edge: Single [1]",       nums: [1],                    expected: 0 },
+  { label: "Edge: Desc [2,1]",       nums: [2, 1],                 expected: 0 },
+  { label: "Edge: Asc [1,2]",        nums: [1, 2],                 expected: 1 },
+];
+
+// ── Step builder ──────────────────────────────────────────
+function buildSteps(nums) {
+  const steps = [];
+  const n = nums.length;
+  let left = 0, right = n - 1;
+
+  steps.push({
+    desc: `Initialize <em>left = 0</em>, <em>right = ${right}</em>. Search space spans the whole array.`,
+    log: [
+      { t: `array = [${nums.join(', ')}]`, h: false },
+      { t: `left = 0, right = ${right}`, h: true },
+    ],
+    vPhase: "init", vResult: "—",
+    left, right, mid: -1,
+    cmpA: null, cmpB: null, op: "?", dir: null, done: false,
+    activeLines: [2],
+  });
+
+  while (left < right) {
+    const mid = Math.floor((left + right) / 2);
+
+    steps.push({
+      desc: `<em>mid = ⌊(${left} + ${right}) / 2⌋ = ${mid}</em>. Compare <em>array[${mid}] = ${nums[mid]}</em> with <em>array[${mid+1}] = ${nums[mid+1]}</em>.`,
+      log: [
+        { t: `left=${left}, right=${right}  →  mid=${mid}`, h: true },
+        { t: `array[${mid}] = ${nums[mid]}  vs  array[${mid+1}] = ${nums[mid+1]}`, h: true },
+      ],
+      vPhase: "compare", vResult: "—",
+      left, right, mid,
+      cmpA: nums[mid], cmpB: nums[mid+1], op: "?", dir: null, done: false,
+      activeLines: [4, 5, 6],
+    });
+
+    if (nums[mid] > nums[mid + 1]) {
+      right = mid;
+      steps.push({
+        desc: `<em>array[${mid}] = ${nums[mid]} &gt; array[${mid+1}] = ${nums[mid+1]}</em> — descending slope. Peak is at or left of mid. Move <em>right = ${mid}</em>.`,
+        log: [
+          { t: `array[mid] > array[mid+1]  →  descending slope`, h: true },
+          { t: `right = mid = ${mid}`, h: true },
+        ],
+        vPhase: "shrink-right", vResult: "—",
+        left, right, mid,
+        cmpA: nums[mid], cmpB: nums[mid+1], op: ">", dir: "left", done: false,
+        activeLines: [6, 7],
+      });
+    } else {
+      left = mid + 1;
+      steps.push({
+        desc: `<em>array[${mid}] = ${nums[mid]} ≤ array[${mid+1}] = ${nums[mid+1]}</em> — ascending slope. Peak is strictly right of mid. Move <em>left = ${mid + 1}</em>.`,
+        log: [
+          { t: `array[mid] <= array[mid+1]  →  ascending slope`, h: true },
+          { t: `left = mid + 1 = ${mid + 1}`, h: true },
+        ],
+        vPhase: "shrink-left", vResult: "—",
+        left, right, mid,
+        cmpA: nums[mid], cmpB: nums[mid+1], op: "≤", dir: "right", done: false,
+        activeLines: [6, 8, 9],
+      });
+    }
+  }
+
+  steps.push({
+    desc: `<em>left = right = ${left}</em> — convergence. Return <em>${left}</em>. Peak value is <em>${nums[left]}</em>.`,
+    log: [
+      { t: `left == right == ${left}  →  loop exits`, h: true },
+      { t: `return ${left}  (value = ${nums[left]})`, h: true },
+    ],
+    vPhase: "done", vResult: String(left),
+    left, right, mid: left,
+    cmpA: null, cmpB: null, op: "—", dir: "found", done: true,
+    activeLines: [12],
+  });
+
+  return steps;
+}
+
+// ── State ─────────────────────────────────────────────────
+let currentEx    = 0;
+let currentSteps = [];
+let currentIdx   = 0;
+let playTimer    = null;
+
+// ── Phase → badge class ───────────────────────────────────
+const PHASE_CLASS = {
+  "init":         ["init",   "init"],
+  "compare":      ["compare","compare"],
+  "shrink-right": ["shrink", "shrink-right"],
+  "shrink-left":  ["shrink", "shrink-left"],
+  "done":         ["done",   "done"],
+};
+
+// ── Render ────────────────────────────────────────────────
+function renderStep(idx) {
+  const step = currentSteps[idx];
+  const nums = EXAMPLES[currentEx].nums;
+  const n    = nums.length;
+
+  // Step description
+  document.getElementById('stepDesc').innerHTML = step.desc;
+
+  // Phase badge
+  const badge = document.getElementById('phaseBadge');
+  badge.className = 'phase-badge ' + (PHASE_CLASS[step.vPhase]?.[0] || 'init');
+  badge.textContent = step.vPhase;
+
+  // Result
+  document.getElementById('resultVal').textContent = step.vResult;
+
+  // Variables
+  document.getElementById('vLeft').textContent  = step.left;
+  document.getElementById('vRight').textContent = step.right;
+  document.getElementById('vMid').textContent   = step.mid >= 0 ? step.mid : '—';
+
+  // Array cells
+  const row = document.getElementById('arrayRow');
+  row.innerHTML = '';
+  for (let i = 0; i < n; i++) {
+    const wrap = document.createElement('div');
+    wrap.className = 'cell-wrap';
+
+    // Cell
+    const cell = document.createElement('div');
+    cell.className = 'cell';
+    cell.textContent = nums[i];
+
+    const inRange = (i >= step.left && i <= step.right);
+
+    if (step.done && i === step.left) {
+      cell.classList.add('peak');
+    } else if (step.mid >= 0 && i === step.mid && step.vPhase === 'compare') {
+      cell.classList.add('cmp-a');
+    } else if (step.mid >= 0 && i === step.mid + 1 && step.vPhase === 'compare') {
+      cell.classList.add('cmp-b');
+    } else if (step.mid >= 0 && i === step.mid && (step.vPhase === 'shrink-right' || step.vPhase === 'shrink-left')) {
+      cell.classList.add('is-mid');
+    } else if (inRange) {
+      cell.classList.add('active');
+    } else {
+      cell.classList.add('dimmed');
+    }
+
+    // Index label
+    const idxLabel = document.createElement('div');
+    idxLabel.className = 'cell-index';
+    idxLabel.textContent = i;
+
+    // Pointer labels
+    const ptrs = document.createElement('div');
+    ptrs.className = 'cell-ptrs';
+
+    if (i === step.left) {
+      const p = document.createElement('span');
+      p.className = 'ptr L'; p.textContent = 'L';
+      ptrs.appendChild(p);
+    }
+    if (i === step.right && i !== step.left) {
+      const p = document.createElement('span');
+      p.className = 'ptr R'; p.textContent = 'R';
+      ptrs.appendChild(p);
+    }
+    if (i === step.right && i === step.left) {
+      const p = document.createElement('span');
+      p.className = 'ptr R'; p.textContent = 'L=R';
+      ptrs.appendChild(p);
+    }
+    if (step.mid >= 0 && i === step.mid && i !== step.left && i !== step.right) {
+      const p = document.createElement('span');
+      p.className = 'ptr mid'; p.textContent = 'mid';
+      ptrs.appendChild(p);
+    }
+    if (step.mid >= 0 && i === step.mid && (i === step.left || i === step.right)) {
+      const p = document.createElement('span');
+      p.className = 'ptr mid'; p.textContent = 'mid';
+      ptrs.appendChild(p);
+    }
+
+    wrap.appendChild(cell);
+    wrap.appendChild(idxLabel);
+    wrap.appendChild(ptrs);
+    row.appendChild(wrap);
+  }
+
+  document.getElementById('arrayLabel').textContent =
+    `array = [${nums.join(', ')}]  |  search space: [${step.left}..${step.right}]`;
+
+  // Comparison panel
+  if (step.cmpA !== null) {
+    document.getElementById('cmpLabelA').textContent = `array[${step.mid}]`;
+    document.getElementById('cmpLabelB').textContent = `array[${step.mid + 1}]`;
+    document.getElementById('cmpValA').textContent   = step.cmpA;
+    document.getElementById('cmpValB').textContent   = step.cmpB;
+
+    const opEl = document.getElementById('cmpOp');
+    opEl.textContent  = step.op;
+    opEl.className    = 'cmp-op ' + (step.op === '>' ? 'gt' : step.op === '≤' ? 'lte' : 'q');
+
+    const valA = document.getElementById('cmpValA');
+    const valB = document.getElementById('cmpValB');
+    valA.className = 'cmp-val ' + (step.op === '?' ? 'amber' : step.op === '>' ? 'green' : 'muted');
+    valB.className = 'cmp-val ' + (step.op === '?' ? 'orange' : step.op === '>' ? 'muted' : 'green');
+  } else {
+    document.getElementById('cmpLabelA').textContent = 'array[mid]';
+    document.getElementById('cmpLabelB').textContent = 'array[mid+1]';
+    document.getElementById('cmpValA').textContent   = '—';
+    document.getElementById('cmpValB').textContent   = '—';
+    document.getElementById('cmpOp').textContent     = step.op || '—';
+    document.getElementById('cmpOp').className       = 'cmp-op q';
+    document.getElementById('cmpValA').className     = 'cmp-val muted';
+    document.getElementById('cmpValB').className     = 'cmp-val muted';
+  }
+
+  const dirEl = document.getElementById('cmpDir');
+  if (step.dir === 'left')  { dirEl.textContent = '← Peak is left'; dirEl.className = 'cmp-direction left'; }
+  else if (step.dir === 'right') { dirEl.textContent = 'Peak is right →'; dirEl.className = 'cmp-direction right'; }
+  else if (step.dir === 'found') { dirEl.textContent = '✓ Peak found!';  dirEl.className = 'cmp-direction found'; }
+  else { dirEl.textContent = ''; dirEl.className = 'cmp-direction none'; }
+
+  // Execution log
+  const logBox = document.getElementById('logBox');
+  logBox.innerHTML = '';
+  step.log.forEach(entry => {
+    const div = document.createElement('div');
+    div.className = 'log-line' + (entry.h ? ' hl' : '');
+    div.textContent = entry.t;
+    logBox.appendChild(div);
+  });
+
+  // Code line highlight
+  document.querySelectorAll('.code-line').forEach(el => el.classList.remove('active'));
+  (step.activeLines || []).forEach(n => {
+    const el = document.querySelector(`.code-line[data-line="${n}"]`);
+    if (el) el.classList.add('active');
+  });
+
+  // Progress bar
+  const pct = currentSteps.length > 1
+    ? (idx / (currentSteps.length - 1)) * 100
+    : 100;
+  document.getElementById('progressBar').style.width = pct + '%';
+
+  // Step counter + controls
+  document.getElementById('stepCounter').textContent = `${idx + 1} / ${currentSteps.length}`;
+  document.getElementById('btnPrev').disabled = (idx === 0);
+  document.getElementById('btnNext').disabled = (idx === currentSteps.length - 1);
+}
+
+function navigate(delta) {
+  const next = currentIdx + delta;
+  if (next < 0 || next >= currentSteps.length) return;
+  currentIdx = next;
+  renderStep(currentIdx);
+}
+
+function selectExample(i) {
+  if (playTimer) { clearInterval(playTimer); playTimer = null; document.getElementById('btnPlay').textContent = '▶ Play'; }
+  currentEx    = i;
+  currentSteps = buildSteps(EXAMPLES[i].nums);
+  currentIdx   = 0;
+  document.querySelectorAll('.ex-tab').forEach((t, j) => t.classList.toggle('active', j === i));
+  renderStep(0);
+}
+
+function togglePlay() {
+  const btn = document.getElementById('btnPlay');
+  if (playTimer) {
+    clearInterval(playTimer);
+    playTimer = null;
+    btn.textContent = '▶ Play';
+  } else {
+    btn.textContent = '⏸ Pause';
+    playTimer = setInterval(() => {
+      if (currentIdx >= currentSteps.length - 1) {
+        clearInterval(playTimer); playTimer = null;
+        btn.textContent = '▶ Play';
+      } else {
+        currentIdx++;
+        renderStep(currentIdx);
+      }
+    }, 900);
+  }
+}
+
+// Keyboard navigation
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight') navigate(1);
+  if (e.key === 'ArrowLeft')  navigate(-1);
+});
+
+// Build example tabs
+const tabBar = document.getElementById('exTabs');
+EXAMPLES.forEach((ex, i) => {
+  const btn = document.createElement('button');
+  btn.className = 'ex-tab' + (i === 0 ? ' active' : '');
+  btn.textContent = ex.label;
+  btn.onclick = () => selectExample(i);
+  tabBar.appendChild(btn);
+});
+
+// Init
+selectExample(0);
+</script>
+</body>
+</html>

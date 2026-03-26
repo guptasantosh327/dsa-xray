@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>#14 · Longest Common Prefix — DSA Visualizer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Sora:wght@300;400;600;700;800&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0d0f14;--surface:#13161d;--surface2:#1a1e28;--surface3:#212638;
+  --border:rgba(255,255,255,0.07);--border-mid:rgba(255,255,255,0.12);
+  --text:#e8eaf0;--text-muted:#6b7280;--text-dim:#3d4251;
+  --accent:#7c6ef5;--green:#34d399;--amber:#fbbf24;
+  --blue:#60a5fa;--red:#f87171;--orange:#fb923c;
+  --mono:'JetBrains Mono',monospace;--sans:'Sora',sans-serif;
+}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:15px;line-height:1.6;min-height:100vh;overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;
+  background-image:linear-gradient(rgba(124,110,245,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(124,110,245,0.03) 1px,transparent 1px);
+  background-size:40px 40px;pointer-events:none;z-index:0}
+.page{position:relative;z-index:1;max-width:980px;margin:0 auto;padding:3rem 1.5rem 6rem}
+@keyframes fadeUp{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
+
+/* HEADER */
+.back-link{display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:11px;color:var(--text-muted);text-decoration:none;margin-bottom:2rem;opacity:.7;transition:opacity .2s}
+.back-link:hover{opacity:1}
+.prob-meta{display:flex;align-items:center;gap:10px;margin-bottom:.75rem;flex-wrap:wrap}
+.badge{display:inline-block;font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:3px 10px;border-radius:100px}
+.badge-easy{background:rgba(52,211,153,0.12);color:var(--green);border:1px solid rgba(52,211,153,0.25)}
+.badge-pat{background:rgba(124,110,245,0.12);color:var(--accent);border:1px solid rgba(124,110,245,0.25)}
+h1.prob-title{font-size:clamp(1.8rem,5vw,2.8rem);font-weight:800;letter-spacing:-.03em;margin-bottom:.5rem;animation:fadeUp .6s ease both}
+.prob-num{color:var(--text-dim);font-family:var(--mono)}
+
+/* SECTIONS */
+section{margin-bottom:2.75rem;animation:fadeUp .6s ease both}
+section:nth-child(2){animation-delay:.08s}
+section:nth-child(3){animation-delay:.13s}
+section:nth-child(4){animation-delay:.18s}
+section:nth-child(5){animation-delay:.23s}
+section:nth-child(6){animation-delay:.28s}
+.sec-label{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);margin-bottom:.6rem}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:1.4rem}
+
+/* PATTERN BANNER */
+.pat-banner{background:linear-gradient(135deg,rgba(124,110,245,0.08),rgba(96,165,250,0.05));border:1px solid rgba(124,110,245,0.2);border-radius:14px;padding:1.4rem}
+.pat-name{font-size:1.05rem;font-weight:700;color:var(--accent);margin-bottom:.35rem}
+.pat-why{color:var(--text-muted);font-size:13.5px;line-height:1.65;margin-bottom:.9rem}
+.related{display:flex;gap:.4rem;flex-wrap:wrap}
+.chip{font-family:var(--mono);font-size:11px;padding:3px 11px;border-radius:100px;background:var(--surface2);border:1px solid var(--border-mid);color:var(--text-muted)}
+
+/* PROBLEM */
+.ex-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:.75rem;margin-top:.9rem}
+.ex-card{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:.85rem}
+.ex-lbl{font-family:var(--mono);font-size:10px;color:var(--text-dim);letter-spacing:.1em;text-transform:uppercase;margin-bottom:.35rem}
+.ex-in{font-family:var(--mono);font-size:12px;color:var(--blue);margin-bottom:.2rem}
+.ex-out{font-family:var(--mono);font-size:12px;color:var(--green)}
+
+/* INTUITION */
+.hint-list{list-style:none;counter-reset:h;display:flex;flex-direction:column;gap:.65rem}
+.hint-list li{counter-increment:h;display:flex;gap:.7rem;font-size:13.5px;color:var(--text-muted);line-height:1.6}
+.hint-list li::before{content:counter(h);display:flex;align-items:center;justify-content:center;min-width:21px;height:21px;border-radius:50%;background:var(--surface3);border:1px solid var(--border-mid);font-family:var(--mono);font-size:11px;font-weight:700;color:var(--accent);margin-top:2px;flex-shrink:0}
+.key-trick{margin-top:.9rem;background:rgba(251,191,36,0.07);border:1px solid rgba(251,191,36,0.18);border-radius:8px;padding:.7rem 1rem;font-size:13px;color:var(--amber);line-height:1.6}
+.km{font-family:var(--mono);font-size:12px}
+
+/* CODE BLOCK */
+.code-wrap{background:#090b10;border:1px solid var(--border);border-radius:12px;overflow:hidden}
+.code-hdr{display:flex;justify-content:space-between;align-items:center;padding:.5rem 1rem;background:var(--surface);border-bottom:1px solid var(--border)}
+.code-lang{font-family:var(--mono);font-size:10px;color:var(--text-dim);letter-spacing:.1em;text-transform:uppercase}
+pre.code-body{padding:1.1rem 1.4rem;overflow-x:auto;font-family:var(--mono);font-size:13px;line-height:1.85;tab-size:2}
+.cl{display:block;padding:0 .4rem;margin:0 -.4rem;border-radius:4px;transition:background .2s;border-left:2px solid transparent}
+.cl.al{background:rgba(251,191,36,0.1);border-left-color:var(--amber)}
+.kw{color:#c792ea}.fn{color:#82aaff}.str{color:#c3e88d}.num{color:#f78c6c}
+.vr{color:#eeffff}.op{color:#89ddff}.mt{color:#ffcb6b}
+
+/* VISUALIZER */
+.viz-wrap{background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden}
+.viz-topbar{display:flex;align-items:center;justify-content:space-between;padding:.65rem 1.1rem;border-bottom:1px solid var(--border);flex-wrap:wrap;gap:.5rem}
+.ex-sel{display:flex;gap:.35rem;flex-wrap:wrap}
+.eb{font-family:var(--mono);font-size:11px;padding:4px 12px;border-radius:100px;background:var(--surface2);border:1px solid var(--border-mid);color:var(--text-muted);cursor:pointer;transition:all .18s}
+.eb.on{background:rgba(124,110,245,0.15);color:var(--accent);border-color:rgba(124,110,245,0.35)}
+.res-badge{font-family:var(--mono);font-size:12px;padding:4px 14px;border-radius:100px;background:var(--surface2);border:1px solid var(--border-mid);color:var(--text-muted);transition:all .3s}
+.res-badge.show{background:rgba(52,211,153,0.12);color:var(--green);border-color:rgba(52,211,153,0.3)}
+.prog-track{height:3px;background:var(--surface2)}
+.prog-fill{height:100%;background:linear-gradient(90deg,var(--amber),var(--orange));transition:width .3s ease;border-radius:0 3px 3px 0}
+
+/* Viz body layout */
+.viz-body{display:grid;grid-template-columns:1fr 240px;min-height:360px}
+@media(max-width:660px){.viz-body{grid-template-columns:1fr}}
+.viz-left{padding:1.1rem;border-right:1px solid var(--border)}
+.viz-right{padding:1.1rem;display:flex;flex-direction:column;gap:.6rem}
+.viz-sub-lbl{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--text-dim);margin-bottom:.55rem}
+
+/* Prefix display */
+.pref-display{margin-bottom:1.1rem}
+.pref-row{display:flex;gap:4px;flex-wrap:wrap;align-items:center}
+.pc{width:36px;height:36px;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:14px;font-weight:700;border-radius:8px;border:2px solid;transition:all .22s}
+.pc.am{background:rgba(251,191,36,0.14);border-color:var(--amber);color:var(--amber)}
+.pc.emp{background:rgba(248,113,113,0.1);border-color:rgba(248,113,113,0.3);color:var(--red);font-size:13px}
+.pl-badge{margin-left:6px;font-family:var(--mono);font-size:11px;color:var(--text-dim);padding:2px 10px;background:var(--surface2);border:1px solid var(--border);border-radius:100px;white-space:nowrap}
+
+/* Strings grid */
+.sg{display:flex;flex-direction:column;gap:7px}
+.sr{display:flex;align-items:center;gap:6px;transition:all .2s}
+.sr-lbl{font-family:var(--mono);font-size:10px;color:var(--text-dim);min-width:55px;text-align:right;flex-shrink:0}
+.sr.act .sr-lbl{color:var(--amber)}
+.sc-row{display:flex;gap:3px;flex-wrap:wrap}
+.sc{width:33px;height:33px;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:13px;font-weight:600;border-radius:7px;border:1.5px solid;transition:all .22s}
+/* cell states */
+.sc.dim  {background:rgba(61,66,81,0.15);border-color:rgba(61,66,81,0.25);color:var(--text-dim)}
+.sc.neu  {background:rgba(96,165,250,0.07);border-color:rgba(96,165,250,0.18);color:var(--blue)}
+.sc.ok   {background:rgba(52,211,153,0.12);border-color:rgba(52,211,153,0.3);color:var(--green)}
+.sc.bad  {background:rgba(248,113,113,0.12);border-color:rgba(248,113,113,0.3);color:var(--red)}
+.sc.done {background:rgba(52,211,153,0.06);border-color:rgba(52,211,153,0.12);color:rgba(52,211,153,0.5)}
+/* active row overrides neutral to amber */
+.sr.act .sc.neu{background:rgba(251,191,36,0.09);border-color:rgba(251,191,36,0.28);color:var(--amber)}
+.act-ind{font-family:var(--mono);font-size:10px;color:var(--amber);margin-left:5px;white-space:nowrap}
+
+/* Variables panel */
+.var-rows{display:flex;flex-direction:column;gap:5px}
+.var-r{display:flex;justify-content:space-between;align-items:center;padding:.4rem .65rem;background:var(--surface2);border-radius:7px;border:1px solid var(--border)}
+.vn{font-family:var(--mono);font-size:11px;color:var(--text-dim)}
+.vv{font-family:var(--mono);font-size:12px;font-weight:700;color:var(--text);max-width:130px;text-align:right;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.phase-box{padding:.45rem .65rem;background:var(--surface2);border-radius:7px;border:1px solid var(--border)}
+.ph-lbl{font-family:var(--mono);font-size:10px;color:var(--text-dim);margin-bottom:2px}
+.ph-val{font-family:var(--mono);font-size:12px;font-weight:700}
+.ph-init{color:var(--blue)}.ph-compare{color:var(--accent)}
+.ph-shrink{color:var(--red)}.ph-match{color:var(--green)}.ph-done{color:var(--amber)}
+
+/* Step desc + log */
+.step-desc-bar{padding:.65rem 1.1rem;border-top:1px solid var(--border);border-bottom:1px solid var(--border);background:var(--surface2)}
+.sd{font-size:13px;color:var(--text-muted);line-height:1.65}
+.sd em{color:var(--text);font-style:normal;font-weight:600;font-family:var(--mono)}
+.exec-log{padding:.65rem 1.1rem;max-height:90px;overflow-y:auto}
+.elt{font-family:var(--mono);font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--text-dim);margin-bottom:.35rem}
+.ll{font-family:var(--mono);font-size:11px;color:var(--text-dim);padding:1px 0;display:flex;gap:5px}
+.ll::before{content:'›';color:var(--text-dim);flex-shrink:0}
+.ll.lh{color:var(--text-muted)}.ll.lh::before{content:'▶';color:var(--accent)}
+
+/* Controls */
+.ctrl-bar{display:flex;align-items:center;justify-content:center;gap:.65rem;padding:.65rem 1.1rem;border-top:1px solid var(--border);flex-wrap:wrap}
+.cb{display:flex;align-items:center;gap:5px;font-family:var(--mono);font-size:12px;padding:6px 16px;border-radius:8px;background:var(--surface2);border:1px solid var(--border-mid);color:var(--text-muted);cursor:pointer;transition:all .18s}
+.cb:hover{background:var(--surface3);color:var(--text)}
+.cb.pri{background:rgba(124,110,245,0.14);color:var(--accent);border-color:rgba(124,110,245,0.3)}
+.cb.pri:hover{background:rgba(124,110,245,0.22)}
+.cb:disabled{opacity:.3;cursor:not-allowed}
+.sc-ctr{font-family:var(--mono);font-size:11px;color:var(--text-dim);min-width:60px;text-align:center}
+
+/* COMPLEXITY */
+.cx-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:.9rem}
+.cx-c{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:.9rem;text-align:center}
+.cx-lbl{font-family:var(--mono);font-size:10px;color:var(--text-dim);text-transform:uppercase;letter-spacing:.1em;margin-bottom:.35rem}
+.cx-v{font-family:var(--mono);font-size:1.35rem;font-weight:700;color:var(--accent)}
+.cx-n{font-size:12px;color:var(--text-dim);margin-top:.25rem}
+.tks{margin-top:.9rem;display:flex;flex-direction:column;gap:.45rem}
+.tk{padding:.55rem .9rem;background:var(--surface2);border-left:3px solid var(--accent);border-radius:0 8px 8px 0;font-size:13px;color:var(--text-muted);line-height:1.55}
+.tk code{font-family:var(--mono);font-size:12px;color:var(--text);background:var(--surface3);padding:1px 5px;border-radius:4px}
+</style>
+</head>
+<body>
+<div class="page">
+
+<a href="../index.html" class="back-link">← back to hub</a>
+
+<!-- HEADER -->
+<div class="prob-meta">
+  <span class="badge badge-easy">Easy</span>
+  <span class="badge badge-pat">Iterative Prefix Shrinking</span>
+</div>
+<h1 class="prob-title"><span class="prob-num">#14 · </span>Longest Common Prefix</h1>
+
+<!-- 1. PATTERN BANNER -->
+<section>
+  <div class="sec-label">Pattern</div>
+  <div class="pat-banner">
+    <div class="pat-name">Iterative Prefix Shrinking</div>
+    <div class="pat-why">Start with the first string as the longest possible prefix candidate. For each subsequent string, aggressively trim the prefix until it fits — or until nothing remains. Key insight: once a character is eliminated from the prefix, it can never come back. The prefix is monotonically shrinking.</div>
+    <div class="related">
+      <span class="chip">#58 Length of Last Word</span>
+      <span class="chip">#28 Find Index of First Occurrence</span>
+      <span class="chip">#1143 Longest Common Subsequence</span>
+    </div>
+  </div>
+</section>
+
+<!-- 2. PROBLEM STATEMENT -->
+<section>
+  <div class="sec-label">Problem</div>
+  <div class="card">
+    <p style="color:var(--text-muted);font-size:14px;margin-bottom:.85rem">Find the longest common prefix string among an array of strings. If there is no common prefix, return <code style="font-family:var(--mono);color:var(--amber);font-size:13px">""</code>.</p>
+    <p style="color:var(--text-muted);font-size:14px;margin-bottom:.85rem"><strong style="color:var(--text)">Analogy:</strong> Imagine sorting words in a dictionary. If you open to the "fl" tab, every word there starts with "fl". You are looking for the deepest tab where all your input words appear together.</p>
+    <div class="ex-row">
+      <div class="ex-card">
+        <div class="ex-lbl">Example 1</div>
+        <div class="ex-in">["flower","flow","flight"]</div>
+        <div class="ex-out">→ "fl"</div>
+      </div>
+      <div class="ex-card">
+        <div class="ex-lbl">Example 2</div>
+        <div class="ex-in">["dog","racecar","car"]</div>
+        <div class="ex-out">→ "" (none)</div>
+      </div>
+      <div class="ex-card">
+        <div class="ex-lbl">Example 3</div>
+        <div class="ex-in">["interview","inter","internal"]</div>
+        <div class="ex-out">→ "inter"</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 3. INTUITION -->
+<section>
+  <div class="sec-label">Intuition &amp; Hints</div>
+  <div class="card">
+    <ul class="hint-list">
+      <li><strong style="color:var(--text)">Brute force:</strong> Pick every character position, check if all strings share it — O(S) where S = total chars. Requires careful bounds checking per string.</li>
+      <li><strong style="color:var(--text)">Smarter seed:</strong> The first string is the most optimistic prefix guess. Every other string can only make it shorter, never longer.</li>
+      <li><strong style="color:var(--text)">Shrink loop:</strong> For each string, check if the current <code class="km">pref</code> matches its start via <code class="km">str.substring(0, prefLength)</code>. If not, chop one character and retry. JavaScript safely handles strings shorter than <code class="km">prefLength</code> by returning the whole string — forcing a mismatch and a shrink.</li>
+      <li><strong style="color:var(--text)">Early exit:</strong> If <code class="km">prefLength</code> reaches 0, return <code class="km">""</code> immediately — no common prefix exists.</li>
+    </ul>
+    <div class="key-trick">
+      ✦ Key trick: the while loop does not loop over characters one-by-one — it compares the entire prefix string at once using <code class="km">!==</code>. Each iteration removes exactly one character from the end of <code class="km">pref</code>. Worst case per string = O(m) shrinks where m = initial prefix length.
+    </div>
+  </div>
+</section>
+
+<!-- 4. CODE BLOCK -->
+<section>
+  <div class="sec-label">Solution Code</div>
+  <div class="code-wrap">
+    <div class="code-hdr">
+      <span class="code-lang">javascript</span>
+      <span style="font-family:var(--mono);font-size:10px;color:var(--text-dim)">your solution — exact</span>
+    </div>
+    <pre class="code-body"><span id="cl1"  class="cl"><span class="kw">var</span> <span class="fn">longestCommonPrefix</span> <span class="op">=</span> <span class="kw">function</span>(<span class="vr">strs</span>) {</span>
+<span id="cl2"  class="cl">    <span class="kw">let</span> <span class="vr">prefLength</span> <span class="op">=</span> <span class="vr">strs</span>[<span class="num">0</span>].<span class="mt">length</span>;</span>
+<span id="cl3"  class="cl">    <span class="kw">let</span> <span class="vr">pref</span> <span class="op">=</span> <span class="vr">strs</span>[<span class="num">0</span>]</span>
+<span id="cl4"  class="cl"> </span>
+<span id="cl5"  class="cl">    <span class="kw">for</span>(<span class="kw">let</span> <span class="vr">i</span> <span class="op">=</span> <span class="num">1</span>;  <span class="vr">i</span> <span class="op">&lt;</span> <span class="vr">strs</span>.<span class="mt">length</span>; <span class="vr">i</span><span class="op">++</span>){</span>
+<span id="cl6"  class="cl">        <span class="kw">let</span> <span class="vr">str</span> <span class="op">=</span> <span class="vr">strs</span>[<span class="vr">i</span>]</span>
+<span id="cl7"  class="cl">        <span class="kw">while</span>(<span class="vr">pref</span> <span class="op">!==</span> <span class="vr">str</span>.<span class="mt">substring</span>(<span class="num">0</span>, <span class="vr">prefLength</span>)) {</span>
+<span id="cl8"  class="cl">            <span class="vr">prefLength</span><span class="op">--</span>;</span>
+<span id="cl9"  class="cl">            <span class="kw">if</span>(<span class="vr">prefLength</span> <span class="op">==</span> <span class="num">0</span> ) <span class="kw">return</span> <span class="str">''</span></span>
+<span id="cl10" class="cl">            <span class="vr">pref</span> <span class="op">=</span> <span class="vr">pref</span>.<span class="mt">substring</span>(<span class="num">0</span>, <span class="vr">prefLength</span>)</span>
+<span id="cl11" class="cl">        }</span>
+<span id="cl12" class="cl">    }</span>
+<span id="cl13" class="cl">    <span class="kw">return</span> <span class="vr">pref</span></span>
+<span id="cl14" class="cl">};</span></pre>
+  </div>
+</section>
+
+<!-- 5. VISUALIZER -->
+<section>
+  <div class="sec-label">Interactive Visualizer</div>
+  <div class="viz-wrap">
+    <div class="viz-topbar">
+      <div class="ex-sel" id="exSel"></div>
+      <div class="res-badge" id="resBadge">result: —</div>
+    </div>
+    <div class="prog-track"><div class="prog-fill" id="progFill" style="width:0%"></div></div>
+    <div class="viz-body">
+      <!-- LEFT -->
+      <div class="viz-left">
+        <div class="pref-display">
+          <div class="viz-sub-lbl">current prefix (pref)</div>
+          <div class="pref-row" id="prefRow"></div>
+        </div>
+        <div class="viz-sub-lbl">input strings</div>
+        <div class="sg" id="strGrid"></div>
+      </div>
+      <!-- RIGHT -->
+      <div class="viz-right">
+        <div>
+          <div class="viz-sub-lbl">variables</div>
+          <div class="var-rows">
+            <div class="var-r"><span class="vn">prefLength</span><span class="vv" id="vPL">—</span></div>
+            <div class="var-r"><span class="vn">pref</span><span class="vv" id="vP">—</span></div>
+            <div class="var-r"><span class="vn">i</span><span class="vv" id="vI">—</span></div>
+            <div class="var-r"><span class="vn">str</span><span class="vv" id="vS">—</span></div>
+          </div>
+        </div>
+        <div class="phase-box">
+          <div class="ph-lbl">phase</div>
+          <div class="ph-val" id="phVal">—</div>
+        </div>
+      </div>
+    </div>
+    <div class="step-desc-bar">
+      <div class="sd" id="stepDesc">Press Next or ▶ Play to step through the algorithm.</div>
+    </div>
+    <div class="exec-log">
+      <div class="elt">execution log</div>
+      <div id="execLog"></div>
+    </div>
+    <div class="ctrl-bar">
+      <button class="cb" id="btnPrev" onclick="prevStep()" disabled>← Prev</button>
+      <button class="cb pri" id="btnPlay" onclick="togglePlay()">▶ Play</button>
+      <span class="sc-ctr" id="stpCtr">0 / 0</span>
+      <button class="cb" id="btnNext" onclick="nextStep()">Next →</button>
+    </div>
+  </div>
+</section>
+
+<!-- 6. COMPLEXITY -->
+<section>
+  <div class="sec-label">Complexity</div>
+  <div class="cx-grid">
+    <div class="cx-c">
+      <div class="cx-lbl">Time</div>
+      <div class="cx-v">O(S)</div>
+      <div class="cx-n">S = total characters across all strings</div>
+    </div>
+    <div class="cx-c">
+      <div class="cx-lbl">Space</div>
+      <div class="cx-v">O(1)</div>
+      <div class="cx-n">Only two scalar variables — no extra structures</div>
+    </div>
+    <div class="cx-c">
+      <div class="cx-lbl">Max shrinks</div>
+      <div class="cx-v">O(m·n)</div>
+      <div class="cx-n">m = shortest string length, n = # strings</div>
+    </div>
+  </div>
+  <div class="tks">
+    <div class="tk">The prefix can only <strong>shrink</strong> — once a character is removed it never returns. Total work across the whole algorithm ≤ sum of all character comparisons ≤ S.</div>
+    <div class="tk"><code>str.substring(0, prefLength)</code> gracefully handles strings shorter than <code>prefLength</code> — it just returns the full string, which forces a mismatch and a shrink automatically.</div>
+    <div class="tk">Start optimistic (full first string), trim lazily on demand. This greedy approach avoids scanning every character of every string.</div>
+  </div>
+</section>
+
+</div><!-- /page -->
+
+<script>
+// ─── STEP ENGINE ───────────────────────────────────────────────────────────
+
+function computeSteps(strs) {
+  const steps = [];
+  let prefLength = strs[0].length;
+  let pref = strs[0];
+
+  steps.push({
+    desc: `Initialize — <em>pref</em> = strs[0] = <em>"${pref}"</em>, <em>prefLength</em> = ${prefLength}`,
+    log: [{t:`pref = strs[0] = "${pref}"`,h:true},{t:`prefLength = strs[0].length = ${prefLength}`,h:false}],
+    phase:'init', pref, prefLength, activeI:0, str:null,
+    lines:[2,3], vResult:'—'
+  });
+
+  for (let i = 1; i < strs.length; i++) {
+    const str = strs[i];
+
+    steps.push({
+      desc: `i = ${i}: pick <em>str</em> = <em>"${str}"</em> — evaluate while condition`,
+      log: [{t:`str = strs[${i}] = "${str}"`,h:true},{t:`while: "${pref}" vs "${str.substring(0,prefLength)}"`}],
+      phase:'compare', pref, prefLength, activeI:i, str,
+      lines:[5,6,7], vResult:'—'
+    });
+
+    while (pref !== str.substring(0, prefLength)) {
+      const oldPref = pref;
+      const oldPL   = prefLength;
+      prefLength--;
+
+      if (prefLength === 0) {
+        steps.push({
+          desc: `<em>prefLength</em> reached 0 → <em>return ""</em> — no common prefix exists`,
+          log: [{t:`prefLength-- = 0`,h:true},{t:`prefLength == 0 → return ""`}],
+          phase:'done', pref:'', prefLength:0, activeI:i, str,
+          lines:[8,9], vResult:'""'
+        });
+        return steps;
+      }
+      pref = pref.substring(0, prefLength);
+
+      steps.push({
+        desc: `Mismatch: <em>"${oldPref}"</em> ≠ <em>"${str}".substring(0,${oldPL})</em> → shrink to <em>prefLength</em> = ${prefLength}, <em>pref</em> = <em>"${pref}"</em>`,
+        log: [
+          {t:`"${oldPref}" ≠ "${str.substring(0,oldPL)}" → shrink`,h:true},
+          {t:`prefLength-- = ${prefLength}`,h:true},
+          {t:`pref = pref.substring(0,${prefLength}) = "${pref}"`}
+        ],
+        phase:'shrink', pref, prefLength, activeI:i, str,
+        lines:[7,8,10], vResult:'—'
+      });
+    }
+
+    steps.push({
+      desc: `While exits ✓ — <em>"${pref}"</em> === <em>"${str}".substring(0,${prefLength})</em> — move to next string`,
+      log: [{t:`"${pref}" === "${str.substring(0,prefLength)}" ✓`,h:true}],
+      phase:'match', pref, prefLength, activeI:i, str,
+      lines:[7], vResult:'—'
+    });
+  }
+
+  steps.push({
+    desc: `Loop complete — <em>return</em> <em>"${pref}"</em>`,
+    log: [{t:`return "${pref}"`,h:true}],
+    phase:'done', pref, prefLength, activeI:-1, str:null,
+    lines:[13], vResult: pref === '' ? '""' : `"${pref}"`
+  });
+
+  return steps;
+}
+
+// ─── EXAMPLES ──────────────────────────────────────────────────────────────
+
+const EXAMPLES = [
+  { label:'Ex 1', strs:['flower','flow','flight'] },
+  { label:'Ex 2', strs:['dog','racecar','car']    },
+  { label:'Ex 3', strs:['interview','inter','internal','interest'] },
+  { label:'Ex 4', strs:['a']                       },
+  { label:'Ex 5', strs:['ab','a']                  },
+];
+
+// ─── STATE ─────────────────────────────────────────────────────────────────
+
+let exIdx   = 0;
+let stepIdx = 0;
+let steps   = [];
+let playing = false;
+let playTimer = null;
+
+// ─── INIT ───────────────────────────────────────────────────────────────────
+
+(function init() {
+  const sel = document.getElementById('exSel');
+  sel.innerHTML = EXAMPLES.map((e,i) =>
+    `<button class="eb${i===0?' on':''}" onclick="loadEx(${i})">${e.label}</button>`
+  ).join('');
+  loadEx(0);
+})();
+
+function loadEx(idx) {
+  stopPlay();
+  exIdx   = idx;
+  stepIdx = 0;
+  steps   = computeSteps(EXAMPLES[idx].strs);
+  document.querySelectorAll('.eb').forEach((b,i) => b.classList.toggle('on', i===idx));
+  render(steps[0]);
+  updateCtrl();
+}
+
+// ─── RENDER ─────────────────────────────────────────────────────────────────
+
+function render(s) {
+  const strs = EXAMPLES[exIdx].strs;
+
+  // ── Prefix banner ────────────────────────────────────────────────
+  const pr = document.getElementById('prefRow');
+  if (!s.pref) {
+    pr.innerHTML = `<span class="pc emp">∅</span><span class="pl-badge">prefLength = 0</span>`;
+  } else {
+    pr.innerHTML = s.pref.split('').map(c => `<span class="pc am">${c}</span>`).join('')
+      + `<span class="pl-badge">prefLength = ${s.prefLength}</span>`;
+  }
+
+  // ── Strings grid ─────────────────────────────────────────────────
+  document.getElementById('strGrid').innerHTML = strs.map((str, ri) => {
+    const isAct  = ri === s.activeI;
+    const isDone = ri < s.activeI || (s.phase === 'done' && s.activeI === -1);
+
+    const cells = str.split('').map((ch, j) => {
+      let cls;
+      if (j >= s.prefLength) {
+        cls = 'dim';
+      } else if (isAct) {
+        if (s.phase === 'compare' || s.phase === 'shrink') {
+          // per-char comparison against current pref
+          cls = (j < s.pref.length && ch === s.pref[j]) ? 'ok' : 'bad';
+        } else if (s.phase === 'match') {
+          cls = 'ok';
+        } else {
+          cls = 'neu'; // init phase: source row
+        }
+      } else if (isDone) {
+        cls = 'done';
+      } else {
+        cls = 'neu'; // not yet visited
+      }
+      return `<span class="sc ${cls}">${ch}</span>`;
+    }).join('');
+
+    const ind = isAct ? `<span class="act-ind">← i=${s.activeI}</span>` : '';
+    return `<div class="sr${isAct?' act':''}">
+      <span class="sr-lbl">strs[${ri}]</span>
+      <div class="sc-row">${cells}</div>${ind}
+    </div>`;
+  }).join('');
+
+  // ── Variables ────────────────────────────────────────────────────
+  document.getElementById('vPL').textContent = s.prefLength;
+  document.getElementById('vP').textContent  = `"${s.pref}"`;
+  document.getElementById('vI').textContent  = s.activeI >= 0 ? s.activeI : '—';
+  document.getElementById('vS').textContent  = s.str !== null ? `"${s.str}"` : '—';
+
+  const phEl = document.getElementById('phVal');
+  phEl.className = `ph-val ph-${s.phase}`;
+  phEl.textContent = {init:'initialize',compare:'compare',shrink:'shrink ↓',match:'match ✓',done:'done'}[s.phase] || s.phase;
+
+  // ── Code highlight ────────────────────────────────────────────────
+  for (let n = 1; n <= 14; n++) {
+    const el = document.getElementById(`cl${n}`);
+    if (el) el.classList.remove('al');
+  }
+  (s.lines || []).forEach(n => {
+    const el = document.getElementById(`cl${n}`);
+    if (el) el.classList.add('al');
+  });
+
+  // ── Description ──────────────────────────────────────────────────
+  document.getElementById('stepDesc').innerHTML = s.desc;
+
+  // ── Log ──────────────────────────────────────────────────────────
+  document.getElementById('execLog').innerHTML =
+    (s.log || []).map(l => `<div class="ll${l.h?' lh':''}">${l.t}</div>`).join('');
+
+  // ── Result badge ─────────────────────────────────────────────────
+  const rb = document.getElementById('resBadge');
+  if (s.phase === 'done') {
+    rb.textContent = `result: ${s.vResult}`;
+    rb.classList.add('show');
+  } else {
+    rb.textContent = 'result: —';
+    rb.classList.remove('show');
+  }
+
+  // ── Progress ─────────────────────────────────────────────────────
+  const pct = steps.length > 1 ? (stepIdx / (steps.length - 1)) * 100 : 0;
+  document.getElementById('progFill').style.width = pct + '%';
+  document.getElementById('stpCtr').textContent   = `${stepIdx + 1} / ${steps.length}`;
+}
+
+// ─── CONTROLS ───────────────────────────────────────────────────────────────
+
+function nextStep() {
+  if (stepIdx < steps.length - 1) { stepIdx++; render(steps[stepIdx]); updateCtrl(); }
+  else stopPlay();
+}
+
+function prevStep() {
+  if (stepIdx > 0) { stepIdx--; render(steps[stepIdx]); updateCtrl(); }
+}
+
+function updateCtrl() {
+  document.getElementById('btnPrev').disabled = stepIdx === 0;
+  document.getElementById('btnNext').disabled = stepIdx === steps.length - 1;
+}
+
+function togglePlay() { playing ? stopPlay() : startPlay(); }
+
+function startPlay() {
+  playing = true;
+  document.getElementById('btnPlay').textContent = '⏸ Pause';
+  playTimer = setInterval(() => {
+    if (stepIdx < steps.length - 1) { stepIdx++; render(steps[stepIdx]); updateCtrl(); }
+    else stopPlay();
+  }, 950);
+}
+
+function stopPlay() {
+  playing = false;
+  clearInterval(playTimer);
+  const b = document.getElementById('btnPlay');
+  if (b) b.textContent = '▶ Play';
+}
+
+// ─── KEYBOARD ───────────────────────────────────────────────────────────────
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight' || e.key === 'ArrowDown') { e.preventDefault(); nextStep(); }
+  if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp')   { e.preventDefault(); prevStep(); }
+  if (e.key === ' ') { e.preventDefault(); togglePlay(); }
+});
+</script>
+</body>
+</html>

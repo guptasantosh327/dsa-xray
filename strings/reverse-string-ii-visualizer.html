@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>#541 · Reverse String II — DSA Visualizer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Sora:wght@300;400;600;700;800&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0d0f14;--surface:#13161d;--surface2:#1a1e28;--surface3:#212638;
+  --border:rgba(255,255,255,0.07);--border-mid:rgba(255,255,255,0.12);
+  --text:#e8eaf0;--text-muted:#6b7280;--text-dim:#3d4251;
+  --accent:#7c6ef5;--green:#34d399;--amber:#fbbf24;
+  --blue:#60a5fa;--red:#f87171;--orange:#fb923c;
+  --mono:'JetBrains Mono',monospace;--sans:'Sora',sans-serif;
+}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:15px;line-height:1.6;min-height:100vh;overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;
+  background-image:linear-gradient(rgba(244,114,182,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(244,114,182,0.03) 1px,transparent 1px);
+  background-size:40px 40px;pointer-events:none;z-index:0}
+.page{position:relative;z-index:1;max-width:980px;margin:0 auto;padding:3rem 1.5rem 6rem}
+@keyframes fadeUp{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
+
+/* HEADER */
+.back-link{display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:11px;color:var(--text-muted);text-decoration:none;margin-bottom:2rem;opacity:.7;transition:opacity .2s}
+.back-link:hover{opacity:1}
+.prob-meta{display:flex;align-items:center;gap:10px;margin-bottom:.75rem;flex-wrap:wrap}
+.badge{display:inline-block;font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:3px 10px;border-radius:100px}
+.badge-easy{background:rgba(52,211,153,0.12);color:var(--green);border:1px solid rgba(52,211,153,0.25)}
+.badge-pat{background:rgba(244,114,182,0.12);color:#f472b6;border:1px solid rgba(244,114,182,0.25)}
+h1.prob-title{font-size:clamp(1.8rem,5vw,2.8rem);font-weight:800;letter-spacing:-.03em;margin-bottom:.5rem;animation:fadeUp .6s ease both}
+.prob-num{color:var(--text-dim);font-family:var(--mono)}
+
+/* SECTIONS */
+section{margin-bottom:2.75rem;animation:fadeUp .6s ease both}
+section:nth-child(2){animation-delay:.08s}
+section:nth-child(3){animation-delay:.13s}
+section:nth-child(4){animation-delay:.18s}
+section:nth-child(5){animation-delay:.23s}
+section:nth-child(6){animation-delay:.28s}
+.sec-label{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:#f472b6;margin-bottom:.6rem}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:1.4rem}
+
+/* PATTERN BANNER */
+.pat-banner{background:linear-gradient(135deg,rgba(244,114,182,0.08),rgba(96,165,250,0.05));border:1px solid rgba(244,114,182,0.2);border-radius:14px;padding:1.4rem}
+.pat-name{font-size:1.05rem;font-weight:700;color:#f472b6;margin-bottom:.35rem}
+.pat-why{color:var(--text-muted);font-size:13.5px;line-height:1.65;margin-bottom:.9rem}
+.related{display:flex;gap:.4rem;flex-wrap:wrap}
+.chip{font-family:var(--mono);font-size:11px;padding:3px 11px;border-radius:100px;background:var(--surface2);border:1px solid var(--border-mid);color:var(--text-muted)}
+
+/* PROBLEM */
+.ex-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:.75rem;margin-top:.9rem}
+.ex-card{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:.85rem}
+.ex-lbl{font-family:var(--mono);font-size:10px;color:var(--text-dim);letter-spacing:.1em;text-transform:uppercase;margin-bottom:.35rem}
+.ex-in{font-family:var(--mono);font-size:12px;color:var(--blue);margin-bottom:.2rem}
+.ex-out{font-family:var(--mono);font-size:12px;color:var(--green)}
+
+/* INTUITION */
+.hint-list{list-style:none;counter-reset:h;display:flex;flex-direction:column;gap:.65rem}
+.hint-list li{counter-increment:h;display:flex;gap:.7rem;font-size:13.5px;color:var(--text-muted);line-height:1.6}
+.hint-list li::before{content:counter(h);display:flex;align-items:center;justify-content:center;min-width:21px;height:21px;border-radius:50%;background:var(--surface3);border:1px solid var(--border-mid);font-family:var(--mono);font-size:11px;font-weight:700;color:#f472b6;margin-top:2px;flex-shrink:0}
+.key-trick{margin-top:.9rem;background:rgba(251,191,36,0.07);border:1px solid rgba(251,191,36,0.18);border-radius:8px;padding:.7rem 1rem;font-size:13px;color:var(--amber);line-height:1.6}
+.km{font-family:var(--mono);font-size:12px}
+
+/* CODE BLOCK */
+.code-wrap{background:#090b10;border:1px solid var(--border);border-radius:12px;overflow:hidden}
+.code-hdr{display:flex;justify-content:space-between;align-items:center;padding:.5rem 1rem;background:var(--surface);border-bottom:1px solid var(--border)}
+.code-lang{font-family:var(--mono);font-size:10px;color:var(--text-dim);letter-spacing:.1em;text-transform:uppercase}
+pre.code-body{padding:1.1rem 1.4rem;overflow-x:auto;font-family:var(--mono);font-size:13px;line-height:1.85;tab-size:4}
+.cl{display:block;padding:0 .4rem;margin:0 -.4rem;border-radius:4px;transition:background .2s;border-left:2px solid transparent}
+.cl.al{background:rgba(251,191,36,0.1);border-left-color:var(--amber)}
+.kw{color:#c792ea}.fn{color:#82aaff}.str{color:#c3e88d}.num{color:#f78c6c}
+.vr{color:#eeffff}.op{color:#89ddff}.mt{color:#ffcb6b}
+
+/* VISUALIZER */
+.viz-wrap{background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden}
+.viz-topbar{display:flex;align-items:center;justify-content:space-between;padding:.65rem 1.1rem;border-bottom:1px solid var(--border);flex-wrap:wrap;gap:.5rem}
+.ex-sel{display:flex;gap:.35rem;flex-wrap:wrap}
+.eb{font-family:var(--mono);font-size:11px;padding:4px 12px;border-radius:100px;background:var(--surface2);border:1px solid var(--border-mid);color:var(--text-muted);cursor:pointer;transition:all .18s}
+.eb.on{background:rgba(244,114,182,0.15);color:#f472b6;border-color:rgba(244,114,182,0.35)}
+.res-badge{font-family:var(--mono);font-size:12px;padding:4px 14px;border-radius:100px;background:var(--surface2);border:1px solid var(--border-mid);color:var(--text-muted);transition:all .3s}
+.res-badge.show{background:rgba(52,211,153,0.12);color:var(--green);border-color:rgba(52,211,153,0.3)}
+.prog-track{height:3px;background:var(--surface2)}
+.prog-fill{height:100%;background:linear-gradient(90deg,var(--amber),var(--orange));transition:width .3s ease;border-radius:0 3px 3px 0}
+
+/* Viz body layout */
+.viz-body{display:grid;grid-template-columns:1fr 260px;min-height:360px}
+@media(max-width:768px){.viz-body{grid-template-columns:1fr}}
+.viz-left{padding:1.4rem;border-right:1px solid var(--border)}
+.viz-right{padding:1.4rem;display:flex;flex-direction:column;gap:.8rem}
+.viz-sub-lbl{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--text-dim);margin-bottom:.65rem}
+
+/* Array/Cells display */
+.cell-row{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:1.5rem}
+.sc{width:36px;height:36px;display:inline-flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:14px;font-weight:700;border-radius:8px;border:1.5px solid;transition:all .22s}
+.sc.dim {background:rgba(61,66,81,0.15);border-color:rgba(61,66,81,0.25);color:var(--text-dim)}
+.sc.neu {background:rgba(96,165,250,0.07);border-color:rgba(96,165,250,0.2);color:var(--blue)}
+.sc.act {background:rgba(251,191,36,0.12);border-color:var(--amber);color:var(--amber);box-shadow:0 0 10px rgba(251,191,36,0.2);transform:translateY(-2px)}
+.sc.done{background:rgba(52,211,153,0.08);border-color:rgba(52,211,153,0.25);color:var(--green)}
+
+/* Variables panel */
+.var-rows{display:flex;flex-direction:column;gap:5px}
+.var-r{display:flex;justify-content:space-between;align-items:center;padding:.4rem .65rem;background:var(--surface2);border-radius:7px;border:1px solid var(--border)}
+.vn{font-family:var(--mono);font-size:11px;color:var(--text-dim)}
+.vv{font-family:var(--mono);font-size:12px;font-weight:700;color:var(--text);max-width:130px;text-align:right;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.vv.b{color:var(--blue)} .vv.c{color:var(--accent)} .vv.g{color:var(--green)}
+.phase-box{padding:.45rem .65rem;background:var(--surface2);border-radius:7px;border:1px solid var(--border)}
+.ph-lbl{font-family:var(--mono);font-size:10px;color:var(--text-dim);margin-bottom:2px}
+.ph-val{font-family:var(--mono);font-size:12px;font-weight:700;text-transform:capitalize}
+
+/* Step desc + log */
+.step-desc-bar{padding:.65rem 1.1rem;border-top:1px solid var(--border);border-bottom:1px solid var(--border);background:var(--surface2)}
+.sd{font-size:13px;color:var(--text-muted);line-height:1.65;min-height:43px}
+.sd em{color:var(--text);font-style:normal;font-weight:600;font-family:var(--mono)}
+.exec-log{padding:.65rem 1.1rem;max-height:120px;overflow-y:auto}
+.elt{font-family:var(--mono);font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--text-dim);margin-bottom:.35rem}
+.ll{font-family:var(--mono);font-size:11px;color:var(--text-dim);padding:1px 0;display:flex;gap:5px}
+.ll::before{content:'›';color:var(--text-dim);flex-shrink:0}
+.ll.lh{color:var(--text-muted)}.ll.lh::before{content:'▶';color:#f472b6}
+
+/* Controls */
+.ctrl-bar{display:flex;align-items:center;justify-content:center;gap:.65rem;padding:.65rem 1.1rem;border-top:1px solid var(--border);flex-wrap:wrap}
+.cb{display:flex;align-items:center;gap:5px;font-family:var(--mono);font-size:12px;padding:6px 16px;border-radius:8px;background:var(--surface2);border:1px solid var(--border-mid);color:var(--text-muted);cursor:pointer;transition:all .18s}
+.cb:hover{background:var(--surface3);color:var(--text)}
+.cb.pri{background:rgba(244,114,182,0.14);color:#f472b6;border-color:rgba(244,114,182,0.3)}
+.cb.pri:hover{background:rgba(244,114,182,0.22)}
+.cb:disabled{opacity:.3;cursor:not-allowed}
+.sc-ctr{font-family:var(--mono);font-size:11px;color:var(--text-dim);min-width:60px;text-align:center}
+
+/* COMPLEXITY */
+.cx-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:.9rem}
+.cx-c{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:.9rem;text-align:center}
+.cx-lbl{font-family:var(--mono);font-size:10px;color:var(--text-dim);text-transform:uppercase;letter-spacing:.1em;margin-bottom:.35rem}
+.cx-v{font-family:var(--mono);font-size:1.35rem;font-weight:700;color:#f472b6}
+.cx-n{font-size:12px;color:var(--text-dim);margin-top:.25rem}
+.tks{margin-top:.9rem;display:flex;flex-direction:column;gap:.45rem}
+.tk{padding:.55rem .9rem;background:var(--surface2);border-left:3px solid #f472b6;border-radius:0 8px 8px 0;font-size:13px;color:var(--text-muted);line-height:1.55}
+.tk code{font-family:var(--mono);font-size:12px;color:var(--text);background:var(--surface3);padding:1px 5px;border-radius:4px}
+</style>
+</head>
+<body>
+<div class="page">
+
+<a href="../index.html" class="back-link">← back to hub</a>
+
+<!-- HEADER -->
+<div class="prob-meta">
+  <span class="badge badge-easy">Easy</span>
+  <span class="badge badge-pat">Alternating Chunks / Reversal</span>
+</div>
+<h1 class="prob-title"><span class="prob-num">#541 · </span>Reverse String II</h1>
+
+<!-- 1. PATTERN BANNER -->
+<section>
+  <div class="sec-label">Pattern</div>
+  <div class="pat-banner">
+    <div class="pat-name">Alternating Chunks / Reversal</div>
+    <div class="pat-why">For every <code>2k</code> characters starting from the beginning, reverse the first <code>k</code> characters and leave the other <code>k</code> characters as they are. This requires toggling behavior in contiguous blocks across the string.</div>
+    <div class="related">
+      <span class="chip">#344 Reverse String</span>
+      <span class="chip">#151 Reverse Words in a String</span>
+      <span class="chip">#557 Reverse Words in a String III</span>
+    </div>
+  </div>
+</section>
+
+<!-- 2. PROBLEM STATEMENT -->
+<section>
+  <div class="sec-label">Problem</div>
+  <div class="card">
+    <p style="color:var(--text-muted);font-size:14px;margin-bottom:.85rem">Given a string <code>s</code> and an integer <code>k</code>, reverse the first <code>k</code> characters for every <code>2k</code> characters counting from the start of the string. If there are fewer than <code>k</code> characters left, reverse all of them. If there are less than <code>2k</code> but greater than or equal to <code>k</code> characters, then reverse the first <code>k</code> characters and leave the other as original.</p>
+    <p style="color:var(--text-muted);font-size:14px;margin-bottom:.85rem"><strong style="color:var(--text)">Analogy:</strong> Imagine reading a book where you read the first <code>k</code> pages backwards, then the next <code>k</code> pages normally, alternating non-stop.</p>
+    <div class="ex-row">
+      <div class="ex-card">
+        <div class="ex-lbl">Example 1</div>
+        <div class="ex-in">s = "abcdefg", k = 2</div>
+        <div class="ex-out">→ "bacdfeg"</div>
+      </div>
+      <div class="ex-card">
+        <div class="ex-lbl">Example 2</div>
+        <div class="ex-in">s = "abcd", k = 2</div>
+        <div class="ex-out">→ "bacd"</div>
+      </div>
+      <div class="ex-card">
+        <div class="ex-lbl">Example 3</div>
+        <div class="ex-in">s = "a", k = 2</div>
+        <div class="ex-out">→ "a"</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 3. INTUITION -->
+<section>
+  <div class="sec-label">Intuition &amp; Hints</div>
+  <div class="card">
+    <ul class="hint-list">
+      <li><strong style="color:var(--text)">Chunk Extraction:</strong> Instead of jumping by <code>2k</code>, jump by <code>k</code>. This gives you exact bounds for extraction.</li>
+      <li><strong style="color:var(--text)">Boolean Flag:</strong> Use a simple boolean <code>pass</code> flag to track whether the current block of size <code>k</code> needs reversal or not.</li>
+      <li><strong style="color:var(--text)">Reverse Mechanism:</strong> When <code>pass</code> is true, extract the substring and loop backwards over it to append to the result. When false, append directly.</li>
+      <li><strong style="color:var(--text)">Toggle and Iterate:</strong> Toggle the <code>pass</code> boolean on every iteration, and increment your index pointer by <code>k</code>.</li>
+    </ul>
+    <div class="key-trick">
+      ✦ Key trick: We don't need complex math for modulo operators. Advancing the loop index strictly by <code>i = i + k</code> and toggling a flag naturally breaks down the string into alternating phases.
+    </div>
+  </div>
+</section>
+
+<!-- 4. CODE BLOCK -->
+<section>
+  <div class="sec-label">Solution Code</div>
+  <div class="code-wrap">
+    <div class="code-hdr">
+      <span class="code-lang">javascript</span>
+      <span style="font-family:var(--mono);font-size:10px;color:var(--text-dim)">your solution — exact</span>
+    </div>
+    <pre class="code-body"><span id="cl1" class="cl"><span class="kw">var</span> <span class="fn">reverseStr</span> <span class="op">=</span> <span class="kw">function</span> (<span class="vr">s</span>, <span class="vr">k</span>) {</span>
+<span id="cl2" class="cl">    <span class="kw">let</span> <span class="vr">i</span> <span class="op">=</span> <span class="num">0</span>;</span>
+<span id="cl3" class="cl">    <span class="kw">let</span> <span class="vr">reverse</span> <span class="op">=</span> <span class="str">''</span></span>
+<span id="cl4" class="cl">    <span class="kw">let</span> <span class="vr">pass</span> <span class="op">=</span> <span class="kw">true</span></span>
+<span id="cl5" class="cl">    <span class="kw">while</span> (<span class="vr">i</span> <span class="op">&lt;</span> <span class="vr">s</span>.<span class="mt">length</span>) {</span>
+<span id="cl6" class="cl">        <span class="kw">let</span> <span class="vr">jump</span> <span class="op">=</span> <span class="vr">i</span> <span class="op">+</span> <span class="vr">k</span></span>
+<span id="cl7" class="cl">        <span class="kw">let</span> <span class="vr">sub</span> <span class="op">=</span> <span class="vr">s</span>.<span class="mt">substring</span>(<span class="vr">i</span>, <span class="vr">jump</span>)</span>
+<span id="cl8" class="cl">        <span class="kw">if</span> (<span class="vr">pass</span>) {</span>
+<span id="cl9" class="cl">            <span class="kw">for</span> (<span class="kw">let</span> <span class="vr">j</span> <span class="op">=</span> <span class="vr">sub</span>.<span class="mt">length</span> <span class="op">-</span><span class="num">1</span>; <span class="vr">j</span> <span class="op">&gt;=</span> <span class="num">0</span>; <span class="vr">j</span><span class="op">--</span>) {</span>
+<span id="cl10" class="cl">                <span class="vr">reverse</span> <span class="op">=</span> <span class="vr">reverse</span> <span class="op">+</span> <span class="vr">sub</span>[<span class="vr">j</span>]</span>
+<span id="cl11" class="cl">            }</span>
+<span id="cl12" class="cl">            <span class="vr">pass</span> <span class="op">=</span> <span class="kw">false</span></span>
+<span id="cl13" class="cl">        } <span class="kw">else</span> {</span>
+<span id="cl14" class="cl">            <span class="vr">reverse</span> <span class="op">+=</span> <span class="vr">sub</span></span>
+<span id="cl15" class="cl">            <span class="vr">pass</span> <span class="op">=</span> <span class="kw">true</span></span>
+<span id="cl16" class="cl">        }</span>
+<span id="cl17" class="cl">        <span class="vr">i</span> <span class="op">=</span> <span class="vr">i</span> <span class="op">+</span> <span class="vr">k</span></span>
+<span id="cl18" class="cl">    }</span>
+<span id="cl19" class="cl">    <span class="kw">return</span> <span class="vr">reverse</span></span>
+<span id="cl20" class="cl">};</span></pre>
+  </div>
+</section>
+
+<!-- 5. VISUALIZER -->
+<section>
+  <div class="sec-label">Interactive Visualizer</div>
+  <div class="viz-wrap">
+    <div class="viz-topbar">
+      <div class="ex-sel" id="exSel"></div>
+      <div class="res-badge" id="resBadge">result: —</div>
+    </div>
+    <div class="prog-track"><div class="prog-fill" id="progFill" style="width:0%"></div></div>
+    <div class="viz-body">
+      <!-- LEFT -->
+      <div class="viz-left">
+        <div class="viz-sub-lbl">Original string (s)</div>
+        <div class="cell-row" id="sGrid"></div>
+      </div>
+      <!-- RIGHT -->
+      <div class="viz-right">
+        <div>
+          <div class="viz-sub-lbl">variables</div>
+          <div class="var-rows">
+            <div class="var-r"><span class="vn">i</span><span class="vv b" id="vI">—</span></div>
+            <div class="var-r"><span class="vn">jump</span><span class="vv" id="vJUMP">—</span></div>
+            <div class="var-r"><span class="vn">sub</span><span class="vv c" id="vSUB">—</span></div>
+            <div class="var-r"><span class="vn">pass</span><span class="vv" id="vPASS">—</span></div>
+            <div class="var-r"><span class="vn">j (inner)</span><span class="vv" id="vJ">—</span></div>
+          </div>
+        </div>
+        <div class="phase-box">
+          <div class="ph-lbl">Result Builder</div>
+          <div class="cell-row" id="rGrid" style="margin-bottom:0; min-height: 40px; margin-top:5px;"></div>
+        </div>
+      </div>
+    </div>
+    <div class="step-desc-bar">
+      <div class="sd" id="stepDesc">Press Next or ▶ Play to step through the algorithm.</div>
+    </div>
+    <div class="exec-log">
+      <div class="elt">execution log</div>
+      <div id="execLog"></div>
+    </div>
+    <div class="ctrl-bar">
+      <button class="cb" id="btnPrev" onclick="prevStep()" disabled>← Prev</button>
+      <button class="cb pri" id="btnPlay" onclick="togglePlay()">▶ Play</button>
+      <span class="sc-ctr" id="stpCtr">0 / 0</span>
+      <button class="cb" id="btnNext" onclick="nextStep()">Next →</button>
+    </div>
+  </div>
+</section>
+
+<!-- 6. COMPLEXITY -->
+<section>
+  <div class="sec-label">Complexity</div>
+  <div class="cx-grid">
+    <div class="cx-c">
+      <div class="cx-lbl">Time</div>
+      <div class="cx-v">O(N)</div>
+      <div class="cx-n">N = string length</div>
+    </div>
+    <div class="cx-c">
+      <div class="cx-lbl">Space</div>
+      <div class="cx-v">O(N)</div>
+      <div class="cx-n">Requires a new string build</div>
+    </div>
+  </div>
+  <div class="tks">
+    <div class="tk">All characters are visited exactly once. The outer loop increments by <code>k</code> and the inner string concatenations span exactly size <code>k</code>. This gives linear time O(n).</div>
+    <div class="tk">Because strings in JavaScript are immutable, building up <code>reverse</code> incrementally takes O(N) auxiliary space.</div>
+  </div>
+</section>
+
+</div><!-- /page -->
+
+<script>
+// ─── STEP ENGINE ───────────────────────────────────────────────────────────
+
+function computeSteps(s, k) {
+  const steps = [];
+  let i = 0;
+  let reverse = '';
+  let pass = true;
+
+  steps.push({
+    desc: `Initialize: <em>i</em> = 0, <em>reverse</em> = "", <em>pass</em> = true.<br/>Input string length is ${s.length}, chunk size <em>k</em> = ${k}.`,
+    log: [{t:`Initialize vars`, h:true}],
+    phase: 'init', s, k, i, jump:'—', sub:'—', pass, reverse, j:'—',
+    lines: [2,3,4], vResult:'—', hChunk:null, hChar:null
+  });
+
+  while (i < s.length) {
+    let jump = i + k;
+    let sub = s.substring(i, jump);
+    
+    steps.push({
+      desc: `<em>i</em> = ${i} &lt; <em>s.length</em> (${s.length}). Extract chunk of max size ${k}: <em>jump</em> = ${jump}.<br/><em>sub</em> = "${sub}".`,
+      log: [{t:`while(i < s.length): i=${i}`}, {t:`jump = ${jump}, sub = "${sub}"`, h:true}],
+      phase: 'chunk', s, k, i, jump, sub, pass, reverse, j:'—',
+      lines: [5,6,7], vResult:'—', hChunk:[i, Math.min(jump, s.length)], hChar:null
+    });
+
+    if (pass) {
+      steps.push({
+        desc: `<em>pass</em> is true. We need to <strong>reverse</strong> this chunk character by character limit bounded by loop.`,
+        log: [{t:`if(pass) is true → reverse chunk`, h:true}],
+        phase: 'process', s, k, i, jump, sub, pass, reverse, j:'—',
+        lines: [8], vResult:'—', hChunk:[i, Math.min(jump, s.length)], hChar:null
+      });
+      
+      for (let j = sub.length - 1; j >= 0; j--) {
+        reverse = reverse + sub[j];
+        steps.push({
+          desc: `Inner loop <em>j</em> = ${j}. Append character <em>'${sub[j]}'</em> to reverse string.`,
+          log: [{t:`  j=${j}: reverse += '${sub[j]}'`, h:true}],
+          phase: 'inner', s, k, i, jump, sub, pass, reverse, j,
+          lines: [9,10], vResult:'—', hChunk:[i, Math.min(jump, s.length)], hChar:i+j
+        });
+      }
+      pass = false;
+      steps.push({
+        desc: `Chunk reversed completely. Set <em>pass</em> = false for the next chunk toggling.`,
+        log: [{t:`pass = false`, h:true}],
+        phase: 'process', s, k, i, jump, sub, pass, reverse, j:'—',
+        lines: [12], vResult:'—', hChunk:[i, Math.min(jump, s.length)], hChar:null
+      });
+    } else {
+      reverse += sub;
+      pass = true;
+      steps.push({
+        desc: `<em>pass</em> is false. Append chunk <em>"${sub}"</em> as-is. Set <em>pass</em> = true for the next chunk.`,
+        log: [{t:`else → append sub as-is`, h:true}, {t:`reverse += "${sub}"`, h:false}, {t:`pass = true`, h:false}],
+        phase: 'process', s, k, i, jump, sub, pass, reverse, j:'—',
+        lines: [13,14,15], vResult:'—', hChunk:[i, Math.min(jump, s.length)], hChar:-1
+      });
+    }
+    
+    i = i + k;
+    steps.push({
+      desc: `Advance index by <em>k</em>: <em>i</em> = ${i}.`,
+      log: [{t:`i = i + k = ${i}`, h:true}],
+      phase: 'advance', s, k, i, jump:'—', sub:'—', pass, reverse, j:'—',
+      lines: [17], vResult:'—', hChunk:null, hChar:null
+    });
+  }
+
+  steps.push({
+    desc: `<em>i</em> = ${i} ≥ <em>s.length</em> (${s.length}). Loop ends. Return <em>"${reverse}"</em>.`,
+    log: [{t:`while loop ends`, h:true}, {t:`return "${reverse}"`, h:true}],
+    phase: 'done', s, k, i: s.length, jump:'—', sub:'—', pass, reverse, j:'—',
+    lines: [19], vResult: `"${reverse}"`, hChunk:null, hChar:null
+  });
+
+  return steps;
+}
+
+// ─── EXAMPLES ──────────────────────────────────────────────────────────────
+
+const EXAMPLES = [
+  { label:'Ex 1: "abcdefg" (k=2)', s:'abcdefg', k:2 },
+  { label:'Ex 2: "abcd" (k=2)', s:'abcd', k:2 },
+  { label:'Ex 3: "a" (k=2)', s:'a', k:2 },
+  { label:'Ex 4: "abcdefg" (k=8)', s:'abcdefg', k:8 },
+];
+
+// ─── STATE ─────────────────────────────────────────────────────────────────
+
+let exIdx   = 0;
+let stepIdx = 0;
+let steps   = [];
+let playing = false;
+let playTimer = null;
+
+// ─── INIT ───────────────────────────────────────────────────────────────────
+
+(function init() {
+  const sel = document.getElementById('exSel');
+  sel.innerHTML = EXAMPLES.map((e,idx) =>
+    `<button class="eb${idx===0?' on':''}" onclick="loadEx(${idx})">${e.label}</button>`
+  ).join('');
+  loadEx(0);
+})();
+
+function loadEx(idx) {
+  stopPlay();
+  exIdx   = idx;
+  stepIdx = 0;
+  steps   = computeSteps(EXAMPLES[idx].s, EXAMPLES[idx].k);
+  document.querySelectorAll('.eb').forEach((b,i) => b.classList.toggle('on', i===idx));
+  render(steps[0]);
+  updateCtrl();
+}
+
+// ─── RENDER ─────────────────────────────────────────────────────────────────
+
+function render(sItem) {
+  
+  // ── "s" String ──────────────────────────────────────────────────
+  const strArr = sItem.s.split('');
+  const cells = strArr.map((ch, idx) => {
+    let cls = 'dim'; 
+    if (sItem.hChunk && idx >= sItem.hChunk[0] && idx < sItem.hChunk[1]) {
+      cls = 'neu';
+      if (sItem.hChar === idx) cls = 'act';
+      if (sItem.hChar === -1) cls = 'act'; 
+    } else if (idx < sItem.i) {
+      cls = 'done';
+    }
+    return `<div style="display:flex; flex-direction:column; align-items:center;">
+              <span class="sc ${cls}">${ch}</span>
+              <span style="font-size:9px;color:var(--text-dim);font-family:var(--mono);margin-top:2px;">${idx}</span>
+            </div>`;
+  }).join('');
+  document.getElementById('sGrid').innerHTML = cells;
+
+  // ── "reverse" String ──────────────────────────────────────────────────
+  const revArr = sItem.reverse.split('');
+  const revCells = revArr.map(ch => `<span class="sc done" style="margin-right:2px;margin-bottom:2px;">${ch}</span>`).join('');
+  document.getElementById('rGrid').innerHTML = revCells || `<span style="font-size:12px;color:var(--text-dim);font-family:var(--mono);">""</span>`;
+
+  // ── Variables ────────────────────────────────────────────────────
+  document.getElementById('vI').textContent    = sItem.i;
+  document.getElementById('vJUMP').textContent = sItem.jump;
+  document.getElementById('vSUB').textContent  = sItem.sub !== '—' ? `"${sItem.sub}"` : '—';
+  
+  const vPass = document.getElementById('vPASS');
+  vPass.textContent = sItem.pass;
+  vPass.style.color = sItem.pass ? "var(--green)" : "var(--red)";
+
+  document.getElementById('vJ').textContent    = sItem.j;
+
+  // ── Code highlight ────────────────────────────────────────────────
+  for (let n = 1; n <= 20; n++) {
+    const el = document.getElementById(`cl${n}`);
+    if (el) el.classList.remove('al');
+  }
+  (sItem.lines || []).forEach(n => {
+    const el = document.getElementById(`cl${n}`);
+    if (el) el.classList.add('al');
+  });
+
+  // ── Description ──────────────────────────────────────────────────
+  document.getElementById('stepDesc').innerHTML = sItem.desc;
+
+  // ── Log ──────────────────────────────────────────────────────────
+  document.getElementById('execLog').innerHTML =
+    (sItem.log || []).map(l => `<div class="ll${l.h?' lh':''}">${l.t}</div>`).join('');
+
+  // ── Result badge ─────────────────────────────────────────────────
+  const rb = document.getElementById('resBadge');
+  if (sItem.phase === 'done') {
+    rb.textContent = `result: ${sItem.vResult}`;
+    rb.classList.add('show');
+  } else {
+    rb.textContent = 'result: —';
+    rb.classList.remove('show');
+  }
+
+  // ── Progress ─────────────────────────────────────────────────────
+  const pct = steps.length > 1 ? (stepIdx / (steps.length - 1)) * 100 : 0;
+  document.getElementById('progFill').style.width = pct + '%';
+  document.getElementById('stpCtr').textContent   = `${stepIdx + 1} / ${steps.length}`;
+}
+
+// ─── CONTROLS ───────────────────────────────────────────────────────────────
+
+function nextStep() {
+  if (stepIdx < steps.length - 1) { stepIdx++; render(steps[stepIdx]); updateCtrl(); }
+  else stopPlay();
+}
+
+function prevStep() {
+  if (stepIdx > 0) { stepIdx--; render(steps[stepIdx]); updateCtrl(); }
+}
+
+function updateCtrl() {
+  document.getElementById('btnPrev').disabled = stepIdx === 0;
+  document.getElementById('btnNext').disabled = stepIdx === steps.length - 1;
+}
+
+function togglePlay() { playing ? stopPlay() : startPlay(); }
+
+function startPlay() {
+  playing = true;
+  document.getElementById('btnPlay').textContent = '⏸ Pause';
+  playTimer = setInterval(() => {
+    if (stepIdx < steps.length - 1) { stepIdx++; render(steps[stepIdx]); updateCtrl(); }
+    else stopPlay();
+  }, 950);
+}
+
+function stopPlay() {
+  playing = false;
+  clearInterval(playTimer);
+  const b = document.getElementById('btnPlay');
+  if (b) b.textContent = '▶ Play';
+}
+
+// ─── KEYBOARD ───────────────────────────────────────────────────────────────
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight' || e.key === 'ArrowDown') { e.preventDefault(); nextStep(); }
+  if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp')   { e.preventDefault(); prevStep(); }
+  if (e.key === ' ') { e.preventDefault(); togglePlay(); }
+});
+</script>
+</body>
+</html>
