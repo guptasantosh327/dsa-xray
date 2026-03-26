@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>#125 · Valid Palindrome — DSA Visualizer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Sora:wght@300;400;600;700;800&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0d0f14;--surface:#13161d;--surface2:#1a1e28;--surface3:#212638;
+  --border:rgba(255,255,255,0.07);--border-mid:rgba(255,255,255,0.12);
+  --text:#e8eaf0;--text-muted:#6b7280;--text-dim:#3d4251;
+  --accent:#c084fc; /* Purple base for this vis */
+  --green:#34d399;--amber:#fbbf24;
+  --blue:#60a5fa;--red:#f87171;--orange:#fb923c;
+  --cyan:#22d3ee;
+  --mono:'JetBrains Mono',monospace;--sans:'Sora',sans-serif;
+}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:15px;line-height:1.6;min-height:100vh;overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;
+  background-image:linear-gradient(rgba(192,132,252,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(192,132,252,0.03) 1px,transparent 1px);
+  background-size:40px 40px;pointer-events:none;z-index:0}
+.page{position:relative;z-index:1;max-width:980px;margin:0 auto;padding:3rem 1.5rem 6rem}
+@keyframes fadeUp{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
+
+/* HEADER */
+.back-link{display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:11px;color:var(--text-muted);text-decoration:none;margin-bottom:2rem;opacity:.7;transition:opacity .2s}
+.back-link:hover{opacity:1}
+.prob-meta{display:flex;align-items:center;gap:10px;margin-bottom:.75rem;flex-wrap:wrap}
+.badge{display:inline-block;font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:3px 10px;border-radius:100px}
+.badge-easy{background:rgba(52,211,153,0.12);color:var(--green);border:1px solid rgba(52,211,153,0.25)}
+.badge-pat{background:rgba(192,132,252,0.12);color:var(--accent);border:1px solid rgba(192,132,252,0.25)}
+h1.prob-title{font-size:clamp(1.8rem,5vw,2.8rem);font-weight:800;letter-spacing:-.03em;margin-bottom:.5rem;animation:fadeUp .6s ease both}
+.prob-num{color:var(--text-dim);font-family:var(--mono)}
+
+/* SECTIONS */
+section{margin-bottom:2.75rem;animation:fadeUp .6s ease both}
+section:nth-child(2){animation-delay:.08s}
+section:nth-child(3){animation-delay:.13s}
+section:nth-child(4){animation-delay:.18s}
+section:nth-child(5){animation-delay:.23s}
+section:nth-child(6){animation-delay:.28s}
+.sec-label{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);margin-bottom:.6rem}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:1.4rem}
+
+/* PATTERN BANNER */
+.pat-banner{background:linear-gradient(135deg,rgba(192,132,252,0.08),rgba(124,110,245,0.05));border:1px solid rgba(192,132,252,0.2);border-radius:14px;padding:1.4rem}
+.pat-name{font-size:1.05rem;font-weight:700;color:var(--accent);margin-bottom:.35rem}
+.pat-why{color:var(--text-muted);font-size:13.5px;line-height:1.65;margin-bottom:.9rem}
+.related{display:flex;gap:.4rem;flex-wrap:wrap}
+.chip{font-family:var(--mono);font-size:11px;padding:3px 11px;border-radius:100px;background:var(--surface2);border:1px solid var(--border-mid);color:var(--text-muted)}
+
+/* PROBLEM */
+.ex-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:.75rem;margin-top:.9rem}
+.ex-card{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:.85rem}
+.ex-lbl{font-family:var(--mono);font-size:10px;color:var(--text-dim);letter-spacing:.1em;text-transform:uppercase;margin-bottom:.35rem}
+.ex-in{font-family:var(--mono);font-size:12px;color:var(--accent);margin-bottom:.2rem}
+.ex-out{font-family:var(--mono);font-size:12px;color:var(--green)}
+
+/* INTUITION */
+.hint-list{list-style:none;counter-reset:h;display:flex;flex-direction:column;gap:.65rem}
+.hint-list li{counter-increment:h;display:flex;gap:.7rem;font-size:13.5px;color:var(--text-muted);line-height:1.6}
+.hint-list li::before{content:counter(h);display:flex;align-items:center;justify-content:center;min-width:21px;height:21px;border-radius:50%;background:var(--surface3);border:1px solid var(--border-mid);font-family:var(--mono);font-size:11px;font-weight:700;color:var(--accent);margin-top:2px;flex-shrink:0}
+.key-trick{margin-top:.9rem;background:rgba(192,132,252,0.07);border:1px solid rgba(192,132,252,0.18);border-radius:8px;padding:.7rem 1rem;font-size:13px;color:var(--accent);line-height:1.6}
+.km{font-family:var(--mono);font-size:12px}
+
+/* CODE BLOCK */
+.code-wrap{background:#090b10;border:1px solid var(--border);border-radius:12px;overflow:hidden}
+.code-hdr{display:flex;justify-content:space-between;align-items:center;padding:.5rem 1rem;background:var(--surface);border-bottom:1px solid var(--border)}
+.code-lang{font-family:var(--mono);font-size:10px;color:var(--text-dim);letter-spacing:.1em;text-transform:uppercase}
+pre.code-body{padding:1.1rem 1.4rem;overflow-x:auto;font-family:var(--mono);font-size:13px;line-height:1.85;tab-size:4}
+.cl{display:block;padding:0 .4rem;margin:0 -.4rem;border-radius:4px;transition:background .2s;border-left:2px solid transparent}
+.cl.al{background:rgba(192,132,252,0.1);border-left-color:var(--accent)}
+.kw{color:#c792ea}.fn{color:#82aaff}.str{color:#c3e88d}.num{color:#f78c6c}
+.vr{color:#eeffff}.op{color:#89ddff}.mt{color:#c084fc}
+
+/* VISUALIZER */
+.viz-wrap{background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden}
+.viz-topbar{display:flex;align-items:center;justify-content:space-between;padding:.65rem 1.1rem;border-bottom:1px solid var(--border);flex-wrap:wrap;gap:.5rem}
+.ex-sel{display:flex;gap:.35rem;flex-wrap:wrap}
+.eb{font-family:var(--mono);font-size:11px;padding:4px 12px;border-radius:100px;background:var(--surface2);border:1px solid var(--border-mid);color:var(--text-muted);cursor:pointer;transition:all .18s}
+.eb.on{background:rgba(192,132,252,0.15);color:var(--accent);border-color:rgba(192,132,252,0.35)}
+.res-badge{font-family:var(--mono);font-size:12px;padding:4px 14px;border-radius:100px;background:var(--surface2);border:1px solid var(--border-mid);color:var(--text-muted);transition:all .3s}
+.res-badge.show{background:rgba(52,211,153,0.12);color:var(--green);border-color:rgba(52,211,153,0.3)}
+.res-badge.show.fail{background:rgba(248,113,113,0.12);color:var(--red);border-color:rgba(248,113,113,0.3)}
+.prog-track{height:3px;background:var(--surface2)}
+.prog-fill{height:100%;background:linear-gradient(90deg,var(--blue),var(--accent));transition:width .3s ease;border-radius:0 3px 3px 0}
+
+/* Viz body layout */
+.viz-body{display:grid;grid-template-columns:1fr 240px;min-height:360px}
+@media(max-width:768px){.viz-body{grid-template-columns:1fr}}
+.viz-left{padding:1.4rem;border-right:1px solid var(--border);display:flex;flex-direction:column;justify-content:center}
+.viz-right{padding:1.4rem;display:flex;flex-direction:column;gap:.8rem}
+.viz-sub-lbl{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--text-dim);margin-bottom:.65rem}
+
+/* Array/Cells display */
+.cell-row{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:1.5rem;justify-content:center}
+.sc{width:34px;height:34px;display:inline-flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:14px;font-weight:700;border-radius:8px;border:1.5px solid;transition:all .22s;}
+.sc.dim{opacity:0.3;filter:grayscale(1);}
+.sc.act{box-shadow:0 0 10px rgba(192,132,252,0.3);transform:translateY(-2px);border-color:var(--accent);color:var(--accent);}
+.sc.neu{background:rgba(61,66,81,0.15);border-color:rgba(61,66,81,0.25);color:var(--text-muted);}
+.sc.bad{background:rgba(248,113,113,0.1) !important;border-color:var(--red) !important;color:var(--red) !important;}
+
+/* Pointers */
+.ptr{font-family:var(--mono);font-size:12px;font-weight:700;color:var(--accent);margin-top:4px}
+.ptr.hide{visibility:hidden}
+
+/* Variables panel */
+.var-rows{display:flex;flex-direction:column;gap:5px}
+.var-r{display:flex;justify-content:space-between;align-items:center;padding:.4rem .65rem;background:var(--surface2);border-radius:7px;border:1px solid var(--border)}
+.vn{font-family:var(--mono);font-size:11px;color:var(--text-dim)}
+.vv{font-family:var(--mono);font-size:12px;font-weight:700;color:var(--text);max-width:130px;text-align:right;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.vv.c{color:var(--accent)}
+
+/* Step desc + log */
+.step-desc-bar{padding:.65rem 1.1rem;border-top:1px solid var(--border);border-bottom:1px solid var(--border);background:var(--surface2)}
+.sd{font-size:13px;color:var(--text-muted);line-height:1.65;min-height:43px}
+.sd em{color:var(--text);font-style:normal;font-weight:600;font-family:var(--mono)}
+.exec-log{padding:.65rem 1.1rem;max-height:140px;overflow-y:auto}
+.elt{font-family:var(--mono);font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--text-dim);margin-bottom:.35rem}
+.ll{font-family:var(--mono);font-size:11px;color:var(--text-dim);padding:1px 0;display:flex;gap:5px}
+.ll::before{content:'›';color:var(--text-dim);flex-shrink:0}
+.ll.lh{color:var(--text-muted)}.ll.lh::before{content:'▶';color:var(--accent)}
+
+/* Controls */
+.ctrl-bar{display:flex;align-items:center;justify-content:center;gap:.65rem;padding:.65rem 1.1rem;border-top:1px solid var(--border);flex-wrap:wrap}
+.cb{display:flex;align-items:center;gap:5px;font-family:var(--mono);font-size:12px;padding:6px 16px;border-radius:8px;background:var(--surface2);border:1px solid var(--border-mid);color:var(--text-muted);cursor:pointer;transition:all .18s}
+.cb:hover{background:var(--surface3);color:var(--text)}
+.cb.pri{background:rgba(192,132,252,0.14);color:var(--accent);border-color:rgba(192,132,252,0.3)}
+.cb.pri:hover{background:rgba(192,132,252,0.22)}
+.cb:disabled{opacity:.3;cursor:not-allowed}
+.sc-ctr{font-family:var(--mono);font-size:11px;color:var(--text-dim);min-width:60px;text-align:center}
+
+/* COMPLEXITY */
+.cx-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:.9rem}
+.cx-c{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:.9rem;text-align:center}
+.cx-lbl{font-family:var(--mono);font-size:10px;color:var(--text-dim);text-transform:uppercase;letter-spacing:.1em;margin-bottom:.35rem}
+.cx-v{font-family:var(--mono);font-size:1.35rem;font-weight:700;color:var(--accent)}
+.cx-n{font-size:12px;color:var(--text-dim);margin-top:.25rem}
+.tks{margin-top:.9rem;display:flex;flex-direction:column;gap:.45rem}
+.tk{padding:.55rem .9rem;background:var(--surface2);border-left:3px solid var(--accent);border-radius:0 8px 8px 0;font-size:13px;color:var(--text-muted);line-height:1.55}
+.tk code{font-family:var(--mono);font-size:12px;color:var(--text);background:var(--surface3);padding:1px 5px;border-radius:4px}
+</style>
+</head>
+<body>
+<div class="page">
+
+<a href="../index.html" class="back-link">← back to hub</a>
+
+<!-- HEADER -->
+<div class="prob-meta">
+  <span class="badge badge-easy">Easy</span>
+  <span class="badge badge-pat">Two Pointers</span>
+</div>
+<h1 class="prob-title"><span class="prob-num">#125 · </span>Valid Palindrome</h1>
+
+<!-- 1. PATTERN BANNER -->
+<section>
+  <div class="sec-label">Pattern</div>
+  <div class="pat-banner">
+    <div class="pat-name">Two Pointers (Outside-In)</div>
+    <div class="pat-why">Start one pointer at the beginning and the other at the end. Move them towards each other, ignoring any non-alphanumeric characters. If at any point they mismatch, it's not a palindrome.</div>
+    <div class="related">
+      <span class="chip">#344 Reverse String</span>
+      <span class="chip">#680 Valid Palindrome II</span>
+      <span class="chip">#345 Reverse Vowels</span>
+    </div>
+  </div>
+</section>
+
+<!-- 2. PROBLEM STATEMENT -->
+<section>
+  <div class="sec-label">Problem</div>
+  <div class="card">
+    <p style="color:var(--text-muted);font-size:14px;margin-bottom:.85rem">A phrase is a palindrome if, after converting all uppercase letters into lowercase letters and removing all non-alphanumeric characters, it reads the same forward and backward. Alphanumeric characters include letters and numbers. Given a string <code>s</code>, return <code>true</code> if it is a palindrome, or <code>false</code> otherwise.</p>
+    <p style="color:var(--text-muted);font-size:14px;margin-bottom:.85rem"><strong style="color:var(--text)">Analogy:</strong> Imagine two people reading the same sentence—one from the left, one from the right. Every time they hit a space or punctuation, they skip it. They must always read the exact same letter aloud until they meet in the middle.</p>
+    <div class="ex-row">
+      <div class="ex-card">
+        <div class="ex-lbl">Example 1</div>
+        <div class="ex-in">s = "A man, a plan, a canal: Panama"</div>
+        <div class="ex-out">→ true ("amanaplanacanalpanama")</div>
+      </div>
+      <div class="ex-card">
+        <div class="ex-lbl">Example 2</div>
+        <div class="ex-in">s = "race a car"</div>
+        <div class="ex-out">→ false ("raceacar")</div>
+      </div>
+      <div class="ex-card">
+        <div class="ex-lbl">Example 3</div>
+        <div class="ex-in">s = " "</div>
+        <div class="ex-out">→ true (empty string reads same)</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 3. INTUITION -->
+<section>
+  <div class="sec-label">Intuition &amp; Hints</div>
+  <div class="card">
+    <ul class="hint-list">
+      <li><strong style="color:var(--text)">Normalization:</strong> Lowercase the entire string upfront to avoid messy capitalization checks later.</li>
+      <li><strong style="color:var(--text)">Pointer Setup:</strong> Place pointer <code>i</code> at index 0 and <code>j</code> at index <code>s.length - 1</code>. Proceed while <code>i &lt;= j</code>.</li>
+      <li><strong style="color:var(--text)">Skipping Skips:</strong> Instead of looping to skip spaces all at once, if <code>s[i]</code> isn't alphanumeric, just do <code>i++</code> and <code>continue</code> the `while` loop softly. This is sometimes called "lazy evaluation."</li>
+      <li><strong style="color:var(--text)">Regex check:</strong> Checking <code>!s[i].match(/[a-z0-9]/)</code> effectively detects symbols, spaces, and punctuation.</li>
+    </ul>
+    <div class="key-trick">
+      ✦ Key trick: We don't allocate a new cleaned string at all. This saves us from an extra O(N) space penalty that we'd have if we did <code>s.replace(/[^a-z0-9]/gi, '')</code> upfront.
+    </div>
+  </div>
+</section>
+
+<!-- 4. CODE BLOCK -->
+<section>
+  <div class="sec-label">Solution Code</div>
+  <div class="code-wrap">
+    <div class="code-hdr">
+      <span class="code-lang">javascript</span>
+      <span style="font-family:var(--mono);font-size:10px;color:var(--text-dim)">your solution — exact</span>
+    </div>
+    <pre class="code-body"><span id="cl1" class="cl"><span class="kw">var</span> <span class="fn">isPalindrome</span> <span class="op">=</span> <span class="kw">function</span>(<span class="vr">s</span>) {</span>
+<span id="cl2" class="cl">    <span class="vr">s</span> <span class="op">=</span> <span class="vr">s</span>.<span class="mt">toLowerCase</span>()</span>
+<span id="cl3" class="cl">    <span class="kw">let</span> <span class="vr">i</span> <span class="op">=</span> <span class="num">0</span>;</span>
+<span id="cl4" class="cl">    <span class="kw">let</span> <span class="vr">j</span> <span class="op">=</span> <span class="vr">s</span>.<span class="mt">length</span> <span class="op">-</span> <span class="num">1</span>;</span>
+<span id="cl5" class="cl">    <span class="kw">while</span>(<span class="vr">i</span> <span class="op">&lt;=</span> <span class="vr">j</span>) {</span>
+<span id="cl6" class="cl">        <span class="kw">if</span>(<span class="op">!</span><span class="vr">s</span>[<span class="vr">i</span>].<span class="mt">match</span>(<span class="str">/[a-z0-9]/</span>)){</span>
+<span id="cl7" class="cl">            <span class="vr">i</span><span class="op">++</span></span>
+<span id="cl8" class="cl">        } <span class="kw">else</span> <span class="kw">if</span>(<span class="op">!</span><span class="vr">s</span>[<span class="vr">j</span>].<span class="mt">match</span>(<span class="str">/[a-z0-9]/</span>)) {</span>
+<span id="cl9" class="cl">            <span class="vr">j</span><span class="op">--</span></span>
+<span id="cl10" class="cl">        } <span class="kw">else</span> <span class="kw">if</span>(<span class="vr">s</span>[<span class="vr">i</span>] <span class="op">==</span> <span class="vr">s</span>[<span class="vr">j</span>]) {</span>
+<span id="cl11" class="cl">            <span class="vr">i</span><span class="op">++</span>;</span>
+<span id="cl12" class="cl">            <span class="vr">j</span><span class="op">--</span>;</span>
+<span id="cl13" class="cl">        } <span class="kw">else</span> {</span>
+<span id="cl14" class="cl">            <span class="kw">return</span> <span class="kw">false</span></span>
+<span id="cl15" class="cl">        }</span>
+<span id="cl16" class="cl">    }</span>
+<span id="cl17" class="cl">    <span class="kw">return</span> <span class="kw">true</span></span>
+<span id="cl18" class="cl">};</span></pre>
+  </div>
+</section>
+
+<!-- 5. VISUALIZER -->
+<section>
+  <div class="sec-label">Interactive Visualizer</div>
+  <div class="viz-wrap">
+    <div class="viz-topbar">
+      <div class="ex-sel" id="exSel"></div>
+      <div class="res-badge" id="resBadge">result: —</div>
+    </div>
+    <div class="prog-track"><div class="prog-fill" id="progFill" style="width:0%"></div></div>
+    <div class="viz-body">
+      <!-- LEFT -->
+      <div class="viz-left">
+        <div class="viz-sub-lbl" style="text-align:center;">Working String (s)</div>
+        <div class="cell-row" id="sGrid"></div>
+      </div>
+      <!-- RIGHT -->
+      <div class="viz-right">
+        <div>
+          <div class="viz-sub-lbl">variables</div>
+          <div class="var-rows">
+            <div class="var-r"><span class="vn">i (left)</span><span class="vv c" id="vI">—</span></div>
+            <div class="var-r"><span class="vn">s[i]</span><span class="vv" id="vCI">—</span></div>
+            <div class="var-r"><span class="vn">j (right)</span><span class="vv c" id="vJ">—</span></div>
+            <div class="var-r"><span class="vn">s[j]</span><span class="vv" id="vCJ">—</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="step-desc-bar">
+      <div class="sd" id="stepDesc">Press Next or ▶ Play to step through the algorithm.</div>
+    </div>
+    <div class="exec-log">
+      <div class="elt">execution log</div>
+      <div id="execLog"></div>
+    </div>
+    <div class="ctrl-bar">
+      <button class="cb" id="btnPrev" onclick="prevStep()" disabled>← Prev</button>
+      <button class="cb pri" id="btnPlay" onclick="togglePlay()">▶ Play</button>
+      <span class="sc-ctr" id="stpCtr">0 / 0</span>
+      <button class="cb" id="btnNext" onclick="nextStep()">Next →</button>
+    </div>
+  </div>
+</section>
+
+<!-- 6. COMPLEXITY -->
+<section>
+  <div class="sec-label">Complexity</div>
+  <div class="cx-grid">
+    <div class="cx-c">
+      <div class="cx-lbl">Time</div>
+      <div class="cx-v">O(N)</div>
+      <div class="cx-n">N = string length</div>
+    </div>
+    <div class="cx-c">
+      <div class="cx-lbl">Space</div>
+      <div class="cx-v">O(1) *</div>
+      <div class="cx-n">No new allocations (mostly)</div>
+    </div>
+  </div>
+  <div class="tks">
+    <div class="tk">We traverse the string exactly once. Each character is visited at most once by `i` and at most once by `j`.</div>
+    <div class="tk">* Normally O(1), but since we called <code>s.toLowerCase()</code>, that creates a new string taking O(N) space. If we skipped that and used `.toLowerCase()` inside the loop per char, it would be strictly O(1) space!</div>
+  </div>
+</section>
+
+</div><!-- /page -->
+
+<script>
+// ─── STEP ENGINE ───────────────────────────────────────────────────────────
+
+function computeSteps(rawS) {
+  const steps = [];
+  
+  steps.push({
+    desc: `Function called with <em>s</em> = "${rawS}".<br/>Convert string to lowercase.`,
+    log: [{t:`isPalindrome(s)`, h:true}],
+    phase: 'init', rawS, s: rawS, i:-1, j:-1,
+    lines: [1,2], vResult: '—'
+  });
+
+  let s = rawS.toLowerCase();
+  let i = 0;
+  let j = s.length - 1;
+
+  steps.push({
+    desc: `String became lowercase.<br/>Initialize pointers: <em>i</em> = 0, <em>j</em> = ${j}.`,
+    log: [{t:`s = s.toLowerCase()`, h:false}, {t:`i=0, j=${j}`, h:true}],
+    phase: 'pointers', rawS, s, i, j,
+    lines: [3,4], vResult: '—'
+  });
+
+  while(i <= j) {
+    steps.push({
+      desc: `<em>i</em> (${i}) &lt;= <em>j</em> (${j}). Loop continues.`,
+      log: [{t:`while(i <= j): i=${i}, j=${j}`, h:true}],
+      phase: 'loop', rawS, s, i, j,
+      lines: [5], vResult:'—', badH:false
+    });
+
+    let isIAln = !!s[i].match(/[a-z0-9]/);
+    
+    steps.push({
+      desc: `Check if left char '${s[i]}' is alphanumeric.`,
+      log: [{t:`!s[${i}].match(/[a-z0-9]/) → ${!isIAln}`, h:false}],
+      phase: 'check_i', rawS, s, i, j,
+      lines: [6], vResult:'—', badH:false
+    });
+
+    if(!isIAln){
+      i++;
+      steps.push({
+        desc: `Left character isn't alphanumeric. Skip by incrementing <em>i</em>.`,
+        log: [{t:`i++ → ${i}`, h:true}],
+        phase: 'skip_i', rawS, s, i, j,
+        lines: [7], vResult:'—', badH:false
+      });
+      continue;
+    }
+
+    let isJAln = !!s[j].match(/[a-z0-9]/);
+
+    steps.push({
+      desc: `Left char '${s[i]}' is alphanumeric.<br/>Check if right char '${s[j]}' is alphanumeric.`,
+      log: [{t:`!s[${j}].match(/[a-z0-9]/) → ${!isJAln}`, h:false}],
+      phase: 'check_j', rawS, s, i, j,
+      lines: [8], vResult:'—', badH:false
+    });
+
+    if(!isJAln){
+      j--;
+      steps.push({
+        desc: `Right character isn't alphanumeric. Skip by decrementing <em>j</em>.`,
+        log: [{t:`j-- → ${j}`, h:true}],
+        phase: 'skip_j', rawS, s, i, j,
+        lines: [9], vResult:'—', badH:false
+      });
+      continue;
+    }
+
+    steps.push({
+      desc: `Both characters are alphanumeric. Compare '${s[i]}' and '${s[j]}'.`,
+      log: [{t:`s[${i}] == s[${j}] → ${s[i] == s[j]}`, h:true}],
+      phase: 'compare', rawS, s, i, j,
+      lines: [10], vResult:'—', badH:false
+    });
+
+    if(s[i] == s[j]) {
+      i++;
+      j--;
+      steps.push({
+        desc: `Match! Both characters are the same. Move pointers inward: <em>i++</em>, <em>j--</em>.`,
+        log: [{t:`Match! i=${i}, j=${j}`, h:true}],
+        phase: 'match', rawS, s, i, j,
+        lines: [11,12], vResult:'—', badH:false
+      });
+    } else {
+      steps.push({
+        desc: `Mismatch! '${s[i]}' != '${s[j]}'. The string is not a valid palindrome. Return false.`,
+        log: [{t:`Mismatch! return false`, h:true}],
+        phase: 'done', rawS, s, i, j,
+        lines: [14], vResult: 'false', badH:true
+      });
+      return steps;
+    }
+  }
+
+  steps.push({
+    desc: `Loop ends because <em>i</em> > <em>j</em>. All alphanumeric characters matched. Return true.`,
+    log: [{t:`return true`, h:true}],
+    phase: 'done', rawS, s, i, j,
+    lines: [17], vResult: 'true', badH:false
+  });
+
+  return steps;
+}
+
+// ─── EXAMPLES ──────────────────────────────────────────────────────────────
+
+const EXAMPLES = [
+  { label:'Ex 1: "Race Car"', s:'Race Car' },
+  { label:'Ex 2: "A man, a plan..."', s:'A man, a plan, a canal: Panama' },
+  { label:'Ex 3: "race a car"', s:'race a car' },
+  { label:'Ex 4: " "', s:' ' },
+];
+
+// ─── STATE ─────────────────────────────────────────────────────────────────
+
+let exIdx   = 0;
+let stepIdx = 0;
+let steps   = [];
+let playing = false;
+let playTimer = null;
+
+// ─── INIT ───────────────────────────────────────────────────────────────────
+
+(function init() {
+  const sel = document.getElementById('exSel');
+  sel.innerHTML = EXAMPLES.map((e,idx) =>
+    `<button class="eb${idx===0?' on':''}" onclick="loadEx(${idx})">${e.label}</button>`
+  ).join('');
+  loadEx(0);
+})();
+
+function loadEx(idx) {
+  stopPlay();
+  exIdx   = idx;
+  stepIdx = 0;
+  steps   = computeSteps(EXAMPLES[idx].s);
+  document.querySelectorAll('.eb').forEach((b,i) => b.classList.toggle('on', i===idx));
+  render(steps[0]);
+  updateCtrl();
+}
+
+// ─── RENDER ─────────────────────────────────────────────────────────────────
+
+function render(sItem) {
+  
+  // ── "s" Grid ──────────────────────────────────────────────────
+  const strArr = sItem.s.split('');
+  const cells = strArr.map((ch, idx) => {
+    let clss = ['neu'];
+    let ptrStr = '';
+    
+    // Check if we skipped this because it's non-alphanumeric (we can infer if it's outside i and j)
+    if(sItem.phase !== 'init' && (idx < sItem.i || idx > sItem.j)) {
+      clss.push('dim');
+    }
+    
+    if (idx === sItem.i) {
+      clss.push('act');
+      ptrStr = 'i';
+    } else if (idx === sItem.j) {
+      clss.push('act');
+      ptrStr = 'j';
+    }
+    if (idx === sItem.i && idx === sItem.j) {
+      ptrStr = 'i,j';
+    }
+
+    if (sItem.badH && (idx === sItem.i || idx === sItem.j)) {
+      clss.push('bad');
+    }
+
+    const spaceChar = ch === ' ' ? '&nbsp;' : ch;
+
+    return `<div style="display:flex; flex-direction:column; align-items:center; margin-right:5px; margin-bottom:12px;">
+              <span class="sc ${clss.join(' ')}" style="margin-bottom:0">${spaceChar}</span>
+              <span class="ptr ${ptrStr ? '' : 'hide'}">${ptrStr || 'x'}</span>
+            </div>`;
+  }).join('');
+  document.getElementById('sGrid').innerHTML = cells || `<span style="color:var(--text-dim);font-family:var(--mono);">"" (empty)</span>`;
+
+  // ── Variables ────────────────────────────────────────────────────
+  document.getElementById('vI').textContent  = sItem.i >= 0 && sItem.i < sItem.s.length ? sItem.i : '—';
+  document.getElementById('vJ').textContent  = sItem.j >= 0 && sItem.j < sItem.s.length ? sItem.j : '—';
+  document.getElementById('vCI').innerHTML = sItem.i >= 0 && sItem.i < sItem.s.length ? `"${sItem.s[sItem.i]}"` : '—';
+  document.getElementById('vCJ').innerHTML = sItem.j >= 0 && sItem.j < sItem.s.length ? `"${sItem.s[sItem.j]}"` : '—';
+
+  // ── Code highlight ────────────────────────────────────────────────
+  for (let n = 1; n <= 18; n++) {
+    const el = document.getElementById(`cl${n}`);
+    if (el) el.classList.remove('al');
+  }
+  (sItem.lines || []).forEach(n => {
+    const el = document.getElementById(`cl${n}`);
+    if (el) el.classList.add('al');
+  });
+
+  // ── Description ──────────────────────────────────────────────────
+  document.getElementById('stepDesc').innerHTML = sItem.desc;
+
+  // ── Log ──────────────────────────────────────────────────────────
+  document.getElementById('execLog').innerHTML =
+    (sItem.log || []).map(l => `<div class="ll${l.h?' lh':''}">${l.t}</div>`).join('');
+
+  // ── Result badge ─────────────────────────────────────────────────
+  const rb = document.getElementById('resBadge');
+  if (sItem.phase === 'done') {
+    rb.textContent = `result: ${sItem.vResult}`;
+    rb.className = 'res-badge show ' + (sItem.vResult === 'false' ? 'fail' : '');
+  } else {
+    rb.textContent = 'result: —';
+    rb.className = 'res-badge';
+  }
+
+  // ── Progress ─────────────────────────────────────────────────────
+  const pct = steps.length > 1 ? (stepIdx / (steps.length - 1)) * 100 : 0;
+  document.getElementById('progFill').style.width = pct + '%';
+  document.getElementById('stpCtr').textContent   = `${stepIdx + 1} / ${steps.length}`;
+}
+
+// ─── CONTROLS ───────────────────────────────────────────────────────────────
+
+function nextStep() {
+  if (stepIdx < steps.length - 1) { stepIdx++; render(steps[stepIdx]); updateCtrl(); }
+  else stopPlay();
+}
+
+function prevStep() {
+  if (stepIdx > 0) { stepIdx--; render(steps[stepIdx]); updateCtrl(); }
+}
+
+function updateCtrl() {
+  document.getElementById('btnPrev').disabled = stepIdx === 0;
+  document.getElementById('btnNext').disabled = stepIdx === steps.length - 1;
+}
+
+function togglePlay() { playing ? stopPlay() : startPlay(); }
+
+function startPlay() {
+  playing = true;
+  document.getElementById('btnPlay').textContent = '⏸ Pause';
+  playTimer = setInterval(() => {
+    if (stepIdx < steps.length - 1) { stepIdx++; render(steps[stepIdx]); updateCtrl(); }
+    else stopPlay();
+  }, 950);
+}
+
+function stopPlay() {
+  playing = false;
+  clearInterval(playTimer);
+  const b = document.getElementById('btnPlay');
+  if (b) b.textContent = '▶ Play';
+}
+
+// ─── KEYBOARD ───────────────────────────────────────────────────────────────
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight' || e.key === 'ArrowDown') { e.preventDefault(); nextStep(); }
+  if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp')   { e.preventDefault(); prevStep(); }
+  if (e.key === ' ') { e.preventDefault(); togglePlay(); }
+});
+</script>
+</body>
+</html>

@@ -642,7 +642,7 @@
       Step-by-step visualizers for classic DSA problems — problem statement, hints, approach, code, dry-run animation, multiple examples, and edge cases. All in one place.
     </p>
     <div class="stats">
-      <div class="stat"><span class="stat-num">20</span><span class="stat-label">Problems</span></div>
+      <div class="stat"><span class="stat-num">23</span><span class="stat-label">Problems</span></div>
       <div class="stat-sep"></div>
       <div class="stat"><span class="stat-num">2</span><span class="stat-label">Tree Types</span></div>
       <div class="stat-sep"></div>
@@ -712,7 +712,7 @@
     <button class="topic-tab active" data-topic="trees"><span class="tab-icon">🌳</span>Binary Tree<span class="tab-badge" id="badge-trees">11</span></button>
     <button class="topic-tab" data-topic="bst"><span class="tab-icon">🌲</span>Binary Search Tree<span class="tab-badge" id="badge-bst">5</span></button>
     <button class="topic-tab" data-topic="arrays"><span class="tab-icon">📦</span>Arrays<span class="tab-badge" id="badge-arrays">0</span></button>
-    <button class="topic-tab" data-topic="strings"><span class="tab-icon">🔤</span>Strings<span class="tab-badge" id="badge-strings">3</span></button>
+    <button class="topic-tab" data-topic="strings"><span class="tab-icon">🔤</span>Strings<span class="tab-badge" id="badge-strings">6</span></button>
     <button class="topic-tab" data-topic="hashmap"><span class="tab-icon">🗂️</span>HashMap<span class="tab-badge" id="badge-hashmap">0</span></button>
     <button class="topic-tab" data-topic="bsearch"><span class="tab-icon">🔎</span>Binary Search<span class="tab-badge" id="badge-bsearch">1</span></button>
     <button class="topic-tab" data-topic="graph"><span class="tab-icon">🕸️</span>Graphs<span class="tab-badge" id="badge-graph">0</span></button>
@@ -759,7 +759,7 @@
     </div>
   </div>
 
-  <footer><p>Built with vanilla HTML · CSS · JS &nbsp;·&nbsp; No frameworks &nbsp;·&nbsp; 20 problems · Multiple examples each</p></footer>
+  <footer><p>Built with vanilla HTML · CSS · JS &nbsp;·&nbsp; No frameworks &nbsp;·&nbsp; 23 problems · Multiple examples each</p></footer>
 
 </div>
 
@@ -966,6 +966,28 @@ const TOPICS = {
   arrays:  { label:"Arrays",              icon:"📦", color:"var(--green)",  badgeStyle:"background:rgba(52,211,153,0.1);color:var(--green);border:1px solid rgba(52,211,153,0.2)",    description:"Two Pointer · Sliding Window · Kadane's Algorithm · Prefix Sums", problems:[] },
   strings: { label:"Strings",             icon:"🔤", color:"var(--rose)",   badgeStyle:"background:rgba(244,114,182,0.1);color:var(--rose);border:1px solid rgba(244,114,182,0.2)",  description:"Sliding Window · Two Pointer · Anagram · Palindrome",            problems:[
       {
+        num:"#1903", title:"Largest Odd Number in String", href:"strings/largest-odd-number-visualizer.html",
+        color:"cyan", tagColor:"var(--cyan)",
+        btnStyle:"background:rgba(34,211,238,0.12);color:var(--cyan);border:1px solid rgba(34,211,238,0.25)",
+        diff:"easy", steps:"10+",
+        pattern:"Right-to-Left Scan", patternColor:"#22d3ee", patternBg:"rgba(34,211,238,0.1)",
+        desc:"Watch the algorithm traverse the string backwards, dropping even trailing digits until it finds an odd one.",
+        pills:["O(N)","String Substring","Right-to-Left","Math Parity"],
+        kw:"largest odd number string trailing even right-to-left scan",
+        svg:`<svg viewBox="0 0 300 130"><g font-family="'JetBrains Mono',monospace" font-size="20" font-weight="700"><rect x="40" y="30" width="30" height="30" rx="4" fill="rgba(61,66,81,0.2)" stroke="var(--border-mid)"/><text x="47" y="52" fill="var(--text)">5</text><rect x="80" y="30" width="30" height="30" rx="4" fill="rgba(61,66,81,0.2)" stroke="var(--border-mid)"/><text x="87" y="52" fill="var(--text)">2</text><rect x="120" y="30" width="30" height="30" rx="4" fill="rgba(34,211,238,0.15)" stroke="var(--cyan)"/><text x="127" y="52" fill="var(--cyan)">7</text><rect x="160" y="30" width="30" height="30" rx="4" fill="rgba(248,113,113,0.15)" stroke="var(--red)"/><text x="167" y="52" fill="var(--red)">4</text><rect x="200" y="30" width="30" height="30" rx="4" fill="rgba(248,113,113,0.15)" stroke="var(--red)"/><text x="207" y="52" fill="var(--red)">8</text></g><path d="M 215 85 L 175 85 L 135 85" fill="none" stroke="var(--cyan)" stroke-width="2" marker-end="url(#arrowCyan)"/><defs><marker id="arrowCyan" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="var(--cyan)"/></marker></defs></svg>`
+      },
+      {
+        num:"#125", title:"Valid Palindrome", href:"strings/valid-palindrome-visualizer.html",
+        color:"purple", tagColor:"var(--purple)",
+        btnStyle:"background:rgba(192,132,252,0.12);color:var(--purple);border:1px solid rgba(192,132,252,0.25)",
+        diff:"easy", steps:"10+",
+        pattern:"Two Pointers", patternColor:"#c084fc", patternBg:"rgba(192,132,252,0.1)",
+        desc:"Watch two pointers traverse inwards from opposite ends, seamlessly bypassing spaces and punctuation using regex matching.",
+        pills:["O(N)","Two Pointers","Regex Skip","In-place"],
+        kw:"valid palindrome two pointers regex skip alphanumeric",
+        svg:`<svg viewBox="0 0 300 130"><g font-family="'JetBrains Mono',monospace" font-size="16" font-weight="700"><rect x="30" y="25" width="24" height="24" rx="4" fill="rgba(192,132,252,0.15)" stroke="var(--purple)"/><text x="36" y="42" fill="var(--purple)">r</text><rect x="60" y="25" width="24" height="24" rx="4" fill="rgba(61,66,81,0.2)" stroke="var(--border-mid)"/><text x="66" y="42" fill="var(--text-dim)">&amp;</text><rect x="90" y="25" width="24" height="24" rx="4" fill="rgba(192,132,252,0.15)" stroke="var(--purple)"/><text x="96" y="42" fill="var(--purple)">a</text><rect x="120" y="25" width="24" height="24" rx="4" fill="rgba(61,66,81,0.2)" stroke="var(--border-mid)"/><text x="126" y="42" fill="var(--text-dim)">_</text><rect x="150" y="25" width="24" height="24" rx="4" fill="rgba(192,132,252,0.15)" stroke="var(--purple)"/><text x="156" y="42" fill="var(--purple)">c</text><rect x="180" y="25" width="24" height="24" rx="4" fill="rgba(61,66,81,0.2)" stroke="var(--border-mid)"/><text x="186" y="42" fill="var(--text-dim)">#</text><rect x="210" y="25" width="24" height="24" rx="4" fill="rgba(192,132,252,0.15)" stroke="var(--purple)"/><text x="216" y="42" fill="var(--purple)">e</text></g><path d="M 42 65 L 42 85" stroke="var(--purple)" stroke-width="2" stroke-dasharray="2"/><path d="M 222 65 L 222 85" stroke="var(--purple)" stroke-width="2" stroke-dasharray="2"/><text x="38" y="100" font-family="'JetBrains Mono',monospace" font-size="12" fill="var(--purple)">i</text><text x="218" y="100" font-family="'JetBrains Mono',monospace" font-size="12" fill="var(--purple)">j</text></svg>`
+      },
+      {
         num:"#1221", title:"Split Balanced Strings", href:"strings/split-balanced-strings-visualizer.html",
         color:"amber", tagColor:"var(--amber)",
         btnStyle:"background:rgba(251,191,36,0.12);color:var(--amber);border:1px solid rgba(251,191,36,0.25)",
@@ -997,6 +1019,17 @@ const TOPICS = {
         pills:["O(S)","Shrink loop","Early exit","String"],
         kw:"longest common prefix shrink iterative string",
         svg:`<svg viewBox="0 0 300 130"><g fill="#6b7280" font-family="'JetBrains Mono',monospace" font-size="16" font-weight="700"><text x="40" y="40"><tspan fill="#f472b6">fl</tspan>ower</text><text x="40" y="70"><tspan fill="#f472b6">fl</tspan>ow</text><text x="40" y="100"><tspan fill="#f472b6">fl</tspan>ight</text></g><rect x="35" y="20" width="30" height="90" fill="none" stroke="#f472b6" stroke-width="2" stroke-dasharray="4" rx="4"/></svg>`
+      },
+      {
+        num:"#242", title:"Valid Anagram", href:"strings/valid-anagram-visualizer.html",
+        color:"teal", tagColor:"var(--teal)",
+        btnStyle:"background:rgba(45,212,191,0.12);color:var(--teal);border:1px solid rgba(45,212,191,0.25)",
+        diff:"easy", steps:"10+",
+        pattern:"Frequency Count", patternColor:"#2dd4bf", patternBg:"rgba(45,212,191,0.1)",
+        desc:"Iterate the first string to tally character counts into a map, and iterate the second to deduct them—validating an exact match.",
+        pills:["O(N)","HashMap","Frequency Count"],
+        kw:"valid anagram hashmap frequency counting dictionary",
+        svg:`<svg viewBox="0 0 300 130"><g font-family="'JetBrains Mono',monospace" font-size="16" font-weight="700"><rect x="40" y="20" width="220" height="40" rx="6" fill="rgba(45,212,191,0.1)" stroke="var(--teal)"/><text x="60" y="45" fill="var(--teal)">a:3</text><text x="110" y="45" fill="var(--teal)">n:1</text><text x="160" y="45" fill="var(--teal)">g:1</text><text x="210" y="45" fill="var(--teal)">r:1</text></g><g font-family="'JetBrains Mono',monospace" font-size="14" font-weight="700"><rect x="80" y="80" width="24" height="24" rx="4" fill="rgba(61,66,81,0.2)" stroke="var(--border-mid)"/><text x="86" y="97" fill="var(--text-dim)">r</text><rect x="110" y="80" width="24" height="24" rx="4" fill="rgba(61,66,81,0.2)" stroke="var(--border-mid)"/><text x="116" y="97" fill="var(--text-dim)">a</text><rect x="140" y="80" width="24" height="24" rx="4" fill="rgba(45,212,191,0.15)" stroke="var(--teal)"/><text x="146" y="97" fill="var(--teal)">t</text></g><path d="M 152 75 L 152 65" stroke="var(--red)" stroke-width="2" marker-end="url(#arrowRed)"/><defs><marker id="arrowRed" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="var(--red)"/></marker></defs></svg>`
       }
   ] },
   hashmap: { label:"HashMap / HashSet",   icon:"🗂️", color:"var(--amber)",  badgeStyle:"background:rgba(251,191,36,0.1);color:var(--amber);border:1px solid rgba(251,191,36,0.2)",  description:"Frequency Count · Lookup · Two Sum patterns",                    problems:[] },

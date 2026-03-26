@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>#242 · Valid Anagram — DSA Visualizer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Sora:wght@300;400;600;700;800&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0d0f14;--surface:#13161d;--surface2:#1a1e28;--surface3:#212638;
+  --border:rgba(255,255,255,0.07);--border-mid:rgba(255,255,255,0.12);
+  --text:#e8eaf0;--text-muted:#6b7280;--text-dim:#3d4251;
+  --accent:#2dd4bf; /* Teal base for this vis */
+  --green:#34d399;--amber:#fbbf24;
+  --blue:#60a5fa;--red:#f87171;--orange:#fb923c;
+  --cyan:#22d3ee; --teal:#2dd4bf;
+  --mono:'JetBrains Mono',monospace;--sans:'Sora',sans-serif;
+}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:15px;line-height:1.6;min-height:100vh;overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;
+  background-image:linear-gradient(rgba(45,212,191,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(45,212,191,0.03) 1px,transparent 1px);
+  background-size:40px 40px;pointer-events:none;z-index:0}
+.page{position:relative;z-index:1;max-width:980px;margin:0 auto;padding:3rem 1.5rem 6rem}
+@keyframes fadeUp{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
+
+/* HEADER */
+.back-link{display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:11px;color:var(--text-muted);text-decoration:none;margin-bottom:2rem;opacity:.7;transition:opacity .2s}
+.back-link:hover{opacity:1}
+.prob-meta{display:flex;align-items:center;gap:10px;margin-bottom:.75rem;flex-wrap:wrap}
+.badge{display:inline-block;font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:3px 10px;border-radius:100px}
+.badge-easy{background:rgba(52,211,153,0.12);color:var(--green);border:1px solid rgba(52,211,153,0.25)}
+.badge-pat{background:rgba(45,212,191,0.12);color:var(--accent);border:1px solid rgba(45,212,191,0.25)}
+h1.prob-title{font-size:clamp(1.8rem,5vw,2.8rem);font-weight:800;letter-spacing:-.03em;margin-bottom:.5rem;animation:fadeUp .6s ease both}
+.prob-num{color:var(--text-dim);font-family:var(--mono)}
+
+/* SECTIONS */
+section{margin-bottom:2.75rem;animation:fadeUp .6s ease both}
+section:nth-child(2){animation-delay:.08s}
+section:nth-child(3){animation-delay:.13s}
+section:nth-child(4){animation-delay:.18s}
+section:nth-child(5){animation-delay:.23s}
+section:nth-child(6){animation-delay:.28s}
+.sec-label{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);margin-bottom:.6rem}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:1.4rem}
+
+/* PATTERN BANNER */
+.pat-banner{background:linear-gradient(135deg,rgba(45,212,191,0.08),rgba(96,165,250,0.05));border:1px solid rgba(45,212,191,0.2);border-radius:14px;padding:1.4rem}
+.pat-name{font-size:1.05rem;font-weight:700;color:var(--accent);margin-bottom:.35rem}
+.pat-why{color:var(--text-muted);font-size:13.5px;line-height:1.65;margin-bottom:.9rem}
+.related{display:flex;gap:.4rem;flex-wrap:wrap}
+.chip{font-family:var(--mono);font-size:11px;padding:3px 11px;border-radius:100px;background:var(--surface2);border:1px solid var(--border-mid);color:var(--text-muted)}
+
+/* PROBLEM */
+.ex-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:.75rem;margin-top:.9rem}
+.ex-card{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:.85rem}
+.ex-lbl{font-family:var(--mono);font-size:10px;color:var(--text-dim);letter-spacing:.1em;text-transform:uppercase;margin-bottom:.35rem}
+.ex-in{font-family:var(--mono);font-size:12px;color:var(--accent);margin-bottom:.2rem}
+.ex-out{font-family:var(--mono);font-size:12px;color:var(--green)}
+
+/* INTUITION */
+.hint-list{list-style:none;counter-reset:h;display:flex;flex-direction:column;gap:.65rem}
+.hint-list li{counter-increment:h;display:flex;gap:.7rem;font-size:13.5px;color:var(--text-muted);line-height:1.6}
+.hint-list li::before{content:counter(h);display:flex;align-items:center;justify-content:center;min-width:21px;height:21px;border-radius:50%;background:var(--surface3);border:1px solid var(--border-mid);font-family:var(--mono);font-size:11px;font-weight:700;color:var(--accent);margin-top:2px;flex-shrink:0}
+.key-trick{margin-top:.9rem;background:rgba(45,212,191,0.07);border:1px solid rgba(45,212,191,0.18);border-radius:8px;padding:.7rem 1rem;font-size:13px;color:var(--accent);line-height:1.6}
+
+/* CODE BLOCK */
+.code-wrap{background:#090b10;border:1px solid var(--border);border-radius:12px;overflow:hidden}
+.code-hdr{display:flex;justify-content:space-between;align-items:center;padding:.5rem 1rem;background:var(--surface);border-bottom:1px solid var(--border)}
+.code-lang{font-family:var(--mono);font-size:10px;color:var(--text-dim);letter-spacing:.1em;text-transform:uppercase}
+pre.code-body{padding:1.1rem 1.4rem;overflow-x:auto;font-family:var(--mono);font-size:13px;line-height:1.85;tab-size:4}
+.cl{display:block;padding:0 .4rem;margin:0 -.4rem;border-radius:4px;transition:background .2s;border-left:2px solid transparent}
+.cl.al{background:rgba(45,212,191,0.1);border-left-color:var(--accent)}
+.kw{color:#c792ea}.fn{color:#82aaff}.str{color:#c3e88d}.num{color:#f78c6c}
+.vr{color:#eeffff}.op{color:#89ddff}.mt{color:#2dd4bf}
+
+/* VISUALIZER */
+.viz-wrap{background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden}
+.viz-topbar{display:flex;align-items:center;justify-content:space-between;padding:.65rem 1.1rem;border-bottom:1px solid var(--border);flex-wrap:wrap;gap:.5rem}
+.ex-sel{display:flex;gap:.35rem;flex-wrap:wrap}
+.eb{font-family:var(--mono);font-size:11px;padding:4px 12px;border-radius:100px;background:var(--surface2);border:1px solid var(--border-mid);color:var(--text-muted);cursor:pointer;transition:all .18s}
+.eb.on{background:rgba(45,212,191,0.15);color:var(--accent);border-color:rgba(45,212,191,0.35)}
+.res-badge{font-family:var(--mono);font-size:12px;padding:4px 14px;border-radius:100px;background:var(--surface2);border:1px solid var(--border-mid);color:var(--text-muted);transition:all .3s}
+.res-badge.show{background:rgba(52,211,153,0.12);color:var(--green);border-color:rgba(52,211,153,0.3)}
+.res-badge.show.fail{background:rgba(248,113,113,0.12);color:var(--red);border-color:rgba(248,113,113,0.3)}
+.prog-track{height:3px;background:var(--surface2)}
+.prog-fill{height:100%;background:linear-gradient(90deg,var(--blue),var(--accent));transition:width .3s ease;border-radius:0 3px 3px 0}
+
+/* Viz body layout */
+.viz-body{display:grid;grid-template-columns:1fr 280px;min-height:430px}
+@media(max-width:768px){.viz-body{grid-template-columns:1fr}}
+.viz-left{padding:1.4rem;border-right:1px solid var(--border);display:flex;flex-direction:column;gap:1.5rem;}
+.viz-right{padding:1.4rem;display:flex;flex-direction:column;gap:.8rem}
+.viz-sub-lbl{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--text-dim);margin-bottom:.65rem}
+
+/* Array/Cells display */
+.cell-row{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:0;}
+.sc{width:34px;height:34px;display:inline-flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:14px;font-weight:700;border-radius:8px;border:1.5px solid;transition:all .22s;}
+.sc.dim{opacity:0.3;filter:grayscale(1);}
+.sc.act{box-shadow:0 0 10px rgba(45,212,191,0.3);transform:translateY(-2px);border-color:var(--accent);color:var(--accent);}
+.sc.neu{background:rgba(61,66,81,0.15);border-color:rgba(61,66,81,0.25);color:var(--text-muted);}
+
+/* Pointers */
+.ptr{font-family:var(--mono);font-size:11px;font-weight:700;color:var(--accent);margin-top:4px;min-height:16px;}
+.ptr.hide{visibility:hidden}
+
+/* Hash map view */
+.hash-grid{display:flex;flex-wrap:wrap;gap:8px;padding:10px;background:rgba(0,0,0,0.2);border-radius:10px;border:1px solid var(--border);min-height:60px;}
+.h-cell{display:flex;flex-direction:column;align-items:center;background:var(--surface3);border:1px solid var(--border-mid);border-radius:6px;overflow:hidden;min-width:40px;transition:all 0.2s;}
+.h-key{font-family:var(--mono);font-size:12px;padding:4px 8px;background:rgba(45,212,191,0.15);color:var(--teal);font-weight:700;width:100%;text-align:center;border-bottom:1px solid rgba(45,212,191,0.25);}
+.h-val{font-family:var(--mono);font-size:14px;padding:6px 8px;color:var(--text);font-weight:700;}
+.h-cell.act{transform:scale(1.1);box-shadow:0 0 10px rgba(45,212,191,0.3);border-color:var(--teal);}
+
+/* Variables panel */
+.var-rows{display:flex;flex-direction:column;gap:5px}
+.var-r{display:flex;justify-content:space-between;align-items:center;padding:.4rem .65rem;background:var(--surface2);border-radius:7px;border:1px solid var(--border)}
+.vn{font-family:var(--mono);font-size:11px;color:var(--text-dim)}
+.vv{font-family:var(--mono);font-size:12px;font-weight:700;color:var(--text);max-width:130px;text-align:right;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.vv.c{color:var(--accent)}
+
+/* Step desc + log */
+.step-desc-bar{padding:.65rem 1.1rem;border-top:1px solid var(--border);border-bottom:1px solid var(--border);background:var(--surface2)}
+.sd{font-size:13px;color:var(--text-muted);line-height:1.65;min-height:43px}
+.sd em{color:var(--text);font-style:normal;font-weight:600;font-family:var(--mono)}
+.exec-log{padding:.65rem 1.1rem;max-height:140px;overflow-y:auto}
+.elt{font-family:var(--mono);font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--text-dim);margin-bottom:.35rem}
+.ll{font-family:var(--mono);font-size:11px;color:var(--text-dim);padding:1px 0;display:flex;gap:5px}
+.ll::before{content:'›';color:var(--text-dim);flex-shrink:0}
+.ll.lh{color:var(--text-muted)}.ll.lh::before{content:'▶';color:var(--accent)}
+
+/* Controls */
+.ctrl-bar{display:flex;align-items:center;justify-content:center;gap:.65rem;padding:.65rem 1.1rem;border-top:1px solid var(--border);flex-wrap:wrap}
+.cb{display:flex;align-items:center;gap:5px;font-family:var(--mono);font-size:12px;padding:6px 16px;border-radius:8px;background:var(--surface2);border:1px solid var(--border-mid);color:var(--text-muted);cursor:pointer;transition:all .18s}
+.cb:hover{background:var(--surface3);color:var(--text)}
+.cb.pri{background:rgba(45,212,191,0.14);color:var(--accent);border-color:rgba(45,212,191,0.3)}
+.cb.pri:hover{background:rgba(45,212,191,0.22)}
+.cb:disabled{opacity:.3;cursor:not-allowed}
+.sc-ctr{font-family:var(--mono);font-size:11px;color:var(--text-dim);min-width:60px;text-align:center}
+
+/* COMPLEXITY */
+.cx-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:.9rem}
+.cx-c{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:.9rem;text-align:center}
+.cx-lbl{font-family:var(--mono);font-size:10px;color:var(--text-dim);text-transform:uppercase;letter-spacing:.1em;margin-bottom:.35rem}
+.cx-v{font-family:var(--mono);font-size:1.35rem;font-weight:700;color:var(--accent)}
+.cx-n{font-size:12px;color:var(--text-dim);margin-top:.25rem}
+.tks{margin-top:.9rem;display:flex;flex-direction:column;gap:.45rem}
+.tk{padding:.55rem .9rem;background:var(--surface2);border-left:3px solid var(--accent);border-radius:0 8px 8px 0;font-size:13px;color:var(--text-muted);line-height:1.55}
+.tk code{font-family:var(--mono);font-size:12px;color:var(--text);background:var(--surface3);padding:1px 5px;border-radius:4px}
+</style>
+</head>
+<body>
+<div class="page">
+
+<a href="../index.html" class="back-link">← back to hub</a>
+
+<!-- HEADER -->
+<div class="prob-meta">
+  <span class="badge badge-easy">Easy</span>
+  <span class="badge badge-pat">Frequency Count</span>
+</div>
+<h1 class="prob-title"><span class="prob-num">#242 · </span>Valid Anagram</h1>
+
+<!-- 1. PATTERN BANNER -->
+<section>
+  <div class="sec-label">Pattern</div>
+  <div class="pat-banner">
+    <div class="pat-name">Frequency Count (HashMap)</div>
+    <div class="pat-why">Determine if two strings are identical in makeup by iterating one to tally frequencies into a dictionary, and iterating the other to deduct them. If the books balance out to exactly zero without dipping below, it's an anagram!</div>
+    <div class="related">
+      <span class="chip">#49 Group Anagrams</span>
+      <span class="chip">#438 Find All Anagrams in a String</span>
+      <span class="chip">#383 Find All Anagrams in a String</span>
+    </div>
+  </div>
+</section>
+
+<!-- 2. PROBLEM STATEMENT -->
+<section>
+  <div class="sec-label">Problem</div>
+  <div class="card">
+    <p style="color:var(--text-muted);font-size:14px;margin-bottom:.85rem">Given two strings <code>s</code> and <code>t</code>, return <code>true</code> if <code>t</code> is an anagram of <code>s</code>, and <code>false</code> otherwise. An anagram is a word formed by rearranging the letters of a different word, using all the original letters exactly once.</p>
+    <p style="color:var(--text-muted);font-size:14px;margin-bottom:.85rem"><strong style="color:var(--text)">Analogy:</strong> Imagine two identical Lego sets. If you completely disassemble `s` and sort the block types into logical piles, you should be able to build `t` from those exact same piles. No blocks missing, no blocks left over!</p>
+    <div class="ex-row">
+      <div class="ex-card">
+        <div class="ex-lbl">Example 1</div>
+        <div class="ex-in">s = "anagram", t = "nagaram"</div>
+        <div class="ex-out">→ true</div>
+      </div>
+      <div class="ex-card">
+        <div class="ex-lbl">Example 2</div>
+        <div class="ex-in">s = "rat", t = "car"</div>
+        <div class="ex-out">→ false</div>
+      </div>
+      <div class="ex-card">
+        <div class="ex-lbl">Example 3</div>
+        <div class="ex-in">s = "ab", t = "a"</div>
+        <div class="ex-out">→ false (length mismatch)</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 3. INTUITION -->
+<section>
+  <div class="sec-label">Intuition &amp; Hints</div>
+  <div class="card">
+    <ul class="hint-list">
+      <li><strong style="color:var(--text)">Length Check:</strong> The most obvious hurdle. If the string lengths are different, there's a 0% chance they are anagrams. Terminate early.</li>
+      <li><strong style="color:var(--text)">First Loop Additions:</strong> Traverse `s`, dumping everything into a Javascript Object (`source`), tallying up the character counts explicitly.</li>
+      <li><strong style="color:var(--text)">Second Loop Deductions:</strong> Traverse `t`, deducting counts. If `t` needs a letter that is currently zero (or undefined), it means it's requesting a block that we ran out of—return false immediately!</li>
+    </ul>
+    <div class="key-trick">
+      ✦ Note: The algorithm implemented here evaluates <code>source[t[j]] &gt; 0</code> without explicitly checking <code>undefined</code>. In JS, comparing <code>undefined &gt; 0</code> cleanly bypasses errors and evaluates directly to <code>false</code>, ensuring safety against missing characters!
+    </div>
+  </div>
+</section>
+
+<!-- 4. CODE BLOCK -->
+<section>
+  <div class="sec-label">Solution Code</div>
+  <div class="code-wrap">
+    <div class="code-hdr">
+      <span class="code-lang">javascript</span>
+      <span style="font-family:var(--mono);font-size:10px;color:var(--text-dim)">your solution — exact</span>
+    </div>
+    <pre class="code-body"><span id="cl1" class="cl"><span class="kw">var</span> <span class="fn">isAnagram</span> <span class="op">=</span> <span class="kw">function</span> (<span class="vr">s</span>, <span class="vr">t</span>) {</span>
+<span id="cl2" class="cl">    <span class="kw">let</span> <span class="vr">source</span> <span class="op">=</span> {}</span>
+<span id="cl3" class="cl">    <span class="kw">if</span>(<span class="vr">s</span>.<span class="mt">length</span> <span class="op">!==</span> <span class="vr">t</span>.<span class="mt">length</span>) <span class="kw">return</span> <span class="kw">false</span></span>
+<span id="cl4" class="cl">    <span class="kw">for</span> (<span class="kw">let</span> <span class="vr">i</span> <span class="op">=</span> <span class="num">0</span>; <span class="vr">i</span> <span class="op">&lt;</span> <span class="vr">s</span>.<span class="mt">length</span>; <span class="vr">i</span><span class="op">++</span>) {</span>
+<span id="cl5" class="cl">        <span class="kw">if</span> (<span class="vr">source</span>[<span class="vr">s</span>[<span class="vr">i</span>]]) {</span>
+<span id="cl6" class="cl">            <span class="vr">source</span>[<span class="vr">s</span>[<span class="vr">i</span>]] <span class="op">+=</span> <span class="num">1</span>;</span>
+<span id="cl7" class="cl">        } <span class="kw">else</span> {</span>
+<span id="cl8" class="cl">            <span class="vr">source</span>[<span class="vr">s</span>[<span class="vr">i</span>]] <span class="op">=</span> <span class="num">1</span></span>
+<span id="cl9" class="cl">        }</span>
+<span id="cl10" class="cl">    }</span>
+<span id="cl11" class="cl">    <span class="kw">for</span> (<span class="kw">let</span> <span class="vr">j</span> <span class="op">=</span> <span class="num">0</span>; <span class="vr">j</span> <span class="op">&lt;</span> <span class="vr">t</span>.<span class="mt">length</span>; <span class="vr">j</span><span class="op">++</span>) { </span>
+<span id="cl12" class="cl">        <span class="kw">if</span>(<span class="vr">source</span>[<span class="vr">t</span>[<span class="vr">j</span>]] <span class="op">&gt;</span> <span class="num">0</span>){</span>
+<span id="cl13" class="cl">            <span class="vr">source</span>[<span class="vr">t</span>[<span class="vr">j</span>]] <span class="op">-=</span> <span class="num">1</span></span>
+<span id="cl14" class="cl">        }<span class="kw">else</span> {</span>
+<span id="cl15" class="cl">            <span class="kw">return</span> <span class="kw">false</span></span>
+<span id="cl16" class="cl">        }</span>
+<span id="cl17" class="cl">    }</span>
+<span id="cl18" class="cl">    <span class="kw">return</span> <span class="kw">true</span></span>
+<span id="cl19" class="cl">};</span></pre>
+  </div>
+</section>
+
+<!-- 5. VISUALIZER -->
+<section>
+  <div class="sec-label">Interactive Visualizer</div>
+  <div class="viz-wrap">
+    <div class="viz-topbar">
+      <div class="ex-sel" id="exSel"></div>
+      <div class="res-badge" id="resBadge">result: —</div>
+    </div>
+    <div class="prog-track"><div class="prog-fill" id="progFill" style="width:0%"></div></div>
+    <div class="viz-body">
+      <!-- LEFT -->
+      <div class="viz-left">
+        <div>
+          <div class="viz-sub-lbl">String (s) — Build map</div>
+          <div class="cell-row" id="sGrid"></div>
+        </div>
+        <div>
+          <div class="viz-sub-lbl">String (t) — Subtract from map</div>
+          <div class="cell-row" id="tGrid"></div>
+        </div>
+        <div style="flex:1">
+          <div class="viz-sub-lbl">source (HashMap)</div>
+          <div class="hash-grid" id="hGrid"></div>
+        </div>
+      </div>
+      <!-- RIGHT -->
+      <div class="viz-right">
+        <div>
+          <div class="viz-sub-lbl">variables</div>
+          <div class="var-rows">
+            <div class="var-r"><span class="vn">i</span><span class="vv c" id="vI">—</span></div>
+            <div class="var-r"><span class="vn">s[i]</span><span class="vv c" id="vSI">—</span></div>
+            <div class="var-r"><span class="vn">j</span><span class="vv" id="vJ" style="color:var(--orange)">—</span></div>
+            <div class="var-r"><span class="vn">t[j]</span><span class="vv" id="vTJ" style="color:var(--orange)">—</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="step-desc-bar">
+      <div class="sd" id="stepDesc">Press Next or ▶ Play to step through the algorithm.</div>
+    </div>
+    <div class="exec-log">
+      <div class="elt">execution log</div>
+      <div id="execLog"></div>
+    </div>
+    <div class="ctrl-bar">
+      <button class="cb" id="btnPrev" onclick="prevStep()" disabled>← Prev</button>
+      <button class="cb pri" id="btnPlay" onclick="togglePlay()">▶ Play</button>
+      <span class="sc-ctr" id="stpCtr">0 / 0</span>
+      <button class="cb" id="btnNext" onclick="nextStep()">Next →</button>
+    </div>
+  </div>
+</section>
+
+<!-- 6. COMPLEXITY -->
+<section>
+  <div class="sec-label">Complexity</div>
+  <div class="cx-grid">
+    <div class="cx-c">
+      <div class="cx-lbl">Time</div>
+      <div class="cx-v">O(S + T)</div>
+      <div class="cx-n">Two independent linear loops</div>
+    </div>
+    <div class="cx-c">
+      <div class="cx-lbl">Space</div>
+      <div class="cx-v">O(1) *</div>
+      <div class="cx-n">Bounded alphabet dict</div>
+    </div>
+  </div>
+  <div class="tks">
+    <div class="tk">The first loop runs O(S) times, and the second loop runs O(T) times, making the math strictly additive: O(S + T).</div>
+    <div class="tk">* The dictionary `source` size is bounded strictly to the max number of characters in the alphabet (26), so the space doesn't grow towards infinity, bounding it theoretically at O(1) space!</div>
+  </div>
+</section>
+
+</div><!-- /page -->
+
+<script>
+// ─── STEP ENGINE ───────────────────────────────────────────────────────────
+
+function computeSteps(s, t) {
+  const steps = [];
+  
+  steps.push({
+    desc: `Function called with <em>s</em> = "${s}" and <em>t</em> = "${t}".`,
+    log: [{t:`isAnagram("${s}", "${t}")`, h:true}],
+    phase: 'init', s, t, source: {}, i:-1, j:-1, activeKey: null,
+    lines: [1], vResult: '—'
+  });
+
+  let source = {};
+  steps.push({
+    desc: `Initialize empty dictionary <em>source</em>.`,
+    log: [{t:`let source = {}`, h:true}],
+    phase: 'vars', s, t, source: {...source}, i:-1, j:-1, activeKey: null,
+    lines: [2], vResult: '—'
+  });
+
+  steps.push({
+    desc: `Check if lengths match: ${s.length} vs ${t.length}.`,
+    log: [{t:`s.length !== t.length → ${s.length !== t.length}`, h:false}],
+    phase: 'len_check', s, t, source: {...source}, i:-1, j:-1, activeKey: null,
+    lines: [3], vResult: '—'
+  });
+
+  if (s.length !== t.length) {
+    steps.push({
+      desc: `Lengths are different. They cannot be anagrams. Return false.`,
+      log: [{t:`Lengths differ, return false`, h:true}],
+      phase: 'done', s, t, source: {...source}, i:-1, j:-1, activeKey: null,
+      lines: [3], vResult: 'false'
+    });
+    return steps;
+  }
+
+  for (let i = 0; i < s.length; i++) {
+    steps.push({
+      desc: `First Loop: <em>i</em> = ${i}. Read character '${s[i]}' from <em>s</em>.`,
+      log: [{t:`for i=${i}: read '${s[i]}'`, h:true}],
+      phase: 'loop1', s, t, source: {...source}, i, j:-1, activeKey: s[i],
+      lines: [4,5], vResult: '—'
+    });
+
+    if (source[s[i]]) {
+      source[s[i]] += 1;
+      steps.push({
+        desc: `Character '${s[i]}' is already in <em>source</em>. Increment count to ${source[s[i]]}.`,
+        log: [{t:`source['${s[i]}'] += 1 → ${source[s[i]]}`, h:true}],
+        phase: 'update1', s, t, source: {...source}, i, j:-1, activeKey: s[i],
+        lines: [6], vResult: '—'
+      });
+    } else {
+      source[s[i]] = 1;
+      steps.push({
+        desc: `Character '${s[i]}' is not in <em>source</em>. Initialize count to 1.`,
+        log: [{t:`source['${s[i]}'] = 1`, h:true}],
+        phase: 'update1', s, t, source: {...source}, i, j:-1, activeKey: s[i],
+        lines: [8], vResult: '—'
+      });
+    }
+  }
+
+  for (let j = 0; j < t.length; j++) {
+    steps.push({
+      desc: `Second Loop: <em>j</em> = ${j}. Read character '${t[j]}' from <em>t</em>.`,
+      log: [{t:`for j=${j}: read '${t[j]}'`, h:true}],
+      phase: 'loop2', s, t, source: {...source}, i:-1, j, activeKey: t[j],
+      lines: [11], vResult: '—'
+    });
+
+    steps.push({
+      desc: `Evaluate Javascript conditional: <code>source[t[j]] &gt; 0</code>.<br/>Evaluation: ${source[t[j]]} &gt; 0`,
+      log: [{t:`source['${t[j]}'] > 0 → ${source[t[j]] > 0}`, h:false}],
+      phase: 'check2', s, t, source: {...source}, i:-1, j, activeKey: t[j],
+      lines: [12], vResult: '—'
+    });
+
+    if (source[t[j]] > 0) { 
+        source[t[j]] -= 1;
+        steps.push({
+          desc: `Count constraint checks out. Decrement count for '${t[j]}' in <em>source</em> to ${source[t[j]]}.`,
+          log: [{t:`source['${t[j]}'] -= 1 → ${source[t[j]]}`, h:true}],
+          phase: 'update2', s, t, source: {...source}, i:-1, j, activeKey: t[j],
+          lines: [13], vResult: '—'
+        });
+    } else {
+        steps.push({
+          desc: `Character '${t[j]}' count is undefined or &lt; 0! It wasn't in <em>s</em> enough times to satisfy <em>t</em>. Return false.`,
+          log: [{t:`source['${t[j]}'] evaluates negative/undefined`, h:true}],
+          phase: 'done', s, t, source: {...source}, i:-1, j, activeKey: t[j],
+          lines: [14, 15], vResult: 'false'
+        });
+        return steps;
+    }
+  }
+
+  steps.push({
+    desc: `Second loop successfully finished. We cancelled out all characters safely. Return true.`,
+    log: [{t:`return true`, h:true}],
+    phase: 'done', s, t, source: {...source}, i:-1, j:-1, activeKey: null,
+    lines: [18], vResult: 'true'
+  });
+
+  return steps;
+}
+
+// ─── EXAMPLES ──────────────────────────────────────────────────────────────
+
+const EXAMPLES = [
+  { label:'Ex 1: "anagram" vs "nagaram"', s:'anagram', t:'nagaram' },
+  { label:'Ex 2: "rat" vs "car"',         s:'rat',     t:'car' },
+  { label:'Ex 3: "ab" vs "a"',            s:'ab',      t:'a' },
+  { label:'Ex 4: Shortfall ("ab" / "aa")', s:'ab', t:'aa' },
+];
+
+// ─── STATE ─────────────────────────────────────────────────────────────────
+
+let exIdx   = 0;
+let stepIdx = 0;
+let steps   = [];
+let playing = false;
+let playTimer = null;
+
+// ─── INIT ───────────────────────────────────────────────────────────────────
+
+(function init() {
+  const sel = document.getElementById('exSel');
+  sel.innerHTML = EXAMPLES.map((e,idx) =>
+    `<button class="eb${idx===0?' on':''}" onclick="loadEx(${idx})">${e.label}</button>`
+  ).join('');
+  loadEx(0);
+})();
+
+function loadEx(idx) {
+  stopPlay();
+  exIdx   = idx;
+  stepIdx = 0;
+  steps   = computeSteps(EXAMPLES[idx].s, EXAMPLES[idx].t);
+  document.querySelectorAll('.eb').forEach((b,i) => b.classList.toggle('on', i===idx));
+  render(steps[0]);
+  updateCtrl();
+}
+
+// ─── RENDER ─────────────────────────────────────────────────────────────────
+
+function render(sItem) {
+  
+  // ── "s" Grid ──────────────────────────────────────────────────
+  const sStrArr = sItem.s.split('');
+  const sCells = sStrArr.map((ch, idx) => {
+    let clss = ['neu']; let ptrStr = '';
+    if (sItem.phase !== 'init' && sItem.phase !== 'vars' && sItem.phase !== 'len_check') {
+        if(idx < sItem.i) { clss.push('dim'); }
+        if(idx === sItem.i) { clss.push('act'); ptrStr = 'i'; }
+    }
+    if (sItem.j >= 0 || sItem.phase === 'done') { clss.push('dim'); }
+
+    return `<div style="display:flex; flex-direction:column; align-items:center; margin-right:4px;">
+              <span class="sc ${clss.join(' ')}" style="margin-bottom:0">${ch}</span>
+              <span class="ptr ${ptrStr ? '' : 'hide'}">${ptrStr || 'x'}</span>
+            </div>`;
+  }).join('');
+  document.getElementById('sGrid').innerHTML = sCells || `-`;
+
+  // ── "t" Grid ──────────────────────────────────────────────────
+  const tStrArr = sItem.t.split('');
+  const tCells = tStrArr.map((ch, idx) => {
+    let clss = ['neu']; let ptrStr = '';
+    if (sItem.j >= 0 || sItem.phase === 'done' || sItem.phase === 'loop2' || sItem.phase === 'check2' || sItem.phase === 'update2') {
+        if(idx < sItem.j) { clss.push('dim'); }
+        if(idx === sItem.j) { clss.push('act'); ptrStr = 'j'; }
+    } else {
+        clss.push('dim'); /* grayed out during first loop */
+    }
+    
+    if (sItem.phase === 'done') { clss.push('dim'); clss.classList?.remove('act'); }
+
+    return `<div style="display:flex; flex-direction:column; align-items:center; margin-right:4px;">
+              <span class="sc ${clss.join(' ')}" style="margin-bottom:0; border-color:var(--orange)">${ch}</span>
+              <span class="ptr ${ptrStr ? '' : 'hide'}" style="color:var(--orange)">${ptrStr || 'x'}</span>
+            </div>`;
+  }).join('');
+  document.getElementById('tGrid').innerHTML = tCells || `-`;
+
+  // ── HashMap (source) ─────────────────────────────────────────────
+  let hMapHTML = '';
+  // Force a deterministic key order based on appearances
+  const keys = Object.keys(sItem.source || {});
+  if(keys.length === 0) {
+      hMapHTML = `<span style="font-family:var(--mono); color:var(--text-dim); padding:10px;">{} (empty)</span>`;
+  } else {
+      hMapHTML = keys.map(k => {
+          let v = sItem.source[k];
+          let actCls = (k === sItem.activeKey) ? ' act' : '';
+          return `<div class="h-cell${actCls}">
+                     <span class="h-key">${k}</span>
+                     <span class="h-val">${v}</span>
+                  </div>`;
+      }).join('');
+  }
+  document.getElementById('hGrid').innerHTML = hMapHTML;
+
+
+  // ── Variables ────────────────────────────────────────────────────
+  document.getElementById('vI').textContent  = sItem.i >= 0 && sItem.i < sItem.s.length ? sItem.i : '—';
+  document.getElementById('vSI').innerHTML = sItem.i >= 0 && sItem.i < sItem.s.length ? `"${sItem.s[sItem.i]}"` : '—';
+  document.getElementById('vJ').textContent  = sItem.j >= 0 && sItem.j < sItem.t.length ? sItem.j : '—';
+  document.getElementById('vTJ').innerHTML = sItem.j >= 0 && sItem.j < sItem.t.length ? `"${sItem.t[sItem.j]}"` : '—';
+
+  // ── Code highlight ────────────────────────────────────────────────
+  for (let n = 1; n <= 19; n++) {
+    const el = document.getElementById(`cl${n}`);
+    if (el) el.classList.remove('al');
+  }
+  (sItem.lines || []).forEach(n => {
+    const el = document.getElementById(`cl${n}`);
+    if (el) el.classList.add('al');
+  });
+
+  // ── Description ──────────────────────────────────────────────────
+  document.getElementById('stepDesc').innerHTML = sItem.desc;
+
+  // ── Log ──────────────────────────────────────────────────────────
+  document.getElementById('execLog').innerHTML =
+    (sItem.log || []).map(l => `<div class="ll${l.h?' lh':''}">${l.t}</div>`).join('');
+
+  // ── Result badge ─────────────────────────────────────────────────
+  const rb = document.getElementById('resBadge');
+  if (sItem.phase === 'done') {
+    rb.textContent = `result: ${sItem.vResult}`;
+    rb.className = 'res-badge show ' + (sItem.vResult === 'false' ? 'fail' : '');
+  } else {
+    rb.textContent = 'result: —';
+    rb.className = 'res-badge';
+  }
+
+  // ── Progress ─────────────────────────────────────────────────────
+  const pct = steps.length > 1 ? (stepIdx / (steps.length - 1)) * 100 : 0;
+  document.getElementById('progFill').style.width = pct + '%';
+  document.getElementById('stpCtr').textContent   = `${stepIdx + 1} / ${steps.length}`;
+}
+
+// ─── CONTROLS ───────────────────────────────────────────────────────────────
+
+function nextStep() {
+  if (stepIdx < steps.length - 1) { stepIdx++; render(steps[stepIdx]); updateCtrl(); }
+  else stopPlay();
+}
+
+function prevStep() {
+  if (stepIdx > 0) { stepIdx--; render(steps[stepIdx]); updateCtrl(); }
+}
+
+function updateCtrl() {
+  document.getElementById('btnPrev').disabled = stepIdx === 0;
+  document.getElementById('btnNext').disabled = stepIdx === steps.length - 1;
+}
+
+function togglePlay() { playing ? stopPlay() : startPlay(); }
+
+function startPlay() {
+  playing = true;
+  document.getElementById('btnPlay').textContent = '⏸ Pause';
+  playTimer = setInterval(() => {
+    if (stepIdx < steps.length - 1) { stepIdx++; render(steps[stepIdx]); updateCtrl(); }
+    else stopPlay();
+  }, 950);
+}
+
+function stopPlay() {
+  playing = false;
+  clearInterval(playTimer);
+  const b = document.getElementById('btnPlay');
+  if (b) b.textContent = '▶ Play';
+}
+
+// ─── KEYBOARD ───────────────────────────────────────────────────────────────
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight' || e.key === 'ArrowDown') { e.preventDefault(); nextStep(); }
+  if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp')   { e.preventDefault(); prevStep(); }
+  if (e.key === ' ') { e.preventDefault(); togglePlay(); }
+});
+</script>
+</body>
+</html>

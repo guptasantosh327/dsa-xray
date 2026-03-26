@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>#1903 · Largest Odd Number in String — DSA Visualizer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Sora:wght@300;400;600;700;800&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0d0f14;--surface:#13161d;--surface2:#1a1e28;--surface3:#212638;
+  --border:rgba(255,255,255,0.07);--border-mid:rgba(255,255,255,0.12);
+  --text:#e8eaf0;--text-muted:#6b7280;--text-dim:#3d4251;
+  --accent:#22d3ee; /* Cyan base for this vis */
+  --green:#34d399;--amber:#fbbf24;
+  --blue:#60a5fa;--red:#f87171;--orange:#fb923c;
+  --cyan:#22d3ee;
+  --mono:'JetBrains Mono',monospace;--sans:'Sora',sans-serif;
+}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:15px;line-height:1.6;min-height:100vh;overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;
+  background-image:linear-gradient(rgba(34,211,238,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(34,211,238,0.03) 1px,transparent 1px);
+  background-size:40px 40px;pointer-events:none;z-index:0}
+.page{position:relative;z-index:1;max-width:980px;margin:0 auto;padding:3rem 1.5rem 6rem}
+@keyframes fadeUp{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
+
+/* HEADER */
+.back-link{display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:11px;color:var(--text-muted);text-decoration:none;margin-bottom:2rem;opacity:.7;transition:opacity .2s}
+.back-link:hover{opacity:1}
+.prob-meta{display:flex;align-items:center;gap:10px;margin-bottom:.75rem;flex-wrap:wrap}
+.badge{display:inline-block;font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:3px 10px;border-radius:100px}
+.badge-easy{background:rgba(52,211,153,0.12);color:var(--green);border:1px solid rgba(52,211,153,0.25)}
+.badge-pat{background:rgba(34,211,238,0.12);color:var(--accent);border:1px solid rgba(34,211,238,0.25)}
+h1.prob-title{font-size:clamp(1.8rem,5vw,2.8rem);font-weight:800;letter-spacing:-.03em;margin-bottom:.5rem;animation:fadeUp .6s ease both}
+.prob-num{color:var(--text-dim);font-family:var(--mono)}
+
+/* SECTIONS */
+section{margin-bottom:2.75rem;animation:fadeUp .6s ease both}
+section:nth-child(2){animation-delay:.08s}
+section:nth-child(3){animation-delay:.13s}
+section:nth-child(4){animation-delay:.18s}
+section:nth-child(5){animation-delay:.23s}
+section:nth-child(6){animation-delay:.28s}
+.sec-label{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);margin-bottom:.6rem}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:1.4rem}
+
+/* PATTERN BANNER */
+.pat-banner{background:linear-gradient(135deg,rgba(34,211,238,0.08),rgba(96,165,250,0.05));border:1px solid rgba(34,211,238,0.2);border-radius:14px;padding:1.4rem}
+.pat-name{font-size:1.05rem;font-weight:700;color:var(--accent);margin-bottom:.35rem}
+.pat-why{color:var(--text-muted);font-size:13.5px;line-height:1.65;margin-bottom:.9rem}
+.related{display:flex;gap:.4rem;flex-wrap:wrap}
+.chip{font-family:var(--mono);font-size:11px;padding:3px 11px;border-radius:100px;background:var(--surface2);border:1px solid var(--border-mid);color:var(--text-muted)}
+
+/* PROBLEM */
+.ex-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:.75rem;margin-top:.9rem}
+.ex-card{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:.85rem}
+.ex-lbl{font-family:var(--mono);font-size:10px;color:var(--text-dim);letter-spacing:.1em;text-transform:uppercase;margin-bottom:.35rem}
+.ex-in{font-family:var(--mono);font-size:12px;color:var(--accent);margin-bottom:.2rem}
+.ex-out{font-family:var(--mono);font-size:12px;color:var(--green)}
+
+/* INTUITION */
+.hint-list{list-style:none;counter-reset:h;display:flex;flex-direction:column;gap:.65rem}
+.hint-list li{counter-increment:h;display:flex;gap:.7rem;font-size:13.5px;color:var(--text-muted);line-height:1.6}
+.hint-list li::before{content:counter(h);display:flex;align-items:center;justify-content:center;min-width:21px;height:21px;border-radius:50%;background:var(--surface3);border:1px solid var(--border-mid);font-family:var(--mono);font-size:11px;font-weight:700;color:var(--accent);margin-top:2px;flex-shrink:0}
+.key-trick{margin-top:.9rem;background:rgba(34,211,238,0.07);border:1px solid rgba(34,211,238,0.18);border-radius:8px;padding:.7rem 1rem;font-size:13px;color:var(--accent);line-height:1.6}
+.km{font-family:var(--mono);font-size:12px}
+
+/* CODE BLOCK */
+.code-wrap{background:#090b10;border:1px solid var(--border);border-radius:12px;overflow:hidden}
+.code-hdr{display:flex;justify-content:space-between;align-items:center;padding:.5rem 1rem;background:var(--surface);border-bottom:1px solid var(--border)}
+.code-lang{font-family:var(--mono);font-size:10px;color:var(--text-dim);letter-spacing:.1em;text-transform:uppercase}
+pre.code-body{padding:1.1rem 1.4rem;overflow-x:auto;font-family:var(--mono);font-size:13px;line-height:1.85;tab-size:4}
+.cl{display:block;padding:0 .4rem;margin:0 -.4rem;border-radius:4px;transition:background .2s;border-left:2px solid transparent}
+.cl.al{background:rgba(34,211,238,0.1);border-left-color:var(--accent)}
+.kw{color:#c792ea}.fn{color:#82aaff}.str{color:#c3e88d}.num{color:#f78c6c}
+.vr{color:#eeffff}.op{color:#89ddff}.mt{color:#ffcb6b}
+
+/* VISUALIZER */
+.viz-wrap{background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden}
+.viz-topbar{display:flex;align-items:center;justify-content:space-between;padding:.65rem 1.1rem;border-bottom:1px solid var(--border);flex-wrap:wrap;gap:.5rem}
+.ex-sel{display:flex;gap:.35rem;flex-wrap:wrap}
+.eb{font-family:var(--mono);font-size:11px;padding:4px 12px;border-radius:100px;background:var(--surface2);border:1px solid var(--border-mid);color:var(--text-muted);cursor:pointer;transition:all .18s}
+.eb.on{background:rgba(34,211,238,0.15);color:var(--accent);border-color:rgba(34,211,238,0.35)}
+.res-badge{font-family:var(--mono);font-size:12px;padding:4px 14px;border-radius:100px;background:var(--surface2);border:1px solid var(--border-mid);color:var(--text-muted);transition:all .3s}
+.res-badge.show{background:rgba(52,211,153,0.12);color:var(--green);border-color:rgba(52,211,153,0.3)}
+.prog-track{height:3px;background:var(--surface2)}
+.prog-fill{height:100%;background:linear-gradient(90deg,var(--blue),var(--accent));transition:width .3s ease;border-radius:0 3px 3px 0}
+
+/* Viz body layout */
+.viz-body{display:grid;grid-template-columns:1fr 240px;min-height:360px}
+@media(max-width:768px){.viz-body{grid-template-columns:1fr}}
+.viz-left{padding:1.4rem;border-right:1px solid var(--border);display:flex;flex-direction:column;justify-content:center}
+.viz-right{padding:1.4rem;display:flex;flex-direction:column;gap:.8rem}
+.viz-sub-lbl{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--text-dim);margin-bottom:.65rem}
+
+/* Array/Cells display */
+.cell-row{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:1.5rem;justify-content:center}
+.sc{width:38px;height:38px;display:inline-flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:16px;font-weight:700;border-radius:8px;border:1.5px solid;transition:all .22s;}
+.sc.dim{opacity:0.25;filter:grayscale(1);}
+.sc.neu{background:rgba(61,66,81,0.15);border-color:rgba(61,66,81,0.25);color:var(--text-muted);}
+.sc.act{box-shadow:0 0 10px rgba(34,211,238,0.3);transform:translateY(-2px);border-color:var(--accent);color:var(--accent);}
+.sc.bad{background:rgba(248,113,113,0.1) !important;border-color:var(--red) !important;color:var(--red) !important;}
+.sc.good{background:rgba(52,211,153,0.15) !important;border-color:var(--green) !important;color:var(--green) !important;}
+
+/* Pointers */
+.ptr{font-family:var(--mono);font-size:12px;font-weight:700;color:var(--accent);margin-top:4px}
+.ptr.hide{visibility:hidden}
+
+/* Variables panel */
+.var-rows{display:flex;flex-direction:column;gap:5px}
+.var-r{display:flex;justify-content:space-between;align-items:center;padding:.4rem .65rem;background:var(--surface2);border-radius:7px;border:1px solid var(--border)}
+.vn{font-family:var(--mono);font-size:11px;color:var(--text-dim)}
+.vv{font-family:var(--mono);font-size:12px;font-weight:700;color:var(--text);max-width:130px;text-align:right;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.vv.c{color:var(--accent)}
+
+/* Step desc + log */
+.step-desc-bar{padding:.65rem 1.1rem;border-top:1px solid var(--border);border-bottom:1px solid var(--border);background:var(--surface2)}
+.sd{font-size:13px;color:var(--text-muted);line-height:1.65;min-height:43px}
+.sd em{color:var(--text);font-style:normal;font-weight:600;font-family:var(--mono)}
+.exec-log{padding:.65rem 1.1rem;max-height:140px;overflow-y:auto}
+.elt{font-family:var(--mono);font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--text-dim);margin-bottom:.35rem}
+.ll{font-family:var(--mono);font-size:11px;color:var(--text-dim);padding:1px 0;display:flex;gap:5px}
+.ll::before{content:'›';color:var(--text-dim);flex-shrink:0}
+.ll.lh{color:var(--text-muted)}.ll.lh::before{content:'▶';color:var(--accent)}
+
+/* Controls */
+.ctrl-bar{display:flex;align-items:center;justify-content:center;gap:.65rem;padding:.65rem 1.1rem;border-top:1px solid var(--border);flex-wrap:wrap}
+.cb{display:flex;align-items:center;gap:5px;font-family:var(--mono);font-size:12px;padding:6px 16px;border-radius:8px;background:var(--surface2);border:1px solid var(--border-mid);color:var(--text-muted);cursor:pointer;transition:all .18s}
+.cb:hover{background:var(--surface3);color:var(--text)}
+.cb.pri{background:rgba(34,211,238,0.14);color:var(--accent);border-color:rgba(34,211,238,0.3)}
+.cb.pri:hover{background:rgba(34,211,238,0.22)}
+.cb:disabled{opacity:.3;cursor:not-allowed}
+.sc-ctr{font-family:var(--mono);font-size:11px;color:var(--text-dim);min-width:60px;text-align:center}
+
+/* COMPLEXITY */
+.cx-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:.9rem}
+.cx-c{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:.9rem;text-align:center}
+.cx-lbl{font-family:var(--mono);font-size:10px;color:var(--text-dim);text-transform:uppercase;letter-spacing:.1em;margin-bottom:.35rem}
+.cx-v{font-family:var(--mono);font-size:1.35rem;font-weight:700;color:var(--accent)}
+.cx-n{font-size:12px;color:var(--text-dim);margin-top:.25rem}
+.tks{margin-top:.9rem;display:flex;flex-direction:column;gap:.45rem}
+.tk{padding:.55rem .9rem;background:var(--surface2);border-left:3px solid var(--accent);border-radius:0 8px 8px 0;font-size:13px;color:var(--text-muted);line-height:1.55}
+.tk code{font-family:var(--mono);font-size:12px;color:var(--text);background:var(--surface3);padding:1px 5px;border-radius:4px}
+</style>
+</head>
+<body>
+<div class="page">
+
+<a href="../index.html" class="back-link">← back to hub</a>
+
+<!-- HEADER -->
+<div class="prob-meta">
+  <span class="badge badge-easy">Easy</span>
+  <span class="badge badge-pat">Right-to-Left Scan</span>
+</div>
+<h1 class="prob-title"><span class="prob-num">#1903 · </span>Largest Odd Number in String</h1>
+
+<!-- 1. PATTERN BANNER -->
+<section>
+  <div class="sec-label">Pattern</div>
+  <div class="pat-banner">
+    <div class="pat-name">Right-to-Left Scanning</div>
+    <div class="pat-why">Because the overall parity (odd or even) of a multidigit number only depends on its very last digit, we just need to scan the string backwards starting from the end to chop off any trailing even numbers.</div>
+    <div class="related">
+      <span class="chip">#58 Length of Last Word</span>
+      <span class="chip">#67 Add Binary</span>
+    </div>
+  </div>
+</section>
+
+<!-- 2. PROBLEM STATEMENT -->
+<section>
+  <div class="sec-label">Problem</div>
+  <div class="card">
+    <p style="color:var(--text-muted);font-size:14px;margin-bottom:.85rem">You are given a string <code>num</code>, representing a large integer. Return the largest-valued odd integer (as a string) that is a non-empty substring of <code>num</code>, or an empty string <code>""</code> if no odd integer exists.</p>
+    <p style="color:var(--text-muted);font-size:14px;margin-bottom:.85rem"><strong style="color:var(--text)">Analogy:</strong> A giant number's largeness is dictated by its length and its leading digits. To maximize an odd number drawn from the start, we want to include as many leading digits as possible. The only constraint is we must stop just after an odd digit.</p>
+    <div class="ex-row">
+      <div class="ex-card">
+        <div class="ex-lbl">Example 1</div>
+        <div class="ex-in">num = "52"</div>
+        <div class="ex-out">→ "5"</div>
+      </div>
+      <div class="ex-card">
+        <div class="ex-lbl">Example 2</div>
+        <div class="ex-in">num = "4206"</div>
+        <div class="ex-out">→ ""</div>
+      </div>
+      <div class="ex-card">
+        <div class="ex-lbl">Example 3</div>
+        <div class="ex-in">num = "35427"</div>
+        <div class="ex-out">→ "35427"</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 3. INTUITION -->
+<section>
+  <div class="sec-label">Intuition &amp; Hints</div>
+  <div class="card">
+    <ul class="hint-list">
+      <li><strong style="color:var(--text)">Math Rule:</strong> Any number ending in 1, 3, 5, 7, or 9 is odd. Everything preceding it doesn't matter for parity.</li>
+      <li><strong style="color:var(--text)">Greedy Substring:</strong> A substring starting at index 0 will inherently generate a larger number than a substring starting at index 1. Thus, we always want index 0 to be the start!</li>
+      <li><strong style="color:var(--text)">Reverse Searching:</strong> The trick is to just find the very last odd digit in the entire string. Let's say it's at index <code>k</code>. The substring from 0 to <code>k</code> is logically the largest possible odd configuration.</li>
+    </ul>
+    <div class="key-trick">
+      ✦ Key trick: A simple <code>while</code> loop going right-to-left checking <code>num[len] % 2 == 0</code> gracefully drops trailing even digits in O(N) time with zero extra space logic.
+    </div>
+  </div>
+</section>
+
+<!-- 4. CODE BLOCK -->
+<section>
+  <div class="sec-label">Solution Code</div>
+  <div class="code-wrap">
+    <div class="code-hdr">
+      <span class="code-lang">javascript</span>
+      <span style="font-family:var(--mono);font-size:10px;color:var(--text-dim)">your solution — exact</span>
+    </div>
+    <pre class="code-body"><span id="cl1" class="cl"><span class="kw">var</span> <span class="fn">largestOddNumber</span> <span class="op">=</span> <span class="kw">function</span> (<span class="vr">num</span>) {</span>
+<span id="cl2" class="cl">    <span class="kw">let</span> <span class="vr">len</span> <span class="op">=</span> <span class="vr">num</span>.<span class="mt">length</span> <span class="op">-</span> <span class="num">1</span>;</span>
+<span id="cl3" class="cl">    <span class="kw">while</span> (<span class="vr">len</span> <span class="op">&gt;=</span> <span class="num">0</span> <span class="op">&amp;&amp;</span> <span class="vr">num</span>[<span class="vr">len</span>] <span class="op">%</span> <span class="num">2</span> <span class="op">==</span> <span class="num">0</span>) {</span>
+<span id="cl4" class="cl">        <span class="vr">len</span><span class="op">--</span>;</span>
+<span id="cl5" class="cl">    }</span>
+<span id="cl6" class="cl">    <span class="kw">return</span> <span class="vr">num</span>.<span class="mt">substring</span>(<span class="num">0</span>, <span class="vr">len</span> <span class="op">+</span> <span class="num">1</span>);</span>
+<span id="cl7" class="cl">};</span></pre>
+  </div>
+</section>
+
+<!-- 5. VISUALIZER -->
+<section>
+  <div class="sec-label">Interactive Visualizer</div>
+  <div class="viz-wrap">
+    <div class="viz-topbar">
+      <div class="ex-sel" id="exSel"></div>
+      <div class="res-badge" id="resBadge">result: —</div>
+    </div>
+    <div class="prog-track"><div class="prog-fill" id="progFill" style="width:0%"></div></div>
+    <div class="viz-body">
+      <!-- LEFT -->
+      <div class="viz-left">
+        <div class="viz-sub-lbl" style="text-align:center;">Working Decimal String (num)</div>
+        <div class="cell-row" id="sGrid"></div>
+      </div>
+      <!-- RIGHT -->
+      <div class="viz-right">
+        <div>
+          <div class="viz-sub-lbl">variables</div>
+          <div class="var-rows">
+            <div class="var-r"><span class="vn">len (index)</span><span class="vv c" id="vI">—</span></div>
+            <div class="var-r"><span class="vn">digit (num[len])</span><span class="vv" id="vCI">—</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="step-desc-bar">
+      <div class="sd" id="stepDesc">Press Next or ▶ Play to step through the algorithm.</div>
+    </div>
+    <div class="exec-log">
+      <div class="elt">execution log</div>
+      <div id="execLog"></div>
+    </div>
+    <div class="ctrl-bar">
+      <button class="cb" id="btnPrev" onclick="prevStep()" disabled>← Prev</button>
+      <button class="cb pri" id="btnPlay" onclick="togglePlay()">▶ Play</button>
+      <span class="sc-ctr" id="stpCtr">0 / 0</span>
+      <button class="cb" id="btnNext" onclick="nextStep()">Next →</button>
+    </div>
+  </div>
+</section>
+
+<!-- 6. COMPLEXITY -->
+<section>
+  <div class="sec-label">Complexity</div>
+  <div class="cx-grid">
+    <div class="cx-c">
+      <div class="cx-lbl">Time</div>
+      <div class="cx-v">O(N)</div>
+      <div class="cx-n">N = string length</div>
+    </div>
+    <div class="cx-c">
+      <div class="cx-lbl">Space</div>
+      <div class="cx-v">O(1)</div>
+      <div class="cx-n">No auxiliary space needed</div>
+    </div>
+  </div>
+  <div class="tks">
+    <div class="tk">In the worst case (e.g. "88888"), we scan the whole string exactly once going backwards, which evaluates in O(N).</div>
+    <div class="tk">The substring slicing takes O(N) allocation space depending on the browser engine under the hood, but in terms of algorithmic tracking space, it's just one integer <code>len</code> making it O(1) extra space!</div>
+  </div>
+</section>
+
+</div><!-- /page -->
+
+<script>
+// ─── STEP ENGINE ───────────────────────────────────────────────────────────
+
+function computeSteps(num) {
+  const steps = [];
+  
+  steps.push({
+    desc: `Function called with <em>num</em> = "${num}".`,
+    log: [{t:`largestOddNumber("${num}")`, h:true}],
+    phase: 'init', num, len:-1,
+    lines: [1], vResult: '—'
+  });
+
+  let len = num.length - 1;
+
+  steps.push({
+    desc: `Initialize pointer <em>len</em> at the last index (${len}).`,
+    log: [{t:`len = ${len}`, h:true}],
+    phase: 'pointers', num, len,
+    lines: [2], vResult: '—'
+  });
+
+  while (true) {
+    steps.push({
+      desc: `Check while loop condition: <em>len >= 0</em> and <em>num[len] % 2 == 0</em>.`,
+      log: [{t:`while(len >= 0 && num[len] % 2 == 0)`, h:true}],
+      phase: 'check', num, len,
+      lines: [3], vResult:'—', highlightAllIncluded: false
+    });
+
+    if (len >= 0) {
+      let isEven = num[len] % 2 == 0;
+      steps.push({
+        desc: `<em>len</em> is ${len} (&ge; 0). Look at char '${num[len]}'.<br/>Is '${num[len]}' even? ${isEven ? 'Yes.' : 'No.'}`,
+        log: [{t:`${num[len]} % 2 == 0 → ${isEven}`, h:false}],
+        phase: 'eval', num, len,
+        lines: [3], vResult:'—', isEven, highlightAllIncluded: false
+      });
+
+      if (isEven) {
+        len--;
+        steps.push({
+          desc: `Character is even, meaning we must drop it from the end. Decrement <em>len</em> to ${len}.`,
+          log: [{t:`len-- → ${len}`, h:true}],
+          phase: 'skip', num, len,
+          lines: [4], vResult:'—', highlightAllIncluded: false
+        });
+      } else {
+        steps.push({
+          desc: `Character '${num[len]}' is odd! The while loop gracefully terminates.`,
+          log: [{t:`Condition failed (odd found)`, h:true}],
+          phase: 'break', num, len,
+          lines: [3], vResult:'—', highlightAllIncluded: true
+        });
+        break;
+      }
+    } else {
+      steps.push({
+        desc: `<em>len</em> is ${len} (&lt; 0), meaning all characters were even. The while loop terminates.`,
+        log: [{t:`len < 0, break loop`, h:true}],
+        phase: 'break', num, len,
+        lines: [3], vResult:'—', highlightAllIncluded: false
+      });
+      break;
+    }
+  }
+
+  let finalStr = num.substring(0, len + 1);
+  steps.push({
+    desc: `Return substring from index 0 to index ${len} (using length \`len + 1\`).<br/>Returns <em>"${finalStr}"</em>.`,
+    log: [{t:`return num.substring(0, ${len + 1})`, h:true}],
+    phase: 'done', num, len,
+    lines: [6], vResult: `"${finalStr}"`, highlightAllIncluded: true
+  });
+
+  return steps;
+}
+
+// ─── EXAMPLES ──────────────────────────────────────────────────────────────
+
+const EXAMPLES = [
+  { label:'Ex 1: "52"', num:'52' },
+  { label:'Ex 2: "35427"', num:'35427' },
+  { label:'Ex 3: "4206"', num:'4206' },
+  { label:'Ex 4: "7193"', num:'7193' },
+];
+
+// ─── STATE ─────────────────────────────────────────────────────────────────
+
+let exIdx   = 0;
+let stepIdx = 0;
+let steps   = [];
+let playing = false;
+let playTimer = null;
+
+// ─── INIT ───────────────────────────────────────────────────────────────────
+
+(function init() {
+  const sel = document.getElementById('exSel');
+  sel.innerHTML = EXAMPLES.map((e,idx) =>
+    `<button class="eb${idx===0?' on':''}" onclick="loadEx(${idx})">${e.label}</button>`
+  ).join('');
+  loadEx(0);
+})();
+
+function loadEx(idx) {
+  stopPlay();
+  exIdx   = idx;
+  stepIdx = 0;
+  steps   = computeSteps(EXAMPLES[idx].num);
+  document.querySelectorAll('.eb').forEach((b,i) => b.classList.toggle('on', i===idx));
+  render(steps[0]);
+  updateCtrl();
+}
+
+// ─── RENDER ─────────────────────────────────────────────────────────────────
+
+function render(sItem) {
+  
+  // ── "num" Grid ──────────────────────────────────────────────────
+  const strArr = sItem.num.split('');
+  const cells = strArr.map((ch, idx) => {
+    let clss = ['neu'];
+    let ptrStr = '';
+    
+    // Once dropped (greater than len tracking)
+    if(idx > sItem.len && sItem.phase !== 'init' && sItem.phase !== 'pointers') {
+      clss.push('bad'); // dropped
+      clss.push('dim');
+    }
+    
+    // Actively iterating
+    if (idx === sItem.len && sItem.phase !== 'init') {
+      clss.push('act');
+      ptrStr = 'len';
+    }
+
+    // Success styling
+    if (sItem.highlightAllIncluded && idx <= sItem.len) {
+      clss.push('good');
+      clss.classList?.remove('neu');
+    }
+
+    return `<div style="display:flex; flex-direction:column; align-items:center; margin-right:5px; margin-bottom:12px;">
+              <span class="sc ${clss.join(' ')}" style="margin-bottom:0">${ch}</span>
+              <span class="ptr ${ptrStr ? '' : 'hide'}">${ptrStr || 'x'}</span>
+            </div>`;
+  }).join('');
+  document.getElementById('sGrid').innerHTML = cells || `<span style="color:var(--text-dim);font-family:var(--mono);">"" (empty)</span>`;
+
+  // ── Variables ────────────────────────────────────────────────────
+  document.getElementById('vI').textContent  = sItem.len;
+  document.getElementById('vCI').innerHTML = sItem.len >= 0 && sItem.len < sItem.num.length ? `"${sItem.num[sItem.len]}"` : '—';
+
+  // ── Code highlight ────────────────────────────────────────────────
+  for (let n = 1; n <= 7; n++) {
+    const el = document.getElementById(`cl${n}`);
+    if (el) el.classList.remove('al');
+  }
+  (sItem.lines || []).forEach(n => {
+    const el = document.getElementById(`cl${n}`);
+    if (el) el.classList.add('al');
+  });
+
+  // ── Description ──────────────────────────────────────────────────
+  document.getElementById('stepDesc').innerHTML = sItem.desc;
+
+  // ── Log ──────────────────────────────────────────────────────────
+  document.getElementById('execLog').innerHTML =
+    (sItem.log || []).map(l => `<div class="ll${l.h?' lh':''}">${l.t}</div>`).join('');
+
+  // ── Result badge ─────────────────────────────────────────────────
+  const rb = document.getElementById('resBadge');
+  if (sItem.phase === 'done') {
+    rb.textContent = `result: ${sItem.vResult}`;
+    rb.className = 'res-badge show';
+  } else {
+    rb.textContent = 'result: —';
+    rb.className = 'res-badge';
+  }
+
+  // ── Progress ─────────────────────────────────────────────────────
+  const pct = steps.length > 1 ? (stepIdx / (steps.length - 1)) * 100 : 0;
+  document.getElementById('progFill').style.width = pct + '%';
+  document.getElementById('stpCtr').textContent   = `${stepIdx + 1} / ${steps.length}`;
+}
+
+// ─── CONTROLS ───────────────────────────────────────────────────────────────
+
+function nextStep() {
+  if (stepIdx < steps.length - 1) { stepIdx++; render(steps[stepIdx]); updateCtrl(); }
+  else stopPlay();
+}
+
+function prevStep() {
+  if (stepIdx > 0) { stepIdx--; render(steps[stepIdx]); updateCtrl(); }
+}
+
+function updateCtrl() {
+  document.getElementById('btnPrev').disabled = stepIdx === 0;
+  document.getElementById('btnNext').disabled = stepIdx === steps.length - 1;
+}
+
+function togglePlay() { playing ? stopPlay() : startPlay(); }
+
+function startPlay() {
+  playing = true;
+  document.getElementById('btnPlay').textContent = '⏸ Pause';
+  playTimer = setInterval(() => {
+    if (stepIdx < steps.length - 1) { stepIdx++; render(steps[stepIdx]); updateCtrl(); }
+    else stopPlay();
+  }, 950);
+}
+
+function stopPlay() {
+  playing = false;
+  clearInterval(playTimer);
+  const b = document.getElementById('btnPlay');
+  if (b) b.textContent = '▶ Play';
+}
+
+// ─── KEYBOARD ───────────────────────────────────────────────────────────────
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight' || e.key === 'ArrowDown') { e.preventDefault(); nextStep(); }
+  if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp')   { e.preventDefault(); prevStep(); }
+  if (e.key === ' ') { e.preventDefault(); togglePlay(); }
+});
+</script>
+</body>
+</html>
