@@ -87,9 +87,11 @@ Every file must have:
 1. **Pattern banner** — pattern name + why it fits + 3 related problems
 2. **Problem statement** — plain English + analogy + 3 visual worked examples
 3. **Intuition + Hints** — brute force → optimal, numbered, key trick called out
-4. **Code block** — user's exact code, syntax highlighted, active line highlighted per step
+4. **Code block** — user's exact code, syntax highlighted, active line highlighted per step. Include a "Blur Code" toggle in the UI that blurs out the core logic lines (loops, if conditions) so the user can test their memory before revealing it (Active Recall).
 5. **Interactive visualizer** — step engine
-6. **Complexity + Memory hooks** — O() table + 2–3 quotable takeaways
+6. **Gotchas & Common Pitfalls** — 2-3 common mistakes, edge cases people forget, or typical interview traps for this specific problem (Failure Analysis).
+7. **Trade-offs / Alternatives** — Briefly explain why another approach was NOT used, or the space/time trade-off.
+8. **Complexity + Memory hooks** — O() table + a 1-sentence "ELI5" overall summary mnemonic to memorize + 2-3 quotable takeaways.
 
 ---
 

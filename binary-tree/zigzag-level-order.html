@@ -136,25 +136,14 @@
     }
     .insight-banner strong { color: var(--orange); font-weight: 600; }
 
-    .code-block {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      overflow: hidden;
-      margin-bottom: 2rem;
-      animation: fadeUp .6s ease .1s both;
-    }
-
-    .code-header {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      padding: 12px 16px;
-      border-bottom: 1px solid var(--border);
-      background: var(--surface2);
-    }
-
+    .code-block { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; margin-bottom: 2rem; animation: fadeUp .6s ease .1s both; }
+    .code-header { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; border-bottom: 1px solid var(--border); background: var(--surface2); }
+    .code-header .file-info { display: flex; align-items: center; gap: 8px; }
     .code-header span { font-family: var(--mono); font-size: 12px; color: var(--text-muted); }
+    .btn-blur { font-family: var(--mono); font-size: 11px; padding: 3px 10px; border-radius: 100px; background: var(--surface2); border: 1px solid var(--border-mid); color: var(--text-muted); cursor: pointer; transition: all .2s; }
+    .btn-blur:hover { color: var(--text); border-color: var(--text-dim); }
+    .btn-blur.on { background: rgba(124,110,245,0.15); color: var(--orange); border-color: rgba(124,110,245,0.35); }
+    .code-body.blur-logic span { filter: blur(4px); opacity: 0.6; transition: all .3s; }
 
     .dots { display: flex; gap: 6px; }
     .dot { width: 10px; height: 10px; border-radius: 50%; }
@@ -722,10 +711,10 @@
   <!-- Code -->
   <div class="code-block">
     <div class="code-header">
-      <div class="dots"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div></div>
-      <span>zigzagLevelOrder.js</span>
+      <div class="file-info"><div class="dots"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div></div><span>zigzagLevelOrder.js</span></div>
+      <button class="btn-blur" id="btnBlur" onclick="toggleBlur()">👁 Show Logic</button>
     </div>
-    <pre><span class="kw">var</span> <span class="fn">zigzagLevelOrder</span> = <span class="kw">function</span>(<span class="var">root</span>) {
+    <pre class="code-body blur-logic"><span class="kw">var</span> <span class="fn">zigzagLevelOrder</span> = <span class="kw">function</span>(<span class="var">root</span>) {
     <span class="kw">if</span> (!<span class="var">root</span>) <span class="kw">return</span> []
     <span class="kw">let</span> <span class="var">level</span> = <span class="num">0</span>;
     <span class="kw">let</span> <span class="var">queue</span> = [<span class="var">root</span>]
@@ -993,11 +982,28 @@
       </div>
     </div>
 
+    <div class="mental-model" style="display:grid;grid-template-columns:1fr 1fr;gap:0;background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:2rem;animation:fadeUp .6s ease .12s both">
+      <div class="model-col" style="padding:20px">
+        <div class="model-hdr" style="font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text-muted);margin-bottom:12px;display:flex;align-items:center;gap:8px">⚠️ Gotchas & Common Pitfalls</div>
+        <ul class="model-list" style="list-style:none;display:flex;flex-direction:column;gap:10px">
+          <li style="font-size:13px;color:var(--text-dim);line-height:1.6;position:relative;padding-left:14px"><span style="position:absolute;left:0;color:var(--orange);font-family:var(--mono)">→</span><strong>Reversing Queue Traversal:</strong> Do not try to reverse how you pop from the queue or how you push children (left then right). The BFS queue must ALWAYS process strictly left-to-right.</li>
+          <li style="font-size:13px;color:var(--text-dim);line-height:1.6;position:relative;padding-left:14px"><span style="position:absolute;left:0;color:var(--orange);font-family:var(--mono)">→</span><strong>Forgetting the level counter:</strong> You must track the current depth/level independently of the queue length to know which direction to insert into the array.</li>
+        </ul>
+      </div>
+      <div class="model-col" style="padding:20px;border-left:1px solid var(--border)">
+        <div class="model-hdr" style="font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text-muted);margin-bottom:12px;display:flex;align-items:center;gap:8px">⚖️ Trade-offs & Alternatives</div>
+        <ul class="model-list" style="list-style:none;display:flex;flex-direction:column;gap:10px">
+          <li style="font-size:13px;color:var(--text-dim);line-height:1.6;position:relative;padding-left:14px"><span style="position:absolute;left:0;color:var(--orange);font-family:var(--mono)">→</span><strong>BFS + Unshift (Current):</strong> Very intuitive logic. O(N) time overall but <code>unshift</code> in JS arrays can be O(K) where K is level size, meaning worst-case O(N²) for skewed trees in some engines.</li>
+          <li style="font-size:13px;color:var(--text-dim);line-height:1.6;position:relative;padding-left:14px"><span style="position:absolute;left:0;color:var(--orange);font-family:var(--mono)">→</span><strong>BFS + Reverse Post-Level:</strong> Push all values normally, then if <code>level % 2 === 1</code>, <code>levelArr.reverse()</code> before pushing to ans. Often faster in JS than <code>unshift</code> because <code>reverse()</code> is heavily optimized natively.</li>
+        </ul>
+      </div>
+    </div>
+
     <div class="complexity">
       <div class="cpill">Time: <strong>O(n)</strong> — every node visited once</div>
       <div class="cpill">Space: <strong>O(n)</strong> — queue + output storage</div>
       <div class="cpill">Pattern: <strong>BFS</strong> with alternating insert</div>
-      <div class="cpill">Key ops: <strong>push / unshift / shift</strong></div>
+      <div class="cpill eli5"><strong>ELI5:</strong> Read a book page left-to-right, but every alternating line is written backwards. Instead of reading backwards, you read normally but write your notes from right-to-left!</div>
     </div>
   </div>
 
@@ -1288,6 +1294,19 @@ function togglePlay() {
       }
       move(1);
     }, 1500);
+  }
+}
+
+function toggleBlur() {
+  const btn = document.getElementById('btnBlur');
+  const cb = document.querySelector('.code-body');
+  cb.classList.toggle('blur-logic');
+  if (cb.classList.contains('blur-logic')) {
+    btn.classList.remove('on');
+    btn.innerHTML = '👁 Show Logic';
+  } else {
+    btn.classList.add('on');
+    btn.innerHTML = '👁 Hide Logic';
   }
 }
 

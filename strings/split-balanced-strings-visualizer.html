@@ -72,6 +72,10 @@ section:nth-child(6){animation-delay:.28s}
 .code-wrap{background:#090b10;border:1px solid var(--border);border-radius:12px;overflow:hidden}
 .code-hdr{display:flex;justify-content:space-between;align-items:center;padding:.5rem 1rem;background:var(--surface);border-bottom:1px solid var(--border)}
 .code-lang{font-family:var(--mono);font-size:10px;color:var(--text-dim);letter-spacing:.1em;text-transform:uppercase}
+.btn-blur{font-family:var(--mono);font-size:11px;padding:3px 10px;border-radius:100px;background:var(--surface2);border:1px solid var(--border-mid);color:var(--text-muted);cursor:pointer;transition:all .2s;}
+.btn-blur:hover{color:var(--text);border-color:var(--text-dim);}
+.btn-blur.on{background:rgba(251,191,36,0.15);color:var(--accent);border-color:rgba(251,191,36,0.35);}
+.code-body.blur-logic .cl{filter:blur(4px);opacity:0.6;transition:all .3s;}
 pre.code-body{padding:1.1rem 1.4rem;overflow-x:auto;font-family:var(--mono);font-size:13px;line-height:1.85;tab-size:4}
 .cl{display:block;padding:0 .4rem;margin:0 -.4rem;border-radius:4px;transition:background .2s;border-left:2px solid transparent}
 .cl.al{background:rgba(251,191,36,0.1);border-left-color:var(--amber)}
@@ -218,9 +222,12 @@ pre.code-body{padding:1.1rem 1.4rem;overflow-x:auto;font-family:var(--mono);font
   <div class="code-wrap">
     <div class="code-hdr">
       <span class="code-lang">javascript</span>
-      <span style="font-family:var(--mono);font-size:10px;color:var(--text-dim)">your solution — exact</span>
+      <div style="display:flex; gap:10px; align-items:center;">
+        <button class="btn-blur" id="btnBlur" onclick="toggleBlur()">👁 Show Logic</button>
+        <span style="font-family:var(--mono);font-size:10px;color:var(--text-dim)">your solution — exact</span>
+      </div>
     </div>
-    <pre class="code-body"><span id="cl1" class="cl"><span class="kw">var</span> <span class="fn">balancedStringSplit</span> <span class="op">=</span> <span class="kw">function</span>(<span class="vr">s</span>) {</span>
+    <pre class="code-body blur-logic"><span id="cl1" class="cl"><span class="kw">var</span> <span class="fn">balancedStringSplit</span> <span class="op">=</span> <span class="kw">function</span>(<span class="vr">s</span>) {</span>
 <span id="cl2" class="cl">    <span class="kw">let</span> <span class="vr">balanceCount</span> <span class="op">=</span> <span class="num">0</span>;</span>
 <span id="cl3" class="cl">    <span class="kw">let</span> <span class="vr">count</span> <span class="op">=</span> <span class="num">0</span></span>
 <span id="cl4" class="cl">    <span class="kw">for</span>(<span class="kw">let</span> <span class="vr">i</span> <span class="op">=</span> <span class="num">0</span>; <span class="vr">i</span> <span class="op">&lt;</span> <span class="vr">s</span>.<span class="mt">length</span>; <span class="vr">i</span><span class="op">++</span>) {</span>
@@ -287,9 +294,28 @@ pre.code-body{padding:1.1rem 1.4rem;overflow-x:auto;font-family:var(--mono);font
   </div>
 </section>
 
-<!-- 6. COMPLEXITY -->
+<!-- 6. GOTCHAS & COMMON PITFALLS -->
 <section>
-  <div class="sec-label">Complexity</div>
+  <div class="sec-label">Gotchas &amp; Common Pitfalls</div>
+  <div class="card">
+    <ul class="hint-list">
+      <li><strong style="color:var(--text)">Forgetting to count when balance reaches 0:</strong> You might successfully detect a balanced substring but forget to increment the total <code>count</code> right when it happens.</li>
+      <li><strong style="color:var(--text)">Not acting greedily:</strong> Trying to track complex boundaries instead of just splitting the millisecond the balance becomes 0 will cause missed chunks.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- 7. TRADE-OFFS / ALTERNATIVES -->
+<section>
+  <div class="sec-label">Trade-offs &amp; Alternatives</div>
+  <div class="card">
+    <p style="color:var(--text-muted);font-size:14px;margin-bottom:.85rem"><strong style="color:var(--text)">Alternative 1: Stack</strong><br/>You could push 'L' onto a stack and pop when you see 'R' (or vice versa). When the stack is empty, increment the count.<br/><em>Trade-off:</em> Takes <code>O(N)</code> space instead of <code>O(1)</code> space with an integer counter.</p>
+  </div>
+</section>
+
+<!-- 8. COMPLEXITY -->
+<section>
+  <div class="sec-label">Complexity &amp; Hooks</div>
   <div class="cx-grid">
     <div class="cx-c">
       <div class="cx-lbl">Time</div>
@@ -303,6 +329,9 @@ pre.code-body{padding:1.1rem 1.4rem;overflow-x:auto;font-family:var(--mono);font
     </div>
   </div>
   <div class="tks">
+    <div class="tk" style="border-left-color:var(--green)">
+      <strong style="color:var(--text);font-family:var(--sans)">ELI5:</strong> Pull a rope +1 for Left, -1 for Right. The second the rope returns completely to dead center (0), you instantly chop it!
+    </div>
     <div class="tk">All characters are visited exactly once. No complex inner loops or look-aheads needed. Gives O(N).</div>
     <div class="tk">Because we only increment and decrement a single counter instead of tracking sequences, space is perfectly minimal at O(1).</div>
   </div>
@@ -545,6 +574,19 @@ document.addEventListener('keydown', e => {
   if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp')   { e.preventDefault(); prevStep(); }
   if (e.key === ' ') { e.preventDefault(); togglePlay(); }
 });
+
+function toggleBlur() {
+  const btn = document.getElementById('btnBlur');
+  const cb = document.querySelector('.code-body');
+  cb.classList.toggle('blur-logic');
+  if (cb.classList.contains('blur-logic')) {
+    btn.classList.remove('on');
+    btn.innerHTML = '👁 Show Logic';
+  } else {
+    btn.classList.add('on');
+    btn.innerHTML = '👁 Hide Logic';
+  }
+}
 </script>
 </body>
 </html>

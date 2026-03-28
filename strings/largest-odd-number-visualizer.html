@@ -72,6 +72,10 @@ section:nth-child(6){animation-delay:.28s}
 .code-wrap{background:#090b10;border:1px solid var(--border);border-radius:12px;overflow:hidden}
 .code-hdr{display:flex;justify-content:space-between;align-items:center;padding:.5rem 1rem;background:var(--surface);border-bottom:1px solid var(--border)}
 .code-lang{font-family:var(--mono);font-size:10px;color:var(--text-dim);letter-spacing:.1em;text-transform:uppercase}
+.btn-blur{font-family:var(--mono);font-size:11px;padding:3px 10px;border-radius:100px;background:var(--surface2);border:1px solid var(--border-mid);color:var(--text-muted);cursor:pointer;transition:all .2s;}
+.btn-blur:hover{color:var(--text);border-color:var(--text-dim);}
+.btn-blur.on{background:rgba(34,211,238,0.15);color:var(--accent);border-color:rgba(34,211,238,0.35);}
+.code-body.blur-logic .cl{filter:blur(4px);opacity:0.6;transition:all .3s;}
 pre.code-body{padding:1.1rem 1.4rem;overflow-x:auto;font-family:var(--mono);font-size:13px;line-height:1.85;tab-size:4}
 .cl{display:block;padding:0 .4rem;margin:0 -.4rem;border-radius:4px;transition:background .2s;border-left:2px solid transparent}
 .cl.al{background:rgba(34,211,238,0.1);border-left-color:var(--accent)}
@@ -218,9 +222,12 @@ pre.code-body{padding:1.1rem 1.4rem;overflow-x:auto;font-family:var(--mono);font
   <div class="code-wrap">
     <div class="code-hdr">
       <span class="code-lang">javascript</span>
-      <span style="font-family:var(--mono);font-size:10px;color:var(--text-dim)">your solution — exact</span>
+      <div style="display:flex; gap:10px; align-items:center;">
+        <button class="btn-blur" id="btnBlur" onclick="toggleBlur()">👁 Show Logic</button>
+        <span style="font-family:var(--mono);font-size:10px;color:var(--text-dim)">your solution — exact</span>
+      </div>
     </div>
-    <pre class="code-body"><span id="cl1" class="cl"><span class="kw">var</span> <span class="fn">largestOddNumber</span> <span class="op">=</span> <span class="kw">function</span> (<span class="vr">num</span>) {</span>
+    <pre class="code-body blur-logic"><span id="cl1" class="cl"><span class="kw">var</span> <span class="fn">largestOddNumber</span> <span class="op">=</span> <span class="kw">function</span> (<span class="vr">num</span>) {</span>
 <span id="cl2" class="cl">    <span class="kw">let</span> <span class="vr">len</span> <span class="op">=</span> <span class="vr">num</span>.<span class="mt">length</span> <span class="op">-</span> <span class="num">1</span>;</span>
 <span id="cl3" class="cl">    <span class="kw">while</span> (<span class="vr">len</span> <span class="op">&gt;=</span> <span class="num">0</span> <span class="op">&amp;&amp;</span> <span class="vr">num</span>[<span class="vr">len</span>] <span class="op">%</span> <span class="num">2</span> <span class="op">==</span> <span class="num">0</span>) {</span>
 <span id="cl4" class="cl">        <span class="vr">len</span><span class="op">--</span>;</span>
@@ -272,9 +279,28 @@ pre.code-body{padding:1.1rem 1.4rem;overflow-x:auto;font-family:var(--mono);font
   </div>
 </section>
 
-<!-- 6. COMPLEXITY -->
+<!-- 6. GOTCHAS & COMMON PITFALLS -->
 <section>
-  <div class="sec-label">Complexity</div>
+  <div class="sec-label">Gotchas &amp; Common Pitfalls</div>
+  <div class="card">
+    <ul class="hint-list">
+      <li><strong style="color:var(--text)">Integer Overflow:</strong> You cannot parseInt() the entire string to check if it's odd! JavaScript numbers lose precision after 15 digits. You MUST check the character/string logic by examining the digits directly: <code>num[len] % 2 === 0</code>.</li>
+      <li><strong style="color:var(--text)">Empty Returns:</strong> If no odd digits exist (like "4206"), you must return an explicit empty string <code>""</code>, not <code>0</code> or <code>null</code>.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- 7. TRADE-OFFS / ALTERNATIVES -->
+<section>
+  <div class="sec-label">Trade-offs &amp; Alternatives</div>
+  <div class="card">
+    <p style="color:var(--text-muted);font-size:14px;margin-bottom:.85rem"><strong style="color:var(--text)">Alternative 1: Regular Expressions</strong><br/>You can use a regex replacement: <code>return num.replace(/[02468]+$/, '')</code>.<br/><em>Trade-off:</em> It's a clean one-liner, but under the hood the Regex engine is still performing a backward scan. Explicitly writing the loop gives you absolute control without regex compiling overhead.</p>
+  </div>
+</section>
+
+<!-- 8. COMPLEXITY -->
+<section>
+  <div class="sec-label">Complexity &amp; Hooks</div>
   <div class="cx-grid">
     <div class="cx-c">
       <div class="cx-lbl">Time</div>
@@ -288,6 +314,9 @@ pre.code-body{padding:1.1rem 1.4rem;overflow-x:auto;font-family:var(--mono);font
     </div>
   </div>
   <div class="tks">
+    <div class="tk" style="border-left-color:var(--green)">
+      <strong style="color:var(--text);font-family:var(--sans)">ELI5:</strong> Eating a chocolate bar where you only like odd pieces! Start biting from the right end until you hit an odd piece. Keep that piece and everything to its left!
+    </div>
     <div class="tk">In the worst case (e.g. "88888"), we scan the whole string exactly once going backwards, which evaluates in O(N).</div>
     <div class="tk">The substring slicing takes O(N) allocation space depending on the browser engine under the hood, but in terms of algorithmic tracking space, it's just one integer <code>len</code> making it O(1) extra space!</div>
   </div>
@@ -523,6 +552,19 @@ document.addEventListener('keydown', e => {
   if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp')   { e.preventDefault(); prevStep(); }
   if (e.key === ' ') { e.preventDefault(); togglePlay(); }
 });
+
+function toggleBlur() {
+  const btn = document.getElementById('btnBlur');
+  const cb = document.querySelector('.code-body');
+  cb.classList.toggle('blur-logic');
+  if (cb.classList.contains('blur-logic')) {
+    btn.classList.remove('on');
+    btn.innerHTML = '👁 Show Logic';
+  } else {
+    btn.classList.add('on');
+    btn.innerHTML = '👁 Hide Logic';
+  }
+}
 </script>
 </body>
 </html>

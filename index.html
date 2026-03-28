@@ -711,7 +711,7 @@
   <div class="topics-row" id="topics-row">
     <button class="topic-tab active" data-topic="trees"><span class="tab-icon">🌳</span>Binary Tree<span class="tab-badge" id="badge-trees">11</span></button>
     <button class="topic-tab" data-topic="bst"><span class="tab-icon">🌲</span>Binary Search Tree<span class="tab-badge" id="badge-bst">5</span></button>
-    <button class="topic-tab" data-topic="arrays"><span class="tab-icon">📦</span>Arrays<span class="tab-badge" id="badge-arrays">0</span></button>
+    <button class="topic-tab" data-topic="arrays"><span class="tab-icon">📦</span>Arrays<span class="tab-badge" id="badge-arrays">1</span></button>
     <button class="topic-tab" data-topic="strings"><span class="tab-icon">🔤</span>Strings<span class="tab-badge" id="badge-strings">6</span></button>
     <button class="topic-tab" data-topic="hashmap"><span class="tab-icon">🗂️</span>HashMap<span class="tab-badge" id="badge-hashmap">0</span></button>
     <button class="topic-tab" data-topic="bsearch"><span class="tab-icon">🔎</span>Binary Search<span class="tab-badge" id="badge-bsearch">1</span></button>
@@ -963,7 +963,18 @@ const TOPICS = {
   },
 
   // Other topics (BT section)
-  arrays:  { label:"Arrays",              icon:"📦", color:"var(--green)",  badgeStyle:"background:rgba(52,211,153,0.1);color:var(--green);border:1px solid rgba(52,211,153,0.2)",    description:"Two Pointer · Sliding Window · Kadane's Algorithm · Prefix Sums", problems:[] },
+  arrays:  { label:"Arrays",              icon:"📦", color:"var(--green)",  badgeStyle:"background:rgba(52,211,153,0.1);color:var(--green);border:1px solid rgba(52,211,153,0.2)",    description:"Two Pointer · Sliding Window · Kadane's Algorithm · Prefix Sums", problems:[
+    {
+      num:"#26", title:"Remove Duplicates from Sorted Array", href:"arrays/remove-duplicates-from-sorted-array-visualizer.html",
+      color:"green", tagColor:"var(--green)",
+      btnStyle:"background:rgba(52,211,153,0.12);color:var(--green);border:1px solid rgba(52,211,153,0.25)",
+      diff:"easy", steps:"12+",
+      pattern:"Two Pointers — Read / Write", patternColor:"#34d399", patternBg:"rgba(52,211,153,0.1)",
+      desc:"Watch <code>k</code> anchor the write head while <code>i</code> scans ahead — when <code>arr[i] > arr[k]</code>, a new unique is found and written in-place.",
+      pills:["O(n)","O(1) space","Two Pointers","In-place"],
+      kw:"remove duplicates sorted array two pointers in-place write head"
+    }
+  ] },
   strings: { label:"Strings",             icon:"🔤", color:"var(--rose)",   badgeStyle:"background:rgba(244,114,182,0.1);color:var(--rose);border:1px solid rgba(244,114,182,0.2)",  description:"Sliding Window · Two Pointer · Anagram · Palindrome",            problems:[
       {
         num:"#1903", title:"Largest Odd Number in String", href:"strings/largest-odd-number-visualizer.html",

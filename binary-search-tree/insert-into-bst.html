@@ -77,9 +77,24 @@
     .key-insight { background: var(--amber-bg); border: 1px solid rgba(251,191,36,0.2); border-left: 3px solid var(--amber); border-radius: 10px; padding: 14px 18px; margin-bottom: 2rem; font-size: 13px; color: var(--text-muted); font-family: var(--mono); animation: fadeUp .6s ease .05s both; line-height: 1.7; }
     .key-insight strong { color: var(--amber); }
 
+    /* MENTAL MODEL */
+    .mental-model { display: grid; grid-template-columns: 1fr 1fr; gap: 0; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; margin-bottom: 2rem; animation: fadeUp .6s ease .12s both; }
+    .model-col { padding: 20px; }
+    .model-hdr { font-family: var(--mono); font-size: 11px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+    .model-list { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+    .model-list li { font-size: 13px; color: var(--text-dim); line-height: 1.6; position: relative; padding-left: 14px; }
+    .model-list li::before { content: '→'; position: absolute; left: 0; color: var(--accent); font-family: var(--mono); }
+    .model-list strong { color: var(--text); }
+    .model-list code { font-family: var(--mono); font-size: 11px; background: var(--surface2); padding: 2px 5px; border-radius: 4px; color: var(--accent); }
+
     .code-block { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; margin-bottom: 2rem; animation: fadeUp .6s ease .1s both; }
-    .code-header { display: flex; align-items: center; gap: 8px; padding: 12px 16px; border-bottom: 1px solid var(--border); background: var(--surface2); }
+    .code-header { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; border-bottom: 1px solid var(--border); background: var(--surface2); }
+    .code-header .file-info { display: flex; align-items: center; gap: 8px; }
     .code-header span { font-family: var(--mono); font-size: 12px; color: var(--text-muted); }
+    .btn-blur { font-family: var(--mono); font-size: 11px; padding: 3px 10px; border-radius: 100px; background: var(--surface2); border: 1px solid var(--border-mid); color: var(--text-muted); cursor: pointer; transition: all .2s; }
+    .btn-blur:hover { color: var(--text); border-color: var(--text-dim); }
+    .btn-blur.on { background: rgba(124,110,245,0.15); color: var(--accent); border-color: rgba(124,110,245,0.35); }
+    .code-body.blur-logic span { filter: blur(4px); opacity: 0.6; transition: all .3s; }
     .dots { display: flex; gap: 6px; }
     .dot { width: 10px; height: 10px; border-radius: 50%; }
     .dot-r { background: #ff5f57; } .dot-y { background: #ffbd2e; } .dot-g { background: #28c940; }
@@ -333,8 +348,11 @@
 
   <!-- CODE -->
   <div class="code-block">
-    <div class="code-header"><div class="dots"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div></div><span>insertIntoBST.js</span></div>
-    <pre><span class="kw">var</span> <span class="fn">insertIntoBST</span> = <span class="kw">function</span>(<span class="var">root</span>, <span class="var">val</span>) {
+    <div class="code-header">
+      <div class="file-info"><div class="dots"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div></div><span>insertIntoBST.js</span></div>
+      <button class="btn-blur" id="btnBlur" onclick="toggleBlur()">👁 Show Logic</button>
+    </div>
+    <pre class="code-body blur-logic"><span class="kw">var</span> <span class="fn">insertIntoBST</span> = <span class="kw">function</span>(<span class="var">root</span>, <span class="var">val</span>) {
   <span class="hl"><span class="kw">if</span>(!<span class="var">root</span>) <span class="kw">return</span> <span class="kw">new</span> <span class="fn">TreeNode</span>(<span class="var">val</span>)</span>  <span class="cm">// ← insertion point! (also handles empty tree)</span>
 
   <span class="kw">if</span>(<span class="var">root</span>.val &lt; <span class="var">val</span>) {
@@ -447,21 +465,33 @@
     <span class="var">root</span>.right = <span class="fn">insertIntoBST</span>(<span class="var">root</span>.right, <span class="var">val</span>);
   <span class="kw">else</span>                                         <span class="cm">// val is smaller → go left</span>
     <span class="var">root</span>.left  = <span class="fn">insertIntoBST</span>(<span class="var">root</span>.left,  <span class="var">val</span>);
+  <span class="kw">return</span> <span class="var">root</span>;                                 <span class="cm">// stitch the modified subtree back</span>
+};</pre>
+    </div>
 
-  <span class="kw">return</span> <span class="var">root</span>;                               <span class="cm">// return this node unchanged</span>
-};
-
-<span class="cm">// PATTERN: BST navigation → insert at null gap
-// KEY 1: Navigate with val > root.val ? right : left
-// KEY 2: return root on every call — stitches new node into tree
-// KEY 3: base case (!root) handles BOTH empty tree AND leaf insertion</span></pre>
+    <div class="mental-model">
+      <div class="model-col">
+        <div class="model-hdr">⚠️ Gotchas & Common Pitfalls</div>
+        <ul class="model-list">
+          <li><strong>Losing the Tree:</strong> If you don't return <code>root</code> at the end of every function call, the recursion will break your connections and return <code>undefined</code>.</li>
+          <li><strong>Overthinking Re-balancing:</strong> The problem doesn't require maintaining an AVL or Red-Black tree properties. Just attach it as a leaf where it naturally belongs.</li>
+          <li><strong>Handling Empty Start:</strong> If <code>root</code> is null to begin with, you must return a new TreeNode so the caller receives the new root.</li>
+        </ul>
+      </div>
+      <div class="model-col" style="border-left:1px solid var(--border)">
+        <div class="model-hdr">⚖️ Trade-offs & Alternatives</div>
+        <ul class="model-list">
+          <li><strong>Recursive (Current):</strong> O(H) Space for the call stack. Elegant and standard, but can crash deeply skewed trees.</li>
+          <li><strong>Iterative (Alternative):</strong> O(1) Space. Uses a <code>curr</code> pointer and steps down the tree until finding a null spot. Much safer for production environments with deep trees.</li>
+        </ul>
+      </div>
     </div>
 
     <div class="complexity">
-      <div class="cpill">Time: <strong>O(log n)</strong> balanced BST</div>
-      <div class="cpill">Time: <strong>O(n)</strong> skewed/worst case</div>
-      <div class="cpill">Space: <strong>O(h)</strong> recursion stack</div>
-      <div class="cpill">Pattern: <strong>BST navigation</strong></div>
+      <div class="cpill">Time: <strong>O(H)</strong> average, <strong>O(N)</strong> worst (skewed tree)</div>
+      <div class="cpill">Space: <strong>O(H)</strong> call stack</div>
+      <div class="cpill">Pattern: <strong>BST Traversal</strong></div>
+      <div class="cpill eli5"><strong>ELI5:</strong> It's like finding your seat in a movie theater row. "Is my number bigger than seat 14? Go right. Smaller than 18? Go left. Ah, an empty seat! I'll sit here."</div>
     </div>
   </div>
 </div>
@@ -834,6 +864,19 @@ function togglePlay() {
     if (cur >= getSteps().length - 1) { stopPlay(); return; }
     move(1);
   }, 1400);
+}
+
+function toggleBlur() {
+  const btn = document.getElementById('btnBlur');
+  const cb = document.querySelector('.code-body');
+  cb.classList.toggle('blur-logic');
+  if (cb.classList.contains('blur-logic')) {
+    btn.classList.remove('on');
+    btn.innerHTML = '👁 Show Logic';
+  } else {
+    btn.classList.add('on');
+    btn.innerHTML = '👁 Hide Logic';
+  }
 }
 
 loadExample(0);

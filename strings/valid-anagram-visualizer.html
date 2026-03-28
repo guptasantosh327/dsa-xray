@@ -71,6 +71,10 @@ section:nth-child(6){animation-delay:.28s}
 .code-wrap{background:#090b10;border:1px solid var(--border);border-radius:12px;overflow:hidden}
 .code-hdr{display:flex;justify-content:space-between;align-items:center;padding:.5rem 1rem;background:var(--surface);border-bottom:1px solid var(--border)}
 .code-lang{font-family:var(--mono);font-size:10px;color:var(--text-dim);letter-spacing:.1em;text-transform:uppercase}
+.btn-blur{font-family:var(--mono);font-size:11px;padding:3px 10px;border-radius:100px;background:var(--surface2);border:1px solid var(--border-mid);color:var(--text-muted);cursor:pointer;transition:all .2s;}
+.btn-blur:hover{color:var(--text);border-color:var(--text-dim);}
+.btn-blur.on{background:rgba(45,212,191,0.15);color:var(--accent);border-color:rgba(45,212,191,0.35);}
+.code-body.blur-logic .cl{filter:blur(4px);opacity:0.6;transition:all .3s;}
 pre.code-body{padding:1.1rem 1.4rem;overflow-x:auto;font-family:var(--mono);font-size:13px;line-height:1.85;tab-size:4}
 .cl{display:block;padding:0 .4rem;margin:0 -.4rem;border-radius:4px;transition:background .2s;border-left:2px solid transparent}
 .cl.al{background:rgba(45,212,191,0.1);border-left-color:var(--accent)}
@@ -224,9 +228,12 @@ pre.code-body{padding:1.1rem 1.4rem;overflow-x:auto;font-family:var(--mono);font
   <div class="code-wrap">
     <div class="code-hdr">
       <span class="code-lang">javascript</span>
-      <span style="font-family:var(--mono);font-size:10px;color:var(--text-dim)">your solution — exact</span>
+      <div style="display:flex; gap:10px; align-items:center;">
+        <button class="btn-blur" id="btnBlur" onclick="toggleBlur()">👁 Show Logic</button>
+        <span style="font-family:var(--mono);font-size:10px;color:var(--text-dim)">your solution — exact</span>
+      </div>
     </div>
-    <pre class="code-body"><span id="cl1" class="cl"><span class="kw">var</span> <span class="fn">isAnagram</span> <span class="op">=</span> <span class="kw">function</span> (<span class="vr">s</span>, <span class="vr">t</span>) {</span>
+    <pre class="code-body blur-logic"><span id="cl1" class="cl"><span class="kw">var</span> <span class="fn">isAnagram</span> <span class="op">=</span> <span class="kw">function</span> (<span class="vr">s</span>, <span class="vr">t</span>) {</span>
 <span id="cl2" class="cl">    <span class="kw">let</span> <span class="vr">source</span> <span class="op">=</span> {}</span>
 <span id="cl3" class="cl">    <span class="kw">if</span>(<span class="vr">s</span>.<span class="mt">length</span> <span class="op">!==</span> <span class="vr">t</span>.<span class="mt">length</span>) <span class="kw">return</span> <span class="kw">false</span></span>
 <span id="cl4" class="cl">    <span class="kw">for</span> (<span class="kw">let</span> <span class="vr">i</span> <span class="op">=</span> <span class="num">0</span>; <span class="vr">i</span> <span class="op">&lt;</span> <span class="vr">s</span>.<span class="mt">length</span>; <span class="vr">i</span><span class="op">++</span>) {</span>
@@ -302,13 +309,34 @@ pre.code-body{padding:1.1rem 1.4rem;overflow-x:auto;font-family:var(--mono);font
   </div>
 </section>
 
-<!-- 6. COMPLEXITY -->
+<!-- 6. GOTCHAS & COMMON PITFALLS -->
 <section>
-  <div class="sec-label">Complexity</div>
+  <div class="sec-label">Gotchas &amp; Common Pitfalls</div>
+  <div class="card">
+    <ul class="hint-list">
+      <li><strong style="color:var(--text)">Forgetting the length check:</strong> If lengths differ, they can't be anagrams. Skipping this early return wastes cycles!</li>
+      <li><strong style="color:var(--text)">Using two maps:</strong> You can build two frequency maps and compare them, but it wastes space and adds a third loop. One map is optimal.</li>
+      <li><strong style="color:var(--text)">Negative values:</strong> If `t` has more of a character than `s`, the count dips below 0 or goes `undefined`. Failing to catch this leads to bugs.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- 7. TRADE-OFFS / ALTERNATIVES -->
+<section>
+  <div class="sec-label">Trade-offs &amp; Alternatives</div>
+  <div class="card">
+    <p style="color:var(--text-muted);font-size:14px;margin-bottom:.85rem"><strong style="color:var(--text)">Alternative 1: Sorting</strong><br/>Sort both strings and compare (<code>s.split("").sort().join("") === t...</code>). Takes <code>O(N log N)</code> time, but avoids the hash map overhead. Great for short strings.</p>
+    <p style="color:var(--text-muted);font-size:14px;"><strong style="color:var(--text)">Alternative 2: Fixed Array</strong><br/>Use a fixed size-26 integer array. Faster than a Hash Map and explicitly <code>O(1)</code> space, but breaks if the input contains Unicode characters.</p>
+  </div>
+</section>
+
+<!-- 8. COMPLEXITY -->
+<section>
+  <div class="sec-label">Complexity &amp; Hooks</div>
   <div class="cx-grid">
     <div class="cx-c">
       <div class="cx-lbl">Time</div>
-      <div class="cx-v">O(S + T)</div>
+      <div class="cx-v">O(N)</div>
       <div class="cx-n">Two independent linear loops</div>
     </div>
     <div class="cx-c">
@@ -318,6 +346,9 @@ pre.code-body{padding:1.1rem 1.4rem;overflow-x:auto;font-family:var(--mono);font
     </div>
   </div>
   <div class="tks">
+    <div class="tk" style="border-left-color:var(--green)">
+      <strong style="color:var(--text);font-family:var(--sans)">ELI5:</strong> Deposit characters into a bank account from `s`, then withdraw characters for `t`. If you overdraw, it's not an anagram!
+    </div>
     <div class="tk">The first loop runs O(S) times, and the second loop runs O(T) times, making the math strictly additive: O(S + T).</div>
     <div class="tk">* The dictionary `source` size is bounded strictly to the max number of characters in the alphabet (26), so the space doesn't grow towards infinity, bounding it theoretically at O(1) space!</div>
   </div>
@@ -611,6 +642,19 @@ document.addEventListener('keydown', e => {
   if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp')   { e.preventDefault(); prevStep(); }
   if (e.key === ' ') { e.preventDefault(); togglePlay(); }
 });
+
+function toggleBlur() {
+  const btn = document.getElementById('btnBlur');
+  const cb = document.querySelector('.code-body');
+  cb.classList.toggle('blur-logic');
+  if (cb.classList.contains('blur-logic')) {
+    btn.classList.remove('on');
+    btn.innerHTML = '👁 Show Logic';
+  } else {
+    btn.classList.add('on');
+    btn.innerHTML = '👁 Hide Logic';
+  }
+}
 </script>
 </body>
 </html>

@@ -72,8 +72,13 @@
     .key-insight strong { color: var(--amber); }
 
     .code-block { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; margin-bottom: 2rem; animation: fadeUp .6s ease .1s both; }
-    .code-header { display: flex; align-items: center; gap: 8px; padding: 12px 16px; border-bottom: 1px solid var(--border); background: var(--surface2); }
+    .code-header { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; border-bottom: 1px solid var(--border); background: var(--surface2); }
+    .code-header .file-info { display: flex; align-items: center; gap: 8px; }
     .code-header span { font-family: var(--mono); font-size: 12px; color: var(--text-muted); }
+    .btn-blur { font-family: var(--mono); font-size: 11px; padding: 3px 10px; border-radius: 100px; background: var(--surface2); border: 1px solid var(--border-mid); color: var(--text-muted); cursor: pointer; transition: all .2s; }
+    .btn-blur:hover { color: var(--text); border-color: var(--text-dim); }
+    .btn-blur.on { background: rgba(192,132,252,0.15); color: var(--purple); border-color: rgba(192,132,252,0.35); }
+    .code-body.blur-logic span { filter: blur(4px); opacity: 0.6; transition: all .3s; }
     .dots { display: flex; gap: 6px; }
     .dot { width: 10px; height: 10px; border-radius: 50%; }
     .dot-r { background: #ff5f57; } .dot-y { background: #ffbd2e; } .dot-g { background: #28c940; }
@@ -316,8 +321,11 @@
   </div>
 
   <div class="code-block">
-    <div class="code-header"><div class="dots"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div></div><span>diameterOfBinaryTree.js</span></div>
-    <pre><span class="kw">var</span> <span class="fn">diameterOfBinaryTree</span> = <span class="kw">function</span>(<span class="var">root</span>) {
+    <div class="code-header">
+      <div class="file-info"><div class="dots"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div></div><span>diameterOfBinaryTree.js</span></div>
+      <button class="btn-blur" id="btnBlur" onclick="toggleBlur()">👁 Show Logic</button>
+    </div>
+    <pre class="code-body blur-logic"><span class="kw">var</span> <span class="fn">diameterOfBinaryTree</span> = <span class="kw">function</span>(<span class="var">root</span>) {
   <span class="kw">let</span> <span class="var">maxDiameter</span> = <span class="num">0</span>;                          <span class="cm">// single node = 0 edges</span>
 
   <span class="kw">function</span> <span class="fn">getDepth</span>(<span class="var">curr</span>) {
@@ -440,7 +448,26 @@
 // At every node: update max with l+r, return 1+max(l,r)</span></pre>
     </div>
 
+    <div class="mental-model" style="border-color: rgba(248,113,113,0.3);">
+      <div class="mental-model-header"><span style="font-size:16px">🚨</span><span class="mm-title" style="color:var(--red);">Gotchas &amp; Common Pitfalls</span></div>
+      <div class="mental-model-body">
+        <div class="mm-item"><span class="mm-bullet" style="color:var(--red);">▸</span><div class="mm-text"><strong>Confusing Nodes vs Edges:</strong> The problem measures path length by <em>edges</em>, not nodes. A path of 3 nodes has 2 edges. Because we compute <code>leftDepth + rightDepth</code> where depth is edges from the node to the leaf, it naturally outputs edge count without needing to subtract 1!</div></div>
+        <div class="mm-item"><span class="mm-bullet" style="color:var(--red);">▸</span><div class="mm-text"><strong>Assuming Root is the Bend:</strong> It's tempting to just write <code>getDepth(root.left) + getDepth(root.right)</code>. But the longest path often lives entirely in the left or right subtree of the root! You MUST check every node.</div></div>
+      </div>
+    </div>
+
+    <div class="mental-model" style="border-color: rgba(96,165,250,0.3);">
+      <div class="mental-model-header"><span style="font-size:16px">⚖️</span><span class="mm-title" style="color:var(--blue);">Trade-offs &amp; Alternatives</span></div>
+      <div class="mental-model-body">
+        <div class="mm-item"><span class="mm-bullet" style="color:var(--blue);">▸</span><div class="mm-text"><strong>Closure Variable (Our Code):</strong> Fast, simple, clean. <em>Trade-off:</em> Relies on side effects. In strongly typed languages, people sometimes dislike global side effects during recursion.</div></div>
+        <div class="mm-item"><span class="mm-bullet" style="color:var(--blue);">▸</span><div class="mm-text"><strong>Return Object <code>{depth, maxDiam}</code>:</strong> Fully pure functional approach that returns both values in an array/object. <em>Trade-off:</em> Allocates a new object at every single node, causing more memory churn and verbosity compared to a single outer variable.</div></div>
+      </div>
+    </div>
+
     <div class="complexity">
+      <div class="cpill" style="flex-basis: 100%; border-color: rgba(192,132,252,0.3); background: var(--purple-bg); color: var(--purple);">
+        <strong style="color:var(--purple)">ELI5:</strong> Imagine picking up the tree by one node and letting the rest dangle. The longest combined string of nodes hanging off the left and right sides of that peak node is your answer. We just check every single node to see who has the longest total hangers!
+      </div>
       <div class="cpill">Time: <strong>O(n)</strong> — each node visited once</div>
       <div class="cpill">Space: <strong>O(h)</strong> — call stack = tree height</div>
       <div class="cpill">Pattern: <strong>post-order</strong> traversal</div>
@@ -642,6 +669,18 @@ document.getElementById("examples-row").addEventListener("click",e=>{const b=e.t
 document.addEventListener("keydown",e=>{if(e.key==="ArrowRight"||e.key==="ArrowDown")move(1);if(e.key==="ArrowLeft"||e.key==="ArrowUp")move(-1);});
 function stopPlay(){if(playTimer){clearInterval(playTimer);playTimer=null;}const b=document.getElementById("btn-play");b.textContent="▶ Play";b.classList.add("btn-play");}
 function togglePlay(){const b=document.getElementById("btn-play");if(playTimer){stopPlay();return;}b.textContent="⏸ Pause";b.classList.add("btn-play");playTimer=setInterval(()=>{if(cur>=getSteps().length-1){stopPlay();return;}move(1);},1400);}
+function toggleBlur() {
+  const btn = document.getElementById('btnBlur');
+  const cb = document.querySelector('.code-body');
+  cb.classList.toggle('blur-logic');
+  if (cb.classList.contains('blur-logic')) {
+    btn.classList.remove('on');
+    btn.innerHTML = '👁 Show Logic';
+  } else {
+    btn.classList.add('on');
+    btn.innerHTML = '👁 Hide Logic';
+  }
+}
 loadExample(0);
 </script>
 </body>

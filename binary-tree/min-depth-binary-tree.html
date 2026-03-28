@@ -193,18 +193,25 @@
     .ex-badge { font-size: 9px; font-weight: 700; padding: 2px 7px; border-radius: 5px; background: var(--surface3); color: var(--text-dim); }
     .ex-btn.active .ex-badge { background: rgba(255,255,255,0.1); color: inherit; }
 
+    /* MENTAL MODEL */
+    .mental-model { display: grid; grid-template-columns: 1fr 1fr; gap: 0; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; margin-bottom: 2rem; animation: fadeUp .6s ease .12s both; }
+    .model-col { padding: 20px; }
+    .model-hdr { font-family: var(--mono); font-size: 11px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+    .model-list { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+    .model-list li { font-size: 13px; color: var(--text-dim); line-height: 1.6; position: relative; padding-left: 14px; }
+    .model-list li::before { content: '→'; position: absolute; left: 0; color: var(--teal); font-family: var(--mono); }
+    .model-list strong { color: var(--text); }
+    .model-list code { font-family: var(--mono); font-size: 11px; background: var(--surface2); padding: 2px 5px; border-radius: 4px; color: var(--teal); }
+
     /* Code */
-    .code-block {
-      background: var(--surface); border: 1px solid var(--border);
-      border-radius: 12px; overflow: hidden; margin-bottom: 2rem;
-      animation: fadeUp .6s ease .1s both;
-    }
-    .code-header {
-      display: flex; align-items: center; gap: 8px;
-      padding: 12px 16px; border-bottom: 1px solid var(--border);
-      background: var(--surface2);
-    }
+    .code-block { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; margin-bottom: 2rem; animation: fadeUp .6s ease .1s both; }
+    .code-header { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; border-bottom: 1px solid var(--border); background: var(--surface2); }
+    .code-header .file-info { display: flex; align-items: center; gap: 8px; }
     .code-header span { font-family: var(--mono); font-size: 12px; color: var(--text-muted); }
+    .btn-blur { font-family: var(--mono); font-size: 11px; padding: 3px 10px; border-radius: 100px; background: var(--surface2); border: 1px solid var(--border-mid); color: var(--text-muted); cursor: pointer; transition: all .2s; }
+    .btn-blur:hover { color: var(--text); border-color: var(--text-dim); }
+    .btn-blur.on { background: rgba(124,110,245,0.15); color: var(--teal); border-color: rgba(124,110,245,0.35); }
+    .code-body.blur-logic span { filter: blur(4px); opacity: 0.6; transition: all .3s; }
     .dots { display: flex; gap: 6px; }
     .dot { width: 10px; height: 10px; border-radius: 50%; }
     .dot-r { background: #ff5f57; } .dot-y { background: #ffbd2e; } .dot-g { background: #28c940; }
@@ -521,10 +528,10 @@
   <!-- Code -->
   <div class="code-block">
     <div class="code-header">
-      <div class="dots"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div></div>
-      <span>minDepth.js</span>
+      <div class="file-info"><div class="dots"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div></div><span>minDepth.js</span></div>
+      <button class="btn-blur" id="btnBlur" onclick="toggleBlur()">👁 Show Logic</button>
     </div>
-    <pre><span class="kw">var</span> <span class="fn">minDepth</span> = <span class="kw">function</span>(<span class="var">root</span>) {
+    <pre class="code-body blur-logic"><span class="kw">var</span> <span class="fn">minDepth</span> = <span class="kw">function</span>(<span class="var">root</span>) {
     <span class="kw">if</span> (!<span class="var">root</span>) <span class="kw">return</span> <span class="num">0</span>                       <span class="cm">// empty tree → 0</span>
 
     <span class="kw">let</span> <span class="var">queue</span> = [<span class="var">root</span>]                       <span class="cm">// seed BFS queue with root</span>
@@ -743,11 +750,29 @@
         <p>Unlike max depth where you visit every node, min depth exits the moment the first leaf is found. In best case (balanced tree), you only visit ~half the nodes.</p>
       </div>
     </div>
+    <div class="mental-model">
+      <div class="model-col">
+        <div class="model-hdr">⚠️ Gotchas & Common Pitfalls</div>
+        <ul class="model-list">
+          <li><strong>One-Child Trap:</strong> A node with only one child is <em>not</em> a leaf. You must continue down the existing branch. The condition <code>!curr.left && !curr.right</code> ensures BOTH are null.</li>
+          <li><strong>Empty Tree:</strong> If <code>root === null</code>, returning 0 right away prevents trying to push null into the queue.</li>
+          <li><strong>Queue Size Snapshot:</strong> You must take <code>len = queue.length</code> before processing a level so you know exactly when to increment the <code>depth</code> counter.</li>
+        </ul>
+      </div>
+      <div class="model-col" style="border-left:1px solid var(--border)">
+        <div class="model-hdr">⚖️ Trade-offs & Alternatives</div>
+        <ul class="model-list">
+          <li><strong>BFS Iterative (Current):</strong> O(W) Space. Often faster than DFS because it immediately exits at the <em>shallowest</em> leaf.</li>
+          <li><strong>DFS Recursive (Alternative):</strong> O(H) Call Stack Space. Code is simpler, but it must traverse the <em>entire</em> tree to guarantee it found the absolute minimum depth.</li>
+        </ul>
+      </div>
+    </div>
+
     <div class="complexity">
       <div class="cpill">Time: <strong>O(n)</strong> — worst case all nodes visited</div>
       <div class="cpill">Space: <strong>O(n)</strong> — queue can hold one full level</div>
       <div class="cpill">Best case: <strong>O(n/2)</strong> for balanced tree</div>
-      <div class="cpill">Pattern: <strong>BFS early exit</strong></div>
+      <div class="cpill eli5"><strong>ELI5:</strong> Water is rising from the root level by level. The first node to completely disappear under water (because it has no children below it) defines the minimum depth!</div>
     </div>
   </div>
 
@@ -1194,6 +1219,19 @@ function togglePlay() {
 }
 
 // Init
+function toggleBlur() {
+  const btn = document.getElementById('btnBlur');
+  const cb = document.querySelector('.code-body');
+  cb.classList.toggle('blur-logic');
+  if (cb.classList.contains('blur-logic')) {
+    btn.classList.remove('on');
+    btn.innerHTML = '👁 Show Logic';
+  } else {
+    btn.classList.add('on');
+    btn.innerHTML = '👁 Hide Logic';
+  }
+}
+
 loadExample(0);
 </script>
 </body>

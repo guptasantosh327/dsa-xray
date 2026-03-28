@@ -86,9 +86,24 @@
     .key-insight strong { color: var(--amber); }
 
     /* CODE BLOCK */
+    /* MENTAL MODEL */
+    .mental-model { display: grid; grid-template-columns: 1fr 1fr; gap: 0; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; margin-bottom: 2rem; animation: fadeUp .6s ease .12s both; }
+    .model-col { padding: 20px; }
+    .model-hdr { font-family: var(--mono); font-size: 11px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+    .model-list { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+    .model-list li { font-size: 13px; color: var(--text-dim); line-height: 1.6; position: relative; padding-left: 14px; }
+    .model-list li::before { content: '→'; position: absolute; left: 0; color: var(--teal); font-family: var(--mono); }
+    .model-list strong { color: var(--text); }
+    .model-list code { font-family: var(--mono); font-size: 11px; background: var(--surface2); padding: 2px 5px; border-radius: 4px; color: var(--teal); }
+
     .code-block { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; margin-bottom: 2rem; animation: fadeUp .6s ease .1s both; }
-    .code-header { display: flex; align-items: center; gap: 8px; padding: 12px 16px; border-bottom: 1px solid var(--border); background: var(--surface2); }
+    .code-header { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; border-bottom: 1px solid var(--border); background: var(--surface2); }
+    .code-header .file-info { display: flex; align-items: center; gap: 8px; }
     .code-header span { font-family: var(--mono); font-size: 12px; color: var(--text-muted); }
+    .btn-blur { font-family: var(--mono); font-size: 11px; padding: 3px 10px; border-radius: 100px; background: var(--surface2); border: 1px solid var(--border-mid); color: var(--text-muted); cursor: pointer; transition: all .2s; }
+    .btn-blur:hover { color: var(--text); border-color: var(--text-dim); }
+    .btn-blur.on { background: rgba(124,110,245,0.15); color: var(--teal); border-color: rgba(124,110,245,0.35); }
+    .code-body.blur-logic span { filter: blur(4px); opacity: 0.6; transition: all .3s; }
     .dots { display: flex; gap: 6px; }
     .dot { width: 10px; height: 10px; border-radius: 50%; }
     .dot-r { background: #ff5f57; } .dot-y { background: #ffbd2e; } .dot-g { background: #28c940; }
@@ -357,8 +372,11 @@
 
   <!-- CODE -->
   <div class="code-block">
-    <div class="code-header"><div class="dots"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div></div><span>lcaBST.js</span></div>
-    <pre><span class="kw">var</span> <span class="fn">lowestCommonAncestor</span> = <span class="kw">function</span>(<span class="var">root</span>, <span class="var">p</span>, <span class="var">q</span>) {
+    <div class="code-header">
+      <div class="file-info"><div class="dots"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div></div><span>lcaBST.js</span></div>
+      <button class="btn-blur" id="btnBlur" onclick="toggleBlur()">👁 Show Logic</button>
+    </div>
+    <pre class="code-body blur-logic"><span class="kw">var</span> <span class="fn">lowestCommonAncestor</span> = <span class="kw">function</span>(<span class="var">root</span>, <span class="var">p</span>, <span class="var">q</span>) {
   <span class="cm">// Case 1: both smaller → LCA must be left subtree</span>
   <span class="kw">if</span> (<span class="var">p</span>.val &lt; <span class="var">root</span>.val &amp;&amp; <span class="var">q</span>.val &lt; <span class="var">root</span>.val) {
     <span class="kw">return</span> <span class="fn">lowestCommonAncestor</span>(<span class="var">root</span>.left, <span class="var">p</span>, <span class="var">q</span>)
@@ -518,11 +536,29 @@
 // Key: The split point = LCA. BST ordering reveals it in O(log n).</span></pre>
     </div>
 
+    <div class="mental-model">
+      <div class="model-col">
+        <div class="model-hdr">⚠️ Gotchas & Common Pitfalls</div>
+        <ul class="model-list">
+          <li><strong>Overcomplicating the search:</strong> Don't traverse the whole tree like a standard Binary Tree LCA. Use the BST property!</li>
+          <li><strong>p and q order:</strong> <code>p</code> is not guaranteed to be smaller than <code>q</code>. Always check both <code>p < root</code> and <code>q < root</code> instead of assuming p is the min!</li>
+          <li><strong>Missed Equality:</strong> The split occurs when p and q are on <em>different</em> sides, OR when the root itself <em>equals</em> p or q. Both mean we found the LCA.</li>
+        </ul>
+      </div>
+      <div class="model-col" style="border-left:1px solid var(--border)">
+        <div class="model-hdr">⚖️ Trade-offs & Alternatives</div>
+        <ul class="model-list">
+          <li><strong>Iterative Pointer (Current):</strong> O(1) Space, O(H) Time. The absolute best way. Just walks down one single path until the split.</li>
+          <li><strong>Recursive (Alternative):</strong> O(H) Space for call stack. Clean code, but unnecessary overhead since it's just tail recursion.</li>
+        </ul>
+      </div>
+    </div>
+
     <div class="complexity">
-      <div class="cpill">Time: <strong>O(log n)</strong> balanced BST</div>
-      <div class="cpill">Time: <strong>O(n)</strong> skewed BST</div>
-      <div class="cpill">Space: <strong>O(h)</strong> recursive call stack</div>
-      <div class="cpill">Space: <strong>O(1)</strong> iterative version</div>
+      <div class="cpill">Time: <strong>O(h)</strong> — single path from root to LCA</div>
+      <div class="cpill">Space: <strong>O(1)</strong> — iterative pointer walk</div>
+      <div class="cpill">Pattern: <strong>BST split point</strong></div>
+      <div class="cpill eli5"><strong>ELI5:</strong> Two people are walking down a mountain path. As long as they want to go the exact same way (both left or both right), they walk together. The very first fork in the road where one wants to go left and the other goes right—that fork is the Lowest Common Ancestor!</div>
     </div>
   </div>
 
@@ -945,7 +981,6 @@ function renderStep(step) {
   // Meta
   const steps = getSteps();
   document.getElementById("step-label").textContent = `Step ${cur + 1} / ${steps.length}`;
-  document.getElementById("step-desc").innerHTML = step.desc;
   document.getElementById("prog").style.width = ((cur + 1) / steps.length * 100) + "%";
 
   const badge = document.getElementById("ans-badge");
@@ -1005,7 +1040,21 @@ function togglePlay() {
   }, 1500);
 }
 
+function toggleBlur() {
+  const btn = document.getElementById('btnBlur');
+  const cb = document.querySelector('.code-body');
+  cb.classList.toggle('blur-logic');
+  if (cb.classList.contains('blur-logic')) {
+    btn.classList.remove('on');
+    btn.innerHTML = '👁 Show Logic';
+  } else {
+    btn.classList.add('on');
+    btn.innerHTML = '👁 Hide Logic';
+  }
+}
+
 loadExample(0);
 </script>
 </body>
 </html>
+```

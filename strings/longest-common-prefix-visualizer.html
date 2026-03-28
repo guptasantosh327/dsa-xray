@@ -70,6 +70,10 @@ section:nth-child(6){animation-delay:.28s}
 .code-wrap{background:#090b10;border:1px solid var(--border);border-radius:12px;overflow:hidden}
 .code-hdr{display:flex;justify-content:space-between;align-items:center;padding:.5rem 1rem;background:var(--surface);border-bottom:1px solid var(--border)}
 .code-lang{font-family:var(--mono);font-size:10px;color:var(--text-dim);letter-spacing:.1em;text-transform:uppercase}
+.btn-blur{font-family:var(--mono);font-size:11px;padding:3px 10px;border-radius:100px;background:var(--surface2);border:1px solid var(--border-mid);color:var(--text-muted);cursor:pointer;transition:all .2s;}
+.btn-blur:hover{color:var(--text);border-color:var(--text-dim);}
+.btn-blur.on{background:rgba(124,110,245,0.15);color:var(--accent);border-color:rgba(124,110,245,0.35);}
+.code-body.blur-logic .cl{filter:blur(4px);opacity:0.6;transition:all .3s;}
 pre.code-body{padding:1.1rem 1.4rem;overflow-x:auto;font-family:var(--mono);font-size:13px;line-height:1.85;tab-size:2}
 .cl{display:block;padding:0 .4rem;margin:0 -.4rem;border-radius:4px;transition:background .2s;border-left:2px solid transparent}
 .cl.al{background:rgba(251,191,36,0.1);border-left-color:var(--amber)}
@@ -234,9 +238,12 @@ pre.code-body{padding:1.1rem 1.4rem;overflow-x:auto;font-family:var(--mono);font
   <div class="code-wrap">
     <div class="code-hdr">
       <span class="code-lang">javascript</span>
-      <span style="font-family:var(--mono);font-size:10px;color:var(--text-dim)">your solution — exact</span>
+      <div style="display:flex; gap:10px; align-items:center;">
+        <button class="btn-blur" id="btnBlur" onclick="toggleBlur()">👁 Show Logic</button>
+        <span style="font-family:var(--mono);font-size:10px;color:var(--text-dim)">your solution — exact</span>
+      </div>
     </div>
-    <pre class="code-body"><span id="cl1"  class="cl"><span class="kw">var</span> <span class="fn">longestCommonPrefix</span> <span class="op">=</span> <span class="kw">function</span>(<span class="vr">strs</span>) {</span>
+    <pre class="code-body blur-logic"><span id="cl1"  class="cl"><span class="kw">var</span> <span class="fn">longestCommonPrefix</span> <span class="op">=</span> <span class="kw">function</span>(<span class="vr">strs</span>) {</span>
 <span id="cl2"  class="cl">    <span class="kw">let</span> <span class="vr">prefLength</span> <span class="op">=</span> <span class="vr">strs</span>[<span class="num">0</span>].<span class="mt">length</span>;</span>
 <span id="cl3"  class="cl">    <span class="kw">let</span> <span class="vr">pref</span> <span class="op">=</span> <span class="vr">strs</span>[<span class="num">0</span>]</span>
 <span id="cl4"  class="cl"> </span>
@@ -305,9 +312,29 @@ pre.code-body{padding:1.1rem 1.4rem;overflow-x:auto;font-family:var(--mono);font
   </div>
 </section>
 
-<!-- 6. COMPLEXITY -->
+<!-- 6. GOTCHAS & COMMON PITFALLS -->
 <section>
-  <div class="sec-label">Complexity</div>
+  <div class="sec-label">Gotchas &amp; Common Pitfalls</div>
+  <div class="card">
+    <ul class="hint-list">
+      <li><strong style="color:var(--text)">Out of Bounds Errors:</strong> Javascript handles <code>str.substring(0, prefLength)</code> gracefully even if <code>str</code> is super short. But in C++ or Java, trying to take a substring larger than the string length throws an exception! You must use <code>Math.min()</code> or <code>indexOf()</code> in other languages.</li>
+      <li><strong style="color:var(--text)">Empty Array:</strong> If <code>strs</code> is completely empty, <code>strs[0]</code> will throw an error. It's best practice to add <code>if (!strs || strs.length === 0) return "";</code> at the top.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- 7. TRADE-OFFS / ALTERNATIVES -->
+<section>
+  <div class="sec-label">Trade-offs &amp; Alternatives</div>
+  <div class="card">
+    <p style="color:var(--text-muted);font-size:14px;margin-bottom:.85rem"><strong style="color:var(--text)">Alternative 1: Vertical Scanning</strong><br/>Instead of comparing whole words, compare character 0 of all strings, then character 1, etc. <br/><em>Trade-off:</em> Can be faster if there is a very short string at the very end of the array, because it bails out early. However, horizontal scanning is often more cache-friendly and easier to write.</p>
+    <p style="color:var(--text-muted);font-size:14px;"><strong style="color:var(--text)">Alternative 2: Sorting</strong><br/>Sort the array alphabetically (<code>strs.sort()</code>), then purely compare the <em>first</em> string and the <em>last</em> string in the sorted array.<br/><em>Trade-off:</em> Sorting strings takes <code>O(N log N * M)</code> time, which is usually slower than a linear <code>O(S)</code> pass, but the code is incredibly short and elegant!</p>
+  </div>
+</section>
+
+<!-- 8. COMPLEXITY -->
+<section>
+  <div class="sec-label">Complexity &amp; Hooks</div>
   <div class="cx-grid">
     <div class="cx-c">
       <div class="cx-lbl">Time</div>
@@ -326,9 +353,11 @@ pre.code-body{padding:1.1rem 1.4rem;overflow-x:auto;font-family:var(--mono);font
     </div>
   </div>
   <div class="tks">
+    <div class="tk" style="border-left-color:var(--green)">
+      <strong style="color:var(--text);font-family:var(--sans)">ELI5:</strong> Start greedy! Assume the first word is the perfect answer, then for every next word, keep chopping letters off the end of your guess until it fits!
+    </div>
     <div class="tk">The prefix can only <strong>shrink</strong> — once a character is removed it never returns. Total work across the whole algorithm ≤ sum of all character comparisons ≤ S.</div>
     <div class="tk"><code>str.substring(0, prefLength)</code> gracefully handles strings shorter than <code>prefLength</code> — it just returns the full string, which forces a mismatch and a shrink automatically.</div>
-    <div class="tk">Start optimistic (full first string), trim lazily on demand. This greedy approach avoids scanning every character of every string.</div>
   </div>
 </section>
 
@@ -574,6 +603,19 @@ document.addEventListener('keydown', e => {
   if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp')   { e.preventDefault(); prevStep(); }
   if (e.key === ' ') { e.preventDefault(); togglePlay(); }
 });
+
+function toggleBlur() {
+  const btn = document.getElementById('btnBlur');
+  const cb = document.querySelector('.code-body');
+  cb.classList.toggle('blur-logic');
+  if (cb.classList.contains('blur-logic')) {
+    btn.classList.remove('on');
+    btn.innerHTML = '👁 Show Logic';
+  } else {
+    btn.classList.add('on');
+    btn.innerHTML = '👁 Hide Logic';
+  }
+}
 </script>
 </body>
 </html>

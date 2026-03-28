@@ -1,0 +1,1135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>#26 Remove Duplicates from Sorted Array — DSA Visualizer</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Sora:wght@300;400;600;700;800&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0d0f14;
+      --surface: #13161d;
+      --surface2: #1a1e28;
+      --surface3: #212638;
+      --border: rgba(255,255,255,0.07);
+      --border-mid: rgba(255,255,255,0.12);
+      --text: #e8eaf0;
+      --text-muted: #6b7280;
+      --text-dim: #3d4251;
+      --accent: #7c6ef5;
+      --green: #34d399;
+      --amber: #fbbf24;
+      --blue: #60a5fa;
+      --red: #f87171;
+      --orange: #fb923c;
+      --mono: 'JetBrains Mono', monospace;
+      --sans: 'Sora', sans-serif;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--sans);
+      font-size: 15px;
+      line-height: 1.6;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(124,110,245,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(124,110,245,0.03) 1px, transparent 1px);
+      background-size: 40px 40px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    body::after {
+      content: '';
+      position: fixed;
+      top: -20%;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 900px;
+      height: 500px;
+      background: radial-gradient(ellipse, rgba(124,110,245,0.07) 0%, transparent 70%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(18px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .section {
+      position: relative;
+      z-index: 1;
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 0 20px;
+      animation: fadeUp 0.5s ease both;
+    }
+    .section:nth-child(1) { animation-delay: 0.0s; }
+    .section:nth-child(2) { animation-delay: 0.07s; }
+    .section:nth-child(3) { animation-delay: 0.14s; }
+    .section:nth-child(4) { animation-delay: 0.21s; }
+    .section:nth-child(5) { animation-delay: 0.28s; }
+    .section:nth-child(6) { animation-delay: 0.35s; }
+    .section:nth-child(7) { animation-delay: 0.42s; }
+    .section:nth-child(8) { animation-delay: 0.49s; }
+
+    /* ── NAV ── */
+    .top-nav {
+      position: relative; z-index: 10;
+      display: flex; align-items: center; gap: 12px;
+      padding: 18px 28px;
+      border-bottom: 1px solid var(--border);
+      background: rgba(13,15,20,0.85);
+      backdrop-filter: blur(12px);
+    }
+    .nav-back {
+      display: flex; align-items: center; gap: 8px;
+      padding: 7px 14px;
+      background: var(--surface2);
+      border: 1px solid var(--border-mid);
+      border-radius: 8px;
+      color: var(--text-muted);
+      text-decoration: none;
+      font-family: var(--mono);
+      font-size: 12px;
+      transition: all .2s;
+    }
+    .nav-back:hover { color: var(--text); border-color: var(--accent); }
+    .nav-title { font-size: 14px; font-weight: 600; color: var(--text-muted); }
+    .nav-num { font-family: var(--mono); color: var(--green); font-size: 13px; font-weight: 700; }
+
+    /* ── PATTERN BANNER ── */
+    .pattern-banner {
+      margin: 36px 0 28px;
+      padding: 22px 26px;
+      background: linear-gradient(135deg, rgba(52,211,153,0.07) 0%, rgba(96,165,250,0.05) 100%);
+      border: 1px solid rgba(52,211,153,0.2);
+      border-radius: 16px;
+    }
+    .pattern-label {
+      font-family: var(--mono);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: .12em;
+      color: var(--green);
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+    .pattern-name {
+      font-size: 22px;
+      font-weight: 800;
+      color: var(--text);
+      margin-bottom: 8px;
+    }
+    .pattern-why { color: var(--text-muted); font-size: 14px; margin-bottom: 14px; }
+    .related-row { display: flex; flex-wrap: wrap; gap: 8px; }
+    .related-pill {
+      padding: 4px 12px;
+      background: rgba(52,211,153,0.08);
+      border: 1px solid rgba(52,211,153,0.2);
+      border-radius: 20px;
+      font-size: 12px;
+      color: var(--green);
+      font-family: var(--mono);
+    }
+
+    /* ── SECTION HEADER ── */
+    .sec-head {
+      display: flex; align-items: center; gap: 10px;
+      margin: 36px 0 16px;
+    }
+    .sec-num {
+      width: 28px; height: 28px;
+      background: var(--surface3);
+      border: 1px solid var(--border-mid);
+      border-radius: 8px;
+      display: grid; place-items: center;
+      font-family: var(--mono);
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--accent);
+      flex-shrink: 0;
+    }
+    .sec-title {
+      font-size: 17px;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    /* ── PROBLEM STATEMENT ── */
+    .prob-box {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 24px;
+    }
+    .prob-box p { color: var(--text-muted); margin-bottom: 12px; }
+    .prob-box strong { color: var(--text); }
+    .analogy-box {
+      background: var(--surface2);
+      border-left: 3px solid var(--blue);
+      padding: 12px 16px;
+      border-radius: 0 8px 8px 0;
+      margin: 14px 0;
+      font-size: 14px;
+      color: var(--blue);
+    }
+    .examples-row { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 16px; }
+    .ex-card {
+      flex: 1; min-width: 220px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 14px;
+    }
+    .ex-card .ex-label {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+    }
+    .ex-card .ex-io { font-family: var(--mono); font-size: 13px; }
+    .ex-card .ex-in { color: var(--blue); }
+    .ex-card .ex-out { color: var(--green); margin-top: 4px; }
+
+    /* ── INTUITION ── */
+    .hints-box {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 24px;
+    }
+    .hint-step {
+      display: flex; gap: 14px;
+      margin-bottom: 14px;
+    }
+    .hint-step:last-child { margin-bottom: 0; }
+    .hint-num {
+      width: 24px; height: 24px;
+      background: var(--surface3);
+      border-radius: 6px;
+      display: grid; place-items: center;
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--accent);
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+    .hint-text { color: var(--text-muted); font-size: 14px; }
+    .hint-text strong { color: var(--amber); }
+    .key-trick {
+      margin-top: 16px;
+      padding: 12px 16px;
+      background: rgba(251,191,36,0.06);
+      border: 1px solid rgba(251,191,36,0.2);
+      border-radius: 10px;
+      font-size: 13px;
+      color: var(--amber);
+    }
+
+    /* ── CODE BLOCK ── */
+    .code-wrap {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      overflow: hidden;
+    }
+    .code-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 12px 18px;
+      border-bottom: 1px solid var(--border);
+      background: var(--surface2);
+    }
+    .code-lang {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: .1em;
+    }
+    .blur-btn {
+      padding: 5px 14px;
+      background: var(--surface3);
+      border: 1px solid var(--border-mid);
+      border-radius: 7px;
+      font-size: 12px;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-family: var(--mono);
+      transition: all .2s;
+    }
+    .blur-btn:hover { color: var(--text); border-color: var(--accent); }
+    pre {
+      padding: 20px;
+      overflow-x: auto;
+      font-family: var(--mono);
+      font-size: 13.5px;
+      line-height: 1.8;
+    }
+    .line { display: block; padding: 1px 4px; border-radius: 4px; transition: background .2s; }
+    .line.active { background: rgba(251,191,36,0.15); color: var(--amber); }
+    .line.blurred { filter: blur(4px); user-select: none; transition: filter .3s; }
+    .kw { color: #c084fc; }
+    .fn { color: #60a5fa; }
+    .cm { color: #3d4251; }
+    .str { color: #34d399; }
+    .num-lit { color: #fb923c; }
+    .op { color: #fbbf24; }
+
+    /* ── VISUALIZER ── */
+    .viz-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      overflow: hidden;
+    }
+    .viz-top {
+      padding: 18px 22px;
+      border-bottom: 1px solid var(--border);
+      background: var(--surface2);
+      display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;
+    }
+    .viz-title-row { display: flex; align-items: center; gap: 10px; }
+    .viz-badge {
+      padding: 4px 12px;
+      background: rgba(52,211,153,0.1);
+      border: 1px solid rgba(52,211,153,0.25);
+      border-radius: 20px;
+      font-size: 12px;
+      color: var(--green);
+      font-family: var(--mono);
+    }
+    .ex-select-row { display: flex; gap: 6px; flex-wrap: wrap; }
+    .ex-btn {
+      padding: 5px 13px;
+      background: var(--surface3);
+      border: 1px solid var(--border-mid);
+      border-radius: 8px;
+      font-size: 12px;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-family: var(--mono);
+      transition: all .2s;
+    }
+    .ex-btn:hover { border-color: var(--green); color: var(--green); }
+    .ex-btn.active { background: rgba(52,211,153,0.12); border-color: rgba(52,211,153,0.4); color: var(--green); }
+
+    /* Progress bar */
+    .progress-track {
+      height: 3px;
+      background: var(--surface3);
+      position: relative;
+    }
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--amber), var(--orange));
+      transition: width .3s ease;
+    }
+
+    .viz-body { padding: 24px 22px; }
+
+    /* Array visualization */
+    .array-stage {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 24px;
+    }
+    .array-row {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .cell-wrap { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+    .cell {
+      width: 38px; height: 38px;
+      background: var(--surface2);
+      border: 1px solid var(--border-mid);
+      border-radius: 8px;
+      display: grid; place-items: center;
+      font-family: var(--mono);
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text-muted);
+      transition: all .3s;
+    }
+    .cell.write-zone {
+      border-color: rgba(52,211,153,0.35);
+      background: rgba(52,211,153,0.06);
+    }
+    .cell.k-pos {
+      border-color: var(--amber);
+      background: rgba(251,191,36,0.15);
+      color: var(--amber);
+      box-shadow: 0 0 10px rgba(251,191,36,0.2);
+    }
+    .cell.i-pos {
+      border-color: var(--blue);
+      background: rgba(96,165,250,0.12);
+      color: var(--blue);
+      box-shadow: 0 0 10px rgba(96,165,250,0.15);
+    }
+    .cell.both-pos {
+      border-color: var(--accent);
+      background: rgba(124,110,245,0.15);
+      color: var(--accent);
+    }
+    .cell.written {
+      border-color: var(--green);
+      background: rgba(52,211,153,0.15);
+      color: var(--green);
+    }
+    .cell.dim { opacity: 0.3; }
+    .cell-idx {
+      font-family: var(--mono);
+      font-size: 10px;
+      color: var(--text-dim);
+    }
+    .pointer-label {
+      font-family: var(--mono);
+      font-size: 11px;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 4px;
+      text-align: center;
+    }
+    .ptr-k { color: var(--amber); background: rgba(251,191,36,0.1); border: 1px solid rgba(251,191,36,0.25); }
+    .ptr-i { color: var(--blue);  background: rgba(96,165,250,0.1);  border: 1px solid rgba(96,165,250,0.25); }
+    .ptr-both { color: var(--accent); background: rgba(124,110,245,0.1); border: 1px solid rgba(124,110,245,0.25); }
+    .ptr-none { visibility: hidden; }
+
+    /* Variables panel */
+    .vars-row {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 20px;
+      justify-content: center;
+    }
+    .var-chip {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 10px 18px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      min-width: 90px;
+    }
+    .var-name { font-family: var(--mono); font-size: 11px; color: var(--text-dim); margin-bottom: 4px; }
+    .var-val { font-family: var(--mono); font-size: 18px; font-weight: 700; }
+    .val-k { color: var(--amber); }
+    .val-i { color: var(--blue); }
+    .val-result { color: var(--green); }
+    .val-cmp { color: var(--accent); }
+
+    /* Legend */
+    .legend {
+      display: flex; gap: 14px; flex-wrap: wrap; justify-content: center;
+      margin-bottom: 18px;
+    }
+    .legend-item { display: flex; align-items: center; gap: 5px; font-size: 12px; color: var(--text-muted); font-family: var(--mono); }
+    .legend-dot { width: 10px; height: 10px; border-radius: 3px; }
+
+    /* Step description */
+    .step-desc {
+      padding: 14px 18px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      font-size: 14px;
+      color: var(--text-muted);
+      margin-bottom: 14px;
+      min-height: 48px;
+    }
+    .step-desc em { color: var(--amber); font-style: normal; font-weight: 600; }
+
+    /* Phase + result */
+    .status-row {
+      display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-bottom: 18px;
+    }
+    .phase-badge {
+      padding: 4px 12px;
+      background: var(--surface3);
+      border: 1px solid var(--border-mid);
+      border-radius: 20px;
+      font-size: 12px;
+      font-family: var(--mono);
+      color: var(--text-muted);
+    }
+    .result-badge {
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-family: var(--mono);
+      font-weight: 700;
+    }
+    .rb-pending { background: rgba(107,114,128,0.1); border: 1px solid rgba(107,114,128,0.25); color: var(--text-muted); }
+    .rb-done    { background: rgba(52,211,153,0.12); border: 1px solid rgba(52,211,153,0.35); color: var(--green); }
+
+    /* Execution log */
+    .log-box {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px 14px;
+      max-height: 140px;
+      overflow-y: auto;
+      margin-bottom: 20px;
+    }
+    .log-line {
+      font-family: var(--mono);
+      font-size: 12px;
+      color: var(--text-muted);
+      padding: 2px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.03);
+    }
+    .log-line:last-child { border-bottom: none; }
+    .log-line.hl { color: var(--amber); }
+
+    /* Controls */
+    .controls {
+      display: flex; align-items: center; justify-content: center; gap: 10px; flex-wrap: wrap;
+    }
+    .ctrl-btn {
+      padding: 9px 22px;
+      background: var(--surface2);
+      border: 1px solid var(--border-mid);
+      border-radius: 10px;
+      color: var(--text);
+      font-size: 13px;
+      cursor: pointer;
+      font-family: var(--mono);
+      transition: all .2s;
+    }
+    .ctrl-btn:hover { border-color: var(--green); color: var(--green); }
+    .ctrl-btn:disabled { opacity: .35; cursor: not-allowed; }
+    .ctrl-btn.play-btn {
+      background: rgba(52,211,153,0.1);
+      border-color: rgba(52,211,153,0.35);
+      color: var(--green);
+      font-weight: 700;
+    }
+    .ctrl-btn.play-btn:hover { background: rgba(52,211,153,0.18); }
+    .step-counter {
+      font-family: var(--mono);
+      font-size: 12px;
+      color: var(--text-dim);
+      padding: 6px 14px;
+      background: var(--surface3);
+      border-radius: 8px;
+    }
+
+    /* ── INFO SECTIONS ── */
+    .info-box {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 24px;
+      margin-bottom: 0;
+    }
+    .gotcha-item, .alt-item, .complexity-item {
+      margin-bottom: 16px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--border);
+    }
+    .gotcha-item:last-child, .alt-item:last-child, .complexity-item:last-child {
+      margin-bottom: 0; padding-bottom: 0; border-bottom: none;
+    }
+    .gotcha-title { color: var(--red); font-weight: 700; margin-bottom: 4px; }
+    .gotcha-body  { color: var(--text-muted); font-size: 14px; }
+    .alt-title    { color: var(--blue); font-weight: 700; margin-bottom: 4px; }
+    .alt-body     { color: var(--text-muted); font-size: 14px; }
+
+    /* complexity table */
+    .cx-table { width: 100%; border-collapse: collapse; margin-bottom: 16px; }
+    .cx-table th, .cx-table td {
+      padding: 9px 14px;
+      font-family: var(--mono);
+      font-size: 13px;
+      border: 1px solid var(--border);
+      text-align: left;
+    }
+    .cx-table th { background: var(--surface2); color: var(--text-muted); }
+    .cx-table td { color: var(--text); }
+    .cx-table td:nth-child(2) { color: var(--green); font-weight: 700; }
+
+    .mnemonic {
+      padding: 14px 18px;
+      background: rgba(124,110,245,0.06);
+      border: 1px solid rgba(124,110,245,0.2);
+      border-radius: 10px;
+      font-size: 14px;
+      color: var(--accent);
+      margin-bottom: 14px;
+    }
+    .takeaway {
+      padding: 8px 14px;
+      background: var(--surface2);
+      border-left: 3px solid var(--green);
+      border-radius: 0 8px 8px 0;
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+    }
+    .takeaway:last-child { margin-bottom: 0; }
+
+    .spacer { height: 60px; }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--surface3); border-radius: 3px; }
+
+    @media (max-width: 600px) {
+      .vars-row { gap: 7px; }
+      .var-chip { padding: 8px 12px; min-width: 70px; }
+      .array-row { gap: 4px; }
+      .cell { width: 32px; height: 32px; font-size: 12px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="top-nav">
+  <a href="../index.html" class="nav-back">← Hub</a>
+  <span class="nav-num">#26</span>
+  <span class="nav-title">Remove Duplicates from Sorted Array</span>
+</nav>
+
+<!-- ① PATTERN BANNER -->
+<div class="section">
+  <div class="pattern-banner">
+    <div class="pattern-label">Pattern</div>
+    <div class="pattern-name">Two Pointers — Read / Write</div>
+    <div class="pattern-why">The array is sorted, so duplicates are always adjacent. One pointer (<code style="color:var(--amber)">k</code>) marks the last unique write position; a second pointer (<code style="color:var(--blue)">i</code>) scans ahead. When <code>arr[i] &gt; arr[k]</code>, a new unique value is found — advance <code>k</code> and write. Zero extra space needed.</div>
+    <div class="related-row">
+      <span class="related-pill">#80 Remove Duplicates II</span>
+      <span class="related-pill">#283 Move Zeroes</span>
+      <span class="related-pill">#27 Remove Element</span>
+    </div>
+  </div>
+</div>
+
+<!-- ② PROBLEM STATEMENT -->
+<div class="section">
+  <div class="sec-head"><span class="sec-num">2</span><span class="sec-title">Problem Statement</span></div>
+  <div class="prob-box">
+    <p>Given a <strong>sorted</strong> integer array <code style="color:var(--blue)">nums</code>, remove duplicates <strong>in-place</strong> so each unique element appears only once. Return <code style="color:var(--green)">k</code> — the count of unique elements. The first <code>k</code> positions of the array must hold those unique values.</p>
+    <div class="analogy-box">Think of it like compressing a sorted list of names on a whiteboard: you keep one pointer at the last confirmed unique name, and scan ahead — whenever you hit a new name, overwrite the next slot.</div>
+    <div class="examples-row">
+      <div class="ex-card">
+        <div class="ex-label">Example 1</div>
+        <div class="ex-io ex-in">arr = [1,1,2]</div>
+        <div class="ex-io ex-out">k = 2, arr = [1,2,_]</div>
+      </div>
+      <div class="ex-card">
+        <div class="ex-label">Example 2</div>
+        <div class="ex-io ex-in">arr = [0,0,1,1,1,2,2,3,3,4]</div>
+        <div class="ex-io ex-out">k = 5, arr = [0,1,2,3,4,...]</div>
+      </div>
+      <div class="ex-card">
+        <div class="ex-label">Edge case</div>
+        <div class="ex-io ex-in">arr = [1]</div>
+        <div class="ex-io ex-out">k = 1, arr = [1]</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ③ INTUITION + HINTS -->
+<div class="section">
+  <div class="sec-head"><span class="sec-num">3</span><span class="sec-title">Intuition & Hints</span></div>
+  <div class="hints-box">
+    <div class="hint-step">
+      <span class="hint-num">1</span>
+      <span class="hint-text"><strong>Brute force:</strong> Copy to a Set, convert back — O(n) time, O(n) space. Works, but the constraint says "in-place."</span>
+    </div>
+    <div class="hint-step">
+      <span class="hint-num">2</span>
+      <span class="hint-text"><strong>Key insight:</strong> Because the array is sorted, duplicates are always neighbours. You don't need to search — just compare <code style="color:var(--amber)">arr[i]</code> with the <em>last written</em> value at <code style="color:var(--amber)">arr[k]</code>.</span>
+    </div>
+    <div class="hint-step">
+      <span class="hint-num">3</span>
+      <span class="hint-text"><strong>Two pointers:</strong> <code style="color:var(--amber)">k = 0</code> anchors the write head. <code style="color:var(--blue)">i</code> runs from 1 to end. Whenever <code>arr[i] &gt; arr[k]</code>, we found a new unique: do <code>k++</code> then <code>arr[k] = arr[i]</code>.</span>
+    </div>
+    <div class="hint-step">
+      <span class="hint-num">4</span>
+      <span class="hint-text"><strong>Return value:</strong> <code>k</code> is a 0-based index of the last unique slot. Count = <code>k + 1</code>.</span>
+    </div>
+    <div class="key-trick">Key trick: <code>arr[i] &gt; arr[k]</code> (strict greater-than) works because the array is sorted — a larger value guarantees a new unique element.</div>
+  </div>
+</div>
+
+<!-- ④ CODE BLOCK -->
+<div class="section">
+  <div class="sec-head"><span class="sec-num">4</span><span class="sec-title">Solution Code</span></div>
+  <div class="code-wrap">
+    <div class="code-header">
+      <span class="code-lang">JavaScript</span>
+      <button class="blur-btn" id="blurBtn" onclick="toggleBlur()">Blur Logic</button>
+    </div>
+    <pre id="codeBlock"><span class="line" id="cl0"><span class="cm">/**</span></span>
+<span class="line" id="cl1"><span class="cm"> * @param {number[]} nums</span></span>
+<span class="line" id="cl2"><span class="cm"> * @return {number}</span></span>
+<span class="line" id="cl3"><span class="cm"> */</span></span>
+<span class="line" id="cl4"><span class="kw">var</span> <span class="fn">removeDuplicates</span> = <span class="kw">function</span>(arr) {</span>
+<span class="line" id="cl5">    <span class="kw">let</span> k = <span class="num-lit">0</span>;</span>
+<span class="line" id="cl6">    <span class="kw">for</span> (<span class="kw">let</span> i = <span class="num-lit">1</span>; i &lt; arr.length; i++) {</span>
+<span class="line" id="cl7">        <span class="kw">if</span>(arr[i] &gt; arr[k]) {</span>
+<span class="line" id="cl8">            k++;</span>
+<span class="line" id="cl9">            arr[k] = arr[i]</span>
+<span class="line" id="cl10">        }</span>
+<span class="line" id="cl11">    }</span>
+<span class="line" id="cl12">    <span class="kw">return</span> k + <span class="num-lit">1</span>;</span>
+<span class="line" id="cl13">};</span></pre>
+  </div>
+</div>
+
+<!-- ⑤ VISUALIZER -->
+<div class="section">
+  <div class="sec-head"><span class="sec-num">5</span><span class="sec-title">Interactive Visualizer</span></div>
+  <div class="viz-card">
+    <div class="viz-top">
+      <div class="viz-title-row">
+        <span class="viz-badge">Two Pointers</span>
+      </div>
+      <div class="ex-select-row" id="exRow"></div>
+    </div>
+    <div class="progress-track"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+    <div class="viz-body">
+
+      <div class="vars-row" id="varsRow">
+        <div class="var-chip"><div class="var-name">k</div><div class="var-val val-k" id="vk">—</div></div>
+        <div class="var-chip"><div class="var-name">i</div><div class="var-val val-i" id="vi">—</div></div>
+        <div class="var-chip"><div class="var-name">arr[k]</div><div class="var-val val-cmp" id="vArrK">—</div></div>
+        <div class="var-chip"><div class="var-name">arr[i]</div><div class="var-val val-cmp" id="vArrI">—</div></div>
+        <div class="var-chip"><div class="var-name">result k+1</div><div class="var-val val-result" id="vResult">—</div></div>
+      </div>
+
+      <div class="legend">
+        <div class="legend-item"><div class="legend-dot" style="background:var(--amber)"></div>k pointer</div>
+        <div class="legend-item"><div class="legend-dot" style="background:var(--blue)"></div>i pointer</div>
+        <div class="legend-item"><div class="legend-dot" style="background:var(--green)"></div>written (unique)</div>
+        <div class="legend-item"><div class="legend-dot" style="background:rgba(52,211,153,0.25);border:1px solid rgba(52,211,153,0.35)"></div>write zone [0..k]</div>
+      </div>
+
+      <div class="array-stage" id="arrayStage"></div>
+
+      <div class="status-row">
+        <span class="phase-badge" id="phaseEl">—</span>
+        <span class="result-badge rb-pending" id="resultEl">—</span>
+      </div>
+
+      <div class="step-desc" id="stepDesc">Press Play or Next to begin.</div>
+
+      <div class="log-box" id="logBox"></div>
+
+      <div class="controls">
+        <button class="ctrl-btn" id="btnPrev" onclick="move(-1)" disabled>← Prev</button>
+        <button class="ctrl-btn play-btn" id="btnPlay" onclick="togglePlay()">▶ Play</button>
+        <button class="ctrl-btn" id="btnNext" onclick="move(1)">Next →</button>
+        <span class="step-counter" id="stepCounter">0 / 0</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ⑥ GOTCHAS -->
+<div class="section">
+  <div class="sec-head"><span class="sec-num">6</span><span class="sec-title">Gotchas & Common Pitfalls</span></div>
+  <div class="info-box">
+    <div class="gotcha-item">
+      <div class="gotcha-title">① Off-by-one in the return value</div>
+      <div class="gotcha-body"><code>k</code> is a 0-based index, so the count of unique elements is <code>k + 1</code>. Returning just <code>k</code> will be wrong for every case with at least one element. LeetCode checks <code>expectedNums[k-1]</code>, so it will silently truncate the last unique element.</div>
+    </div>
+    <div class="gotcha-item">
+      <div class="gotcha-title">② Starting <code>i</code> at 0 instead of 1</div>
+      <div class="gotcha-body">If you start <code>i = 0</code>, you compare <code>arr[0]</code> with <code>arr[0]</code> — always equal, always skipped. The loop then misses comparing the first two elements. Always start the scan pointer one ahead of the write pointer.</div>
+    </div>
+    <div class="gotcha-item">
+      <div class="gotcha-title">③ Using <code>>=</code> instead of <code>></code></div>
+      <div class="gotcha-body">Because the array is sorted (not just distinct), <code>arr[i] &gt; arr[k]</code> is correct. Using <code>>=</code> would re-write values that are the same — no correctness issue here, but it's conceptually wrong and would break if you tried to adapt this to "allow at most 2 duplicates" (LeetCode #80).</div>
+    </div>
+  </div>
+</div>
+
+<!-- ⑦ TRADE-OFFS -->
+<div class="section">
+  <div class="sec-head"><span class="sec-num">7</span><span class="sec-title">Trade-offs & Alternatives</span></div>
+  <div class="info-box">
+    <div class="alt-item">
+      <div class="alt-title">Why not use a Set or filter()?</div>
+      <div class="alt-body">Both produce a new array — O(n) extra space. The problem requires in-place modification. Also, <code>filter</code> would need something to compare against, effectively re-implementing the two-pointer idea anyway.</div>
+    </div>
+    <div class="alt-item">
+      <div class="alt-title">Could we use splice() instead of overwriting?</div>
+      <div class="alt-body"><code>splice</code> to remove elements inside a loop is O(n²) because each splice shifts all subsequent elements. The write-pointer approach is O(n) — far superior.</div>
+    </div>
+    <div class="alt-item">
+      <div class="alt-title">Space trade-off</div>
+      <div class="alt-body">This solution is O(1) extra space. The trade-off is that the "tail" of the original array (positions k+1 onwards) is left with stale data — but the problem explicitly allows this since only the first k elements are evaluated.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ⑧ COMPLEXITY -->
+<div class="section">
+  <div class="sec-head"><span class="sec-num">8</span><span class="sec-title">Complexity & Memory Hooks</span></div>
+  <div class="info-box">
+    <table class="cx-table">
+      <thead><tr><th>Dimension</th><th>Complexity</th><th>Reason</th></tr></thead>
+      <tbody>
+        <tr><td>Time</td><td>O(n)</td><td>Single pass: <code>i</code> visits each element exactly once</td></tr>
+        <tr><td>Space</td><td>O(1)</td><td>Only two integer pointers (<code>k</code>, <code>i</code>) — no extra array</td></tr>
+      </tbody>
+    </table>
+    <div class="mnemonic">ELI5: Two people walk down a sorted guest list. Person B (i) reads names aloud; person A (k) only writes a name on the final list if it's different from the last name they wrote. One pass, no clipboard needed.</div>
+    <div class="takeaway">"Sorted = duplicates are neighbours. Never need to search, just compare with your last write."</div>
+    <div class="takeaway">"k is a write index, not a count. Return k + 1."</div>
+    <div class="takeaway">"Two pointers: one writes, one reads. O(n) time, O(1) space."</div>
+  </div>
+</div>
+
+<div class="spacer"></div>
+
+<script>
+// ── EXAMPLES ──────────────────────────────────────────────────────────────────
+const EXAMPLES = [
+  {
+    label: "Ex 1",
+    arr: [1, 1, 2],
+  },
+  {
+    label: "Ex 2",
+    arr: [0, 0, 1, 1, 1, 2, 2, 3, 3, 4],
+  },
+  {
+    label: "All unique",
+    arr: [1, 2, 3, 4, 5],
+  },
+  {
+    label: "All same",
+    arr: [3, 3, 3, 3],
+  },
+  {
+    label: "Single",
+    arr: [7],
+  }
+];
+
+// ── STEP GENERATOR ────────────────────────────────────────────────────────────
+function buildSteps(inputArr) {
+  const arr = [...inputArr];
+  const steps = [];
+
+  // Step 0: Init
+  steps.push({
+    desc: `Initialize <em>k = 0</em>. The write pointer starts at index 0 — the first element is always unique by itself.`,
+    log: [{ t: `arr = [${arr.join(', ')}]`, h: false }, { t: `k = 0`, h: true }],
+    vPhase: "Init",
+    vResult: "—",
+    k: 0,
+    i: null,
+    arr: [...arr],
+    written: new Set([0]),
+    codeLine: 5,
+  });
+
+  if (arr.length === 1) {
+    steps.push({
+      desc: `Array has only one element — loop doesn't run. Return <em>k + 1 = 1</em>.`,
+      log: [{ t: `Loop skipped (length=1)`, h: false }, { t: `return 1`, h: true }],
+      vPhase: "Return",
+      vResult: `1`,
+      k: 0,
+      i: null,
+      arr: [...arr],
+      written: new Set([0]),
+      codeLine: 12,
+    });
+    return steps;
+  }
+
+  // Simulate
+  let k = 0;
+  for (let i = 1; i < arr.length; i++) {
+    // Step: start of loop iteration — i enters
+    steps.push({
+      desc: `Loop iteration: <em>i = ${i}</em>. Comparing arr[i] = <em>${arr[i]}</em> with arr[k] = <em>${arr[k]}</em> (k=${k}).`,
+      log: [{ t: `i=${i}: arr[${i}]=${arr[i]} vs arr[${k}]=${arr[k]}`, h: true }],
+      vPhase: "Scanning",
+      vResult: "—",
+      k: k,
+      i: i,
+      arr: [...arr],
+      written: new Set(Array.from({length: k+1}, (_, idx) => idx)),
+      codeLine: 7,
+    });
+
+    if (arr[i] > arr[k]) {
+      k++;
+      arr[k] = arr[i];
+
+      steps.push({
+        desc: `<em>${arr[i]} > ${arr[k-1]}</em> — new unique found! Increment <em>k to ${k}</em>, write arr[k] = <em>${arr[i]}</em>.`,
+        log: [{ t: `  ✓ unique! k++ → k=${k}, arr[${k}] = ${arr[i]}`, h: true }],
+        vPhase: "Write",
+        vResult: "—",
+        k: k,
+        i: i,
+        arr: [...arr],
+        written: new Set(Array.from({length: k+1}, (_, idx) => idx)),
+        codeLine: 9,
+      });
+    } else {
+      steps.push({
+        desc: `<em>${arr[i]} == ${arr[k]}</em> — duplicate, skip. <em>k stays at ${k}</em>.`,
+        log: [{ t: `  ✗ duplicate (${arr[i]} == ${arr[k]}), skip`, h: false }],
+        vPhase: "Skip",
+        vResult: "—",
+        k: k,
+        i: i,
+        arr: [...arr],
+        written: new Set(Array.from({length: k+1}, (_, idx) => idx)),
+        codeLine: 7,
+      });
+    }
+  }
+
+  // Return step
+  steps.push({
+    desc: `Loop complete. Return <em>k + 1 = ${k + 1}</em>. The first ${k + 1} positions hold all unique elements.`,
+    log: [{ t: `return k + 1 = ${k + 1}`, h: true }],
+    vPhase: "Return",
+    vResult: `${k + 1}`,
+    k: k,
+    i: null,
+    arr: [...arr],
+    written: new Set(Array.from({length: k+1}, (_, idx) => idx)),
+    codeLine: 12,
+  });
+
+  return steps;
+}
+
+// ── STATE ─────────────────────────────────────────────────────────────────────
+let currentEx = 0;
+let steps = [];
+let stepIdx = 0;
+let playTimer = null;
+
+function loadExample(idx) {
+  currentEx = idx;
+  steps = buildSteps(EXAMPLES[idx].arr);
+  stepIdx = 0;
+
+  document.querySelectorAll('.ex-btn').forEach((b, i) => b.classList.toggle('active', i === idx));
+  renderStep();
+}
+
+// ── RENDER ────────────────────────────────────────────────────────────────────
+function renderStep() {
+  const s = steps[stepIdx];
+  const total = steps.length;
+  const arr = s.arr;
+  const n = EXAMPLES[currentEx].arr.length;
+
+  // Progress
+  document.getElementById('progressFill').style.width = `${((stepIdx) / (total - 1)) * 100}%`;
+  document.getElementById('stepCounter').textContent = `${stepIdx + 1} / ${total}`;
+
+  // Buttons
+  document.getElementById('btnPrev').disabled = stepIdx === 0;
+  document.getElementById('btnNext').disabled = stepIdx === total - 1;
+
+  // Variables
+  document.getElementById('vk').textContent = s.k !== null ? s.k : '—';
+  document.getElementById('vi').textContent = s.i !== null ? s.i : '—';
+  document.getElementById('vArrK').textContent = s.k !== null ? arr[s.k] : '—';
+  document.getElementById('vArrI').textContent = s.i !== null ? arr[s.i] : '—';
+  document.getElementById('vResult').textContent = s.vResult !== '—' ? s.vResult : '—';
+
+  // Phase + result
+  document.getElementById('phaseEl').textContent = s.vPhase;
+  const rb = document.getElementById('resultEl');
+  if (s.vResult !== '—') {
+    rb.textContent = `k+1 = ${s.vResult}`;
+    rb.className = 'result-badge rb-done';
+  } else {
+    rb.textContent = 'running…';
+    rb.className = 'result-badge rb-pending';
+  }
+
+  // Array cells
+  const stage = document.getElementById('arrayStage');
+  stage.innerHTML = '';
+
+  // Pointer label row (above cells)
+  const ptrRow = document.createElement('div');
+  ptrRow.className = 'array-row';
+  arr.forEach((_, ci) => {
+    const wrap = document.createElement('div');
+    wrap.style.display = 'flex';
+    wrap.style.flexDirection = 'column';
+    wrap.style.alignItems = 'center';
+    wrap.style.gap = '2px';
+
+    const lbl = document.createElement('div');
+    lbl.className = 'pointer-label';
+    const isK = s.k === ci;
+    const isI = s.i === ci;
+    if (isK && isI) {
+      lbl.textContent = 'k,i';
+      lbl.className += ' ptr-both';
+    } else if (isK) {
+      lbl.textContent = 'k';
+      lbl.className += ' ptr-k';
+    } else if (isI) {
+      lbl.textContent = 'i';
+      lbl.className += ' ptr-i';
+    } else {
+      lbl.textContent = ' ';
+      lbl.className += ' ptr-none';
+    }
+    wrap.appendChild(lbl);
+    ptrRow.appendChild(wrap);
+  });
+  stage.appendChild(ptrRow);
+
+  // Cell row
+  const cellRow = document.createElement('div');
+  cellRow.className = 'array-row';
+  arr.forEach((val, ci) => {
+    const wrap = document.createElement('div');
+    wrap.className = 'cell-wrap';
+
+    const cell = document.createElement('div');
+    cell.className = 'cell';
+
+    const isK = s.k === ci;
+    const isI = s.i === ci;
+    const inWriteZone = s.written && s.written.has(ci);
+
+    if (isK && isI) {
+      cell.classList.add('both-pos');
+    } else if (isK) {
+      cell.classList.add('k-pos');
+    } else if (isI) {
+      cell.classList.add('i-pos');
+    } else if (inWriteZone) {
+      cell.classList.add('written');
+    } else if (s.k !== null && ci > s.k && s.i !== null && ci > s.i) {
+      cell.classList.add('write-zone');
+      // dim cells beyond i that aren't in write zone
+    } else if (s.k !== null && ci <= s.k) {
+      cell.classList.add('written');
+    }
+
+    cell.textContent = val;
+
+    const idxEl = document.createElement('div');
+    idxEl.className = 'cell-idx';
+    idxEl.textContent = ci;
+
+    wrap.appendChild(cell);
+    wrap.appendChild(idxEl);
+    cellRow.appendChild(wrap);
+  });
+  stage.appendChild(cellRow);
+
+  // Step desc
+  document.getElementById('stepDesc').innerHTML = s.desc;
+
+  // Log
+  const logBox = document.getElementById('logBox');
+  const allLogs = steps.slice(0, stepIdx + 1).flatMap(st => st.log);
+  logBox.innerHTML = allLogs.map(l =>
+    `<div class="log-line${l.h ? ' hl' : ''}">${l.t}</div>`
+  ).join('');
+  logBox.scrollTop = logBox.scrollHeight;
+
+  // Code highlight
+  document.querySelectorAll('#codeBlock .line').forEach((el, li) => {
+    el.classList.toggle('active', li === s.codeLine);
+  });
+}
+
+// ── CONTROLS ─────────────────────────────────────────────────────────────────
+function move(dir) {
+  stepIdx = Math.max(0, Math.min(steps.length - 1, stepIdx + dir));
+  renderStep();
+}
+
+function togglePlay() {
+  if (playTimer) {
+    clearInterval(playTimer);
+    playTimer = null;
+    document.getElementById('btnPlay').textContent = '▶ Play';
+  } else {
+    if (stepIdx === steps.length - 1) stepIdx = 0;
+    document.getElementById('btnPlay').textContent = '⏸ Pause';
+    playTimer = setInterval(() => {
+      if (stepIdx < steps.length - 1) {
+        stepIdx++;
+        renderStep();
+      } else {
+        clearInterval(playTimer);
+        playTimer = null;
+        document.getElementById('btnPlay').textContent = '▶ Play';
+      }
+    }, 900);
+  }
+}
+
+// keyboard
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowLeft')  move(-1);
+  if (e.key === 'ArrowRight') move(1);
+});
+
+// ── BLUR ──────────────────────────────────────────────────────────────────────
+let blurred = false;
+const blurLines = [6, 7, 8, 9, 10, 11]; // for/if/k++/arr[k] lines
+function toggleBlur() {
+  blurred = !blurred;
+  blurLines.forEach(li => {
+    document.getElementById('cl' + li)?.classList.toggle('blurred', blurred);
+  });
+  document.getElementById('blurBtn').textContent = blurred ? 'Reveal Code' : 'Blur Logic';
+}
+
+// ── BUILD EXAMPLE BUTTONS ─────────────────────────────────────────────────────
+const exRow = document.getElementById('exRow');
+EXAMPLES.forEach((ex, idx) => {
+  const btn = document.createElement('button');
+  btn.className = 'ex-btn' + (idx === 0 ? ' active' : '');
+  btn.textContent = ex.label;
+  btn.onclick = () => loadExample(idx);
+  exRow.appendChild(btn);
+});
+
+// ── INIT ──────────────────────────────────────────────────────────────────────
+loadExample(0);
+</script>
+</body>
+</html>

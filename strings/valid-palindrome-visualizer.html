@@ -72,6 +72,10 @@ section:nth-child(6){animation-delay:.28s}
 .code-wrap{background:#090b10;border:1px solid var(--border);border-radius:12px;overflow:hidden}
 .code-hdr{display:flex;justify-content:space-between;align-items:center;padding:.5rem 1rem;background:var(--surface);border-bottom:1px solid var(--border)}
 .code-lang{font-family:var(--mono);font-size:10px;color:var(--text-dim);letter-spacing:.1em;text-transform:uppercase}
+.btn-blur{font-family:var(--mono);font-size:11px;padding:3px 10px;border-radius:100px;background:var(--surface2);border:1px solid var(--border-mid);color:var(--text-muted);cursor:pointer;transition:all .2s;}
+.btn-blur:hover{color:var(--text);border-color:var(--text-dim);}
+.btn-blur.on{background:rgba(192,132,252,0.15);color:var(--accent);border-color:rgba(192,132,252,0.35);}
+.code-body.blur-logic .cl{filter:blur(4px);opacity:0.6;transition:all .3s;}
 pre.code-body{padding:1.1rem 1.4rem;overflow-x:auto;font-family:var(--mono);font-size:13px;line-height:1.85;tab-size:4}
 .cl{display:block;padding:0 .4rem;margin:0 -.4rem;border-radius:4px;transition:background .2s;border-left:2px solid transparent}
 .cl.al{background:rgba(192,132,252,0.1);border-left-color:var(--accent)}
@@ -220,9 +224,12 @@ pre.code-body{padding:1.1rem 1.4rem;overflow-x:auto;font-family:var(--mono);font
   <div class="code-wrap">
     <div class="code-hdr">
       <span class="code-lang">javascript</span>
-      <span style="font-family:var(--mono);font-size:10px;color:var(--text-dim)">your solution — exact</span>
+      <div style="display:flex; gap:10px; align-items:center;">
+        <button class="btn-blur" id="btnBlur" onclick="toggleBlur()">👁 Show Logic</button>
+        <span style="font-family:var(--mono);font-size:10px;color:var(--text-dim)">your solution — exact</span>
+      </div>
     </div>
-    <pre class="code-body"><span id="cl1" class="cl"><span class="kw">var</span> <span class="fn">isPalindrome</span> <span class="op">=</span> <span class="kw">function</span>(<span class="vr">s</span>) {</span>
+    <pre class="code-body blur-logic"><span id="cl1" class="cl"><span class="kw">var</span> <span class="fn">isPalindrome</span> <span class="op">=</span> <span class="kw">function</span>(<span class="vr">s</span>) {</span>
 <span id="cl2" class="cl">    <span class="vr">s</span> <span class="op">=</span> <span class="vr">s</span>.<span class="mt">toLowerCase</span>()</span>
 <span id="cl3" class="cl">    <span class="kw">let</span> <span class="vr">i</span> <span class="op">=</span> <span class="num">0</span>;</span>
 <span id="cl4" class="cl">    <span class="kw">let</span> <span class="vr">j</span> <span class="op">=</span> <span class="vr">s</span>.<span class="mt">length</span> <span class="op">-</span> <span class="num">1</span>;</span>
@@ -287,9 +294,28 @@ pre.code-body{padding:1.1rem 1.4rem;overflow-x:auto;font-family:var(--mono);font
   </div>
 </section>
 
-<!-- 6. COMPLEXITY -->
+<!-- 6. GOTCHAS & COMMON PITFALLS -->
 <section>
-  <div class="sec-label">Complexity</div>
+  <div class="sec-label">Gotchas &amp; Common Pitfalls</div>
+  <div class="card">
+    <ul class="hint-list">
+      <li><strong style="color:var(--text)">Forgetting Numbers:</strong> The problem says "alphanumeric". Many developers mistakenly only check for letters <code>a-z</code> and completely forget <code>0-9</code>. Use regex <code>/[a-z0-9]/i</code>!</li>
+      <li><strong style="color:var(--text)">Empty Stripped Strings:</strong> Input like <code>"   "</code> strips down to <code>""</code>. The two pointer approach gracefully handles this (<code>i &gt; j</code> immediately, returns true). Built-in reverse string methods also correctly identify it as a palindrome, but sometimes developers add manual length checks <code>if(len == 0) return false;</code> which wrongly fails the test.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- 7. TRADE-OFFS / ALTERNATIVES -->
+<section>
+  <div class="sec-label">Trade-offs &amp; Alternatives</div>
+  <div class="card">
+    <p style="color:var(--text-muted);font-size:14px;margin-bottom:.85rem"><strong style="color:var(--text)">Alternative 1: Built-in Methods (Reverse, Join)</strong><br/>Create a cleaned string upfront: <code>let s2 = s.toLowerCase().replace(/[^a-z0-9]/g, '');</code>. Then check: <code>return s2 === s2.split('').reverse().join('');</code><br/><em>Trade-off:</em> Beautiful one-liner, but scales terribly. It creates three O(N) memory copies of your string (the cleaned string, the array, the reversed string) and passes through the string four times total. The Two Pointer approach is strictly O(1) space and only one single pass!</p>
+  </div>
+</section>
+
+<!-- 8. COMPLEXITY -->
+<section>
+  <div class="sec-label">Complexity &amp; Hooks</div>
   <div class="cx-grid">
     <div class="cx-c">
       <div class="cx-lbl">Time</div>
@@ -303,8 +329,11 @@ pre.code-body{padding:1.1rem 1.4rem;overflow-x:auto;font-family:var(--mono);font
     </div>
   </div>
   <div class="tks">
-    <div class="tk">We traverse the string exactly once. Each character is visited at most once by `i` and at most once by `j`.</div>
-    <div class="tk">* Normally O(1), but since we called <code>s.toLowerCase()</code>, that creates a new string taking O(N) space. If we skipped that and used `.toLowerCase()` inside the loop per char, it would be strictly O(1) space!</div>
+    <div class="tk" style="border-left-color:var(--green)">
+      <strong style="color:var(--text);font-family:var(--sans)">ELI5:</strong> Imagine folding the string perfectly in half like a piece of paper! If the left side physically prints perfectly over the right side everywhere, it's a palindrome!
+    </div>
+    <div class="tk">We traverse the string exactly once. Each character is visited at most once by <code>i</code> and at most once by <code>j</code>.</div>
+    <div class="tk">* Normally O(1), but since we called <code>s.toLowerCase()</code>, that creates a new string taking O(N) space. If we skipped that and used <code>.toLowerCase()</code> inside the loop per char, it would be strictly O(1) space!</div>
   </div>
 </section>
 
@@ -575,6 +604,19 @@ document.addEventListener('keydown', e => {
   if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp')   { e.preventDefault(); prevStep(); }
   if (e.key === ' ') { e.preventDefault(); togglePlay(); }
 });
+
+function toggleBlur() {
+  const btn = document.getElementById('btnBlur');
+  const cb = document.querySelector('.code-body');
+  cb.classList.toggle('blur-logic');
+  if (cb.classList.contains('blur-logic')) {
+    btn.classList.remove('on');
+    btn.innerHTML = '👁 Show Logic';
+  } else {
+    btn.classList.add('on');
+    btn.innerHTML = '👁 Hide Logic';
+  }
+}
 </script>
 </body>
 </html>

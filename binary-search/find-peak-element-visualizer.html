@@ -139,13 +139,32 @@ a:hover { text-decoration: underline; }
   background: var(--surface); border: 1px solid var(--border);
   border-radius: 12px; overflow: hidden;
 }
+    /* MENTAL MODEL */
+    .mental-model { display: grid; grid-template-columns: 1fr 1fr; gap: 0; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; margin-bottom: 2rem; animation: fadeUp .6s ease .12s both; }
+    .model-col { padding: 20px; }
+    .model-hdr { font-family: var(--mono); font-size: 11px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+    .model-list { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+    .model-list li { font-size: 13px; color: var(--text-dim); line-height: 1.6; position: relative; padding-left: 14px; }
+    .model-list li::before { content: '→'; position: absolute; left: 0; color: var(--accent); font-family: var(--mono); }
+    .model-list strong { color: var(--text); }
+    .model-list code { font-family: var(--mono); font-size: 11px; background: var(--surface2); padding: 2px 5px; border-radius: 4px; color: var(--accent); }
+
 .code-header {
   display: flex; align-items: center; justify-content: space-between;
   padding: 10px 16px; background: var(--surface2);
   border-bottom: 1px solid var(--border);
   font-size: 12px; color: var(--text-muted);
 }
-.code-header .lang { color: var(--accent); font-weight: 600; }
+.code-header .file-info { display: flex; align-items: center; gap: 8px; font-family: var(--mono); }
+.code-header .dots { display: flex; gap: 6px; }
+.code-header .dot { width: 10px; height: 10px; border-radius: 50%; }
+.code-header .dot.r { background: var(--red); }
+.code-header .dot.y { background: var(--amber); }
+.code-header .dot.g { background: var(--green); }
+.btn-blur { font-family: var(--mono); font-size: 11px; padding: 3px 10px; border-radius: 100px; background: var(--surface2); border: 1px solid var(--border-mid); color: var(--text-muted); cursor: pointer; transition: all .2s; }
+.btn-blur:hover { color: var(--text); border-color: var(--text-dim); }
+.btn-blur.on { background: rgba(124,110,245,0.15); color: var(--accent); border-color: rgba(124,110,245,0.35); }
+.code-body.blur-logic pre { filter: blur(4px); opacity: 0.6; transition: all .3s; }
 .code-body { padding: 16px; overflow-x: auto; }
 .code-body pre { font-family: var(--mono); font-size: 13px; line-height: 1.8; }
 .code-line {
@@ -468,10 +487,10 @@ a:hover { text-decoration: underline; }
     <div class="section-title">Your Solution</div>
     <div class="code-wrap">
       <div class="code-header">
-        <span>find-peak-element.js</span>
-        <span class="lang">JavaScript</span>
+        <div class="file-info"><div class="dots"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div><span>find-peak-element.js</span></div>
+        <button class="btn-blur" id="btnBlur" onclick="toggleBlur()">👁 Show Logic</button>
       </div>
-      <div class="code-body">
+      <div class="code-body blur-logic">
         <pre id="codeBlock"><span class="code-line" data-line="1"><span class="kw">var</span> <span class="fn">findPeakElement</span> <span class="op">=</span> <span class="kw">function</span><span class="punc">(</span><span class="var">array</span><span class="punc">) {</span></span>
 <span class="code-line" data-line="2"><span class="kw"> let</span> <span class="var">left</span> <span class="op">=</span> <span class="num">0</span><span class="punc">,</span> <span class="var">right</span> <span class="op">=</span> <span class="var">array</span><span class="punc">.</span><span class="var">length</span><span class="op">-</span><span class="num">1</span></span>
 <span class="code-line" data-line="3"></span>
@@ -547,6 +566,24 @@ a:hover { text-decoration: underline; }
   <!-- 6. Complexity + Memory Hooks -->
   <div class="section">
     <div class="section-title">Complexity + Memory Hooks</div>
+
+    <div class="mental-model">
+      <div class="model-col">
+        <div class="model-hdr">⚠️ Gotchas & Common Pitfalls</div>
+        <ul class="model-list">
+          <li><strong>Mid+1 Out of Bounds:</strong> <code>while(left < right)</code> ensures that <code>mid</code> will strictly be less than <code>right</code>, so <code>array[mid+1]</code> is mathematically guaranteed to be safe!</li>
+          <li><strong>Returning left vs right:</strong> The loop breaks exactly when <code>left == right</code>, so they point to the same peak. Returning either one is completely fine.</li>
+        </ul>
+      </div>
+      <div class="model-col" style="border-left:1px solid var(--border)">
+        <div class="model-hdr">⚖️ Trade-offs & Alternatives</div>
+        <ul class="model-list">
+          <li><strong>O(log N) Binary Search (Current):</strong> O(1) Space. Leverages the mathematical guarantee that following an upward slope bounding a -∞ edge will always yield a peak.</li>
+          <li><strong>O(N) Linear Scan:</strong> Trivial to write <code>for(let i=0; i<n; i++)</code> and check neighbors, but fails the strict interview requirement for logarithmic time.</li>
+        </ul>
+      </div>
+    </div>
+
     <div class="complexity-grid">
       <div class="cx-card">
         <div class="cx-label">Time</div>
@@ -567,7 +604,7 @@ a:hover { text-decoration: underline; }
     <ul class="takeaways">
       <li>"If mid is on an upslope, the peak is ahead. If on a downslope, it's behind."</li>
       <li>"Binary search doesn't need a fully sorted array — just a monotone decision function."</li>
-      <li>"left == right isn't just a termination condition — it's proof that you've found a peak."</li>
+      <li><strong>ELI5:</strong> You are walking along hills in the dense fog. You can only see one step ahead. If your next step goes up, keep walking that way! If your next step goes down, you just passed the peak!</li>
     </ul>
   </div>
 
@@ -881,6 +918,19 @@ EXAMPLES.forEach((ex, i) => {
   btn.onclick = () => selectExample(i);
   tabBar.appendChild(btn);
 });
+
+function toggleBlur() {
+  const btn = document.getElementById('btnBlur');
+  const cb = document.querySelector('.code-body');
+  cb.classList.toggle('blur-logic');
+  if (cb.classList.contains('blur-logic')) {
+    btn.classList.remove('on');
+    btn.innerHTML = '👁 Show Logic';
+  } else {
+    btn.classList.add('on');
+    btn.innerHTML = '👁 Hide Logic';
+  }
+}
 
 // Init
 selectExample(0);
