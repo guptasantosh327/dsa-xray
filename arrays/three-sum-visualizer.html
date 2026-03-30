@@ -1,0 +1,937 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>#15 3Sum — DSA Visualizer</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Sora:wght@300;400;600;700;800&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #0d0f14; --surface: #13161d; --surface2: #1a1e28;
+      --surface3: #212638; --border: rgba(255,255,255,0.07);
+      --border-mid: rgba(255,255,255,0.12);
+      --text: #e8eaf0; --text-muted: #6b7280; --text-dim: #3d4251;
+      --accent: #7c6ef5; --green: #34d399; --amber: #fbbf24;
+      --blue: #60a5fa; --red: #f87171; --orange: #fb923c;
+      --purple: #c084fc; --teal: #2dd4bf; --cyan: #22d3ee;
+      --mono: 'JetBrains Mono', monospace;
+      --sans: 'Sora', sans-serif;
+    }
+    html { scroll-behavior: smooth; }
+    body {
+      background: var(--bg); color: var(--text);
+      font-family: var(--sans); font-size: 15px; line-height: 1.6;
+      min-height: 100vh; overflow-x: hidden;
+    }
+    body::before {
+      content: ''; position: fixed; inset: 0;
+      background-image:
+        linear-gradient(rgba(124,110,245,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(124,110,245,0.03) 1px, transparent 1px);
+      background-size: 40px 40px; pointer-events: none; z-index: 0;
+    }
+    body::after {
+      content: ''; position: fixed; top: -20%; left: 50%;
+      transform: translateX(-50%); width: 900px; height: 500px;
+      background: radial-gradient(ellipse, rgba(124,110,245,0.07) 0%, transparent 70%);
+      pointer-events: none; z-index: 0;
+    }
+    .page { position: relative; z-index: 1; max-width: 900px; margin: 0 auto; padding: 3rem 1.5rem 6rem; }
+
+    /* BACK */
+    .back-link{display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:12px;color:var(--text-muted);text-decoration:none;padding:7px 14px 7px 10px;border-radius:8px;border:1px solid var(--border);background:var(--surface);margin-bottom:2rem;transition:all .15s}
+    .back-link:hover{color:var(--text);border-color:var(--border-mid)}
+
+    /* HERO */
+    .hero { text-align: center; margin-bottom: 3rem; animation: fadeUp .6s ease both; }
+    .problem-num { font-family: var(--mono); font-size: 13px; color: var(--text-muted); margin-bottom: .5rem; }
+    .hero h1 { font-size: clamp(1.8rem,4vw,2.6rem); font-weight: 800; margin-bottom: .75rem; letter-spacing: -.5px; }
+    .hero h1 span { background: linear-gradient(135deg, var(--amber), var(--orange)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .tag-row { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; margin-top: .75rem; }
+    .tag { padding: 4px 12px; border-radius: 999px; font-size: 12px; font-family: var(--mono); font-weight: 600; border: 1px solid; }
+    .tag-medium { background: rgba(251,191,36,0.1); color: var(--amber); border-color: rgba(251,191,36,0.25); }
+    .tag-pattern { background: rgba(96,165,250,0.1); color: var(--blue); border-color: rgba(96,165,250,0.25); }
+    .tag-pill { background: rgba(255,255,255,0.05); color: var(--text-muted); border-color: var(--border); }
+
+    /* SECTIONS */
+    section { margin-bottom: 2.5rem; animation: fadeUp .6s ease both; }
+    section:nth-child(2) { animation-delay:.05s; }
+    section:nth-child(3) { animation-delay:.1s; }
+    section:nth-child(4) { animation-delay:.15s; }
+    section:nth-child(5) { animation-delay:.2s; }
+    section:nth-child(6) { animation-delay:.25s; }
+    section:nth-child(7) { animation-delay:.3s; }
+    section:nth-child(8) { animation-delay:.35s; }
+    section:nth-child(9) { animation-delay:.4s; }
+    .section-label {
+      font-size: 11px; font-family: var(--mono); font-weight: 700;
+      color: var(--accent); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 1rem;
+    }
+    .card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 14px; padding: 1.5rem;
+    }
+
+    /* PATTERN BANNER */
+    .pattern-banner {
+      background: linear-gradient(135deg, rgba(251,191,36,0.06), rgba(96,165,250,0.06));
+      border: 1px solid rgba(251,191,36,0.2); border-radius: 14px;
+      padding: 1.5rem 2rem;
+    }
+    .pattern-name { font-size: 1.4rem; font-weight: 700; color: var(--amber); margin-bottom: .25rem; }
+    .pattern-why { color: var(--text-muted); font-size: 14px; line-height: 1.7; }
+    .related-list { margin-top: 1rem; display: flex; gap: 8px; flex-wrap: wrap; }
+    .related-chip {
+      padding: 4px 10px; background: rgba(251,191,36,0.07);
+      border: 1px solid rgba(251,191,36,0.2); border-radius: 6px;
+      font-size: 12px; color: var(--amber); font-family: var(--mono);
+    }
+
+    /* PROBLEM */
+    .worked-examples { display: grid; gap: 12px; margin-top: 1rem; }
+    .worked-ex {
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: 10px; padding: 1rem 1.25rem;
+    }
+    .worked-ex .label { font-size: 11px; color: var(--text-muted); font-family: var(--mono); margin-bottom: 6px; }
+    .worked-ex .io { font-family: var(--mono); font-size: 13px; }
+    .worked-ex .io .hl { color: var(--amber); }
+    .worked-ex .io .res { color: var(--green); }
+
+    /* INTUITION */
+    .hint-list { list-style: none; counter-reset: hints; display: flex; flex-direction: column; gap: 12px; }
+    .hint-list li { counter-increment: hints; display: flex; gap: 12px; align-items: flex-start; }
+    .hint-list li::before {
+      content: counter(hints); min-width: 26px; height: 26px;
+      background: rgba(96,165,250,0.12); border: 1px solid rgba(96,165,250,0.25);
+      border-radius: 50%; color: var(--blue); font-family: var(--mono); font-size: 12px;
+      font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px;
+    }
+    .key-trick {
+      margin-top: 1rem; background: rgba(52,211,153,0.07);
+      border: 1px solid rgba(52,211,153,0.2); border-radius: 10px;
+      padding: .75rem 1.25rem; font-size: 14px; color: var(--green);
+    }
+    .key-trick strong { display: block; font-size: 11px; letter-spacing: 1px; text-transform: uppercase; opacity:.7; margin-bottom: 4px; }
+
+    /* CODE */
+    .code-wrapper { position: relative; }
+    .blur-btn {
+      position: absolute; top: 12px; right: 12px;
+      background: rgba(124,110,245,0.12); border: 1px solid rgba(124,110,245,0.25);
+      border-radius: 8px; color: var(--accent); font-size: 12px;
+      font-family: var(--mono); padding: 5px 12px; cursor: pointer;
+      transition: background .2s; z-index: 2;
+    }
+    .blur-btn:hover { background: rgba(124,110,245,0.22); }
+    pre {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 12px; padding: 1.5rem; overflow-x: auto;
+      font-family: var(--mono); font-size: 13.5px; line-height: 1.8;
+    }
+    .code-line { display: block; padding: 0 4px; border-radius: 4px; transition: background .2s, filter .3s; }
+    .code-line.active { background: rgba(251,191,36,0.12); border-left: 3px solid var(--amber); padding-left: 1px; }
+    .code-line.blurred { filter: blur(4px); user-select: none; pointer-events: none; }
+    .kw { color: #ff79c6; } .fn { color: #50fa7b; } .vr { color: #bd93f9; }
+    .nm { color: #f1fa8c; } .op { color: #ff79c6; } .cm { color: #6272a4; }
+    .st { color: #f1fa8c; } .nb { color: #8be9fd; }
+
+    /* VISUALIZER */
+    .viz-card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; overflow: hidden; }
+    .viz-header {
+      padding: 1rem 1.5rem; border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;
+    }
+    .viz-title { font-weight: 700; font-size: 15px; }
+    .example-tabs { display: flex; gap: 6px; flex-wrap: wrap; }
+    .ex-tab {
+      padding: 5px 14px; border-radius: 8px; font-size: 12px; font-family: var(--mono);
+      cursor: pointer; border: 1px solid var(--border); background: transparent;
+      color: var(--text-muted); transition: all .2s;
+    }
+    .ex-tab.active { background: rgba(251,191,36,0.12); border-color: rgba(251,191,36,0.3); color: var(--amber); }
+
+    /* PROGRESS */
+    .progress-wrap { padding: .75rem 1.5rem; border-bottom: 1px solid var(--border); }
+    .progress-bar-bg { background: var(--surface2); border-radius: 999px; height: 6px; overflow: hidden; }
+    .progress-bar-fill { height: 100%; background: linear-gradient(90deg, var(--amber), var(--orange)); border-radius: 999px; transition: width .3s ease; }
+    .progress-info { display: flex; justify-content: space-between; font-size: 11px; font-family: var(--mono); color: var(--text-muted); margin-top: 5px; }
+    .phase-badge {
+      font-size: 11px; font-family: var(--mono); font-weight: 700;
+      padding: 2px 8px; border-radius: 5px;
+      background: rgba(124,110,245,0.1); border: 1px solid rgba(124,110,245,0.2); color: var(--accent);
+    }
+
+    /* STEP DESC */
+    .step-desc {
+      padding: 1rem 1.5rem; border-bottom: 1px solid var(--border);
+      font-size: 14px; line-height: 1.6; min-height: 56px;
+    }
+    .step-desc em { color: var(--amber); font-style: normal; font-weight: 600; }
+
+    /* ARRAY */
+    .array-area {
+      padding: 1.5rem 1.5rem 0.5rem; display: flex; flex-direction: column; align-items: center; gap: 16px;
+    }
+    .array-row { display: flex; gap: 8px; align-items: flex-end; flex-wrap: wrap; justify-content: center; }
+    .cell-wrap { display: flex; flex-direction: column; align-items: center; gap: 5px; }
+    .cell {
+      width: 38px; height: 38px; border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-family: var(--mono); font-size: 14px; font-weight: 700;
+      border: 2px solid var(--border-mid); background: var(--surface2);
+      color: var(--text); transition: all .3s;
+    }
+    .cell.cell-target { background: rgba(251,191,36,0.15); border-color: var(--amber); color: var(--amber); transform: translateY(-6px); }
+    .cell.cell-i      { background: rgba(96,165,250,0.15); border-color: var(--blue); color: var(--blue); transform: translateY(-6px); }
+    .cell.cell-j      { background: rgba(248,113,113,0.15); border-color: var(--red); color: var(--red); transform: translateY(-6px); }
+    .cell.cell-found  { background: rgba(52,211,153,0.2); border-color: var(--green); color: var(--green); transform: translateY(-6px); animation: pulse .5s ease; }
+    .cell.cell-skip   { opacity: .35; border-color: var(--text-dim); color: var(--text-dim); }
+    .cell-idx { font-size: 10px; font-family: var(--mono); color: var(--text-dim); }
+    .ptr-label {
+      font-size: 10px; font-family: var(--mono); font-weight: 700;
+      padding: 2px 6px; border-radius: 4px; min-height: 20px; min-width: 24px; text-align: center;
+    }
+    .ptr-target { color: var(--amber); background: rgba(251,191,36,0.1); border: 1px solid rgba(251,191,36,0.25); }
+    .ptr-i      { color: var(--blue); background: rgba(96,165,250,0.1); border: 1px solid rgba(96,165,250,0.25); }
+    .ptr-j      { color: var(--red); background: rgba(248,113,113,0.1); border: 1px solid rgba(248,113,113,0.25); }
+
+    /* POINTER LEGEND */
+    .ptr-legend {
+      display: flex; gap: 16px; justify-content: center; flex-wrap: wrap;
+      padding: 0 1.5rem .5rem; font-size: 12px; font-family: var(--mono);
+    }
+    .legend-item { display: flex; align-items: center; gap: 6px; }
+    .legend-dot { width: 10px; height: 10px; border-radius: 2px; }
+
+    /* VARS PANEL */
+    .vars-panel {
+      display: flex; gap: 10px; flex-wrap: wrap; justify-content: center;
+      padding: .75rem 1.5rem;
+    }
+    .var-chip {
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: 10px; padding: 8px 14px; font-family: var(--mono);
+      font-size: 13px; text-align: center; min-width: 72px;
+    }
+    .var-chip .vname { color: var(--text-muted); font-size: 10px; margin-bottom: 2px; }
+    .var-chip .vval  { font-weight: 700; font-size: 15px; }
+    .var-chip.vt .vval  { color: var(--amber); }
+    .var-chip.vi .vval  { color: var(--blue); }
+    .var-chip.vj .vval  { color: var(--red); }
+    .var-chip.vsum-pos .vval { color: var(--red); }
+    .var-chip.vsum-neg .vval { color: var(--blue); }
+    .var-chip.vsum-zero .vval { color: var(--green); }
+
+    /* ANS PANEL */
+    .ans-panel {
+      margin: 0 1.5rem .75rem; padding: .75rem 1rem;
+      background: var(--surface2); border: 1px solid var(--border); border-radius: 10px;
+    }
+    .ans-label { font-size: 10px; font-family: var(--mono); color: var(--text-muted); margin-bottom: 8px; }
+    .ans-chips { display: flex; gap: 8px; flex-wrap: wrap; min-height: 28px; }
+    .ans-chip {
+      padding: 4px 12px; border-radius: 999px; font-family: var(--mono); font-size: 12px; font-weight: 700;
+      background: rgba(52,211,153,0.12); border: 1px solid rgba(52,211,153,0.3); color: var(--green);
+      animation: chipIn .3s ease both;
+    }
+    .ans-empty { font-size: 12px; font-family: var(--mono); color: var(--text-dim); }
+
+    /* LOG */
+    .log-area {
+      margin: 0 1.5rem .75rem; background: var(--surface2);
+      border: 1px solid var(--border); border-radius: 10px;
+      padding: .75rem 1rem; font-family: var(--mono); font-size: 12px;
+      color: var(--text-muted); min-height: 60px; max-height: 100px; overflow-y: auto;
+    }
+    .log-line { line-height: 1.7; }
+    .log-line.hl { color: var(--text); }
+    .log-line.hl-green { color: var(--green); }
+
+    /* CONTROLS */
+    .controls {
+      padding: 1rem 1.5rem; border-top: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: center; gap: 10px; flex-wrap: wrap;
+    }
+    .ctrl-btn {
+      padding: 8px 20px; border-radius: 10px; border: 1px solid var(--border-mid);
+      background: var(--surface2); color: var(--text); font-family: var(--mono); font-size: 13px;
+      cursor: pointer; transition: all .2s;
+    }
+    .ctrl-btn:hover { background: var(--surface3); }
+    .ctrl-btn:disabled { opacity: .35; cursor: default; }
+    .ctrl-btn.play { background: rgba(52,211,153,0.12); border-color: rgba(52,211,153,0.3); color: var(--green); font-weight: 700; }
+    .ctrl-btn.play.active { background: rgba(251,191,36,0.12); border-color: rgba(251,191,36,0.3); color: var(--amber); }
+    .kbd-hint { font-size: 11px; font-family: var(--mono); color: var(--text-dim); text-align: center; padding-bottom: .75rem; }
+
+    /* GOTCHAS / TRADEOFFS */
+    .pitfall-list { list-style: none; display: flex; flex-direction: column; gap: 12px; }
+    .pitfall-item { display: flex; gap: 12px; align-items: flex-start; }
+    .pitfall-icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+    .pitfall-text { font-size: 14px; color: var(--text-muted); line-height: 1.6; }
+    .pitfall-text strong { color: var(--red); }
+
+    /* COMPLEXITY TABLE */
+    .complexity-table { width: 100%; border-collapse: collapse; font-family: var(--mono); font-size: 13px; }
+    .complexity-table th, .complexity-table td { padding: 10px 14px; text-align: left; border-bottom: 1px solid var(--border); }
+    .complexity-table th { color: var(--text-muted); font-weight: 600; font-size: 11px; text-transform: uppercase; letter-spacing: 1px; }
+    .complexity-table td { color: var(--text); }
+    .complexity-table .big-o { color: var(--green); font-weight: 700; }
+    .mnemonic {
+      margin-top: 1.25rem; background: rgba(124,110,245,0.07);
+      border: 1px solid rgba(124,110,245,0.2); border-radius: 10px;
+      padding: .75rem 1.25rem;
+    }
+    .mnemonic strong { color: var(--accent); font-size: 11px; letter-spacing: 1px; text-transform: uppercase; display: block; margin-bottom: 4px; }
+    .quotes { margin-top: 1rem; display: flex; flex-direction: column; gap: 8px; }
+    .quote { font-size: 13px; font-family: var(--mono); color: var(--text-muted); padding-left: 12px; border-left: 3px solid var(--accent); }
+
+    /* ANIMATIONS */
+    @keyframes fadeUp { from { opacity:0; transform:translateY(18px); } to { opacity:1; transform:translateY(0); } }
+    @keyframes pulse { 0%,100% { transform:translateY(-6px) scale(1); } 50% { transform:translateY(-10px) scale(1.08); } }
+    @keyframes chipIn { from { opacity:0; transform:scale(.8); } to { opacity:1; transform:scale(1); } }
+  </style>
+</head>
+<body>
+<div class="page">
+
+  <a href="../index.html" class="back-link">← DSA Hub</a>
+
+  <!-- HERO -->
+  <header class="hero">
+    <div class="problem-num">#15</div>
+    <h1>3<span>Sum</span></h1>
+    <div class="tag-row">
+      <span class="tag tag-medium">Medium</span>
+      <span class="tag tag-pattern">Sort + Two Pointers</span>
+      <span class="tag tag-pill">Array</span>
+      <span class="tag tag-pill">Deduplication</span>
+      <span class="tag tag-pill">Two-Pointer Inner</span>
+    </div>
+  </header>
+
+  <!-- 1. PATTERN BANNER -->
+  <section>
+    <div class="section-label">Pattern</div>
+    <div class="pattern-banner">
+      <div class="pattern-name">Sort + Nested Two Pointers</div>
+      <div class="pattern-why">
+        A brute-force 3-loop is O(n³). Sorting first lets you fix one element (target) and reduce the remaining two to a classic Two Sum II — O(n) with converging pointers. Overall: O(n²). Sorting is the unlock that converts a 3D search into a 2D one.
+      </div>
+      <div class="related-list">
+        <span class="related-chip">#1 Two Sum</span>
+        <span class="related-chip">#167 Two Sum II</span>
+        <span class="related-chip">#18 4Sum</span>
+        <span class="related-chip">#16 3Sum Closest</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- 2. PROBLEM STATEMENT -->
+  <section>
+    <div class="section-label">Problem</div>
+    <div class="card">
+      <p style="color:var(--text-muted); font-size:14px; line-height:1.7; margin-bottom:1rem;">
+        Given an integer array <code style="font-family:var(--mono);color:var(--amber)">nums</code>, return all unique triplets
+        <code style="font-family:var(--mono);color:var(--amber)">[nums[i], nums[j], nums[k]]</code> such that they sum to <strong>0</strong>.
+        The solution set must not contain <strong>duplicate triplets</strong>.
+        <br><br>
+        <strong style="color:var(--text-muted);">Analogy:</strong> You're looking for three numbers on a number line that perfectly balance — one pulling left, others pulling right, net force = zero. Sorting lines them up so you can "squeeze" two outer handles to find the balance point.
+      </p>
+      <div class="worked-examples">
+        <div class="worked-ex">
+          <div class="label">EXAMPLE 1</div>
+          <div class="io">Input: <span class="hl">[-1, 0, 1, 2, -1, -4]</span> → Output: <span class="res">[[-1,-1,2], [-1,0,1]]</span></div>
+        </div>
+        <div class="worked-ex">
+          <div class="label">EXAMPLE 2 — all zeros edge case</div>
+          <div class="io">Input: <span class="hl">[0, 0, 0]</span> → Output: <span class="res">[[0,0,0]]</span></div>
+        </div>
+        <div class="worked-ex">
+          <div class="label">EXAMPLE 3 — duplicates present</div>
+          <div class="io">Input: <span class="hl">[-2, 0, 0, 2, 2]</span> → Output: <span class="res">[[-2,0,2]]</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3. INTUITION + HINTS -->
+  <section>
+    <div class="section-label">Intuition + Hints</div>
+    <div class="card">
+      <ol class="hint-list">
+        <li>
+          <div><strong>Brute force:</strong> three nested loops checking every triplet — O(n³) time, way too slow for n=3000. Can we do better?</div>
+        </li>
+        <li>
+          <div><strong>Sort first.</strong> Once sorted, duplicates are adjacent and easy to skip. More importantly, sorted order makes the inner search steerable — if sum is too big, move right pointer left; if too small, move left pointer right.</div>
+        </li>
+        <li>
+          <div><strong>Fix one, Two-Sum the rest.</strong> Loop over each index as <code style="font-family:var(--mono);color:var(--amber)">target</code>. For each target, run Two Sum II on the remaining subarray with <code style="font-family:var(--mono);color:var(--blue)">i</code> and <code style="font-family:var(--mono);color:var(--red)">j</code> as converging pointers. This is O(n) per target → O(n²) total.</div>
+        </li>
+        <li>
+          <div><strong>Skip duplicates.</strong> After sorting, if <code style="font-family:var(--mono)">nums[target] === nums[target-1]</code>, skip — we'd generate the same triplets again. Likewise skip duplicate <code style="font-family:var(--mono);color:var(--blue)">i</code> values after a match.</div>
+        </li>
+      </ol>
+      <div class="key-trick">
+        <strong>Key Trick</strong>
+        Sort + Two-Pointer reduces 3-variable search to 2-variable. Every time sum &gt; 0 you shrink right; &lt; 0 you grow left. Sorted order guarantees you'll never "miss" a valid pair.
+      </div>
+    </div>
+  </section>
+
+  <!-- 4. CODE BLOCK -->
+  <section>
+    <div class="section-label">Code — Active Recall</div>
+    <div class="code-wrapper">
+      <button class="blur-btn" id="blurBtn" onclick="toggleBlur()">👁 Show Logic</button>
+      <pre id="codeBlock"><code
+><span class="code-line" id="cl1"><span class="kw">var</span> <span class="fn">threeSum</span> <span class="op">=</span> <span class="kw">function</span> (<span class="vr">nums</span>) {</span>
+<span class="code-line" id="cl2">    <span class="kw">let</span> <span class="vr">ans</span> <span class="op">=</span> []</span>
+<span class="code-line blurred" id="cl3">    <span class="vr">nums</span> <span class="op">=</span> <span class="vr">nums</span>.<span class="fn">sort</span>((<span class="vr">a</span>, <span class="vr">b</span>) <span class="op">=&gt;</span> <span class="vr">a</span> <span class="op">-</span> <span class="vr">b</span>)</span>
+<span class="code-line blurred" id="cl4">    <span class="kw">for</span> (<span class="kw">let</span> <span class="vr">target</span> <span class="op">=</span> <span class="nm">0</span>; <span class="vr">target</span> <span class="op">&lt;</span> <span class="vr">nums</span>.<span class="nb">length</span> <span class="op">-</span> <span class="nm">1</span>; <span class="vr">target</span><span class="op">++</span>) {</span>
+<span class="code-line blurred" id="cl5">        <span class="kw">if</span> (<span class="vr">nums</span>[<span class="vr">target</span>] <span class="op">!==</span> <span class="vr">nums</span>[<span class="vr">target</span> <span class="op">-</span> <span class="nm">1</span>]) {</span>
+<span class="code-line blurred" id="cl6">            <span class="fn">twoSum</span>(<span class="vr">target</span>, <span class="vr">nums</span>, <span class="vr">ans</span>)</span>
+<span class="code-line blurred" id="cl7">        }</span>
+<span class="code-line blurred" id="cl8">    }</span>
+<span class="code-line" id="cl9">    <span class="kw">return</span> <span class="vr">ans</span></span>
+<span class="code-line" id="cl10">};</span>
+<span class="code-line" id="cl11"> </span>
+<span class="code-line" id="cl12"><span class="kw">const</span> <span class="fn">twoSum</span> <span class="op">=</span> (<span class="vr">target</span>, <span class="vr">arr</span>, <span class="vr">ans</span>) <span class="op">=&gt;</span> {</span>
+<span class="code-line blurred" id="cl13">    <span class="kw">let</span> <span class="vr">i</span> <span class="op">=</span> <span class="vr">target</span> <span class="op">+</span> <span class="nm">1</span></span>
+<span class="code-line blurred" id="cl14">    <span class="kw">let</span> <span class="vr">j</span> <span class="op">=</span> <span class="vr">arr</span>.<span class="nb">length</span> <span class="op">-</span> <span class="nm">1</span></span>
+<span class="code-line blurred" id="cl15">    <span class="kw">while</span> (<span class="vr">i</span> <span class="op">&lt;</span> <span class="vr">j</span>) {</span>
+<span class="code-line blurred" id="cl16">        <span class="kw">let</span> <span class="vr">sum</span> <span class="op">=</span> <span class="vr">arr</span>[<span class="vr">target</span>] <span class="op">+</span> <span class="vr">arr</span>[<span class="vr">i</span>] <span class="op">+</span> <span class="vr">arr</span>[<span class="vr">j</span>]</span>
+<span class="code-line blurred" id="cl17">        <span class="kw">if</span> (<span class="vr">sum</span> <span class="op">&gt;</span> <span class="nm">0</span>) {</span>
+<span class="code-line blurred" id="cl18">            <span class="vr">j</span><span class="op">--</span>;</span>
+<span class="code-line blurred" id="cl19">        } <span class="kw">else if</span> (<span class="vr">sum</span> <span class="op">&lt;</span> <span class="nm">0</span>) {</span>
+<span class="code-line blurred" id="cl20">            <span class="vr">i</span><span class="op">++</span></span>
+<span class="code-line blurred" id="cl21">        } <span class="kw">else</span> {</span>
+<span class="code-line blurred" id="cl22">            <span class="vr">ans</span>.<span class="fn">push</span>([<span class="vr">arr</span>[<span class="vr">target</span>], <span class="vr">arr</span>[<span class="vr">i</span>], <span class="vr">arr</span>[<span class="vr">j</span>]])</span>
+<span class="code-line blurred" id="cl23">            <span class="vr">i</span><span class="op">++</span>;</span>
+<span class="code-line blurred" id="cl24">            <span class="vr">j</span><span class="op">--</span>;</span>
+<span class="code-line blurred" id="cl25">            <span class="kw">while</span>(<span class="vr"> i</span> <span class="op">&lt;</span> <span class="vr">j</span> <span class="op">&amp;&amp;</span> <span class="vr">arr</span>[<span class="vr">i</span>] <span class="op">==</span> <span class="vr">arr</span>[<span class="vr">i</span> <span class="op">-</span> <span class="nm">1</span>]) <span class="vr">i</span><span class="op">++</span></span>
+<span class="code-line blurred" id="cl26">        }</span>
+<span class="code-line blurred" id="cl27">    }</span>
+<span class="code-line" id="cl28">}</span>
+</code></pre>
+    </div>
+  </section>
+
+  <!-- 5. INTERACTIVE VISUALIZER -->
+  <section>
+    <div class="section-label">Interactive Visualizer</div>
+    <div class="viz-card">
+      <!-- Header + example tabs -->
+      <div class="viz-header">
+        <div class="viz-title">Step-by-step trace</div>
+        <div class="example-tabs" id="exampleTabs"></div>
+      </div>
+
+      <!-- Progress -->
+      <div class="progress-wrap">
+        <div class="progress-bar-bg">
+          <div class="progress-bar-fill" id="progressFill" style="width:0%"></div>
+        </div>
+        <div class="progress-info">
+          <span id="stepCounter">Step 0 / 0</span>
+          <span class="phase-badge" id="phaseBadge">—</span>
+        </div>
+      </div>
+
+      <!-- Step description -->
+      <div class="step-desc" id="stepDesc">Select an example to begin.</div>
+
+      <!-- Array visualization -->
+      <div class="array-area">
+        <div class="array-row" id="arrayRow"></div>
+      </div>
+
+      <!-- Pointer legend -->
+      <div class="ptr-legend">
+        <div class="legend-item">
+          <div class="legend-dot" style="background:var(--amber);border-radius:2px"></div>
+          <span style="color:var(--amber);font-size:12px;font-family:var(--mono)">target</span>
+        </div>
+        <div class="legend-item">
+          <div class="legend-dot" style="background:var(--blue);border-radius:2px"></div>
+          <span style="color:var(--blue);font-size:12px;font-family:var(--mono)">i (left)</span>
+        </div>
+        <div class="legend-item">
+          <div class="legend-dot" style="background:var(--red);border-radius:2px"></div>
+          <span style="color:var(--red);font-size:12px;font-family:var(--mono)">j (right)</span>
+        </div>
+        <div class="legend-item">
+          <div class="legend-dot" style="background:var(--green);border-radius:2px"></div>
+          <span style="color:var(--green);font-size:12px;font-family:var(--mono)">found triplet</span>
+        </div>
+      </div>
+
+      <!-- Variables panel -->
+      <div class="vars-panel" id="varsPanel">
+        <div class="var-chip vt" id="varTarget"><div class="vname">target</div><div class="vval" id="vvTarget">—</div></div>
+        <div class="var-chip vi"  id="varI"><div class="vname">i</div><div class="vval" id="vvI">—</div></div>
+        <div class="var-chip vj"  id="varJ"><div class="vname">j</div><div class="vval" id="vvJ">—</div></div>
+        <div class="var-chip"     id="varSum"><div class="vname">sum</div><div class="vval" id="vvSum">—</div></div>
+        <div class="var-chip"     id="varAns"><div class="vname">ans.length</div><div class="vval" id="vvAns">0</div></div>
+      </div>
+
+      <!-- Ans display -->
+      <div class="ans-panel">
+        <div class="ans-label">ANS — FOUND TRIPLETS</div>
+        <div class="ans-chips" id="ansChips"><span class="ans-empty">none yet</span></div>
+      </div>
+
+      <!-- Execution log -->
+      <div class="log-area" id="logArea"></div>
+
+      <!-- Controls -->
+      <div class="controls">
+        <button class="ctrl-btn" id="btnReset" onclick="reset()">↺ Reset</button>
+        <button class="ctrl-btn" id="btnPrev"  onclick="stepBy(-1)">← Prev</button>
+        <button class="ctrl-btn" id="btnNext"  onclick="stepBy(1)">Next →</button>
+        <button class="ctrl-btn play" id="btnPlay" onclick="togglePlay()">▶ Play</button>
+      </div>
+      <div class="kbd-hint">Keyboard: ← → arrows to step · Space to play/pause</div>
+    </div>
+  </section>
+
+  <!-- 6. GOTCHAS -->
+  <section>
+    <div class="section-label">Gotchas &amp; Common Pitfalls</div>
+    <div class="card">
+      <ul class="pitfall-list">
+        <li class="pitfall-item">
+          <div class="pitfall-icon">⚠️</div>
+          <div class="pitfall-text">
+            <strong>Forgetting to skip duplicate targets.</strong>
+            The condition <code style="font-family:var(--mono)">nums[target] !== nums[target-1]</code> must check <em>previous</em> element, not next.
+            When <code style="font-family:var(--mono)">target=0</code>, <code style="font-family:var(--mono)">nums[-1]</code> is <code style="font-family:var(--mono)">undefined</code> — comparison with any number is <code style="font-family:var(--mono)">true</code>, so index 0 is always processed (safe).
+          </div>
+        </li>
+        <li class="pitfall-item">
+          <div class="pitfall-icon">⚠️</div>
+          <div class="pitfall-text">
+            <strong>Not skipping duplicate i after a match.</strong>
+            After pushing a triplet, <code style="font-family:var(--mono)">i++; j--;</code> — but if <code style="font-family:var(--mono)">nums[i] === nums[i-1]</code>, the same triplet would be pushed again. The inner <code style="font-family:var(--mono)">while(arr[i] == arr[i-1]) i++</code> handles this. Note: j duplicates are automatically avoided because j moves independently.
+          </div>
+        </li>
+        <li class="pitfall-item">
+          <div class="pitfall-icon">⚠️</div>
+          <div class="pitfall-text">
+            <strong>Using <code style="font-family:var(--mono)">target &lt; nums.length</code> instead of <code style="font-family:var(--mono)">nums.length - 1</code>.</strong>
+            If target is the last element, <code style="font-family:var(--mono)">i = j = target+1</code>... wait, no — <code style="font-family:var(--mono)">i = nums.length</code> &gt; <code style="font-family:var(--mono)">j = nums.length - 1</code>, so the while loop exits immediately. It's harmless but wastes a call. Using <code style="font-family:var(--mono)">length - 1</code> is correct and more expressive.
+          </div>
+        </li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- 7. TRADEOFFS -->
+  <section>
+    <div class="section-label">Trade-offs &amp; Alternatives</div>
+    <div class="card" style="font-size:14px;color:var(--text-muted);line-height:1.8;">
+      <p><strong style="color:var(--text)">Why not HashMap?</strong> A HashMap approach would avoid sorting but requires careful deduplication — you'd need a Set of sorted triplets to avoid duplicates, adding overhead and complexity. The sort+two-pointer approach is cleaner and industry-standard for this problem.</p>
+      <br>
+      <p><strong style="color:var(--text)">Why not keep three nested loops?</strong> O(n³) times out for large inputs (n=3000 → 27 billion ops). The sort costs O(n log n) but the two-pointer inner scan reduces O(n²) inner work to O(n) per target → O(n²) total.</p>
+      <br>
+      <p><strong style="color:var(--text)">Space trade-off:</strong> We sort in-place (mutates <code style="font-family:var(--mono)">nums</code>). The output array <code style="font-family:var(--mono)">ans</code> is O(k) where k is the number of triplets. No additional data structures needed — O(1) extra space (ignoring output).</p>
+    </div>
+  </section>
+
+  <!-- 8. COMPLEXITY + MNEMONICS -->
+  <section>
+    <div class="section-label">Complexity + Memory Hooks</div>
+    <div class="card">
+      <table class="complexity-table">
+        <thead><tr><th>Dimension</th><th>Complexity</th><th>Why</th></tr></thead>
+        <tbody>
+          <tr><td>Time</td><td class="big-o">O(n²)</td><td>O(n log n) sort + O(n) per target × n targets</td></tr>
+          <tr><td>Space</td><td class="big-o">O(1)</td><td>In-place sort; output array not counted</td></tr>
+        </tbody>
+      </table>
+      <div class="mnemonic">
+        <strong>ELI5 Mnemonic</strong>
+        "Sort the line, pin one person, squeeze the other two inward until they balance. Skip anyone who looks like their neighbour."
+      </div>
+      <div class="quotes">
+        <div class="quote">Sort converts 3D → 2D: fix target, let two pointers handle the rest.</div>
+        <div class="quote">Skip duplicates at the target level AND after each match to keep triplets unique.</div>
+        <div class="quote">sum &gt; 0 → j shrinks. sum &lt; 0 → i grows. sum = 0 → record, then advance both.</div>
+      </div>
+    </div>
+  </section>
+
+</div><!-- /page -->
+
+<script>
+// ─── EXAMPLES ────────────────────────────────────────────────────────────────
+const EXAMPLES = [
+  { label:"Ex 1", input:[-1,0,1,2,-1,-4],     desc:"Standard — 2 triplets" },
+  { label:"Ex 2", input:[0,0,0],               desc:"All zeros edge" },
+  { label:"Ex 3", input:[-2,0,0,2,2],          desc:"Duplicates present" },
+  { label:"Ex 4", input:[1,2,3],               desc:"No solution" },
+  { label:"Ex 5", input:[-4,-1,-1,0,1,2,2],   desc:"Many duplicates — 3 triplets" },
+];
+
+// ─── STEP BUILDER ─────────────────────────────────────────────────────────────
+function buildSteps(inputArr) {
+  const steps = [];
+  let ans = [];
+  const nums = [...inputArr].sort((a, b) => a - b);
+
+  // Sort step
+  steps.push({
+    desc: `Sort the array ascending — <em>enables Two-Pointer direction control</em>`,
+    log: [{t:`nums.sort() → [${nums.join(', ')}]`, h:true}],
+    vPhase:"Sort",
+    arr:[...nums], target:-1, i:-1, j:-1, sum:null, ans:[], activeLine:3
+  });
+
+  for (let target = 0; target < nums.length - 1; target++) {
+    const isDup = target > 0 && nums[target] === nums[target - 1];
+
+    if (isDup) {
+      steps.push({
+        desc:`<em>target=${target}</em>: nums[${target}]=${nums[target]} equals nums[${target-1}]=${nums[target-1]} — skip to avoid duplicate triplets`,
+        log:[{t:`target=${target}: nums[${target}](${nums[target]}) === nums[${target-1}](${nums[target-1]}), skip`, h:false}],
+        vPhase:"Skip Dup Target",
+        arr:[...nums], target, i:-1, j:-1, sum:null, ans:[...ans], activeLine:5,
+        skipTarget:true
+      });
+      continue;
+    }
+
+    // Valid target — enter twoSum
+    const iStart = target + 1;
+    const jStart = nums.length - 1;
+    steps.push({
+      desc:`<em>target=${target}</em>: nums[target]=${nums[target]} — enter twoSum with i=${iStart}, j=${jStart}`,
+      log:[{t:`target=${target} (${nums[target]}): twoSum called, i=${iStart}, j=${jStart}`, h:true}],
+      vPhase:"New Target",
+      arr:[...nums], target, i:iStart, j:jStart, sum:null, ans:[...ans], activeLine:6
+    });
+
+    let i = iStart;
+    let j = jStart;
+
+    while (i < j) {
+      const sum = nums[target] + nums[i] + nums[j];
+      const sumSign = sum > 0 ? "pos" : sum < 0 ? "neg" : "zero";
+      const phaseMap = { pos:"sum > 0, shrink j", neg:"sum < 0, grow i", zero:"sum === 0 ✓" };
+
+      steps.push({
+        desc:`sum = ${nums[target]} + ${nums[i]} + ${nums[j]} = <em>${sum}</em>`,
+        log:[{t:`i=${i}, j=${j}: ${nums[target]}+${nums[i]}+${nums[j]} = ${sum}`, h:sum===0}],
+        vPhase: phaseMap[sumSign],
+        arr:[...nums], target, i, j, sum, ans:[...ans], activeLine:16,
+        found: sum===0
+      });
+
+      if (sum > 0) {
+        j--;
+        steps.push({
+          desc:`sum > 0 → move <em>j left</em> to ${j}`,
+          log:[{t:`j-- → j=${j}`, h:false}],
+          vPhase:"Move j←",
+          arr:[...nums], target, i, j, sum:null, ans:[...ans], activeLine:18
+        });
+      } else if (sum < 0) {
+        i++;
+        steps.push({
+          desc:`sum < 0 → move <em>i right</em> to ${i}`,
+          log:[{t:`i++ → i=${i}`, h:false}],
+          vPhase:"Move i→",
+          arr:[...nums], target, i, j, sum:null, ans:[...ans], activeLine:20
+        });
+      } else {
+        // Push triplet
+        ans = [...ans, [nums[target], nums[i], nums[j]]];
+        steps.push({
+          desc:`Found! Push <em>[${nums[target]}, ${nums[i]}, ${nums[j]}]</em> → ans has ${ans.length} triplet${ans.length>1?'s':''}`,
+          log:[{t:`ans.push([${nums[target]}, ${nums[i]}, ${nums[j]}])  ✓`, h:true}],
+          vPhase:"Triplet Found!",
+          arr:[...nums], target, i, j, sum:0, ans:[...ans], activeLine:22,
+          found:true, newTriplet:[nums[target], nums[i], nums[j]]
+        });
+
+        i++;
+        j--;
+
+        // Skip dup i
+        while (i < j && nums[i] === nums[i - 1]) {
+          steps.push({
+            desc:`Skip duplicate <em>i</em>: nums[${i}]=${nums[i]} same as nums[${i-1}]=${nums[i-1]}`,
+            log:[{t:`dup skip: arr[${i}]=${nums[i]} === arr[${i-1}], i++`, h:false}],
+            vPhase:"Skip Dup i",
+            arr:[...nums], target, i, j, sum:null, ans:[...ans], activeLine:25
+          });
+          i++;
+        }
+
+        steps.push({
+          desc:`Both pointers advanced: i=${i}, j=${j} — continue search`,
+          log:[{t:`i=${i}, j=${j} after advancing`, h:false}],
+          vPhase:"Advance Ptrs",
+          arr:[...nums], target, i, j, sum:null, ans:[...ans], activeLine:23
+        });
+      }
+    }
+  }
+
+  steps.push({
+    desc:`<em>Done!</em> Returning ans with ${ans.length} unique triplet${ans.length!==1?'s':''}`,
+    log:[{t:`return ${JSON.stringify(ans)}`, h:true}],
+    vPhase:"Complete",
+    arr:[...nums], target:-1, i:-1, j:-1, sum:null, ans:[...ans], activeLine:9,
+    done:true
+  });
+
+  return steps;
+}
+
+// ─── STATE ────────────────────────────────────────────────────────────────────
+let currentEx = 0;
+let steps = [];
+let cursor = 0;
+let playing = false;
+let playTimer = null;
+let codeBlurred = true;
+
+// active code lines — we highlight one at a time
+const LINE_IDS = {
+  3:'cl3', 4:'cl4', 5:'cl5', 6:'cl6', 9:'cl9',
+  13:'cl13', 14:'cl14', 15:'cl15', 16:'cl16',
+  18:'cl18', 20:'cl20', 22:'cl22', 23:'cl23', 24:'cl24', 25:'cl25'
+};
+
+// ─── RENDER ───────────────────────────────────────────────────────────────────
+function renderStep(s) {
+  // Step desc
+  document.getElementById('stepDesc').innerHTML = s.desc;
+
+  // Progress
+  const pct = steps.length > 1 ? (cursor / (steps.length - 1)) * 100 : 0;
+  document.getElementById('progressFill').style.width = pct + '%';
+  document.getElementById('stepCounter').textContent = `Step ${cursor + 1} / ${steps.length}`;
+  document.getElementById('phaseBadge').textContent = s.vPhase;
+
+  // Array — update classes in-place, no DOM rebuild
+  s.arr.forEach((v, idx) => {
+    const cell = document.getElementById(`cell-${idx}`);
+    const ptr  = document.getElementById(`ptr-${idx}`);
+    if (!cell || !ptr) return;
+
+    const isTarget = idx === s.target;
+    const isBothIJ = idx === s.i && idx === s.j;
+    const isFound  = s.found && (idx === s.target || idx === s.i || idx === s.j);
+    const isSkipT  = s.skipTarget && idx === s.target;
+
+    // Reset
+    cell.className = 'cell';
+    ptr.className = 'ptr-label';
+    ptr.textContent = '';
+    ptr.removeAttribute('style');
+
+    if (isFound) {
+      cell.className = 'cell cell-found';
+      const role = idx === s.target ? 'T' : idx === s.i ? 'i' : 'j';
+      ptr.className = 'ptr-label';
+      ptr.style.cssText = 'color:var(--green);background:rgba(52,211,153,.12);border:1px solid rgba(52,211,153,.3);padding:2px 6px;border-radius:4px;font-size:10px;font-weight:700;min-width:24px;text-align:center;';
+      ptr.textContent = role;
+    } else if (isSkipT) {
+      cell.className = 'cell cell-skip';
+      ptr.className = 'ptr-label ptr-target';
+      ptr.textContent = 'T';
+    } else if (isTarget && idx === s.i) {
+      cell.className = 'cell cell-target';
+      ptr.className = 'ptr-label ptr-target';
+      ptr.textContent = 'T+i';
+    } else if (isTarget && idx === s.j) {
+      cell.className = 'cell cell-target';
+      ptr.className = 'ptr-label ptr-target';
+      ptr.textContent = 'T+j';
+    } else if (isBothIJ) {
+      cell.className = 'cell cell-i';
+      ptr.className = 'ptr-label ptr-i';
+      ptr.textContent = 'i=j';
+    } else if (isTarget) {
+      cell.className = 'cell cell-target';
+      ptr.className = 'ptr-label ptr-target';
+      ptr.textContent = 'T';
+    } else if (idx === s.i) {
+      cell.className = 'cell cell-i';
+      ptr.className = 'ptr-label ptr-i';
+      ptr.textContent = 'i';
+    } else if (idx === s.j) {
+      cell.className = 'cell cell-j';
+      ptr.className = 'ptr-label ptr-j';
+      ptr.textContent = 'j';
+    }
+  });
+
+  // Vars
+  document.getElementById('vvTarget').textContent = s.target >= 0 ? `${s.target}` : '—';
+  document.getElementById('vvI').textContent  = s.i >= 0 ? `${s.i}` : '—';
+  document.getElementById('vvJ').textContent  = s.j >= 0 ? `${s.j}` : '—';
+
+  const sumEl  = document.getElementById('vvSum');
+  const sumChip = document.getElementById('varSum');
+  sumChip.className = 'var-chip';
+  if (s.sum === null) {
+    sumEl.textContent = '—';
+  } else if (s.sum > 0) {
+    sumEl.textContent = `+${s.sum}`;
+    sumChip.className = 'var-chip vsum-pos';
+  } else if (s.sum < 0) {
+    sumEl.textContent = `${s.sum}`;
+    sumChip.className = 'var-chip vsum-neg';
+  } else {
+    sumEl.textContent = '0';
+    sumChip.className = 'var-chip vsum-zero';
+  }
+
+  document.getElementById('vvAns').textContent = s.ans.length;
+
+  // Ans chips — only rebuild when count changes
+  const chips = document.getElementById('ansChips');
+  const prevCount = chips.dataset.count | 0;
+  if (s.ans.length !== prevCount) {
+    chips.dataset.count = s.ans.length;
+    chips.innerHTML = '';
+    if (s.ans.length === 0) {
+      chips.innerHTML = '<span class="ans-empty">none yet</span>';
+    } else {
+      s.ans.forEach(t => {
+        const chip = document.createElement('span');
+        chip.className = 'ans-chip';
+        chip.textContent = `[${t.join(',')}]`;
+        chips.appendChild(chip);
+      });
+    }
+  }
+
+  // Log
+  const log = document.getElementById('logArea');
+  const newLogText = (s.log || []).map(e => e.t).join('|');
+  if (log.dataset.last !== newLogText) {
+    log.dataset.last = newLogText;
+    log.innerHTML = '';
+    (s.log || []).forEach(entry => {
+      const d = document.createElement('div');
+      d.className = 'log-line' + (entry.h ? ' hl' : '');
+      d.textContent = '» ' + entry.t;
+      log.appendChild(d);
+    });
+  }
+
+  // Code highlight
+  document.querySelectorAll('.code-line').forEach(el => el.classList.remove('active'));
+  if (s.activeLine && LINE_IDS[s.activeLine]) {
+    const el = document.getElementById(LINE_IDS[s.activeLine]);
+    if (el) {
+      el.classList.add('active');
+    }
+  }
+
+  // Buttons
+  document.getElementById('btnPrev').disabled = cursor === 0;
+  document.getElementById('btnNext').disabled = cursor === steps.length - 1;
+}
+
+// ─── CONTROLS ─────────────────────────────────────────────────────────────────
+function stepBy(dir) {
+  cursor = Math.max(0, Math.min(steps.length - 1, cursor + dir));
+  renderStep(steps[cursor]);
+}
+
+function reset() {
+  stopPlay();
+  cursor = 0;
+  renderStep(steps[cursor]);
+}
+
+function togglePlay() {
+  if (playing) { stopPlay(); return; }
+  if (cursor === steps.length - 1) cursor = 0;
+  playing = true;
+  document.getElementById('btnPlay').textContent = '⏸ Pause';
+  document.getElementById('btnPlay').classList.add('active');
+  playTimer = setInterval(() => {
+    if (cursor >= steps.length - 1) { stopPlay(); return; }
+    cursor++;
+    renderStep(steps[cursor]);
+  }, 700);
+}
+
+function stopPlay() {
+  playing = false;
+  clearInterval(playTimer);
+  const btn = document.getElementById('btnPlay');
+  btn.textContent = '▶ Play';
+  btn.classList.remove('active');
+}
+
+function buildArrayDOM(arr) {
+  const row = document.getElementById('arrayRow');
+  row.innerHTML = '';
+  arr.forEach((v, idx) => {
+    const wrap = document.createElement('div');
+    wrap.className = 'cell-wrap';
+    wrap.innerHTML = `
+      <div class="cell" id="cell-${idx}">${v}</div>
+      <div class="cell-idx">${idx}</div>
+      <div class="ptr-label" id="ptr-${idx}"></div>
+    `;
+    row.appendChild(wrap);
+  });
+}
+
+function loadExample(idx) {
+  stopPlay();
+  currentEx = idx;
+  cursor = 0;
+  steps = buildSteps(EXAMPLES[idx].input);
+  // Build DOM once with the sorted array from step 0
+  buildArrayDOM(steps[0].arr);
+  renderStep(steps[0]);
+  document.querySelectorAll('.ex-tab').forEach((t,i) => t.classList.toggle('active', i===idx));
+}
+
+// ─── BLUR TOGGLE ──────────────────────────────────────────────────────────────
+function toggleBlur() {
+  codeBlurred = !codeBlurred;
+  document.getElementById('blurBtn').textContent = codeBlurred ? '👁 Show Logic' : '👁 Blur Logic';
+  const blurLines = ['cl3','cl4','cl5','cl6','cl7','cl8','cl13','cl14','cl15','cl16','cl17','cl18','cl19','cl20','cl21','cl22','cl23','cl24','cl25','cl26','cl27'];
+  blurLines.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.classList.toggle('blurred', codeBlurred);
+  });
+}
+
+// ─── KEYBOARD ─────────────────────────────────────────────────────────────────
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowLeft')  { e.preventDefault(); stepBy(-1); }
+  if (e.key === 'ArrowRight') { e.preventDefault(); stepBy(1); }
+  if (e.key === ' ')          { e.preventDefault(); togglePlay(); }
+});
+
+// ─── INIT ─────────────────────────────────────────────────────────────────────
+(function init() {
+  const tabs = document.getElementById('exampleTabs');
+  EXAMPLES.forEach((ex, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'ex-tab' + (i === 0 ? ' active' : '');
+    btn.textContent = ex.label;
+    btn.title = ex.desc;
+    btn.onclick = () => loadExample(i);
+    tabs.appendChild(btn);
+  });
+  loadExample(0);
+})();
+</script>
+</body>
+</html>

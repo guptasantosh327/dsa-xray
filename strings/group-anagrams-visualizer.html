@@ -1,0 +1,791 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>#49 · Group Anagrams — DSA Visualizer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Sora:wght@300;400;600;700;800&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0d0f14;--surface:#13161d;--surface2:#1a1e28;--surface3:#212638;
+  --border:rgba(255,255,255,0.07);--border-mid:rgba(255,255,255,0.12);
+  --text:#e8eaf0;--text-muted:#6b7280;--text-dim:#3d4251;
+  --accent:#7c6ef5;
+  --green:#34d399;--amber:#fbbf24;--blue:#60a5fa;--red:#f87171;--orange:#fb923c;
+  --purple:#7c6ef5;--teal:#2dd4bf;--rose:#f472b6;
+  --mono:'JetBrains Mono',monospace;--sans:'Sora',sans-serif;
+}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:15px;line-height:1.6;min-height:100vh;overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;
+  background-image:linear-gradient(rgba(124,110,245,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(124,110,245,0.03) 1px,transparent 1px);
+  background-size:40px 40px;pointer-events:none;z-index:0}
+.page{position:relative;z-index:1;max-width:980px;margin:0 auto;padding:3rem 1.5rem 6rem}
+@keyframes fadeUp{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
+
+/* HEADER */
+.back-link{display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:12px;color:var(--text-muted);text-decoration:none;padding:7px 14px 7px 10px;border-radius:8px;border:1px solid var(--border);background:var(--surface);margin-bottom:2rem;transition:all .15s}
+.back-link:hover{color:var(--text);border-color:var(--border-mid)}
+.prob-meta{display:flex;align-items:center;gap:10px;margin-bottom:.75rem;flex-wrap:wrap}
+.badge{display:inline-block;font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:3px 10px;border-radius:100px}
+.badge-medium{background:rgba(251,191,36,0.12);color:var(--amber);border:1px solid rgba(251,191,36,0.25)}
+.badge-pat{background:rgba(124,110,245,0.12);color:var(--accent);border:1px solid rgba(124,110,245,0.25)}
+h1.prob-title{font-size:clamp(1.8rem,5vw,2.8rem);font-weight:800;letter-spacing:-.03em;margin-bottom:.5rem;animation:fadeUp .6s ease both}
+.prob-num{color:var(--text-dim);font-family:var(--mono)}
+
+/* SECTIONS */
+section{margin-bottom:2.75rem;animation:fadeUp .6s ease both}
+section:nth-child(2){animation-delay:.08s}
+section:nth-child(3){animation-delay:.13s}
+section:nth-child(4){animation-delay:.18s}
+section:nth-child(5){animation-delay:.23s}
+section:nth-child(6){animation-delay:.28s}
+.sec-label{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);margin-bottom:.6rem}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:1.4rem}
+
+/* PATTERN BANNER */
+.pat-banner{background:linear-gradient(135deg,rgba(124,110,245,0.08),rgba(96,165,250,0.05));border:1px solid rgba(124,110,245,0.2);border-radius:14px;padding:1.4rem}
+.pat-name{font-size:1.05rem;font-weight:700;color:var(--accent);margin-bottom:.35rem}
+.pat-why{color:var(--text-muted);font-size:13.5px;line-height:1.65;margin-bottom:.9rem}
+.related{display:flex;gap:.4rem;flex-wrap:wrap}
+.chip{font-family:var(--mono);font-size:11px;padding:3px 11px;border-radius:100px;background:var(--surface2);border:1px solid var(--border-mid);color:var(--text-muted)}
+
+/* PROBLEM */
+.ex-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:.75rem;margin-top:.9rem}
+.ex-card{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:.85rem}
+.ex-lbl{font-family:var(--mono);font-size:10px;color:var(--text-dim);letter-spacing:.1em;text-transform:uppercase;margin-bottom:.35rem}
+.ex-in{font-family:var(--mono);font-size:12px;color:var(--accent);margin-bottom:.2rem}
+.ex-out{font-family:var(--mono);font-size:12px;color:var(--green)}
+
+/* INTUITION */
+.hint-list{list-style:none;counter-reset:h;display:flex;flex-direction:column;gap:.65rem}
+.hint-list li{counter-increment:h;display:flex;gap:.7rem;font-size:13.5px;color:var(--text-muted);line-height:1.6}
+.hint-list li::before{content:counter(h);display:flex;align-items:center;justify-content:center;min-width:21px;height:21px;border-radius:50%;background:var(--surface3);border:1px solid var(--border-mid);font-family:var(--mono);font-size:11px;font-weight:700;color:var(--accent);margin-top:2px;flex-shrink:0}
+.key-trick{margin-top:.9rem;background:rgba(124,110,245,0.07);border:1px solid rgba(124,110,245,0.18);border-radius:8px;padding:.7rem 1rem;font-size:13px;color:var(--accent);line-height:1.6}
+
+/* CODE BLOCK */
+.code-wrap{background:#090b10;border:1px solid var(--border);border-radius:12px;overflow:hidden}
+.code-hdr{display:flex;justify-content:space-between;align-items:center;padding:.5rem 1rem;background:var(--surface);border-bottom:1px solid var(--border)}
+.code-lang{font-family:var(--mono);font-size:10px;color:var(--text-dim);letter-spacing:.1em;text-transform:uppercase}
+.btn-blur{font-family:var(--mono);font-size:11px;padding:3px 10px;border-radius:100px;background:var(--surface2);border:1px solid var(--border-mid);color:var(--text-muted);cursor:pointer;transition:all .2s}
+.btn-blur:hover{color:var(--text);border-color:var(--text-dim)}
+.btn-blur.on{background:rgba(124,110,245,0.15);color:var(--accent);border-color:rgba(124,110,245,0.35)}
+.code-body.blur-logic .cl{filter:blur(4px);opacity:0.6;transition:all .3s}
+pre.code-body{padding:1.1rem 1.4rem;overflow-x:auto;font-family:var(--mono);font-size:13px;line-height:1.85;tab-size:4}
+.cl{display:block;padding:0 .4rem;margin:0 -.4rem;border-radius:4px;transition:background .2s;border-left:2px solid transparent}
+.cl.al{background:rgba(124,110,245,0.1);border-left-color:var(--accent)}
+.kw{color:#c792ea}.fn{color:#82aaff}.str{color:#c3e88d}.num{color:#f78c6c}
+.vr{color:#eeffff}.op{color:#89ddff}.mt{color:#7c6ef5}.cm{color:#546e7a}
+
+/* VISUALIZER */
+.viz-wrap{background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden}
+.viz-topbar{display:flex;align-items:center;justify-content:space-between;padding:.65rem 1.1rem;border-bottom:1px solid var(--border);flex-wrap:wrap;gap:.5rem}
+.ex-sel{display:flex;gap:.35rem;flex-wrap:wrap}
+.eb{font-family:var(--mono);font-size:11px;padding:4px 12px;border-radius:100px;background:var(--surface2);border:1px solid var(--border-mid);color:var(--text-muted);cursor:pointer;transition:all .18s}
+.eb.on{background:rgba(124,110,245,0.15);color:var(--accent);border-color:rgba(124,110,245,0.35)}
+.res-badge{font-family:var(--mono);font-size:12px;padding:4px 14px;border-radius:100px;background:var(--surface2);border:1px solid var(--border-mid);color:var(--text-muted);transition:all .3s}
+.res-badge.show{background:rgba(52,211,153,0.12);color:var(--green);border-color:rgba(52,211,153,0.3)}
+.prog-track{height:3px;background:var(--surface2)}
+.prog-fill{height:100%;background:linear-gradient(90deg,var(--amber),var(--orange));transition:width .3s ease;border-radius:0 3px 3px 0}
+
+/* Viz body layout */
+.viz-body{display:grid;grid-template-columns:1fr 260px;min-height:460px}
+@media(max-width:768px){.viz-body{grid-template-columns:1fr}}
+.viz-left{padding:1.4rem;border-right:1px solid var(--border);display:flex;flex-direction:column;gap:1.2rem}
+.viz-right{padding:1.4rem;display:flex;flex-direction:column;gap:.8rem}
+.viz-sub-lbl{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--text-dim);margin-bottom:.55rem}
+
+/* Word cells (strs array) */
+.word-row{display:flex;flex-wrap:wrap;gap:6px}
+.wc{display:inline-flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:13px;font-weight:700;padding:5px 12px;border-radius:8px;border:1.5px solid;transition:all .22s;min-width:40px}
+.wc.neu{background:rgba(61,66,81,0.15);border-color:rgba(61,66,81,0.25);color:var(--text-muted)}
+.wc.act{background:rgba(124,110,245,0.12);border-color:var(--accent);color:var(--accent);box-shadow:0 0 10px rgba(124,110,245,0.3);transform:translateY(-2px)}
+.wc.done{background:rgba(52,211,153,0.08);border-color:rgba(52,211,153,0.25);color:var(--green)}
+.wc-idx{font-size:9px;color:var(--text-dim);font-family:var(--mono);display:block;text-align:center;margin-top:2px}
+
+/* Char cells (current string) */
+.char-row{display:flex;flex-wrap:wrap;gap:4px;min-height:46px}
+.cc{width:38px;height:38px;display:inline-flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:16px;font-weight:700;border-radius:8px;border:1.5px solid;transition:all .22s}
+.cc.neu{background:rgba(61,66,81,0.15);border-color:rgba(61,66,81,0.25);color:var(--text-muted)}
+.cc.act{background:rgba(251,191,36,0.15);border-color:var(--amber);color:var(--amber);box-shadow:0 0 10px rgba(251,191,36,0.3);transform:translateY(-2px)}
+.cc.done{background:rgba(52,211,153,0.08);border-color:rgba(52,211,153,0.2);color:var(--green)}
+
+/* hashArr compact view */
+.hash-row{display:flex;flex-wrap:wrap;gap:5px;padding:10px;background:rgba(0,0,0,0.2);border-radius:10px;border:1px solid var(--border);min-height:50px}
+.hc{display:flex;flex-direction:column;align-items:center;gap:2px;min-width:30px;transition:all .22s}
+.hc-letter{font-family:var(--mono);font-size:9px;color:var(--text-dim)}
+.hc-count{font-family:var(--mono);font-size:11px;font-weight:700;width:28px;height:24px;display:flex;align-items:center;justify-content:center;border-radius:5px;border:1.5px solid;transition:all .22s}
+.hc-count.zero{background:rgba(61,66,81,0.1);border-color:rgba(61,66,81,0.15);color:var(--text-dim)}
+.hc-count.pos{background:rgba(124,110,245,0.12);border-color:rgba(124,110,245,0.3);color:var(--accent)}
+.hc-count.act{background:rgba(251,191,36,0.2);border-color:var(--amber);color:var(--amber);transform:scale(1.15);box-shadow:0 0 8px rgba(251,191,36,0.3)}
+
+/* key display */
+.key-display{font-family:var(--mono);font-size:10px;color:var(--text-muted);padding:6px 10px;background:rgba(0,0,0,0.2);border:1px solid var(--border);border-radius:7px;word-break:break-all;min-height:30px;line-height:1.6}
+.key-display.lit{color:var(--accent);border-color:rgba(124,110,245,0.3)}
+
+/* groups display */
+.groups-wrap{display:flex;flex-direction:column;gap:6px;flex:1}
+.group-row{display:flex;align-items:center;gap:5px;padding:6px 10px;border-radius:8px;border:1.5px solid;transition:all .3s}
+.group-row.new-grp{border-color:rgba(251,191,36,0.5);background:rgba(251,191,36,0.08);animation:pulse-new .4s ease}
+@keyframes pulse-new{0%,100%{transform:scale(1)}50%{transform:scale(1.02)}}
+.gr-idx{font-family:var(--mono);font-size:10px;color:var(--text-dim);min-width:20px}
+.gr-items{display:flex;flex-wrap:wrap;gap:4px}
+.gr-word{font-family:var(--mono);font-size:11px;padding:2px 8px;border-radius:100px;background:var(--surface3);border:1px solid var(--border-mid);color:var(--text-muted);transition:all .2s}
+.gr-word.newest{background:rgba(52,211,153,0.12);border-color:rgba(52,211,153,0.3);color:var(--green)}
+
+/* Variables panel */
+.var-rows{display:flex;flex-direction:column;gap:5px}
+.var-r{display:flex;justify-content:space-between;align-items:center;padding:.4rem .65rem;background:var(--surface2);border-radius:7px;border:1px solid var(--border)}
+.vn{font-family:var(--mono);font-size:11px;color:var(--text-dim)}
+.vv{font-family:var(--mono);font-size:12px;font-weight:700;color:var(--text);max-width:130px;text-align:right;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.vv.c{color:var(--accent)}
+
+/* Phase badge */
+.phase-badge{font-family:var(--mono);font-size:10px;padding:3px 10px;border-radius:100px;border:1px solid;text-align:center;transition:all .3s}
+
+/* Step desc + log */
+.step-desc-bar{padding:.65rem 1.1rem;border-top:1px solid var(--border);border-bottom:1px solid var(--border);background:var(--surface2)}
+.sd{font-size:13px;color:var(--text-muted);line-height:1.65;min-height:43px}
+.sd em{color:var(--text);font-style:normal;font-weight:600;font-family:var(--mono)}
+.exec-log{padding:.65rem 1.1rem;max-height:130px;overflow-y:auto}
+.elt{font-family:var(--mono);font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--text-dim);margin-bottom:.35rem}
+.ll{font-family:var(--mono);font-size:11px;color:var(--text-dim);padding:1px 0;display:flex;gap:5px}
+.ll::before{content:'›';color:var(--text-dim);flex-shrink:0}
+.ll.lh{color:var(--text-muted)}.ll.lh::before{content:'▶';color:var(--accent)}
+
+/* Controls */
+.ctrl-bar{display:flex;align-items:center;justify-content:center;gap:.65rem;padding:.65rem 1.1rem;border-top:1px solid var(--border);flex-wrap:wrap}
+.cb{display:flex;align-items:center;gap:5px;font-family:var(--mono);font-size:12px;padding:6px 16px;border-radius:8px;background:var(--surface2);border:1px solid var(--border-mid);color:var(--text-muted);cursor:pointer;transition:all .18s}
+.cb:hover{background:var(--surface3);color:var(--text)}
+.cb.pri{background:rgba(124,110,245,0.14);color:var(--accent);border-color:rgba(124,110,245,0.3)}
+.cb.pri:hover{background:rgba(124,110,245,0.22)}
+.cb:disabled{opacity:.3;cursor:not-allowed}
+.sc-ctr{font-family:var(--mono);font-size:11px;color:var(--text-dim);min-width:60px;text-align:center}
+
+/* GOTCHAS */
+.gotcha-list{display:flex;flex-direction:column;gap:.75rem}
+.gotcha{padding:.75rem 1rem;background:var(--surface2);border-left:3px solid var(--red);border-radius:0 8px 8px 0;font-size:13px;color:var(--text-muted);line-height:1.6}
+.gotcha strong{color:var(--text)}
+.gotcha code{font-family:var(--mono);font-size:12px;color:var(--amber);background:var(--surface3);padding:1px 5px;border-radius:4px}
+
+/* TRADEOFFS */
+.tradeoff-list{display:flex;flex-direction:column;gap:.75rem}
+.tradeoff{padding:.75rem 1rem;background:var(--surface2);border-left:3px solid var(--blue);border-radius:0 8px 8px 0;font-size:13px;color:var(--text-muted);line-height:1.6}
+.tradeoff strong{color:var(--text)}
+.tradeoff code{font-family:var(--mono);font-size:12px;color:var(--accent);background:var(--surface3);padding:1px 5px;border-radius:4px}
+
+/* COMPLEXITY */
+.cx-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:.9rem}
+.cx-c{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:.9rem;text-align:center}
+.cx-lbl{font-family:var(--mono);font-size:10px;color:var(--text-dim);text-transform:uppercase;letter-spacing:.1em;margin-bottom:.35rem}
+.cx-v{font-family:var(--mono);font-size:1.35rem;font-weight:700;color:var(--accent)}
+.cx-n{font-size:12px;color:var(--text-dim);margin-top:.25rem}
+.tks{margin-top:.9rem;display:flex;flex-direction:column;gap:.45rem}
+.tk{padding:.55rem .9rem;background:var(--surface2);border-left:3px solid var(--accent);border-radius:0 8px 8px 0;font-size:13px;color:var(--text-muted);line-height:1.55}
+.tk code{font-family:var(--mono);font-size:12px;color:var(--text);background:var(--surface3);padding:1px 5px;border-radius:4px}
+</style>
+</head>
+<body>
+<div class="page">
+
+<a href="../index.html" class="back-link">← DSA Hub</a>
+
+<!-- HEADER -->
+<div class="prob-meta">
+  <span class="badge badge-medium">Medium</span>
+  <span class="badge badge-pat">Frequency Count Key</span>
+</div>
+<h1 class="prob-title"><span class="prob-num">#49 · </span>Group Anagrams</h1>
+
+<!-- 1. PATTERN BANNER -->
+<section>
+  <div class="sec-label">Pattern</div>
+  <div class="pat-banner">
+    <div class="pat-name">Frequency-Array as HashMap Key</div>
+    <div class="pat-why">The core insight: two strings are anagrams if and only if they have identical character frequency profiles. Instead of sorting (O(k log k) per string), we encode each string as a 26-slot count array and serialize it into a canonical string key — giving O(k) grouping and a guaranteed collision-free fingerprint for any anagram group.</div>
+    <div class="related">
+      <span class="chip">#242 Valid Anagram</span>
+      <span class="chip">#438 Find All Anagrams in a String</span>
+      <span class="chip">#266 Palindrome Permutation</span>
+    </div>
+  </div>
+</section>
+
+<!-- 2. PROBLEM STATEMENT -->
+<section>
+  <div class="sec-label">Problem</div>
+  <div class="card">
+    <p style="color:var(--text-muted);font-size:14px;margin-bottom:.85rem">Given an array of strings <code style="color:var(--accent);font-family:var(--mono)">strs</code>, group the anagrams together. You can return the answer in any order. An anagram uses the same letters in the same quantities, just rearranged.</p>
+    <p style="color:var(--text-muted);font-size:14px;margin-bottom:.85rem"><strong style="color:var(--text)">Analogy:</strong> Imagine you're sorting a pile of Scrabble tiles that someone scattered randomly. Two bags of tiles are "the same" if they contain exactly the same letters in the same quantities. Your job is to sort all the bags into matching groups — without caring about the order of tiles inside each bag.</p>
+    <div class="ex-row">
+      <div class="ex-card">
+        <div class="ex-lbl">Example 1</div>
+        <div class="ex-in">["eat","tea","tan","ate","nat","bat"]</div>
+        <div class="ex-out">→ [["bat"],["nat","tan"],["ate","eat","tea"]]</div>
+      </div>
+      <div class="ex-card">
+        <div class="ex-lbl">Example 2</div>
+        <div class="ex-in">[""]</div>
+        <div class="ex-out">→ [[""]]</div>
+      </div>
+      <div class="ex-card">
+        <div class="ex-lbl">Example 3</div>
+        <div class="ex-in">["a","b","a"]</div>
+        <div class="ex-out">→ [["a","a"],["b"]]</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 3. INTUITION -->
+<section>
+  <div class="sec-label">Intuition &amp; Hints</div>
+  <div class="card">
+    <ul class="hint-list">
+      <li><strong style="color:var(--text)">Brute Force — Sort Each String:</strong> Sort every string alphabetically. Anagrams will produce identical sorted strings. Use the sorted string as the map key. Works, but sorting takes O(k log k) per string. Total: O(n·k·log k).</li>
+      <li><strong style="color:var(--text)">Optimal — Frequency Array Key:</strong> Instead of sorting, count the 26 letter frequencies in O(k). Encode the array as <code style="color:var(--amber);font-family:var(--mono)">"#1#0#0#0#1#..."</code> using '#' separators so counts ≥ 10 don't collide (e.g. <code style="color:var(--amber);font-family:var(--mono)">"#10#0" ≠ "#1#00"</code>). Total: O(n·k).</li>
+      <li><strong style="color:var(--text)">Group by Key:</strong> Use a plain object as the map. For each string, compute its key; if key exists, push to that array; otherwise create a new array. Return <code style="color:var(--accent);font-family:var(--mono)">Object.values(keyMap)</code>.</li>
+      <li><strong style="color:var(--text)">Why '#' separator matters:</strong> Without it, <code style="color:var(--amber);font-family:var(--mono)">hashArr = [10,0,...]</code> would stringify to <code style="color:var(--amber);font-family:var(--mono)">"100..."</code> which collides with <code style="color:var(--amber);font-family:var(--mono)">[1,0,0,...]</code> → <code style="color:var(--amber);font-family:var(--mono)">"100..."</code>. The '#' prefix makes each slot unambiguous.</li>
+    </ul>
+    <div class="key-trick">
+      ✦ Key insight: <code>charCodeAt(0) - 'a'.charCodeAt(0)</code> maps any lowercase letter to its 0-based index in the alphabet. 'a'→0, 'b'→1, ..., 'z'→25. This turns a character lookup into a direct array index — no hash function needed.
+    </div>
+  </div>
+</section>
+
+<!-- 4. CODE BLOCK -->
+<section>
+  <div class="sec-label">Solution Code</div>
+  <div class="code-wrap">
+    <div class="code-hdr">
+      <span class="code-lang">javascript</span>
+      <div style="display:flex;gap:10px;align-items:center">
+        <button class="btn-blur on" id="btnBlur" onclick="toggleBlur()">👁 Show Logic</button>
+        <span style="font-family:var(--mono);font-size:10px;color:var(--text-dim)">your solution — exact</span>
+      </div>
+    </div>
+    <pre class="code-body blur-logic" id="codeBody"><span id="cl1"  class="cl"><span class="kw">var</span> <span class="fn">groupAnagrams</span> <span class="op">=</span> <span class="kw">function</span>(<span class="vr">strs</span>) {</span>
+<span id="cl2"  class="cl">    <span class="kw">let</span> <span class="vr">keyMap</span> <span class="op">=</span> {}</span>
+<span id="cl3"  class="cl">    <span class="cm">// Create a array which will have all the counts of the character</span></span>
+<span id="cl4"  class="cl">    <span class="kw">for</span>(<span class="kw">let</span> <span class="vr">i</span> <span class="op">=</span> <span class="num">0</span>; <span class="vr">i</span> <span class="op">&lt;</span> <span class="vr">strs</span>.<span class="mt">length</span>; <span class="vr">i</span><span class="op">++</span>) {</span>
+<span id="cl5"  class="cl">        <span class="kw">let</span> <span class="vr">s</span> <span class="op">=</span> <span class="vr">strs</span>[<span class="vr">i</span>]</span>
+<span id="cl6"  class="cl">        <span class="kw">let</span> <span class="vr">hashArr</span> <span class="op">=</span> <span class="kw">new</span> <span class="fn">Array</span>(<span class="num">26</span>).<span class="mt">fill</span>(<span class="num">0</span>)</span>
+<span id="cl7"  class="cl">        <span class="kw">for</span>(<span class="kw">let</span> <span class="vr">j</span> <span class="op">=</span> <span class="num">0</span>; <span class="vr">j</span> <span class="op">&lt;</span> <span class="vr">s</span>.<span class="mt">length</span>; <span class="vr">j</span><span class="op">++</span>) {</span>
+<span id="cl8"  class="cl">            <span class="kw">let</span> <span class="vr">index</span> <span class="op">=</span> <span class="vr">s</span>[<span class="vr">j</span>].<span class="mt">charCodeAt</span>(<span class="num">0</span>) <span class="op">-</span> <span class="str">'a'</span>.<span class="mt">charCodeAt</span>(<span class="num">0</span>)</span>
+<span id="cl9"  class="cl">            <span class="vr">hashArr</span>[<span class="vr">index</span>] <span class="op">+=</span> <span class="num">1</span></span>
+<span id="cl10" class="cl">        }</span>
+<span id="cl11" class="cl">        <span class="kw">let</span> <span class="vr">key</span> <span class="op">=</span> <span class="str">''</span></span>
+<span id="cl12" class="cl">        <span class="kw">for</span>(<span class="kw">let</span> <span class="vr">z</span> <span class="op">=</span> <span class="num">0</span>; <span class="vr">z</span> <span class="op">&lt;</span> <span class="vr">hashArr</span>.<span class="mt">length</span>; <span class="vr">z</span><span class="op">++</span>) {</span>
+<span id="cl13" class="cl">            <span class="vr">key</span> <span class="op">+=</span> <span class="str">'#'</span> <span class="op">+</span> <span class="vr">hashArr</span>[<span class="vr">z</span>]</span>
+<span id="cl14" class="cl">        }</span>
+<span id="cl15" class="cl">        <span class="kw">if</span>(<span class="op">!</span><span class="vr">keyMap</span>[<span class="vr">key</span>]){</span>
+<span id="cl16" class="cl">            <span class="vr">keyMap</span>[<span class="vr">key</span>] <span class="op">=</span> [<span class="vr">s</span>]</span>
+<span id="cl17" class="cl">        } <span class="kw">else</span> {</span>
+<span id="cl18" class="cl">            <span class="vr">keyMap</span>[<span class="vr">key</span>].<span class="mt">push</span>(<span class="vr">s</span>)</span>
+<span id="cl19" class="cl">        }</span>
+<span id="cl20" class="cl">    }</span>
+<span id="cl21" class="cl">    <span class="kw">return</span> <span class="fn">Object</span>.<span class="mt">values</span>(<span class="vr">keyMap</span>)</span>
+<span id="cl22" class="cl">};</span></pre>
+  </div>
+</section>
+
+<!-- 5. INTERACTIVE VISUALIZER -->
+<section>
+  <div class="sec-label">Interactive Visualizer</div>
+  <div class="viz-wrap">
+    <!-- Top bar -->
+    <div class="viz-topbar">
+      <div class="ex-sel" id="exSel"></div>
+      <span class="res-badge" id="resBadge">groups: —</span>
+    </div>
+    <div class="prog-track"><div class="prog-fill" id="progFill" style="width:0%"></div></div>
+
+    <!-- Body -->
+    <div class="viz-body">
+      <!-- LEFT -->
+      <div class="viz-left">
+        <!-- strs array -->
+        <div>
+          <div class="viz-sub-lbl">strs array</div>
+          <div class="word-row" id="strsRow"></div>
+        </div>
+        <!-- current string -->
+        <div>
+          <div class="viz-sub-lbl">current string <span id="curStrLabel" style="color:var(--accent);font-family:var(--mono)"></span></div>
+          <div class="char-row" id="charRow"></div>
+        </div>
+        <!-- hashArr -->
+        <div>
+          <div class="viz-sub-lbl">hashArr[26] — character frequency counts</div>
+          <div class="hash-row" id="hashRow"></div>
+        </div>
+        <!-- key -->
+        <div>
+          <div class="viz-sub-lbl">key string (serialized fingerprint)</div>
+          <div class="key-display" id="keyDisplay">—</div>
+        </div>
+      </div>
+      <!-- RIGHT -->
+      <div class="viz-right">
+        <!-- Variables -->
+        <div>
+          <div class="viz-sub-lbl">variables</div>
+          <div class="var-rows">
+            <div class="var-r"><span class="vn">i</span><span class="vv c" id="vI">—</span></div>
+            <div class="var-r"><span class="vn">j</span><span class="vv c" id="vJ">—</span></div>
+            <div class="var-r"><span class="vn">s</span><span class="vv c" id="vS">—</span></div>
+            <div class="var-r"><span class="vn">index</span><span class="vv c" id="vIndex">—</span></div>
+          </div>
+        </div>
+        <!-- Phase -->
+        <div>
+          <div class="viz-sub-lbl">phase</div>
+          <div class="phase-badge" id="phaseBadge" style="background:var(--surface2);border-color:var(--border);color:var(--text-dim)">init</div>
+        </div>
+        <!-- keyMap groups -->
+        <div style="flex:1">
+          <div class="viz-sub-lbl">keyMap groups</div>
+          <div class="groups-wrap" id="groupsWrap">
+            <div style="font-family:var(--mono);font-size:11px;color:var(--text-dim)">— empty —</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step description -->
+    <div class="step-desc-bar">
+      <div class="sd" id="stepDesc">Press Play or use arrow keys to step through the algorithm.</div>
+    </div>
+
+    <!-- Execution log -->
+    <div class="exec-log">
+      <div class="elt">execution log</div>
+      <div id="execLog"></div>
+    </div>
+
+    <!-- Controls -->
+    <div class="ctrl-bar">
+      <button class="cb" id="btnPrev" onclick="prevStep()" disabled>◀ Prev</button>
+      <span class="sc-ctr" id="stepCtr">0 / 0</span>
+      <button class="cb pri" id="btnPlay" onclick="togglePlay()">▶ Play</button>
+      <button class="cb" id="btnNext" onclick="nextStep()">Next ▶</button>
+    </div>
+  </div>
+</section>
+
+<!-- 6. GOTCHAS -->
+<section>
+  <div class="sec-label">Gotchas &amp; Common Pitfalls</div>
+  <div class="card">
+    <div class="gotcha-list">
+      <div class="gotcha"><strong>The '#' separator is not optional.</strong> Without it, <code>hashArr = [1,0,0,...,10,...]</code> would produce key <code>"100...10..."</code>, which collides with <code>[10,0,...,1,0,...]</code> → <code>"100...10..."</code>. Using <code>'#' + count</code> makes each slot unambiguous: <code>"#1#0#0...#10..."</code> vs <code>"#10#0...#1#0..."</code>.</div>
+      <div class="gotcha"><strong>Empty strings are valid input and should group together.</strong> An empty string produces hashArr all-zeros, key <code>"#0#0...#0"</code>. Multiple empty strings will correctly map to the same key and form one group — don't add a length check that skips them.</div>
+      <div class="gotcha"><strong>Don't sort; use frequency arrays.</strong> Many candidates reach for <code>s.split('').sort().join('')</code> as the key. It works but costs O(k log k) per string. The freq-array key is O(k) and often catches interviewers' attention as the optimal choice.</div>
+    </div>
+  </div>
+</section>
+
+<!-- 7. TRADE-OFFS -->
+<section>
+  <div class="sec-label">Trade-offs &amp; Alternatives</div>
+  <div class="card">
+    <div class="tradeoff-list">
+      <div class="tradeoff"><strong>Sorted string key vs frequency array key:</strong> <code>s.split('').sort().join('')</code> is simpler to write and read but is O(k log k) per string. The frequency array key is O(k) — better when strings are long or n is large. In an interview, start with sorted key, then offer the frequency key as an optimization.</div>
+      <div class="tradeoff"><strong>Object vs Map:</strong> A plain JS object <code>{}</code> is fine here because keys are always non-symbol strings. A <code>Map</code> would have the same O(1) amortized operations but slightly more overhead. The object approach is idiomatic for this problem.</div>
+      <div class="tradeoff"><strong>Space trade-off:</strong> We use O(n·k) extra space — the keyMap stores all strings. This is unavoidable since the output itself is O(n·k). The hashArr is reused per iteration so it's only O(26) = O(1) extra per loop iteration.</div>
+    </div>
+  </div>
+</section>
+
+<!-- 8. COMPLEXITY -->
+<section>
+  <div class="sec-label">Complexity &amp; Memory Hooks</div>
+  <div class="card">
+    <div class="cx-grid">
+      <div class="cx-c">
+        <div class="cx-lbl">Time</div>
+        <div class="cx-v">O(n·k)</div>
+        <div class="cx-n">n = # strings, k = max string length</div>
+      </div>
+      <div class="cx-c">
+        <div class="cx-lbl">Space</div>
+        <div class="cx-v">O(n·k)</div>
+        <div class="cx-n">keyMap stores all strings</div>
+      </div>
+      <div class="cx-c">
+        <div class="cx-lbl">Key Generation</div>
+        <div class="cx-v">O(k)</div>
+        <div class="cx-n">26-slot array + serialize</div>
+      </div>
+    </div>
+    <div class="tks">
+      <div class="tk"><strong style="color:var(--text)">ELI5 Mnemonic:</strong> "Fingerprint each word by its letter inventory, not its letter order. Same inventory = same group."</div>
+      <div class="tk">"The <code>#</code> separator is the bug insurance — it prevents count collisions in the key string."</div>
+      <div class="tk">"<code>charCodeAt(0) - 'a'.charCodeAt(0)</code> = the letter's position in the alphabet. No hash, no branch — pure math."</div>
+      <div class="tk">"The hashArr is your canonical fingerprint. Two anagrams always produce the same 26 numbers in the same order."</div>
+    </div>
+  </div>
+</section>
+
+</div><!-- end .page -->
+
+<script>
+// ── Step Generator ─────────────────────────────────────────────────────────
+function generateSteps(strs) {
+  const steps = [];
+  const keyMap = {};
+  const processedIdx = [];
+
+  steps.push({
+    desc: `Start: <em>strs</em> has ${strs.length} string${strs.length !== 1 ? 's' : ''}. Initialize <em>keyMap = {}</em>`,
+    log: [
+      { t: `strs = [${strs.map(s => `"${s}"`).join(', ')}]`, h: false },
+      { t: `keyMap = {}`, h: true }
+    ],
+    vPhase: 'init', vResult: '—',
+    strIdx: -1, curStr: '', charIdx: -1, charHighlight: -1,
+    hashArr: new Array(26).fill(0), key: '', keyMap: {}
+  });
+
+  for (let i = 0; i < strs.length; i++) {
+    const s = strs[i];
+    const hashArr = new Array(26).fill(0);
+
+    // Select string
+    steps.push({
+      desc: `<em>i = ${i}</em>: pick <em>s = "${s}"</em>, reset <em>hashArr</em> to 26 zeros`,
+      log: [
+        { t: `i = ${i}`, h: true },
+        { t: `s = "${s}"`, h: true },
+        { t: `hashArr = new Array(26).fill(0)`, h: false }
+      ],
+      vPhase: 'select', vResult: '—',
+      strIdx: i, curStr: s, charIdx: -1, charHighlight: -1,
+      hashArr: [...hashArr], key: '', keyMap: JSON.parse(JSON.stringify(keyMap)),
+      activeLine: [4, 5, 6]
+    });
+
+    // Count characters
+    for (let j = 0; j < s.length; j++) {
+      const idx = s.charCodeAt(j) - 97;
+      hashArr[idx]++;
+      steps.push({
+        desc: `<em>j = ${j}</em>: char '<em>${s[j]}</em>' → index <em>${idx}</em> ('${s[j]}' − 'a' = ${idx}), hashArr[${idx}]++ = ${hashArr[idx]}`,
+        log: [
+          { t: `j = ${j}, s[j] = '${s[j]}'`, h: true },
+          { t: `index = '${s[j]}'.charCodeAt(0) - 'a'.charCodeAt(0) = ${idx}`, h: true },
+          { t: `hashArr[${idx}] = ${hashArr[idx]}`, h: true }
+        ],
+        vPhase: 'count', vResult: '—',
+        strIdx: i, curStr: s, charIdx: j, charHighlight: idx,
+        vIndex: idx,
+        hashArr: [...hashArr], key: '', keyMap: JSON.parse(JSON.stringify(keyMap)),
+        activeLine: [7, 8, 9]
+      });
+    }
+
+    // Build key
+    let key = '';
+    for (let z = 0; z < hashArr.length; z++) key += '#' + hashArr[z];
+    const shortKey = key.length > 40 ? key.substring(0, 40) + '…' : key;
+    steps.push({
+      desc: `Build <em>key</em>: join each hashArr[z] with '#' prefix → unique fingerprint`,
+      log: [
+        { t: `key = ""`, h: false },
+        { t: `for z 0→25: key += '#' + hashArr[z]`, h: true },
+        { t: `key = "${shortKey}"`, h: true }
+      ],
+      vPhase: 'keygen', vResult: '—',
+      strIdx: i, curStr: s, charIdx: s.length, charHighlight: -1,
+      hashArr: [...hashArr], key: key, keyMap: JSON.parse(JSON.stringify(keyMap)),
+      activeLine: [11, 12, 13]
+    });
+
+    // Update keyMap
+    const existed = keyMap[key] !== undefined;
+    if (!keyMap[key]) {
+      keyMap[key] = [s];
+    } else {
+      keyMap[key] = [...keyMap[key], s];
+    }
+
+    const groupCount = Object.values(keyMap).length;
+    steps.push({
+      desc: existed
+        ? `<em>key exists</em> → <em>keyMap[key].push("${s}")</em> — group now has [${keyMap[key].map(x => `"${x}"`).join(', ')}]`
+        : `<em>new key</em> → <em>keyMap[key] = ["${s}"]</em> — created group #${groupCount}`,
+      log: [
+        { t: existed ? `keyMap[key].push("${s}")` : `keyMap[key] = ["${s}"]`, h: true },
+        { t: `${groupCount} group${groupCount !== 1 ? 's' : ''} total`, h: false }
+      ],
+      vPhase: 'update', vResult: groupCount,
+      strIdx: i, curStr: s, charIdx: -1, charHighlight: -1,
+      hashArr: [...hashArr], key: key, keyMap: JSON.parse(JSON.stringify(keyMap)),
+      newStr: s, activeLine: [15, 16, 17, 18],
+      processedUpTo: i
+    });
+    processedIdx.push(i);
+  }
+
+  // Done
+  const result = Object.values(keyMap);
+  steps.push({
+    desc: `Done! <em>return Object.values(keyMap)</em> → <em>${result.length} group${result.length !== 1 ? 's' : ''}</em>`,
+    log: [
+      { t: `return Object.values(keyMap)`, h: true },
+      { t: `${result.length} group${result.length !== 1 ? 's' : ''}: ${result.map(g => '[' + g.map(x => '"' + x + '"').join(',') + ']').join(', ')}`, h: false }
+    ],
+    vPhase: 'done', vResult: result.length,
+    strIdx: -1, curStr: '', charIdx: -1, charHighlight: -1,
+    hashArr: new Array(26).fill(0), key: '', keyMap: JSON.parse(JSON.stringify(keyMap)),
+    activeLine: [21], processedUpTo: strs.length - 1
+  });
+
+  return steps;
+}
+
+// ── Examples ───────────────────────────────────────────────────────────────
+const EXAMPLES = [
+  { label: 'Classic',     strs: ['eat','tea','tan','ate','nat','bat'] },
+  { label: 'Two groups',  strs: ['abc','bca','cab','xyz','zyx'] },
+  { label: 'Empty strs',  strs: ['',''] },
+  { label: 'Single',      strs: ['a'] },
+  { label: 'Mixed lens',  strs: ['aab','baa','aba','xyz','x'] },
+];
+
+const allSteps = EXAMPLES.map(e => generateSteps(e.strs));
+let curEx = 0, curStep = 0, playTimer = null;
+let steps = allSteps[0];
+const strs = () => EXAMPLES[curEx].strs;
+
+// ── Build example buttons ──────────────────────────────────────────────────
+(function buildExButtons() {
+  const el = document.getElementById('exSel');
+  EXAMPLES.forEach((e, i) => {
+    const b = document.createElement('button');
+    b.className = 'eb' + (i === 0 ? ' on' : '');
+    b.textContent = e.label;
+    b.onclick = () => selectEx(i);
+    el.appendChild(b);
+  });
+})();
+
+function selectEx(i) {
+  curEx = i; curStep = 0; steps = allSteps[i];
+  document.querySelectorAll('.eb').forEach((b, j) => b.classList.toggle('on', j === i));
+  stopPlay();
+  render();
+}
+
+// ── Navigation ─────────────────────────────────────────────────────────────
+function prevStep() { if (curStep > 0) { curStep--; render(); } }
+function nextStep() { if (curStep < steps.length - 1) { curStep++; render(); } }
+
+function togglePlay() {
+  if (playTimer) stopPlay();
+  else {
+    if (curStep >= steps.length - 1) curStep = 0;
+    document.getElementById('btnPlay').textContent = '⏸ Pause';
+    playTimer = setInterval(() => {
+      if (curStep >= steps.length - 1) { stopPlay(); return; }
+      curStep++; render();
+    }, 900);
+  }
+}
+function stopPlay() {
+  clearInterval(playTimer); playTimer = null;
+  document.getElementById('btnPlay').textContent = '▶ Play';
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight') nextStep();
+  if (e.key === 'ArrowLeft')  prevStep();
+});
+
+// ── Render ─────────────────────────────────────────────────────────────────
+function render() {
+  const s = steps[curStep];
+  const arr = strs();
+
+  // Progress
+  const pct = steps.length > 1 ? (curStep / (steps.length - 1)) * 100 : 0;
+  document.getElementById('progFill').style.width = pct + '%';
+  document.getElementById('stepCtr').textContent = `${curStep + 1} / ${steps.length}`;
+
+  // Controls
+  document.getElementById('btnPrev').disabled = curStep === 0;
+  document.getElementById('btnNext').disabled = curStep === steps.length - 1;
+
+  // Result badge
+  const rb = document.getElementById('resBadge');
+  if (s.vPhase === 'done') {
+    rb.textContent = `groups: ${s.vResult}`;
+    rb.className = 'res-badge show';
+  } else if (s.vResult !== '—') {
+    rb.textContent = `groups so far: ${s.vResult}`;
+    rb.className = 'res-badge show';
+  } else {
+    rb.textContent = 'groups: —';
+    rb.className = 'res-badge';
+  }
+
+  // strs array
+  const strsRow = document.getElementById('strsRow');
+  strsRow.innerHTML = '';
+  const processedUpTo = s.processedUpTo !== undefined ? s.processedUpTo : (s.vPhase === 'done' ? arr.length - 1 : -1);
+  arr.forEach((w, i) => {
+    const wrap = document.createElement('div');
+    const wc = document.createElement('div');
+    const wi = document.createElement('span');
+    wc.className = 'wc';
+    wc.textContent = `"${w}"`;
+    wi.className = 'wc-idx';
+    wi.textContent = `[${i}]`;
+    if (i === s.strIdx) wc.classList.add('act');
+    else if (i < s.strIdx || (s.vPhase === 'done')) wc.classList.add('done');
+    else wc.classList.add('neu');
+    wrap.appendChild(wc);
+    wrap.appendChild(wi);
+    strsRow.appendChild(wrap);
+  });
+
+  // Current string chars
+  const charRow = document.getElementById('charRow');
+  document.getElementById('curStrLabel').textContent = s.curStr ? `s = "${s.curStr}"` : '';
+  charRow.innerHTML = '';
+  if (s.curStr) {
+    s.curStr.split('').forEach((ch, j) => {
+      const cc = document.createElement('div');
+      cc.className = 'cc';
+      cc.textContent = ch;
+      if (j === s.charIdx) cc.classList.add('act');
+      else if (j < s.charIdx || s.charIdx === s.curStr.length) cc.classList.add('done');
+      else cc.classList.add('neu');
+      charRow.appendChild(cc);
+    });
+  } else {
+    charRow.innerHTML = '<span style="font-family:var(--mono);font-size:11px;color:var(--text-dim)">— waiting —</span>';
+  }
+
+  // hashArr — show all 26 as compact cells
+  const hashRow = document.getElementById('hashRow');
+  hashRow.innerHTML = '';
+  if (s.hashArr) {
+    const letters = 'abcdefghijklmnopqrstuvwxyz';
+    s.hashArr.forEach((cnt, idx) => {
+      const hc = document.createElement('div');
+      hc.className = 'hc';
+      const hl = document.createElement('div');
+      hl.className = 'hc-letter';
+      hl.textContent = letters[idx];
+      const hv = document.createElement('div');
+      hv.className = 'hc-count';
+      hv.textContent = cnt;
+      if (idx === s.charHighlight) hv.classList.add('act');
+      else if (cnt > 0) hv.classList.add('pos');
+      else hv.classList.add('zero');
+      hc.appendChild(hl);
+      hc.appendChild(hv);
+      hashRow.appendChild(hc);
+    });
+  }
+
+  // Key display
+  const kd = document.getElementById('keyDisplay');
+  if (s.key) {
+    kd.textContent = s.key;
+    kd.className = 'key-display lit';
+  } else {
+    kd.textContent = '— not computed yet —';
+    kd.className = 'key-display';
+  }
+
+  // Variables panel
+  document.getElementById('vI').textContent = s.strIdx >= 0 ? s.strIdx : '—';
+  document.getElementById('vJ').textContent = (s.charIdx >= 0 && s.charIdx < (s.curStr || '').length) ? s.charIdx : '—';
+  document.getElementById('vS').textContent = s.curStr ? `"${s.curStr}"` : '—';
+  document.getElementById('vIndex').textContent = s.vIndex !== undefined ? s.vIndex : '—';
+
+  // Phase badge
+  const pb = document.getElementById('phaseBadge');
+  const phaseStyles = {
+    init:   { bg: 'rgba(61,66,81,0.3)',     border: 'var(--border-mid)',           color: 'var(--text-dim)',  text: 'init' },
+    select: { bg: 'rgba(124,110,245,0.12)', border: 'rgba(124,110,245,0.35)',      color: 'var(--accent)',   text: 'select string' },
+    count:  { bg: 'rgba(251,191,36,0.12)',  border: 'rgba(251,191,36,0.35)',       color: 'var(--amber)',    text: 'count chars' },
+    keygen: { bg: 'rgba(96,165,250,0.12)',  border: 'rgba(96,165,250,0.35)',       color: 'var(--blue)',     text: 'build key' },
+    update: { bg: 'rgba(52,211,153,0.12)',  border: 'rgba(52,211,153,0.35)',       color: 'var(--green)',    text: 'update map' },
+    done:   { bg: 'rgba(52,211,153,0.15)',  border: 'rgba(52,211,153,0.5)',        color: 'var(--green)',    text: 'done' },
+  };
+  const ps = phaseStyles[s.vPhase] || phaseStyles.init;
+  pb.style.background   = ps.bg;
+  pb.style.borderColor  = ps.border;
+  pb.style.color        = ps.color;
+  pb.textContent        = ps.text;
+
+  // Groups display
+  const gw = document.getElementById('groupsWrap');
+  const groups = Object.values(s.keyMap || {});
+  if (groups.length === 0) {
+    gw.innerHTML = '<div style="font-family:var(--mono);font-size:11px;color:var(--text-dim)">— empty —</div>';
+  } else {
+    const groupColors = ['rgba(124,110,245,0.1)', 'rgba(52,211,153,0.08)', 'rgba(251,191,36,0.08)',
+                         'rgba(96,165,250,0.08)', 'rgba(251,146,60,0.08)', 'rgba(244,114,182,0.08)'];
+    const borderColors = ['rgba(124,110,245,0.3)', 'rgba(52,211,153,0.25)', 'rgba(251,191,36,0.25)',
+                          'rgba(96,165,250,0.25)', 'rgba(251,146,60,0.25)', 'rgba(244,114,182,0.25)'];
+    gw.innerHTML = groups.map((grp, gi) => {
+      const isNewGroup = s.vPhase === 'update' && grp.length === 1 && grp[0] === s.newStr;
+      const newWord = s.vPhase === 'update' ? s.newStr : null;
+      const words = grp.map(w => {
+        const isNew = w === newWord && gi === groups.length - 1 || (s.vPhase === 'update' && w === newWord);
+        return `<span class="gr-word${isNew ? ' newest' : ''}">"${w}"</span>`;
+      }).join('');
+      return `<div class="group-row${isNewGroup ? ' new-grp' : ''}" style="background:${groupColors[gi % groupColors.length]};border-color:${borderColors[gi % borderColors.length]}">
+        <span class="gr-idx">#${gi + 1}</span>
+        <div class="gr-items">${words}</div>
+      </div>`;
+    }).join('');
+  }
+
+  // Step description
+  document.getElementById('stepDesc').innerHTML = s.desc;
+
+  // Execution log
+  const logEl = document.getElementById('execLog');
+  logEl.innerHTML = (s.log || []).map(l =>
+    `<div class="ll${l.h ? ' lh' : ''}">${l.t}</div>`
+  ).join('');
+
+  // Active code lines
+  document.querySelectorAll('.cl').forEach(el => el.classList.remove('al'));
+  if (s.activeLine) {
+    s.activeLine.forEach(n => {
+      const el = document.getElementById('cl' + n);
+      if (el) el.classList.add('al');
+    });
+  }
+}
+
+// ── Blur toggle ────────────────────────────────────────────────────────────
+let blurOn = true;
+function toggleBlur() {
+  blurOn = !blurOn;
+  const cb = document.getElementById('codeBody');
+  const btn = document.getElementById('btnBlur');
+  cb.classList.toggle('blur-logic', blurOn);
+  btn.classList.toggle('on', blurOn);
+  btn.textContent = blurOn ? '👁 Show Logic' : '👁 Blur Logic';
+}
+
+// Mark the core logic lines for blur
+document.querySelectorAll('#cl6,#cl7,#cl8,#cl9,#cl11,#cl12,#cl13,#cl15,#cl16,#cl18').forEach(el => {
+  el.classList.add('cl'); // already cl, this is a hook for blur-logic
+});
+
+// Init
+render();
+</script>
+</body>
+</html>

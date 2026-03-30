@@ -1,0 +1,892 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>#42 Trapping Rain Water — DSA Visualizer</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Sora:wght@300;400;600;700;800&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #0d0f14; --surface: #13161d; --surface2: #1a1e28;
+      --surface3: #212638; --border: rgba(255,255,255,0.07);
+      --border-mid: rgba(255,255,255,0.12);
+      --text: #e8eaf0; --text-muted: #6b7280; --text-dim: #3d4251;
+      --accent: #7c6ef5; --green: #34d399; --amber: #fbbf24;
+      --blue: #60a5fa; --red: #f87171; --orange: #fb923c;
+      --purple: #c084fc; --teal: #2dd4bf; --cyan: #22d3ee;
+      --mono: 'JetBrains Mono', monospace;
+      --sans: 'Sora', sans-serif;
+    }
+    html { scroll-behavior: smooth; }
+    body {
+      background: var(--bg); color: var(--text);
+      font-family: var(--sans); font-size: 15px; line-height: 1.6;
+      min-height: 100vh; overflow-x: hidden;
+    }
+    body::before {
+      content: ''; position: fixed; inset: 0;
+      background-image:
+        linear-gradient(rgba(124,110,245,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(124,110,245,0.03) 1px, transparent 1px);
+      background-size: 40px 40px; pointer-events: none; z-index: 0;
+    }
+    body::after {
+      content: ''; position: fixed; top: -20%; left: 50%;
+      transform: translateX(-50%);
+      width: 900px; height: 500px;
+      background: radial-gradient(ellipse, rgba(124,110,245,0.07) 0%, transparent 70%);
+      pointer-events: none; z-index: 0;
+    }
+    .page { position: relative; z-index: 1; max-width: 900px; margin: 0 auto; padding: 3rem 1.5rem 6rem; }
+
+    @keyframes fadeUp { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:translateY(0); } }
+
+    /* BACK */
+    .back-link{display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:12px;color:var(--text-muted);text-decoration:none;padding:7px 14px 7px 10px;border-radius:8px;border:1px solid var(--border);background:var(--surface);margin-bottom:2rem;transition:all .15s}
+    .back-link:hover{color:var(--text);border-color:var(--border-mid)}
+
+    /* HERO */
+    .hero { text-align: center; margin-bottom: 3rem; animation: fadeUp .6s ease both; }
+    .problem-num { font-family: var(--mono); font-size: 13px; color: var(--text-muted); margin-bottom: .5rem; }
+    .hero h1 { font-size: clamp(1.8rem, 4vw, 2.6rem); font-weight: 800; margin-bottom: .75rem; letter-spacing: -0.5px; }
+    .hero h1 span { background: linear-gradient(135deg, var(--teal), var(--blue)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .tag-row { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; margin-top: .75rem; }
+    .tag { padding: 4px 12px; border-radius: 999px; font-size: 12px; font-family: var(--mono); font-weight: 600; border: 1px solid; }
+    .tag-hard { background: rgba(248,113,113,0.1); color: var(--red); border-color: rgba(248,113,113,0.25); }
+    .tag-pattern { background: rgba(34,211,238,0.1); color: var(--teal); border-color: rgba(34,211,238,0.25); }
+    .tag-pill { background: rgba(255,255,255,0.05); color: var(--text-muted); border-color: var(--border); }
+
+    /* SECTION */
+    section { margin-bottom: 2.5rem; animation: fadeUp .6s ease both; }
+    section:nth-child(2) { animation-delay:.05s; } section:nth-child(3) { animation-delay:.1s; }
+    section:nth-child(4) { animation-delay:.15s; } section:nth-child(5) { animation-delay:.2s; }
+    section:nth-child(6) { animation-delay:.25s; } section:nth-child(7) { animation-delay:.3s; }
+    section:nth-child(8) { animation-delay:.35s; }
+    .section-label { font-size: 11px; font-family: var(--mono); font-weight: 700; color: var(--accent); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 1rem; }
+    .card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 1.5rem; }
+
+    /* PATTERN BANNER */
+    .pattern-banner {
+      background: linear-gradient(135deg, rgba(34,211,238,0.07), rgba(96,165,250,0.05));
+      border: 1px solid rgba(34,211,238,0.2); border-radius: 14px; padding: 1.5rem 2rem;
+    }
+    .pattern-name { font-size: 1.3rem; font-weight: 700; color: var(--teal); margin-bottom: .35rem; }
+    .pattern-why { color: var(--text-muted); font-size: 14px; line-height: 1.7; }
+    .related-list { margin-top: 1rem; display: flex; gap: 8px; flex-wrap: wrap; }
+    .related-chip {
+      padding: 4px 10px; background: rgba(34,211,238,0.07);
+      border: 1px solid rgba(34,211,238,0.2); border-radius: 6px;
+      font-size: 12px; color: var(--teal); font-family: var(--mono);
+    }
+
+    /* PROBLEM STATEMENT */
+    .worked-examples { display: grid; gap: 10px; margin-top: 1rem; }
+    .worked-ex { background: var(--surface2); border: 1px solid var(--border); border-radius: 10px; padding: 1rem 1.25rem; }
+    .worked-ex .label { font-size: 11px; color: var(--text-muted); font-family: var(--mono); margin-bottom: 6px; }
+    .worked-ex .io { font-family: var(--mono); font-size: 13px; line-height: 1.8; }
+    .worked-ex .io .hl { color: var(--amber); }
+    .worked-ex .io .res { color: var(--green); font-weight: 700; }
+
+    /* INTUITION */
+    .hint-list { list-style: none; counter-reset: hints; display: flex; flex-direction: column; gap: 12px; }
+    .hint-list li { counter-increment: hints; display: flex; gap: 12px; align-items: flex-start; }
+    .hint-list li::before {
+      content: counter(hints); min-width: 26px; height: 26px;
+      background: rgba(34,211,238,0.1); border: 1px solid rgba(34,211,238,0.25);
+      border-radius: 50%; color: var(--teal); font-family: var(--mono); font-size: 12px;
+      font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px;
+    }
+    .key-trick {
+      margin-top: 1rem; background: rgba(52,211,153,0.07);
+      border: 1px solid rgba(52,211,153,0.2); border-radius: 10px;
+      padding: .75rem 1.25rem; font-size: 14px; color: var(--green);
+    }
+    .key-trick strong { display: block; font-size: 10px; letter-spacing: 1px; text-transform: uppercase; opacity: .7; margin-bottom: 4px; }
+
+    /* CODE */
+    .code-wrapper { position: relative; }
+    .blur-btn {
+      position: absolute; top: 12px; right: 12px;
+      background: rgba(124,110,245,0.12); border: 1px solid rgba(124,110,245,0.25);
+      border-radius: 8px; color: var(--accent); font-size: 12px;
+      font-family: var(--mono); padding: 5px 12px; cursor: pointer; transition: background .2s; z-index: 2;
+    }
+    .blur-btn:hover { background: rgba(124,110,245,0.22); }
+    pre {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 12px; padding: 1.5rem; overflow-x: auto;
+      font-family: var(--mono); font-size: 13px; line-height: 1.9;
+    }
+    .code-line { display: block; padding: 0 4px; border-radius: 4px; transition: background .2s, filter .3s; }
+    .code-line.active { background: rgba(251,191,36,0.12); border-left: 3px solid var(--amber); padding-left: 1px; }
+    .code-line.blurred { filter: blur(4px); user-select: none; }
+    .kw { color: #ff79c6; } .fn { color: #50fa7b; } .vr { color: #bd93f9; }
+    .nm { color: #f1fa8c; } .op { color: #ff79c6; } .cm { color: #6272a4; }
+    .st { color: #f1fa8c; } .mt { color: #8be9fd; }
+
+    /* VIZ CARD */
+    .viz-card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; overflow: hidden; }
+    .viz-header {
+      padding: 1rem 1.5rem; border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;
+    }
+    .viz-title { font-weight: 700; font-size: 15px; }
+    .example-tabs { display: flex; gap: 6px; flex-wrap: wrap; }
+    .ex-tab {
+      padding: 5px 14px; border-radius: 8px; font-size: 12px; font-family: var(--mono);
+      cursor: pointer; border: 1px solid var(--border); background: transparent;
+      color: var(--text-muted); transition: all .2s;
+    }
+    .ex-tab.active { background: rgba(34,211,238,0.1); border-color: rgba(34,211,238,0.3); color: var(--teal); }
+
+    /* PROGRESS */
+    .progress-wrap { padding: .75rem 1.5rem; border-bottom: 1px solid var(--border); }
+    .progress-bar-bg { background: var(--surface2); border-radius: 999px; height: 6px; overflow: hidden; }
+    .progress-bar-fill { height: 100%; background: linear-gradient(90deg, var(--amber), var(--orange)); border-radius: 999px; transition: width .3s ease; }
+    .progress-info { display: flex; justify-content: space-between; font-size: 11px; font-family: var(--mono); color: var(--text-muted); margin-top: 5px; }
+
+    /* STEP DESC */
+    .step-desc { padding: 1rem 1.5rem; border-bottom: 1px solid var(--border); font-size: 14px; line-height: 1.7; min-height: 58px; }
+    .step-desc em { color: var(--amber); font-style: normal; font-weight: 600; }
+
+    /* SVG AREA */
+    .svg-area { padding: 1.5rem 1rem 0.5rem; overflow-x: auto; }
+    .svg-area svg { display: block; max-width: 100%; }
+
+    /* ARRAY PANELS */
+    .array-panels { padding: .75rem 1.5rem 1rem; display: flex; flex-direction: column; gap: 10px; }
+    .arr-row { display: flex; align-items: center; gap: 8px; overflow-x: auto; }
+    .arr-label { font-family: var(--mono); font-size: 11px; color: var(--text-muted); white-space: nowrap; min-width: 100px; }
+    .arr-cells { display: flex; gap: 3px; }
+    .arr-cell {
+      width: 36px; height: 34px; border-radius: 7px; border: 1px solid var(--border);
+      background: var(--surface2); display: flex; align-items: center; justify-content: center;
+      font-family: var(--mono); font-size: 12px; font-weight: 700; color: var(--text-dim);
+      transition: all .25s; flex-shrink: 0;
+    }
+    .arr-cell.active-left  { background: rgba(96,165,250,0.15); border-color: rgba(96,165,250,0.4); color: var(--blue); }
+    .arr-cell.active-right { background: rgba(251,191,36,0.15); border-color: rgba(251,191,36,0.4); color: var(--amber); }
+    .arr-cell.filled-left  { background: rgba(96,165,250,0.08); border-color: rgba(96,165,250,0.2); color: rgba(96,165,250,0.8); }
+    .arr-cell.filled-right { background: rgba(251,191,36,0.08); border-color: rgba(251,191,36,0.2); color: rgba(251,191,36,0.8); }
+    .arr-cell.water-cell   { background: rgba(34,211,238,0.15); border-color: rgba(34,211,238,0.4); color: var(--teal); }
+    .arr-cell.water-zero   { background: rgba(34,211,238,0.04); border-color: rgba(34,211,238,0.15); color: var(--text-dim); }
+    .arr-cell.scan-z       { background: rgba(251,191,36,0.2); border-color: var(--amber); color: var(--amber); }
+    .arr-cell.height-bar   { background: var(--surface3); border-color: var(--border-mid); color: var(--text-muted); }
+    .arr-cell.done-green   { background: rgba(52,211,153,0.12); border-color: rgba(52,211,153,0.3); color: var(--green); }
+    .arr-cell.null-cell    { color: var(--text-dim); opacity: 0.35; }
+
+    /* BOTTOM PANELS */
+    .bottom-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; padding: 1rem 1.5rem 1.5rem; border-top: 1px solid var(--border); }
+    @media(max-width:600px) { .bottom-row { grid-template-columns: 1fr; } }
+
+    .var-panel, .log-panel { background: var(--surface2); border: 1px solid var(--border); border-radius: 10px; padding: 1rem; }
+    .panel-title { font-size: 10px; font-family: var(--mono); font-weight: 700; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: .75rem; }
+    .var-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+    .var-item { background: var(--surface3); border-radius: 7px; padding: 6px 10px; }
+    .var-name { font-size: 10px; color: var(--text-muted); font-family: var(--mono); }
+    .var-val { font-size: 15px; font-weight: 700; font-family: var(--mono); margin-top: 2px; }
+    .var-val.blue { color: var(--blue); } .var-val.amber { color: var(--amber); }
+    .var-val.teal  { color: var(--teal); } .var-val.green { color: var(--green); }
+    .var-val.muted { color: var(--text-muted); }
+
+    .log-list { display: flex; flex-direction: column; gap: 4px; max-height: 120px; overflow-y: auto; }
+    .log-entry { font-family: var(--mono); font-size: 11.5px; color: var(--text-muted); padding: 3px 6px; border-radius: 4px; }
+    .log-entry.hi { color: var(--teal); background: rgba(34,211,238,0.07); }
+
+    /* CONTROLS */
+    .controls {
+      display: flex; align-items: center; gap: 8px; padding: 1rem 1.5rem;
+      border-top: 1px solid var(--border); flex-wrap: wrap;
+    }
+    .btn {
+      padding: 7px 18px; border-radius: 9px; font-size: 13px; font-family: var(--mono);
+      font-weight: 600; cursor: pointer; border: 1px solid; transition: all .2s;
+    }
+    .btn-ghost { background: transparent; border-color: var(--border); color: var(--text-muted); }
+    .btn-ghost:hover:not(:disabled) { border-color: var(--border-mid); color: var(--text); }
+    .btn-ghost:disabled { opacity: 0.3; cursor: not-allowed; }
+    .btn-primary { background: rgba(34,211,238,0.12); border-color: rgba(34,211,238,0.3); color: var(--teal); }
+    .btn-primary:hover { background: rgba(34,211,238,0.2); }
+    .result-badge {
+      margin-left: auto; font-family: var(--mono); font-size: 13px; font-weight: 700;
+      padding: 6px 16px; border-radius: 8px; background: rgba(52,211,153,0.1);
+      border: 1px solid rgba(52,211,153,0.2); color: var(--green);
+    }
+    .kbd { font-size: 10px; color: var(--text-dim); font-family: var(--mono); }
+
+    /* GOTCHAS */
+    .gotcha-list { display: flex; flex-direction: column; gap: 10px; }
+    .gotcha {
+      display: flex; gap: 12px; align-items: flex-start;
+      background: rgba(248,113,113,0.05); border: 1px solid rgba(248,113,113,0.15);
+      border-radius: 10px; padding: .85rem 1.1rem;
+    }
+    .gotcha-icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+    .gotcha-text { font-size: 14px; color: var(--text-muted); line-height: 1.6; }
+    .gotcha-text strong { color: var(--red); }
+
+    /* TRADEOFFS */
+    .tradeoff-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    @media(max-width:540px) { .tradeoff-grid { grid-template-columns: 1fr; } }
+    .tradeoff-item { background: var(--surface2); border: 1px solid var(--border); border-radius: 10px; padding: 1rem; }
+    .tradeoff-item h4 { font-size: 13px; font-weight: 700; margin-bottom: 6px; }
+    .tradeoff-item p  { font-size: 13px; color: var(--text-muted); line-height: 1.6; }
+
+    /* COMPLEXITY */
+    .complexity-table { width: 100%; border-collapse: collapse; font-family: var(--mono); font-size: 13px; }
+    .complexity-table th, .complexity-table td { padding: 9px 14px; text-align: left; border-bottom: 1px solid var(--border); }
+    .complexity-table th { color: var(--text-muted); font-size: 11px; text-transform: uppercase; letter-spacing: 1px; }
+    .complexity-table td:last-child { color: var(--amber); font-weight: 700; }
+    .mnemonic { margin-top: 1rem; background: rgba(124,110,245,0.07); border: 1px solid rgba(124,110,245,0.2); border-radius: 10px; padding: .85rem 1.25rem; }
+    .mnemonic p { font-size: 14px; color: var(--accent); line-height: 1.6; }
+    .takeaways { margin-top: 1rem; display: flex; flex-direction: column; gap: 6px; }
+    .takeaway { font-size: 13px; color: var(--text-muted); padding-left: 1rem; border-left: 2px solid var(--border-mid); line-height: 1.6; }
+  </style>
+</head>
+<body>
+<div class="page">
+
+  <a href="../index.html" class="back-link">← DSA Hub</a>
+
+  <!-- HERO -->
+  <div class="hero">
+    <div class="problem-num">#42 · Hard · Arrays</div>
+    <h1>Trapping <span>Rain Water</span></h1>
+    <div class="tag-row">
+      <span class="tag tag-hard">Hard</span>
+      <span class="tag tag-pattern">DP Prefix Arrays</span>
+      <span class="tag tag-pill">O(n) time</span>
+      <span class="tag tag-pill">O(n) space</span>
+      <span class="tag tag-pill">Single-Pass Build</span>
+    </div>
+  </div>
+
+  <!-- 1. PATTERN BANNER -->
+  <section>
+    <div class="section-label">Pattern</div>
+    <div class="pattern-banner">
+      <div class="pattern-name">DP Prefix Arrays — maxLeft + maxRight</div>
+      <div class="pattern-why" style="margin-top:.4rem;">
+        Water trapped at any index = <code style="color:var(--teal)">min(maxLeft[i], maxRight[i]) − height[i]</code>.
+        Pre-computing both boundary arrays in a single bidirectional loop eliminates the inner scan of brute force, dropping time from O(n²) to O(n).
+      </div>
+      <div class="related-list">
+        <span class="related-chip">#238 Product of Array Except Self</span>
+        <span class="related-chip">#407 Trapping Rain Water II</span>
+        <span class="related-chip">#84 Largest Rectangle in Histogram</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- 2. PROBLEM STATEMENT -->
+  <section>
+    <div class="section-label">Problem</div>
+    <div class="card">
+      <p>Given <code style="color:var(--teal)">height[]</code> — an elevation map where each bar has width 1 — compute how much water can be trapped after raining.</p>
+      <p style="margin-top:.75rem;color:var(--text-muted);">Think of it as a mountain silhouette seen from the side. Rainwater fills every valley up to the height of the <em style="color:var(--amber);font-style:normal">shorter surrounding peak</em>.</p>
+      <div class="worked-examples" style="margin-top:1.25rem;">
+        <div class="worked-ex">
+          <div class="label">Example 1 — classic</div>
+          <div class="io">
+            height = <span class="hl">[0,1,0,2,1,0,1,3,2,1,2,1]</span><br>
+            Output: <span class="res">6</span> — valleys at indices 2,4,5,6,9 trap water
+          </div>
+        </div>
+        <div class="worked-ex">
+          <div class="label">Example 2 — deep valley</div>
+          <div class="io">
+            height = <span class="hl">[4,2,0,3,2,5]</span><br>
+            Output: <span class="res">9</span> — the large drop after height 4 accumulates quickly
+          </div>
+        </div>
+        <div class="worked-ex">
+          <div class="label">Example 3 — edge: flat roof (no water)</div>
+          <div class="io">
+            height = <span class="hl">[3,3,3]</span><br>
+            Output: <span class="res">0</span> — equal heights leave no room to trap
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3. INTUITION -->
+  <section>
+    <div class="section-label">Intuition &amp; Hints</div>
+    <div class="card">
+      <ul class="hint-list">
+        <li><strong>Brute force O(n²):</strong> for each index i, scan left to find its tallest wall, scan right for its tallest wall, compute water. Too slow.</li>
+        <li><strong>Key insight:</strong> those max-left and max-right values don't change between queries — pre-compute them once into arrays <code style="color:var(--blue)">maxLeft[]</code> and <code style="color:var(--amber)">maxRight[]</code>.</li>
+        <li><strong>Clever single loop:</strong> your solution fills <em>both</em> arrays simultaneously — index <code>i</code> expands the left frontier while <code>nHeight-i-1</code> shrinks the right frontier, all in one pass.</li>
+        <li><strong>Second pass:</strong> a simple linear scan computes <code>min(maxLeft[z], maxRight[z]) − height[z]</code> and accumulates into <code>unitRain</code>.</li>
+      </ul>
+      <div class="key-trick">
+        <strong>Key Trick</strong>
+        Water trapped = the bucket model: you can only fill up to the <em style="color:var(--green);font-style:normal">shorter</em> of the two walls. min(maxLeft, maxRight) is the water level ceiling. Subtract the bar itself to get the air gap filled with water.
+      </div>
+    </div>
+  </section>
+
+  <!-- 4. CODE BLOCK -->
+  <section>
+    <div class="section-label">Solution Code</div>
+    <div class="code-wrapper">
+      <button class="blur-btn" id="blur-btn" onclick="toggleBlur()">👁 Show Logic</button>
+      <pre id="code-block"><code
+><span class="code-line" id="cl1"><span class="kw">var</span> <span class="fn">trap</span> <span class="op">=</span> <span class="kw">function</span> (height) {</span>
+<span class="code-line" id="cl2">    <span class="kw">let</span> <span class="vr">maxLeftHeight</span> <span class="op">=</span> <span class="nm">0</span>;</span>
+<span class="code-line" id="cl3">    <span class="kw">let</span> <span class="vr">maxRightHeight</span> <span class="op">=</span> <span class="nm">0</span>;</span>
+<span class="code-line" id="cl4">    <span class="kw">let</span> <span class="vr">maxLeft</span> <span class="op">=</span> []</span>
+<span class="code-line" id="cl5">    <span class="kw">let</span> <span class="vr">maxRight</span> <span class="op">=</span> []</span>
+<span class="code-line" id="cl6">    <span class="kw">let</span> <span class="vr">nHeight</span> <span class="op">=</span> height.<span class="mt">length</span></span>
+<span class="code-line blurred" id="cl7">    <span class="kw">for</span> (<span class="kw">let</span> <span class="vr">i</span> <span class="op">=</span> <span class="nm">0</span>; <span class="vr">i</span> <span class="op">&lt;</span> <span class="vr">nHeight</span>; <span class="vr">i</span><span class="op">++</span>) {</span>
+<span class="code-line blurred" id="cl8">        <span class="vr">maxLeftHeight</span> <span class="op">=</span> Math.<span class="mt">max</span>(height[<span class="vr">i</span>], <span class="vr">maxLeftHeight</span>)</span>
+<span class="code-line blurred" id="cl9">        <span class="vr">maxRightHeight</span> <span class="op">=</span> Math.<span class="mt">max</span>(height[<span class="vr">nHeight</span> <span class="op">-</span> <span class="vr">i</span> <span class="op">-</span> <span class="nm">1</span>], <span class="vr">maxRightHeight</span>)</span>
+<span class="code-line blurred" id="cl10">        <span class="vr">maxLeft</span>.<span class="mt">push</span>(<span class="vr">maxLeftHeight</span>)</span>
+<span class="code-line blurred" id="cl11">        <span class="vr">maxRight</span>[<span class="vr">nHeight</span> <span class="op">-</span> <span class="vr">i</span> <span class="op">-</span> <span class="nm">1</span>] <span class="op">=</span> <span class="vr">maxRightHeight</span></span>
+<span class="code-line" id="cl12">    }</span>
+<span class="code-line" id="cl13">    <span class="kw">let</span> <span class="vr">unitRain</span> <span class="op">=</span> <span class="nm">0</span></span>
+<span class="code-line blurred" id="cl14">    <span class="kw">for</span> (<span class="kw">let</span> <span class="vr">z</span> <span class="op">=</span> <span class="nm">0</span>; <span class="vr">z</span> <span class="op">&lt;</span> height.<span class="mt">length</span> <span class="op">-</span> <span class="nm">1</span>; <span class="vr">z</span><span class="op">++</span>) {</span>
+<span class="code-line blurred" id="cl15">        <span class="vr">unitRain</span> <span class="op">+=</span> Math.<span class="mt">min</span>(<span class="vr">maxLeft</span>[<span class="vr">z</span>], <span class="vr">maxRight</span>[<span class="vr">z</span>]) <span class="op">-</span> height[<span class="vr">z</span>]</span>
+<span class="code-line" id="cl16">    }</span>
+<span class="code-line" id="cl17">    <span class="kw">return</span> <span class="vr">unitRain</span>;</span>
+<span class="code-line" id="cl18">};</span></code></pre>
+    </div>
+  </section>
+
+  <!-- 5. INTERACTIVE VISUALIZER -->
+  <section>
+    <div class="section-label">Interactive Visualizer</div>
+    <div class="viz-card">
+      <div class="viz-header">
+        <div class="viz-title">Step-by-Step Trace</div>
+        <div class="example-tabs" id="ex-tabs"></div>
+      </div>
+
+      <div class="progress-wrap">
+        <div class="progress-bar-bg"><div class="progress-bar-fill" id="prog-fill" style="width:0%"></div></div>
+        <div class="progress-info">
+          <span id="prog-info-l">Step 1 / 1</span>
+          <span id="prog-info-r">INIT</span>
+        </div>
+      </div>
+
+      <div class="step-desc" id="step-desc">Loading…</div>
+
+      <div class="svg-area" id="svg-area"></div>
+
+      <div class="array-panels" id="array-panels"></div>
+
+      <div class="controls">
+        <button class="btn btn-ghost" id="btn-reset" onclick="reset()">↺ Reset</button>
+        <button class="btn btn-ghost" id="btn-prev"  onclick="prev()" disabled>← Prev</button>
+        <button class="btn btn-primary" id="btn-play" onclick="togglePlay()">▶ Play</button>
+        <button class="btn btn-ghost" id="btn-next"  onclick="next()">Next →</button>
+        <span class="kbd">← → keys</span>
+        <div class="result-badge" id="result-badge">—</div>
+      </div>
+
+      <div class="bottom-row">
+        <div class="var-panel">
+          <div class="panel-title">Variables</div>
+          <div class="var-grid" id="var-grid"></div>
+        </div>
+        <div class="log-panel">
+          <div class="panel-title">Execution Log</div>
+          <div class="log-list" id="log-list"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 6. GOTCHAS -->
+  <section>
+    <div class="section-label">Gotchas &amp; Common Pitfalls</div>
+    <div class="card">
+      <div class="gotcha-list">
+        <div class="gotcha">
+          <div class="gotcha-icon">⚠️</div>
+          <div class="gotcha-text">
+            <strong>Off-by-one in the water loop:</strong> the code uses <code>z &lt; height.length - 1</code> — it skips the last bar. This is <em>correct</em> because the last bar can never trap water (nothing to its right), but interviewers may probe this. Using <code>z &lt; height.length</code> also works since the last bar always contributes 0.
+          </div>
+        </div>
+        <div class="gotcha">
+          <div class="gotcha-icon">⚠️</div>
+          <div class="gotcha-text">
+            <strong>Negative water:</strong> <code>min(maxLeft, maxRight) − height[z]</code> can never be negative because <code>maxLeft[z] ≥ height[z]</code> and <code>maxRight[z] ≥ height[z]</code> by definition. But if you accidentally use a plain max rather than running max, you can produce negative values.
+          </div>
+        </div>
+        <div class="gotcha">
+          <div class="gotcha-icon">⚠️</div>
+          <div class="gotcha-text">
+            <strong>Edge: all same height</strong> — like <code>[3,3,3]</code>. Every position's water = min(3,3)−3 = 0. The algorithm handles this correctly but many beginners forget to verify this edge case in interviews.
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 7. TRADE-OFFS -->
+  <section>
+    <div class="section-label">Trade-offs &amp; Alternatives</div>
+    <div class="card">
+      <div class="tradeoff-grid">
+        <div class="tradeoff-item">
+          <h4 style="color:var(--teal)">This approach — O(n) / O(n)</h4>
+          <p>Two prefix arrays use O(n) space but give clean, readable logic. Easy to extend or debug. The clever single-loop build is a bonus optimization over two separate passes.</p>
+        </div>
+        <div class="tradeoff-item">
+          <h4 style="color:var(--amber)">Two Pointers — O(n) / O(1)</h4>
+          <p>Moves <code>left</code> and <code>right</code> inward, advancing the shorter side. No arrays needed — O(1) space. Harder to intuit: you must trust that the current minimum is always the bottleneck wall.</p>
+        </div>
+        <div class="tradeoff-item">
+          <h4 style="color:var(--purple)">Stack — O(n) / O(n)</h4>
+          <p>Maintains a monotone decreasing stack, computes water horizontally when a taller bar is found. More complex to implement; usually reserved for explaining how water "fills in" layer by layer.</p>
+        </div>
+        <div class="tradeoff-item">
+          <h4 style="color:var(--red)">Brute Force — O(n²) / O(1)</h4>
+          <p>For each bar, scan left and right for max walls. Correct but TLEs on large inputs. The DP approach here is essentially brute force with memoization, reducing repeated work.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 8. COMPLEXITY -->
+  <section>
+    <div class="section-label">Complexity &amp; Memory Hooks</div>
+    <div class="card">
+      <table class="complexity-table">
+        <thead><tr><th>Metric</th><th>Value</th><th>Why</th></tr></thead>
+        <tbody>
+          <tr><td>Time</td><td style="color:var(--green)">O(n)</td><td>Two linear passes — one to build arrays, one to sum water</td></tr>
+          <tr><td>Space</td><td style="color:var(--amber)">O(n)</td><td>maxLeft[] and maxRight[] each store n values</td></tr>
+          <tr><td>Two-pointer alt</td><td style="color:var(--teal)">O(1) space</td><td>Eliminates arrays at the cost of trickier logic</td></tr>
+        </tbody>
+      </table>
+      <div class="mnemonic">
+        <p><strong style="color:var(--accent)">ELI5 Mnemonic:</strong> "Fill every valley to the height of its <em>shorter surrounding peak</em>." Build the left wall map, build the right wall map, then for each bar: take the shorter wall, subtract the bar — that's your water column.</p>
+      </div>
+      <div class="takeaways">
+        <div class="takeaway">"<code>min(maxLeft, maxRight)</code> is the water ceiling — the shorter wall is always the limiting factor."</div>
+        <div class="takeaway">"One loop can fill two arrays if you scan from both ends simultaneously — a clean single-pass trick."</div>
+        <div class="takeaway">"DP here is just memoizing the left-scan and right-scan max values you'd otherwise recompute in brute force."</div>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<script>
+// ─── EXAMPLES ────────────────────────────────────────────────────────────────
+const EXAMPLES = [
+  { label: "Classic",  height: [0,1,0,2,1,0,1,3,2,1,2,1] },
+  { label: "Deep",     height: [4,2,0,3,2,5] },
+  { label: "V-Shape",  height: [3,0,2,0,4] },
+  { label: "Tiny",     height: [1,0,1] },
+  { label: "No Water", height: [3,3,3] }
+];
+
+// ─── STEP GENERATOR ──────────────────────────────────────────────────────────
+function generateSteps(height) {
+  const steps = [];
+  const n = height.length;
+
+  // Init
+  steps.push({
+    desc: 'Initialize <em>maxLeftHeight=0</em>, <em>maxRightHeight=0</em>, empty <em>maxLeft[]</em> and <em>maxRight[]</em>. Ready to build prefix-max arrays.',
+    log: [
+      { t: 'Input: [' + height.join(', ') + ']', h: false },
+      { t: 'n = ' + n, h: false }
+    ],
+    phase: 'init', activeLine: 2,
+    i: -1, iR: -1, z: -1,
+    maxLeftHeight: 0, maxRightHeight: 0,
+    maxLeft: [], maxRight: new Array(n).fill(null),
+    waterAt: new Array(n).fill(0), unitRain: 0, result: '—'
+  });
+
+  let maxLeftHeight = 0, maxRightHeight = 0;
+  const maxLeft = [], maxRight = new Array(n).fill(null);
+
+  // Phase 1: build loop
+  for (let i = 0; i < n; i++) {
+    const iR = n - i - 1;
+    maxLeftHeight = Math.max(height[i], maxLeftHeight);
+    maxRightHeight = Math.max(height[iR], maxRightHeight);
+    maxLeft.push(maxLeftHeight);
+    maxRight[iR] = maxRightHeight;
+
+    const same = i === iR;
+    steps.push({
+      desc: same
+        ? `i=<em>${i}</em> (pointers meet): <em>maxLeft[${i}] = ${maxLeftHeight}</em> &amp; <em>maxRight[${iR}] = ${maxRightHeight}</em>. Both arrays updated at same cell.`
+        : `i=<em>${i}</em> ➜ maxLeft[${i}]=<em>${maxLeftHeight}</em> &nbsp;|&nbsp; r=<em>${iR}</em> ➜ maxRight[${iR}]=<em>${maxRightHeight}</em>. Left and right frontiers advance simultaneously.`,
+      log: [
+        { t: `i=${i}: height[${i}]=${height[i]} → maxLeftHeight=${maxLeftHeight}`, h: true },
+        { t: `r=${iR}: height[${iR}]=${height[iR]} → maxRightHeight=${maxRightHeight}`, h: !same }
+      ],
+      phase: 'build', activeLine: 8,
+      i, iR, z: -1,
+      maxLeftHeight, maxRightHeight,
+      maxLeft: [...maxLeft], maxRight: [...maxRight],
+      waterAt: new Array(n).fill(0), unitRain: 0, result: '—'
+    });
+  }
+
+  // Transition
+  steps.push({
+    desc: 'Both prefix arrays complete. <em>maxLeft[i]</em> = tallest wall to the left (inclusive). <em>maxRight[i]</em> = tallest wall to the right (inclusive). Now calculate water.',
+    log: [
+      { t: 'maxLeft:  [' + maxLeft.join(', ') + ']', h: true },
+      { t: 'maxRight: [' + maxRight.join(', ') + ']', h: false }
+    ],
+    phase: 'build', activeLine: 13,
+    i: -1, iR: -1, z: -1,
+    maxLeftHeight, maxRightHeight,
+    maxLeft: [...maxLeft], maxRight: [...maxRight],
+    waterAt: new Array(n).fill(0), unitRain: 0, result: '—'
+  });
+
+  // Phase 2: water loop
+  let unitRain = 0;
+  const waterAt = new Array(n).fill(0);
+
+  for (let z = 0; z < n - 1; z++) {
+    const mL = maxLeft[z], mR = maxRight[z];
+    const minWall = Math.min(mL, mR);
+    const water = minWall - height[z];
+    waterAt[z] = water;
+    unitRain += water;
+
+    steps.push({
+      desc: `z=<em>${z}</em>: min(maxLeft[${z}]=${mL}, maxRight[${z}]=${mR}) − height[${z}]=${height[z]} = <em>${water} unit${water!==1?'s':''}</em>. Running total: <em>unitRain = ${unitRain}</em>.`,
+      log: [
+        { t: `z=${z}: minWall=${minWall}, height=${height[z]}, Δwater=${water}`, h: water > 0 },
+        { t: `unitRain = ${unitRain}`, h: true }
+      ],
+      phase: 'water', activeLine: 15,
+      i: -1, iR: -1, z,
+      maxLeftHeight, maxRightHeight,
+      maxLeft: [...maxLeft], maxRight: [...maxRight],
+      waterAt: [...waterAt], unitRain, result: String(unitRain)
+    });
+  }
+
+  // Done
+  steps.push({
+    desc: `Loop exits (z reached height.length−1). Return <em>unitRain = ${unitRain}</em>. Total water trapped.`,
+    log: [{ t: `return ${unitRain}`, h: true }],
+    phase: 'done', activeLine: 17,
+    i: -1, iR: -1, z: -1,
+    maxLeftHeight, maxRightHeight,
+    maxLeft: [...maxLeft], maxRight: [...maxRight],
+    waterAt: [...waterAt], unitRain, result: String(unitRain)
+  });
+
+  return steps;
+}
+
+// ─── SVG BUILDER ─────────────────────────────────────────────────────────────
+function buildSVG(height, step) {
+  const n = height.length;
+  const maxH = Math.max(...height, 1);
+  const SVG_W = 580, AREA_H = 170, TOP_PAD = 36, BOT_PAD = 38;
+  const SVG_H = TOP_PAD + AREA_H + BOT_PAD;
+  const barW = Math.max(18, Math.min(44, Math.floor((SVG_W - 30) / n) - 5));
+  const gap  = Math.max(3, Math.floor((SVG_W - 30 - n * barW) / Math.max(n - 1, 1)));
+  const totalW = n * barW + (n - 1) * gap;
+  const startX = (SVG_W - totalW) / 2;
+  const baseY = TOP_PAD + AREA_H;
+  const scale = AREA_H / (maxH + 0.8);
+
+  let rects = '', waters = '', dots = '', lines = '', labels = '', ptrs = '';
+
+  // Collect maxLeft/maxRight line points
+  const mlPts = [], mrPts = [];
+
+  for (let idx = 0; idx < n; idx++) {
+    const x = startX + idx * (barW + gap);
+    const cx = x + barW / 2;
+    const h = height[idx];
+    const barH = h * scale;
+    const barY = baseY - barH;
+
+    // Bar fill colour
+    let fill = 'rgba(33,38,56,0.85)', stroke = 'rgba(255,255,255,0.09)', sw = 1.5;
+    if (step.phase === 'build' && step.i >= 0) {
+      if (idx === step.i && idx === step.iR) { fill = 'rgba(192,132,252,0.25)'; stroke = '#c084fc'; sw = 2; }
+      else if (idx === step.i)  { fill = 'rgba(96,165,250,0.22)'; stroke = '#60a5fa'; sw = 2; }
+      else if (idx === step.iR) { fill = 'rgba(251,191,36,0.22)'; stroke = '#fbbf24'; sw = 2; }
+    } else if (step.phase === 'water' && step.z >= 0) {
+      if (idx === step.z)  { fill = 'rgba(251,191,36,0.18)'; stroke = '#fbbf24'; sw = 2; }
+      else if (idx < step.z) { fill = 'rgba(33,38,56,0.6)'; stroke = 'rgba(52,211,153,0.2)'; }
+    } else if (step.phase === 'done') {
+      fill = 'rgba(52,211,153,0.1)'; stroke = 'rgba(52,211,153,0.25)';
+    }
+
+    if (h > 0) {
+      rects += `<rect x="${fx(x)}" y="${fx(barY)}" width="${barW}" height="${fx(barH)}" rx="4" fill="${fill}" stroke="${stroke}" stroke-width="${sw}"/>`;
+    } else {
+      rects += `<rect x="${fx(x)}" y="${fx(baseY-1.5)}" width="${barW}" height="1.5" rx="1" fill="${stroke}"/>`;
+    }
+
+    // Water overlay
+    const w = step.waterAt ? step.waterAt[idx] || 0 : 0;
+    if (w > 0) {
+      const wH = w * scale;
+      const wY = barY - wH;
+      waters += `<rect x="${fx(x)}" y="${fx(wY)}" width="${barW}" height="${fx(wH)}" rx="3" fill="rgba(34,211,238,0.32)" stroke="rgba(34,211,238,0.6)" stroke-width="1"/>`;
+    }
+
+    // Height label above bar
+    if (h > 0) {
+      labels += `<text x="${fx(cx)}" y="${fx(barY - 5)}" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="10" fill="rgba(255,255,255,0.4)">${h}</text>`;
+    }
+
+    // Index label below
+    labels += `<text x="${fx(cx)}" y="${fx(baseY + 16)}" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="10" fill="rgba(255,255,255,0.2)">${idx}</text>`;
+
+    // maxLeft dot
+    if (step.maxLeft && step.maxLeft[idx] !== undefined) {
+      const mLY = baseY - step.maxLeft[idx] * scale;
+      mlPts.push([cx, mLY]);
+      dots += `<circle cx="${fx(cx)}" cy="${fx(mLY)}" r="4" fill="rgba(96,165,250,0.85)" stroke="#60a5fa" stroke-width="1.2"/>`;
+    }
+
+    // maxRight dot (offset up slightly so they don't overlap maxLeft)
+    if (step.maxRight && step.maxRight[idx] !== null && step.maxRight[idx] !== undefined) {
+      const mRY = baseY - step.maxRight[idx] * scale - 9;
+      mrPts.push([cx, mRY]);
+      dots += `<circle cx="${fx(cx)}" cy="${fx(mRY)}" r="4" fill="rgba(251,191,36,0.85)" stroke="#fbbf24" stroke-width="1.2"/>`;
+    }
+
+    // Pointer label
+    if (step.phase === 'build' && step.i >= 0) {
+      if (idx === step.i && idx === step.iR) {
+        ptrs += ptr(cx, baseY, 'i=r', '#c084fc');
+      } else if (idx === step.i) {
+        ptrs += ptr(cx, baseY, 'i', '#60a5fa');
+      } else if (idx === step.iR) {
+        ptrs += ptr(cx, baseY, 'r', '#fbbf24');
+      }
+    }
+    if (step.phase === 'water' && step.z === idx) {
+      ptrs += ptr(cx, baseY, 'z', '#fbbf24');
+      // Water-level dashed line for current z
+      if (step.maxLeft && step.maxRight && step.maxLeft[idx] !== undefined && step.maxRight[idx] !== null) {
+        const minW = Math.min(step.maxLeft[idx], step.maxRight[idx]);
+        const wLY = baseY - minW * scale;
+        ptrs += `<line x1="${fx(x)}" y1="${fx(wLY)}" x2="${fx(x+barW)}" y2="${fx(wLY)}" stroke="rgba(34,211,238,0.9)" stroke-width="2" stroke-dasharray="4"/>`;
+      }
+    }
+  }
+
+  // Draw connecting polylines for maxLeft / maxRight
+  if (mlPts.length > 1) {
+    lines += `<polyline points="${mlPts.map(p => fx(p[0])+','+fx(p[1])).join(' ')}" fill="none" stroke="rgba(96,165,250,0.35)" stroke-width="1.5" stroke-dasharray="5"/>`;
+  }
+  if (mrPts.length > 1) {
+    lines += `<polyline points="${mrPts.map(p => fx(p[0])+','+fx(p[1])).join(' ')}" fill="none" stroke="rgba(251,191,36,0.35)" stroke-width="1.5" stroke-dasharray="5"/>`;
+  }
+
+  // Legend
+  const ly = SVG_H - 10;
+  const legX = startX;
+  const legend = `
+    <circle cx="${fx(legX)}" cy="${ly}" r="4" fill="rgba(96,165,250,0.85)" stroke="#60a5fa" stroke-width="1"/>
+    <text x="${fx(legX+10)}" y="${ly+4}" font-family="'JetBrains Mono',monospace" font-size="9" fill="rgba(96,165,250,0.8)">maxLeft</text>
+    <circle cx="${fx(legX+76)}" cy="${ly}" r="4" fill="rgba(251,191,36,0.85)" stroke="#fbbf24" stroke-width="1"/>
+    <text x="${fx(legX+86)}" y="${ly+4}" font-family="'JetBrains Mono',monospace" font-size="9" fill="rgba(251,191,36,0.8)">maxRight</text>
+    <rect x="${fx(legX+158)}" y="${ly-5}" width="11" height="10" rx="2" fill="rgba(34,211,238,0.32)" stroke="rgba(34,211,238,0.6)" stroke-width="1"/>
+    <text x="${fx(legX+174)}" y="${ly+4}" font-family="'JetBrains Mono',monospace" font-size="9" fill="rgba(34,211,238,0.8)">water</text>`;
+
+  return `<svg viewBox="0 0 ${SVG_W} ${SVG_H}" width="100%" xmlns="http://www.w3.org/2000/svg">
+    ${rects}${waters}${lines}${dots}${ptrs}${labels}${legend}
+  </svg>`;
+}
+
+function fx(n) { return n.toFixed(1); }
+function ptr(cx, baseY, label, color) {
+  return `<text x="${fx(cx)}" y="${fx(baseY+28)}" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="11" font-weight="700" fill="${color}">${label}</text>
+  <line x1="${fx(cx)}" y1="${fx(baseY+3)}" x2="${fx(cx)}" y2="${fx(baseY+19)}" stroke="${color}" stroke-width="1.5"/>`;
+}
+
+// ─── ARRAY PANELS ────────────────────────────────────────────────────────────
+function renderArrays(height, step) {
+  const n = height.length;
+
+  function row(label, values, cellFn) {
+    const cells = values.map((v, i) => {
+      const cls = cellFn(v, i);
+      const display = v === null ? '·' : v;
+      return `<div class="arr-cell ${cls}">${display}</div>`;
+    }).join('');
+    return `<div class="arr-row"><span class="arr-label">${label}</span><div class="arr-cells">${cells}</div></div>`;
+  }
+
+  // height row
+  const heightRow = row('height[]', height, (v, i) => {
+    if (step.phase === 'build' && i === step.i) return 'active-left';
+    if (step.phase === 'build' && i === step.iR) return 'active-right';
+    if (step.phase === 'water' && i === step.z) return 'scan-z';
+    return 'height-bar';
+  });
+
+  // maxLeft row
+  const mlArr = new Array(n).fill(null);
+  if (step.maxLeft) step.maxLeft.forEach((v, i) => { if (v !== undefined) mlArr[i] = v; });
+  const mlRow = row('maxLeft[]', mlArr, (v, i) => {
+    if (v === null) return 'null-cell';
+    if (step.phase === 'build' && i === step.i) return 'active-left';
+    return 'filled-left';
+  });
+
+  // maxRight row
+  const mrArr = new Array(n).fill(null);
+  if (step.maxRight) step.maxRight.forEach((v, i) => { if (v !== null && v !== undefined) mrArr[i] = v; });
+  const mrRow = row('maxRight[]', mrArr, (v, i) => {
+    if (v === null) return 'null-cell';
+    if (step.phase === 'build' && i === step.iR) return 'active-right';
+    return 'filled-right';
+  });
+
+  // water row — show in water/done phase
+  let waterRow = '';
+  if (step.phase === 'water' || step.phase === 'done') {
+    const wa = step.waterAt || new Array(n).fill(0);
+    waterRow = row('water[]', wa.slice(0, n), (v, i) => {
+      if (step.phase === 'done') return v > 0 ? 'done-green' : 'water-zero';
+      if (i === step.z) return 'scan-z';
+      if (i < step.z) return v > 0 ? 'water-cell' : 'water-zero';
+      return 'null-cell';
+    });
+  }
+
+  document.getElementById('array-panels').innerHTML = heightRow + mlRow + mrRow + waterRow;
+}
+
+// ─── VARIABLE PANEL ──────────────────────────────────────────────────────────
+function renderVars(step) {
+  const items = [];
+
+  if (step.phase === 'init' || step.phase === 'build') {
+    items.push({ name: 'i', val: step.i >= 0 ? step.i : '—', cls: 'blue' });
+    items.push({ name: 'r (n-i-1)', val: step.iR >= 0 ? step.iR : '—', cls: 'amber' });
+    items.push({ name: 'maxLeftHeight', val: step.maxLeftHeight, cls: 'blue' });
+    items.push({ name: 'maxRightHeight', val: step.maxRightHeight, cls: 'amber' });
+  } else if (step.phase === 'water') {
+    const z = step.z;
+    const mL = z >= 0 && step.maxLeft[z] !== undefined ? step.maxLeft[z] : '—';
+    const mR = z >= 0 && step.maxRight[z] !== null ? step.maxRight[z] : '—';
+    const minW = (mL !== '—' && mR !== '—') ? Math.min(mL, mR) : '—';
+    const h = z >= 0 ? EXAMPLES[exIdx].height[z] : '—';
+    items.push({ name: 'z', val: z >= 0 ? z : '—', cls: 'amber' });
+    items.push({ name: 'maxLeft[z]', val: mL, cls: 'blue' });
+    items.push({ name: 'maxRight[z]', val: mR, cls: 'amber' });
+    items.push({ name: 'min(L,R)', val: minW, cls: 'teal' });
+    items.push({ name: 'height[z]', val: h, cls: 'muted' });
+    items.push({ name: 'unitRain', val: step.unitRain, cls: 'green' });
+  } else {
+    items.push({ name: 'unitRain', val: step.unitRain, cls: 'green' });
+    items.push({ name: 'n', val: EXAMPLES[exIdx].height.length, cls: 'muted' });
+  }
+
+  document.getElementById('var-grid').innerHTML = items.map(it =>
+    `<div class="var-item"><div class="var-name">${it.name}</div><div class="var-val ${it.cls}">${it.val}</div></div>`
+  ).join('');
+}
+
+// ─── LOG ─────────────────────────────────────────────────────────────────────
+function renderLog(log) {
+  document.getElementById('log-list').innerHTML = (log || []).map(e =>
+    `<div class="log-entry${e.h ? ' hi' : ''}">${e.t}</div>`
+  ).join('');
+}
+
+// ─── CODE HIGHLIGHT ──────────────────────────────────────────────────────────
+function highlightCode(lineNum) {
+  document.querySelectorAll('.code-line').forEach(el => el.classList.remove('active'));
+  if (lineNum) {
+    const el = document.getElementById('cl' + lineNum);
+    if (el) el.classList.add('active');
+  }
+}
+
+// ─── BLUR TOGGLE ─────────────────────────────────────────────────────────────
+let blurred = true;
+const blurLines = [7,8,9,10,11,14,15];
+function toggleBlur() {
+  blurred = !blurred;
+  blurLines.forEach(n => {
+    const el = document.getElementById('cl' + n);
+    if (el) el.classList.toggle('blurred', blurred);
+  });
+  document.getElementById('blur-btn').textContent = blurred ? '👁 Show Logic' : '👁 Blur Logic';
+}
+
+// ─── STATE & CONTROLS ────────────────────────────────────────────────────────
+let exIdx = 0, stepIdx = 0, steps = [], playing = false, timer = null;
+
+function init(eIdx) {
+  exIdx = eIdx;
+  stepIdx = 0;
+  steps = generateSteps(EXAMPLES[eIdx].height);
+  renderStep();
+  updateTabs();
+}
+
+function renderStep() {
+  const step = steps[stepIdx];
+  const height = EXAMPLES[exIdx].height;
+  const pct = steps.length > 1 ? (stepIdx / (steps.length - 1)) * 100 : 100;
+  document.getElementById('prog-fill').style.width = pct + '%';
+  document.getElementById('prog-info-l').textContent = `Step ${stepIdx + 1} / ${steps.length}`;
+  document.getElementById('prog-info-r').textContent = step.phase.toUpperCase();
+  document.getElementById('step-desc').innerHTML = step.desc;
+  document.getElementById('svg-area').innerHTML = buildSVG(height, step);
+  renderArrays(height, step);
+  renderVars(step);
+  renderLog(step.log);
+  highlightCode(step.activeLine);
+  document.getElementById('result-badge').textContent =
+    step.phase === 'done' ? '= ' + step.result : step.result;
+  document.getElementById('btn-prev').disabled = stepIdx === 0;
+  document.getElementById('btn-next').disabled = stepIdx === steps.length - 1;
+}
+
+function updateTabs() {
+  document.getElementById('ex-tabs').innerHTML = EXAMPLES.map((ex, i) =>
+    `<button class="ex-tab${i === exIdx ? ' active' : ''}" onclick="init(${i})">${ex.label}</button>`
+  ).join('');
+}
+
+function prev() { if (stepIdx > 0) { stepIdx--; renderStep(); } }
+function next() { if (stepIdx < steps.length - 1) { stepIdx++; renderStep(); } }
+function reset() { stepIdx = 0; renderStep(); }
+function togglePlay() {
+  playing = !playing;
+  document.getElementById('btn-play').textContent = playing ? '⏸ Pause' : '▶ Play';
+  if (playing) {
+    timer = setInterval(() => {
+      if (stepIdx < steps.length - 1) { stepIdx++; renderStep(); }
+      else { playing = false; clearInterval(timer); document.getElementById('btn-play').textContent = '▶ Play'; }
+    }, 900);
+  } else {
+    clearInterval(timer);
+  }
+}
+
+document.addEventListener('keydown', e => {
+  if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+  if (e.key === 'ArrowLeft')  { prev(); e.preventDefault(); }
+  if (e.key === 'ArrowRight') { next(); e.preventDefault(); }
+});
+
+// Boot
+init(0);
+</script>
+</body>
+</html>

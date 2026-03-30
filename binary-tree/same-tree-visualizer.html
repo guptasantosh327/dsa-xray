@@ -14,8 +14,8 @@
     body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:15px;line-height:1.6;min-height:100vh;overflow-x:hidden}
     body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(124,110,245,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(124,110,245,0.03) 1px,transparent 1px);background-size:40px 40px;pointer-events:none;z-index:0}
     .page{position:relative;z-index:1;max-width:980px;margin:0 auto;padding:3rem 1.5rem 5rem}
-    .back-nav{display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:12px;color:var(--text-muted);text-decoration:none;padding:7px 14px 7px 10px;border-radius:8px;border:1px solid var(--border);background:var(--surface);margin-bottom:2rem;transition:all .15s}
-    .back-nav:hover{border-color:var(--border-mid);color:var(--text)}
+    .back-link{display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:12px;color:var(--text-muted);text-decoration:none;padding:7px 14px 7px 10px;border-radius:8px;border:1px solid var(--border);background:var(--surface);margin-bottom:2rem;transition:all .15s}
+    .back-link:hover{color:var(--text);border-color:var(--border-mid)}
     header{margin-bottom:2rem;animation:fadeUp .6s ease both}
     .tag{display:inline-block;font-family:var(--mono);font-size:11px;font-weight:500;letter-spacing:.12em;text-transform:uppercase;color:var(--teal);background:var(--teal-bg);border:1px solid rgba(45,212,191,0.3);padding:4px 12px;border-radius:100px;margin-bottom:1.2rem}
     h1{font-size:clamp(1.8rem,5vw,2.8rem);font-weight:700;line-height:1.15;color:var(--text);margin-bottom:.8rem;letter-spacing:-.02em}
@@ -154,7 +154,7 @@
 </head>
 <body>
 <div class="page">
-  <a class="back-nav" href="../index.html">← All problems</a>
+  <a href="../index.html" class="back-link">← DSA Hub</a>
   <header>
     <div class="tag">LeetCode #100 · Algorithm Dry Run</div>
     <h1>Is <span>Same Tree</span>?</h1>
@@ -465,7 +465,7 @@ function toggleBlur() {
     btn.innerHTML = '👁 Show Logic';
   } else {
     btn.classList.add('on');
-    btn.innerHTML = '👁 Hide Logic';
+    btn.innerHTML = '👁 Blur Logic';
   }
 }
 loadExample(0);

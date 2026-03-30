@@ -1,0 +1,766 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>#167 Two Sum II — DSA Visualizer</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Sora:wght@300;400;600;700;800&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #0d0f14; --surface: #13161d; --surface2: #1a1e28;
+      --surface3: #212638; --border: rgba(255,255,255,0.07);
+      --border-mid: rgba(255,255,255,0.12);
+      --text: #e8eaf0; --text-muted: #6b7280; --text-dim: #3d4251;
+      --accent: #7c6ef5; --green: #34d399; --amber: #fbbf24;
+      --blue: #60a5fa; --red: #f87171; --orange: #fb923c;
+      --purple: #c084fc; --teal: #2dd4bf; --cyan: #22d3ee;
+      --mono: 'JetBrains Mono', monospace;
+      --sans: 'Sora', sans-serif;
+    }
+    html { scroll-behavior: smooth; }
+    body {
+      background: var(--bg); color: var(--text);
+      font-family: var(--sans); font-size: 15px; line-height: 1.6;
+      min-height: 100vh; overflow-x: hidden;
+    }
+    body::before {
+      content: ''; position: fixed; inset: 0;
+      background-image:
+        linear-gradient(rgba(124,110,245,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(124,110,245,0.03) 1px, transparent 1px);
+      background-size: 40px 40px; pointer-events: none; z-index: 0;
+    }
+    body::after {
+      content: ''; position: fixed; top: -20%; left: 50%;
+      transform: translateX(-50%);
+      width: 900px; height: 500px;
+      background: radial-gradient(ellipse, rgba(124,110,245,0.07) 0%, transparent 70%);
+      pointer-events: none; z-index: 0;
+    }
+    .page { position: relative; z-index: 1; max-width: 900px; margin: 0 auto; padding: 3rem 1.5rem 6rem; }
+
+    /* BACK LINK */
+    .back-link{display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:12px;color:var(--text-muted);text-decoration:none;padding:7px 14px 7px 10px;border-radius:8px;border:1px solid var(--border);background:var(--surface);margin-bottom:2rem;transition:all .15s}
+    .back-link:hover{color:var(--text);border-color:var(--border-mid)}
+
+    /* HERO */
+    .hero { text-align: center; margin-bottom: 3rem; animation: fadeUp .6s ease both; }
+    .problem-num { font-family: var(--mono); font-size: 13px; color: var(--text-muted); margin-bottom: .5rem; }
+    .hero h1 { font-size: clamp(1.8rem, 4vw, 2.6rem); font-weight: 800; margin-bottom: .75rem; letter-spacing: -0.5px; }
+    .hero h1 span { background: linear-gradient(135deg, var(--green), var(--teal)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .tag-row { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; margin-top: .75rem; }
+    .tag { padding: 4px 12px; border-radius: 999px; font-size: 12px; font-family: var(--mono); font-weight: 600; border: 1px solid; }
+    .tag-easy { background: rgba(52,211,153,0.1); color: var(--green); border-color: rgba(52,211,153,0.25); }
+    .tag-pattern { background: rgba(96,165,250,0.1); color: var(--blue); border-color: rgba(96,165,250,0.25); }
+    .tag-pill { background: rgba(255,255,255,0.05); color: var(--text-muted); border-color: var(--border); }
+
+    /* SECTION */
+    section { margin-bottom: 2.5rem; animation: fadeUp .6s ease both; }
+    section:nth-child(2) { animation-delay: .05s; }
+    section:nth-child(3) { animation-delay: .1s; }
+    section:nth-child(4) { animation-delay: .15s; }
+    section:nth-child(5) { animation-delay: .2s; }
+    .section-label {
+      font-size: 11px; font-family: var(--mono); font-weight: 700;
+      color: var(--accent); text-transform: uppercase; letter-spacing: 2px;
+      margin-bottom: 1rem;
+    }
+    .card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 14px; padding: 1.5rem;
+    }
+
+    /* PATTERN BANNER */
+    .pattern-banner {
+      background: linear-gradient(135deg, rgba(96,165,250,0.08), rgba(52,211,153,0.06));
+      border: 1px solid rgba(96,165,250,0.2); border-radius: 14px;
+      padding: 1.5rem 2rem; display: flex; gap: 2rem; flex-wrap: wrap; align-items: flex-start;
+    }
+    .pattern-name { font-size: 1.4rem; font-weight: 700; color: var(--blue); margin-bottom: .25rem; }
+    .pattern-why { color: var(--text-muted); font-size: 14px; line-height: 1.6; }
+    .related-list { margin-top: 1rem; display: flex; gap: 8px; flex-wrap: wrap; }
+    .related-chip {
+      padding: 4px 10px; background: rgba(96,165,250,0.08);
+      border: 1px solid rgba(96,165,250,0.2); border-radius: 6px;
+      font-size: 12px; color: var(--blue); font-family: var(--mono);
+    }
+
+    /* PROBLEM STATEMENT */
+    .worked-examples { display: grid; gap: 12px; margin-top: 1rem; }
+    .worked-ex {
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: 10px; padding: 1rem 1.25rem;
+    }
+    .worked-ex .label { font-size: 11px; color: var(--text-muted); font-family: var(--mono); margin-bottom: 6px; }
+    .worked-ex .io { font-family: var(--mono); font-size: 13px; }
+    .worked-ex .io .hl { color: var(--amber); }
+    .worked-ex .io .res { color: var(--green); }
+
+    /* INTUITION */
+    .hint-list { list-style: none; counter-reset: hints; display: flex; flex-direction: column; gap: 12px; }
+    .hint-list li { counter-increment: hints; display: flex; gap: 12px; align-items: flex-start; }
+    .hint-list li::before {
+      content: counter(hints); min-width: 26px; height: 26px;
+      background: rgba(96,165,250,0.12); border: 1px solid rgba(96,165,250,0.25);
+      border-radius: 50%; color: var(--blue); font-family: var(--mono); font-size: 12px;
+      font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px;
+    }
+    .key-trick {
+      margin-top: 1rem; background: rgba(52,211,153,0.07);
+      border: 1px solid rgba(52,211,153,0.2); border-radius: 10px;
+      padding: .75rem 1.25rem; font-size: 14px; color: var(--green);
+    }
+    .key-trick strong { display: block; font-size: 11px; letter-spacing: 1px; text-transform: uppercase; opacity: .7; margin-bottom: 4px; }
+
+    /* CODE BLOCK */
+    .code-wrapper { position: relative; }
+    .blur-btn {
+      position: absolute; top: 12px; right: 12px;
+      background: rgba(124,110,245,0.12); border: 1px solid rgba(124,110,245,0.25);
+      border-radius: 8px; color: var(--accent); font-size: 12px;
+      font-family: var(--mono); padding: 5px 12px; cursor: pointer;
+      transition: background .2s; z-index: 2;
+    }
+    .blur-btn:hover { background: rgba(124,110,245,0.2); }
+    pre {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 12px; padding: 1.5rem; overflow-x: auto;
+      font-family: var(--mono); font-size: 13.5px; line-height: 1.8;
+    }
+    .code-line { display: block; padding: 0 4px; border-radius: 4px; transition: background .2s; }
+    .code-line.active { background: rgba(251,191,36,0.12); border-left: 3px solid var(--amber); padding-left: 1px; }
+    .code-line.blurred { filter: blur(4px); user-select: none; }
+    .kw { color: #ff79c6; } .fn { color: #50fa7b; } .vr { color: #bd93f9; }
+    .nm { color: #f1fa8c; } .op { color: #ff79c6; } .cm { color: #6272a4; }
+    .st { color: #f1fa8c; }
+
+    /* VISUALIZER */
+    .viz-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 16px; overflow: hidden;
+    }
+    .viz-header {
+      padding: 1rem 1.5rem; border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;
+    }
+    .viz-title { font-weight: 700; font-size: 15px; }
+    .example-tabs { display: flex; gap: 6px; flex-wrap: wrap; }
+    .ex-tab {
+      padding: 5px 14px; border-radius: 8px; font-size: 12px; font-family: var(--mono);
+      cursor: pointer; border: 1px solid var(--border); background: transparent;
+      color: var(--text-muted); transition: all .2s;
+    }
+    .ex-tab.active { background: rgba(52,211,153,0.12); border-color: rgba(52,211,153,0.3); color: var(--green); }
+
+    /* PROGRESS */
+    .progress-wrap { padding: .75rem 1.5rem; border-bottom: 1px solid var(--border); }
+    .progress-bar-bg { background: var(--surface2); border-radius: 999px; height: 6px; overflow: hidden; }
+    .progress-bar-fill { height: 100%; background: linear-gradient(90deg, var(--amber), var(--orange)); border-radius: 999px; transition: width .3s ease; }
+    .progress-info { display: flex; justify-content: space-between; font-size: 11px; font-family: var(--mono); color: var(--text-muted); margin-top: 5px; }
+
+    /* STEP DESC */
+    .step-desc {
+      padding: 1rem 1.5rem; border-bottom: 1px solid var(--border);
+      font-size: 14px; line-height: 1.6; min-height: 56px;
+    }
+    .step-desc em { color: var(--amber); font-style: normal; font-weight: 600; }
+
+    /* ARRAY DISPLAY */
+    .array-area {
+      padding: 1.5rem; display: flex; flex-direction: column; align-items: center; gap: 20px;
+    }
+    .array-row {
+      display: flex; gap: 8px; align-items: flex-end; flex-wrap: wrap; justify-content: center;
+    }
+    .cell-wrap { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+    .cell {
+      width: 38px; height: 38px; border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-family: var(--mono); font-size: 14px; font-weight: 700;
+      border: 2px solid var(--border-mid); background: var(--surface2);
+      color: var(--text); transition: all .3s;
+    }
+    .cell.active-i { background: rgba(96,165,250,0.15); border-color: var(--blue); color: var(--blue); transform: translateY(-4px); }
+    .cell.active-j { background: rgba(251,191,36,0.15); border-color: var(--amber); color: var(--amber); transform: translateY(-4px); }
+    .cell.matched { background: rgba(52,211,153,0.15); border-color: var(--green); color: var(--green); animation: pulse .5s ease; }
+    .cell.eliminated { background: rgba(61,66,81,0.3); border-color: var(--text-dim); color: var(--text-dim); opacity: 0.5; }
+    .cell-idx { font-size: 11px; font-family: var(--mono); color: var(--text-dim); }
+    .ptr-label {
+      font-size: 11px; font-family: var(--mono); font-weight: 700;
+      padding: 3px 8px; border-radius: 5px; min-height: 22px;
+    }
+    .ptr-i { color: var(--blue); background: rgba(96,165,250,0.12); border: 1px solid rgba(96,165,250,0.25); }
+    .ptr-j { color: var(--amber); background: rgba(251,191,36,0.12); border: 1px solid rgba(251,191,36,0.25); }
+
+    /* VARS PANEL */
+    .vars-panel {
+      display: flex; gap: 12px; flex-wrap: wrap; justify-content: center;
+      padding: 0 1.5rem 1.25rem;
+    }
+    .var-chip {
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: 10px; padding: 8px 14px; font-family: var(--mono);
+      font-size: 13px; text-align: center;
+    }
+    .var-chip .vname { color: var(--text-muted); font-size: 11px; margin-bottom: 2px; }
+    .var-chip .vval { font-weight: 700; font-size: 16px; }
+    .var-chip.highlight .vval { color: var(--amber); }
+    .var-sum-gt .vval { color: var(--red); }
+    .var-sum-lt .vval { color: var(--blue); }
+    .var-sum-eq .vval { color: var(--green); }
+    .result-badge {
+      display: inline-block; padding: 6px 16px; border-radius: 999px;
+      font-family: var(--mono); font-weight: 700; font-size: 14px;
+      background: rgba(52,211,153,0.12); border: 1px solid rgba(52,211,153,0.3); color: var(--green);
+    }
+    .result-badge.hidden { visibility: hidden; }
+
+    /* LOG */
+    .log-area {
+      margin: 0 1.5rem 1.25rem; background: var(--surface2);
+      border: 1px solid var(--border); border-radius: 10px;
+      padding: .75rem 1rem; font-family: var(--mono); font-size: 12px;
+      color: var(--text-muted); min-height: 64px; max-height: 120px; overflow-y: auto;
+    }
+    .log-line { line-height: 1.7; }
+    .log-line.hl { color: var(--text); }
+    .log-line.hl-green { color: var(--green); }
+
+    /* CONTROLS */
+    .controls {
+      padding: 1rem 1.5rem; border-top: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: center; gap: 10px; flex-wrap: wrap;
+    }
+    .ctrl-btn {
+      padding: 8px 20px; border-radius: 10px; border: 1px solid var(--border-mid);
+      background: var(--surface2); color: var(--text); font-family: var(--mono); font-size: 13px;
+      cursor: pointer; transition: all .2s;
+    }
+    .ctrl-btn:hover { background: var(--surface3); }
+    .ctrl-btn:disabled { opacity: .35; cursor: default; }
+    .ctrl-btn.play { background: rgba(52,211,153,0.12); border-color: rgba(52,211,153,0.3); color: var(--green); font-weight: 700; }
+    .ctrl-btn.play:hover { background: rgba(52,211,153,0.2); }
+    .ctrl-btn.play.playing { background: rgba(251,191,36,0.12); border-color: rgba(251,191,36,0.3); color: var(--amber); }
+    .speed-wrap { display: flex; align-items: center; gap: 6px; font-size: 12px; font-family: var(--mono); color: var(--text-muted); }
+    .speed-select {
+      background: var(--surface2); border: 1px solid var(--border-mid);
+      color: var(--text); font-family: var(--mono); font-size: 12px;
+      border-radius: 7px; padding: 5px 8px; cursor: pointer;
+    }
+
+    /* GOTCHAS */
+    .gotcha-list { display: flex; flex-direction: column; gap: 12px; }
+    .gotcha-item {
+      background: var(--surface2); border: 1px solid rgba(248,113,113,0.15);
+      border-left: 3px solid var(--red); border-radius: 0 10px 10px 0;
+      padding: .75rem 1.25rem;
+    }
+    .gotcha-item .gotcha-title { font-weight: 700; color: var(--red); margin-bottom: 4px; font-size: 14px; }
+    .gotcha-item p { font-size: 13px; color: var(--text-muted); line-height: 1.6; }
+
+    /* TRADEOFFS */
+    .tradeoff-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    @media (max-width: 560px) { .tradeoff-grid { grid-template-columns: 1fr; } }
+    .tradeoff-item {
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: 10px; padding: 1rem 1.25rem;
+    }
+    .tradeoff-item .ti-label { font-size: 11px; font-family: var(--mono); color: var(--text-muted); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 1px; }
+    .tradeoff-item p { font-size: 13px; line-height: 1.6; }
+
+    /* COMPLEXITY */
+    .complexity-table { width: 100%; border-collapse: collapse; font-family: var(--mono); font-size: 13px; }
+    .complexity-table th, .complexity-table td {
+      padding: 10px 16px; text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+    .complexity-table th { color: var(--text-muted); font-size: 11px; text-transform: uppercase; letter-spacing: 1px; }
+    .complexity-table td:last-child { color: var(--green); font-weight: 700; }
+    .mnemonic {
+      margin-top: 1.25rem; background: rgba(124,110,245,0.07);
+      border: 1px solid rgba(124,110,245,0.2); border-radius: 10px;
+      padding: 1rem 1.25rem;
+    }
+    .mnemonic .m-label { font-size: 11px; font-family: var(--mono); color: var(--accent); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; }
+    .mnemonic p { font-size: 14px; line-height: 1.6; }
+    .takeaways { margin-top: 1rem; display: flex; flex-direction: column; gap: 8px; }
+    .takeaway {
+      padding: 8px 14px; background: var(--surface2);
+      border: 1px solid var(--border); border-radius: 8px;
+      font-size: 13px; font-family: var(--mono); color: var(--text-muted);
+    }
+    .takeaway::before { content: '→ '; color: var(--accent); }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes pulse {
+      0%   { transform: scale(1) translateY(-4px); }
+      50%  { transform: scale(1.1) translateY(-6px); }
+      100% { transform: scale(1) translateY(-4px); }
+    }
+  </style>
+</head>
+<body>
+<div class="page">
+  <a class="back-link" href="../index.html">← DSA Hub</a>
+
+  <!-- HERO -->
+  <div class="hero">
+    <div class="problem-num">#167</div>
+    <h1><span>Two Sum II</span> — Input Array Is Sorted</h1>
+    <div class="tag-row">
+      <span class="tag tag-easy">Easy</span>
+      <span class="tag tag-pattern">Two Pointers</span>
+      <span class="tag tag-pill">Sorted Array</span>
+      <span class="tag tag-pill">O(n) Time</span>
+      <span class="tag tag-pill">O(1) Space</span>
+    </div>
+  </div>
+
+  <!-- 1. PATTERN BANNER -->
+  <section>
+    <div class="section-label">Pattern</div>
+    <div class="pattern-banner">
+      <div>
+        <div class="pattern-name">Two Pointers — Converging Inward</div>
+        <div class="pattern-why">
+          The array is sorted — that's the key constraint that makes this pattern work.
+          Instead of scanning every pair O(n²), place one pointer at the smallest element
+          and one at the largest. Their sum tells you exactly which direction to move:
+          too big → shrink right, too small → grow left. The sorted order guarantees
+          you'll never miss the answer.
+        </div>
+        <div class="related-list">
+          <span class="related-chip">#1 Two Sum (HashMap)</span>
+          <span class="related-chip">#15 3Sum</span>
+          <span class="related-chip">#125 Valid Palindrome</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 2. PROBLEM STATEMENT -->
+  <section>
+    <div class="section-label">Problem</div>
+    <div class="card">
+      <p style="margin-bottom:1rem;">Given a <strong>1-indexed</strong> sorted array <code style="color:var(--blue)">numbers</code>, find two numbers that add to <code style="color:var(--amber)">target</code>. Return their indices as <code style="color:var(--green)">[index1, index2]</code> (1-based). Exactly one solution is guaranteed.</p>
+      <p style="color:var(--text-muted);font-size:14px;margin-bottom:1rem;"><strong style="color:var(--text)">Analogy:</strong> Imagine a number line on a ruler. You place your left thumb at the smallest number and your right thumb at the largest. Check their sum. If it's too big, slide your right thumb left. Too small — slide your left thumb right. The sorted order means this always converges on the answer.</p>
+      <div class="worked-examples">
+        <div class="worked-ex">
+          <div class="label">Example 1</div>
+          <div class="io">numbers = <span class="hl">[2, 7, 11, 15]</span>, target = <span class="hl">9</span> → <span class="res">[1, 2]</span> &nbsp;&nbsp;<span style="color:var(--text-dim)">// 2+7=9</span></div>
+        </div>
+        <div class="worked-ex">
+          <div class="label">Example 2</div>
+          <div class="io">numbers = <span class="hl">[2, 3, 4]</span>, target = <span class="hl">6</span> → <span class="res">[1, 3]</span> &nbsp;&nbsp;<span style="color:var(--text-dim)">// 2+4=6</span></div>
+        </div>
+        <div class="worked-ex">
+          <div class="label">Example 3 — multiple moves needed</div>
+          <div class="io">numbers = <span class="hl">[1, 3, 4, 5, 7, 11]</span>, target = <span class="hl">9</span> → <span class="res">[3, 4]</span> &nbsp;&nbsp;<span style="color:var(--text-dim)">// 4+5=9</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3. INTUITION + HINTS -->
+  <section>
+    <div class="section-label">Intuition &amp; Hints</div>
+    <div class="card">
+      <ul class="hint-list">
+        <li><strong>Brute force:</strong> Try every pair (i, j) with i &lt; j. O(n²) time — works but ignores the sorted constraint entirely.</li>
+        <li><strong>Binary search:</strong> Fix each element, binary-search for the complement. O(n log n). Better, but still not fully exploiting sorted order.</li>
+        <li><strong>Two pointers (optimal):</strong> Start i=0 (smallest), j=n-1 (largest). Their sum is a compass. Too big → the largest number is too large, so j--. Too small → the smallest number is too small, so i++. O(n), O(1).</li>
+        <li><strong>Why this is safe:</strong> When sum > target, every element to the left of j is ≤ numbers[j], so any pair with j would still be too big. Moving j left is the only useful action. Same logic applies in reverse for i.</li>
+      </ul>
+      <div class="key-trick">
+        <strong>Key Insight</strong>
+        The sorted property turns an O(n²) search space into a directed walk. Each step eliminates an entire row or column of pairs — you never need to revisit them.
+      </div>
+    </div>
+  </section>
+
+  <!-- 4. CODE BLOCK -->
+  <section>
+    <div class="section-label">Your Code</div>
+    <div class="code-wrapper">
+      <button class="blur-btn" id="blurBtn" onclick="toggleBlur()">👁 Show Logic</button>
+      <pre id="codeBlock"><code
+><span class="code-line" id="line-1"><span class="kw">var</span> <span class="fn">twoSum</span> = <span class="kw">function</span>(<span class="vr">numbers</span>, <span class="vr">target</span>) {</span>
+<span class="code-line" id="line-2">    <span class="kw">let</span> <span class="vr">i</span> = <span class="nm">0</span>;</span>
+<span class="code-line" id="line-3">    <span class="kw">let</span> <span class="vr">j</span> = <span class="vr">numbers</span>.<span class="fn">length</span> - <span class="nm">1</span>;</span>
+<span class="code-line blurred" id="line-4">    <span class="kw">while</span> ( <span class="vr">i</span> <span class="op">&lt;</span> <span class="vr">j</span>) {</span>
+<span class="code-line blurred" id="line-5">        <span class="kw">let</span> <span class="vr">sum</span> = <span class="vr">numbers</span>[<span class="vr">i</span>] + <span class="vr">numbers</span>[<span class="vr">j</span>]</span>
+<span class="code-line blurred" id="line-6">        <span class="kw">if</span>( <span class="vr">sum</span> <span class="op">&gt;</span> <span class="vr">target</span>) {</span>
+<span class="code-line blurred" id="line-7">            <span class="vr">j</span>--</span>
+<span class="code-line blurred" id="line-8">        } <span class="kw">else if</span>( <span class="vr">sum</span> <span class="op">&lt;</span> <span class="vr">target</span>) {</span>
+<span class="code-line blurred" id="line-9">            <span class="vr">i</span>++</span>
+<span class="code-line blurred" id="line-10">        } <span class="kw">else</span> {</span>
+<span class="code-line blurred" id="line-11">            <span class="kw">return</span> [<span class="vr">i</span> +<span class="nm">1</span>, <span class="vr">j</span> +<span class="nm">1</span>]</span>
+<span class="code-line blurred" id="line-12">        }</span>
+<span class="code-line blurred" id="line-13">    }</span>
+<span class="code-line" id="line-14">};</span>
+</code></pre>
+    </div>
+  </section>
+
+  <!-- 5. INTERACTIVE VISUALIZER -->
+  <section>
+    <div class="section-label">Interactive Visualizer</div>
+    <div class="viz-card">
+      <div class="viz-header">
+        <div class="viz-title">Step-by-step dry run</div>
+        <div class="example-tabs" id="exTabs"></div>
+      </div>
+      <div class="progress-wrap">
+        <div class="progress-bar-bg"><div class="progress-bar-fill" id="progBar" style="width:0%"></div></div>
+        <div class="progress-info"><span id="progLabel">Step 0 / 0</span><span id="phaseLabel">—</span></div>
+      </div>
+      <div class="step-desc" id="stepDesc">Select an example to begin.</div>
+      <div class="array-area" id="arrayArea"></div>
+      <div class="vars-panel" id="varsPanel"></div>
+      <div class="log-area" id="logArea"></div>
+      <div class="controls">
+        <button class="ctrl-btn" id="prevBtn" onclick="prev()" disabled>← Prev</button>
+        <button class="ctrl-btn play" id="playBtn" onclick="togglePlay()">▶ Play</button>
+        <button class="ctrl-btn" id="nextBtn" onclick="next()" disabled>Next →</button>
+        <div class="speed-wrap">
+          Speed:
+          <select class="speed-select" id="speedSel">
+            <option value="900">Slow</option>
+            <option value="500" selected>Normal</option>
+            <option value="250">Fast</option>
+          </select>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 6. GOTCHAS -->
+  <section>
+    <div class="section-label">Gotchas &amp; Common Pitfalls</div>
+    <div class="gotcha-list">
+      <div class="gotcha-item">
+        <div class="gotcha-title">Returning 0-indexed instead of 1-indexed</div>
+        <p>The problem explicitly says <em>1-indexed</em>. The most common mistake is returning <code>[i, j]</code> instead of <code>[i+1, j+1]</code>. Always re-read the output format.</p>
+      </div>
+      <div class="gotcha-item">
+        <div class="gotcha-title">Using a HashMap (like Two Sum #1)</div>
+        <p>Instinct says "HashMap" because it's Two Sum. But #167 adds the sorted constraint and O(1) space requirement — the two-pointer approach is strictly better here.</p>
+      </div>
+      <div class="gotcha-item">
+        <div class="gotcha-title">The while condition <code>i &lt; j</code>, not <code>i &lt;= j</code></div>
+        <p>When <code>i === j</code>, both pointers point to the same element. You'd be counting a single number twice. The problem guarantees distinct indices, so stop when they meet.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 7. TRADE-OFFS -->
+  <section>
+    <div class="section-label">Trade-offs &amp; Alternatives</div>
+    <div class="tradeoff-grid">
+      <div class="tradeoff-item">
+        <div class="ti-label">Two Pointers (used)</div>
+        <p>O(n) time, O(1) space. Optimal. Works because the array is sorted — the sorted property is load-bearing. This approach would be invalid on an unsorted array.</p>
+      </div>
+      <div class="tradeoff-item">
+        <div class="ti-label">HashMap (not used)</div>
+        <p>O(n) time, O(n) space. Valid but wasteful — ignores the sorted constraint, spends extra memory on a lookup table that the ordering already provides.</p>
+      </div>
+      <div class="tradeoff-item">
+        <div class="ti-label">Binary Search per element</div>
+        <p>O(n log n) time, O(1) space. Fix each element, binary-search for complement. Correct and space-efficient, but the two-pointer approach is asymptotically faster.</p>
+      </div>
+      <div class="tradeoff-item">
+        <div class="ti-label">Brute Force</div>
+        <p>O(n²) time, O(1) space. Try every pair. Guaranteed to find the answer but completely ignores the problem's hints — never acceptable in an interview.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 8. COMPLEXITY + MEMORY HOOKS -->
+  <section>
+    <div class="section-label">Complexity &amp; Memory Hooks</div>
+    <div class="card">
+      <table class="complexity-table">
+        <thead><tr><th>Metric</th><th>Value</th><th>Why</th></tr></thead>
+        <tbody>
+          <tr><td>Time</td><td>O(n)</td><td>Each pointer moves at most n times total</td></tr>
+          <tr><td>Space</td><td>O(1)</td><td>Only two pointer variables, no extra memory</td></tr>
+        </tbody>
+      </table>
+      <div class="mnemonic">
+        <div class="m-label">ELI5 Mnemonic</div>
+        <p>"Two thumbs on a ruler — slide the big thumb left if too hot, the small thumb right if too cold, stop when just right."</p>
+      </div>
+      <div class="takeaways">
+        <div class="takeaway">Sorted array → two pointers is always worth considering first</div>
+        <div class="takeaway">Each move eliminates an entire column or row of candidate pairs</div>
+        <div class="takeaway">Return i+1, j+1 — this problem is 1-indexed</div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script>
+// ─── EXAMPLES ───────────────────────────────────────────────────────────────
+const EXAMPLES = [
+  { label:"Ex 1", numbers:[2,7,11,15], target:9 },
+  { label:"Ex 2", numbers:[2,3,4],     target:6 },
+  { label:"Ex 3", numbers:[1,3,4,5,7,11], target:9 },
+  { label:"Edge: neg", numbers:[-1,0], target:-1 },
+  { label:"Edge: dup", numbers:[2,2],  target:4 },
+];
+
+// ─── STEP BUILDER ────────────────────────────────────────────────────────────
+function buildSteps(numbers, target) {
+  const steps = [];
+  const n = numbers.length;
+
+  steps.push({
+    desc: `Initialize: <em>i = 0</em> points to <em>${numbers[0]}</em> (leftmost), <em>j = ${n-1}</em> points to <em>${numbers[n-1]}</em> (rightmost).`,
+    log: [{ t: `twoSum([${numbers}], ${target})`, h: false }, { t: `i=0, j=${n-1}`, h: true }],
+    vPhase: "init", activeLine: [2,3],
+    i: 0, j: n-1, sum: null, vResult: null,
+    eliminated: []
+  });
+
+  let i = 0, j = n - 1;
+  const eliminated = [];
+
+  while (i < j) {
+    const sum = numbers[i] + numbers[j];
+
+    steps.push({
+      desc: `<em>While i &lt; j</em>: compute <em>sum = numbers[${i}] + numbers[${j}] = ${numbers[i]} + ${numbers[j]} = ${sum}</em>.`,
+      log: [{ t: `→ i=${i}, j=${j}`, h: false }, { t: `sum = ${numbers[i]} + ${numbers[j]} = ${sum}`, h: true }],
+      vPhase: "compute", activeLine: [4,5],
+      i, j, sum, vResult: null,
+      eliminated: [...eliminated]
+    });
+
+    if (sum > target) {
+      steps.push({
+        desc: `<em>sum ${sum} &gt; target ${target}</em> — too big. Move <em>j</em> left (eliminate ${numbers[j]}).`,
+        log: [{ t: `sum ${sum} > target ${target} → j--`, h: true }],
+        vPhase: "shrink-j", activeLine: [6,7],
+        i, j, sum, vResult: null,
+        eliminated: [...eliminated]
+      });
+      eliminated.push(j);
+      j--;
+    } else if (sum < target) {
+      steps.push({
+        desc: `<em>sum ${sum} &lt; target ${target}</em> — too small. Move <em>i</em> right (eliminate ${numbers[i]}).`,
+        log: [{ t: `sum ${sum} < target ${target} → i++`, h: true }],
+        vPhase: "grow-i", activeLine: [8,9],
+        i, j, sum, vResult: null,
+        eliminated: [...eliminated]
+      });
+      eliminated.push(i);
+      i++;
+    } else {
+      steps.push({
+        desc: `<em>sum ${sum} === target ${target}</em> — found it! Return <em>[${i+1}, ${j+1}]</em> (1-indexed).`,
+        log: [{ t: `sum ${sum} === target ${target}`, h: false }, { t: `return [${i+1}, ${j+1}]  ✓`, h: true }],
+        vPhase: "found", activeLine: [10,11],
+        i, j, sum, vResult: [i+1, j+1],
+        eliminated: [...eliminated]
+      });
+      return steps;
+    }
+  }
+  return steps;
+}
+
+// ─── STATE ───────────────────────────────────────────────────────────────────
+let currentEx = 0;
+let currentStep = 0;
+let steps = [];
+let playing = false;
+let playTimer = null;
+let blurred = true;
+const BLUR_LINES = ["line-4","line-5","line-6","line-7","line-8","line-9","line-10","line-11"];
+
+// ─── INIT TABS ────────────────────────────────────────────────────────────────
+function initTabs() {
+  const container = document.getElementById("exTabs");
+  container.innerHTML = "";
+  EXAMPLES.forEach((ex, idx) => {
+    const btn = document.createElement("button");
+    btn.className = "ex-tab" + (idx === currentEx ? " active" : "");
+    btn.textContent = ex.label;
+    btn.onclick = () => loadExample(idx);
+    container.appendChild(btn);
+  });
+}
+
+function loadExample(idx) {
+  currentEx = idx;
+  currentStep = 0;
+  const { numbers, target } = EXAMPLES[idx];
+  steps = buildSteps(numbers, target);
+  initTabs();
+  renderStep();
+  document.getElementById("prevBtn").disabled = false;
+  document.getElementById("nextBtn").disabled = false;
+}
+
+// ─── RENDER ───────────────────────────────────────────────────────────────────
+function renderStep() {
+  if (!steps.length) return;
+  const s = steps[currentStep];
+  const { numbers, target } = EXAMPLES[currentEx];
+
+  // Progress
+  const pct = steps.length > 1 ? (currentStep / (steps.length - 1)) * 100 : 0;
+  document.getElementById("progBar").style.width = pct + "%";
+  document.getElementById("progLabel").textContent = `Step ${currentStep + 1} / ${steps.length}`;
+  document.getElementById("phaseLabel").textContent = s.vPhase;
+
+  // Description
+  document.getElementById("stepDesc").innerHTML = s.desc;
+
+  // Active code lines
+  for (let l = 1; l <= 14; l++) {
+    const el = document.getElementById("line-" + l);
+    if (el) el.classList.remove("active");
+  }
+  if (s.activeLine) {
+    (Array.isArray(s.activeLine) ? s.activeLine : [s.activeLine]).forEach(ln => {
+      const el = document.getElementById("line-" + ln);
+      if (el) el.classList.add("active");
+    });
+  }
+
+  // Array
+  const area = document.getElementById("arrayArea");
+  const row = document.createElement("div");
+  row.className = "array-row";
+  numbers.forEach((val, idx) => {
+    const wrap = document.createElement("div");
+    wrap.className = "cell-wrap";
+
+    // pointer label above
+    const ptrAbove = document.createElement("div");
+    ptrAbove.className = "ptr-label";
+    if (idx === s.i && idx === s.j) {
+      ptrAbove.className += " ptr-i"; ptrAbove.textContent = "i=j";
+    } else if (idx === s.i) {
+      ptrAbove.className += " ptr-i"; ptrAbove.textContent = "i";
+    } else if (idx === s.j) {
+      ptrAbove.className += " ptr-j"; ptrAbove.textContent = "j";
+    }
+    wrap.appendChild(ptrAbove);
+
+    const cell = document.createElement("div");
+    cell.className = "cell";
+    if (s.vResult && (idx === s.i || idx === s.j)) {
+      cell.classList.add("matched");
+    } else if (idx === s.i) {
+      cell.classList.add("active-i");
+    } else if (idx === s.j) {
+      cell.classList.add("active-j");
+    } else if (s.eliminated && s.eliminated.includes(idx)) {
+      cell.classList.add("eliminated");
+    }
+    cell.textContent = val;
+    wrap.appendChild(cell);
+
+    const idxLabel = document.createElement("div");
+    idxLabel.className = "cell-idx";
+    idxLabel.textContent = idx + 1; // 1-based display
+    wrap.appendChild(idxLabel);
+
+    row.appendChild(wrap);
+  });
+  area.innerHTML = "";
+  area.appendChild(row);
+
+  // Result badge
+  if (s.vResult) {
+    const badge = document.createElement("div");
+    badge.className = "result-badge";
+    badge.textContent = `→ [${s.vResult[0]}, ${s.vResult[1]}]`;
+    area.appendChild(badge);
+  }
+
+  // Vars panel
+  const vp = document.getElementById("varsPanel");
+  const sumClass = s.sum === null ? "" : s.sum > target ? " var-sum-gt" : s.sum < target ? " var-sum-lt" : " var-sum-eq";
+  vp.innerHTML = `
+    <div class="var-chip highlight"><div class="vname">i</div><div class="vval">${s.i}</div></div>
+    <div class="var-chip highlight"><div class="vname">j</div><div class="vval">${s.j}</div></div>
+    <div class="var-chip${sumClass}"><div class="vname">sum</div><div class="vval">${s.sum === null ? "—" : s.sum}</div></div>
+    <div class="var-chip"><div class="vname">target</div><div class="vval">${target}</div></div>
+    <div class="var-chip"><div class="vname">result</div><div class="vval" style="color:${s.vResult ? 'var(--green)' : 'var(--text-muted)'}">${s.vResult ? "["+s.vResult+"]" : "—"}</div></div>
+  `;
+
+  // Log
+  const log = document.getElementById("logArea");
+  log.innerHTML = s.log.map(l =>
+    `<div class="log-line${l.h ? (s.result ? ' hl-green' : ' hl') : ''}">${l.t}</div>`
+  ).join("");
+
+  // Buttons
+  document.getElementById("prevBtn").disabled = currentStep === 0;
+  document.getElementById("nextBtn").disabled = currentStep === steps.length - 1;
+}
+
+function prev() { if (currentStep > 0) { currentStep--; renderStep(); } }
+function next() { if (currentStep < steps.length - 1) { currentStep++; renderStep(); } else { stopPlay(); } }
+
+function togglePlay() {
+  playing ? stopPlay() : startPlay();
+}
+function startPlay() {
+  playing = true;
+  document.getElementById("playBtn").textContent = "⏸ Pause";
+  document.getElementById("playBtn").classList.add("playing");
+  tick();
+}
+function stopPlay() {
+  playing = false;
+  clearTimeout(playTimer);
+  document.getElementById("playBtn").textContent = "▶ Play";
+  document.getElementById("playBtn").classList.remove("playing");
+}
+function tick() {
+  if (!playing) return;
+  if (currentStep < steps.length - 1) {
+    currentStep++;
+    renderStep();
+    const speed = parseInt(document.getElementById("speedSel").value, 10);
+    playTimer = setTimeout(tick, speed);
+  } else {
+    stopPlay();
+  }
+}
+
+function toggleBlur() {
+  blurred = !blurred;
+  document.getElementById("blurBtn").textContent = blurred ? "👁 Show Logic" : "👁 Blur Logic";
+  BLUR_LINES.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.classList.toggle("blurred", blurred);
+  });
+}
+
+// Keyboard
+document.addEventListener("keydown", e => {
+  if (e.target.tagName === "INPUT" || e.target.tagName === "SELECT") return;
+  if (e.key === "ArrowRight" || e.key === "ArrowDown") { e.preventDefault(); next(); }
+  if (e.key === "ArrowLeft"  || e.key === "ArrowUp")   { e.preventDefault(); prev(); }
+  if (e.key === " ") { e.preventDefault(); togglePlay(); }
+});
+
+// Boot
+initTabs();
+loadExample(0);
+</script>
+</body>
+</html>

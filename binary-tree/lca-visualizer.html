@@ -72,22 +72,8 @@
       padding: 3rem 1.5rem 5rem;
     }
 
-    .back-nav {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      font-family: var(--mono);
-      font-size: 12px;
-      color: var(--text-muted);
-      text-decoration: none;
-      padding: 7px 14px 7px 10px;
-      border-radius: 8px;
-      border: 1px solid var(--border);
-      background: var(--surface);
-      margin-bottom: 2rem;
-      transition: all .15s;
-    }
-    .back-nav:hover { border-color: var(--border-mid); color: var(--text); }
+    .back-link{display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:12px;color:var(--text-muted);text-decoration:none;padding:7px 14px 7px 10px;border-radius:8px;border:1px solid var(--border);background:var(--surface);margin-bottom:2rem;transition:all .15s}
+    .back-link:hover{color:var(--text);border-color:var(--border-mid)}
 
     header { margin-bottom: 2.5rem; animation: fadeUp .6s ease both; }
 
@@ -591,7 +577,7 @@
 <body>
 <div class="page">
 
-  <a class="back-nav" href="../index.html">← All visualizers</a>
+  <a href="../index.html" class="back-link">← DSA Hub</a>
 
   <header>
     <div class="tag">Algorithm Dry Run · LeetCode #236</div>
@@ -1356,7 +1342,7 @@ function toggleBlur() {
     btn.innerHTML = '👁 Show Logic';
   } else {
     btn.classList.add('on');
-    btn.innerHTML = '👁 Hide Logic';
+    btn.innerHTML = '👁 Blur Logic';
   }
 }
 

@@ -39,7 +39,7 @@ Every file must have:
 - `EXAMPLES[]` with 4–5 test cases including edge cases
 - `steps[]` tracing the user's actual logic — their variable names, their branches
 - `renderStep()` driving all DOM updates
-- Prev / Next / Play controls + keyboard `←→` navigation
+- Prev / Next / Reset / Play controls + keyboard `←→` navigation
 - Progress bar, step description, execution log
 - Mobile responsive
 
@@ -87,7 +87,7 @@ Every file must have:
 1. **Pattern banner** — pattern name + why it fits + 3 related problems
 2. **Problem statement** — plain English + analogy + 3 visual worked examples
 3. **Intuition + Hints** — brute force → optimal, numbered, key trick called out
-4. **Code block** — user's exact code, syntax highlighted, active line highlighted per step. Include a "Blur Code" toggle in the UI that blurs out the core logic lines (loops, if conditions) so the user can test their memory before revealing it (Active Recall).
+4. **Code block** — user's exact code, syntax highlighted, active line highlighted per step. Initialy code should be blured and a "Blur Code" toggle in the UI that blurs out the core logic lines (loops, if conditions) so the user can test their memory before revealing it (Active Recall).
 5. **Interactive visualizer** — step engine
 6. **Gotchas & Common Pitfalls** — 2-3 common mistakes, edge cases people forget, or typical interview traps for this specific problem (Failure Analysis).
 7. **Trade-offs / Alternatives** — Briefly explain why another approach was NOT used, or the space/time trade-off.

@@ -98,19 +98,8 @@
       background: rgba(13,15,20,0.85);
       backdrop-filter: blur(12px);
     }
-    .nav-back {
-      display: flex; align-items: center; gap: 8px;
-      padding: 7px 14px;
-      background: var(--surface2);
-      border: 1px solid var(--border-mid);
-      border-radius: 8px;
-      color: var(--text-muted);
-      text-decoration: none;
-      font-family: var(--mono);
-      font-size: 12px;
-      transition: all .2s;
-    }
-    .nav-back:hover { color: var(--text); border-color: var(--accent); }
+    .back-link{display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:12px;color:var(--text-muted);text-decoration:none;padding:7px 14px 7px 10px;border-radius:8px;border:1px solid var(--border);background:var(--surface);margin-bottom:2rem;transition:all .15s}
+    .back-link:hover{color:var(--text);border-color:var(--border-mid)}
     .nav-title { font-size: 14px; font-weight: 600; color: var(--text-muted); }
     .nav-num { font-family: var(--mono); color: var(--green); font-size: 13px; font-weight: 700; }
 
@@ -611,7 +600,7 @@
 
 <!-- NAV -->
 <nav class="top-nav">
-  <a href="../index.html" class="nav-back">← Hub</a>
+  <a href="../index.html" class="back-link">← DSA Hub</a>
   <span class="nav-num">#26</span>
   <span class="nav-title">Remove Duplicates from Sorted Array</span>
 </nav>
@@ -686,7 +675,7 @@
   <div class="code-wrap">
     <div class="code-header">
       <span class="code-lang">JavaScript</span>
-      <button class="blur-btn" id="blurBtn" onclick="toggleBlur()">Blur Logic</button>
+      <button class="blur-btn" id="blurBtn" onclick="toggleBlur()">👁 Show Logic</button>
     </div>
     <pre id="codeBlock"><span class="line" id="cl0"><span class="cm">/**</span></span>
 <span class="line" id="cl1"><span class="cm"> * @param {number[]} nums</span></span>
@@ -694,12 +683,12 @@
 <span class="line" id="cl3"><span class="cm"> */</span></span>
 <span class="line" id="cl4"><span class="kw">var</span> <span class="fn">removeDuplicates</span> = <span class="kw">function</span>(arr) {</span>
 <span class="line" id="cl5">    <span class="kw">let</span> k = <span class="num-lit">0</span>;</span>
-<span class="line" id="cl6">    <span class="kw">for</span> (<span class="kw">let</span> i = <span class="num-lit">1</span>; i &lt; arr.length; i++) {</span>
-<span class="line" id="cl7">        <span class="kw">if</span>(arr[i] &gt; arr[k]) {</span>
-<span class="line" id="cl8">            k++;</span>
-<span class="line" id="cl9">            arr[k] = arr[i]</span>
-<span class="line" id="cl10">        }</span>
-<span class="line" id="cl11">    }</span>
+<span class="line blurred" id="cl6">    <span class="kw">for</span> (<span class="kw">let</span> i = <span class="num-lit">1</span>; i &lt; arr.length; i++) {</span>
+<span class="line blurred" id="cl7">        <span class="kw">if</span>(arr[i] &gt; arr[k]) {</span>
+<span class="line blurred" id="cl8">            k++;</span>
+<span class="line blurred" id="cl9">            arr[k] = arr[i]</span>
+<span class="line blurred" id="cl10">        }</span>
+<span class="line blurred" id="cl11">    }</span>
 <span class="line" id="cl12">    <span class="kw">return</span> k + <span class="num-lit">1</span>;</span>
 <span class="line" id="cl13">};</span></pre>
   </div>
@@ -1108,14 +1097,14 @@ document.addEventListener('keydown', e => {
 });
 
 // ── BLUR ──────────────────────────────────────────────────────────────────────
-let blurred = false;
+let blurred = true;
 const blurLines = [6, 7, 8, 9, 10, 11]; // for/if/k++/arr[k] lines
 function toggleBlur() {
   blurred = !blurred;
   blurLines.forEach(li => {
     document.getElementById('cl' + li)?.classList.toggle('blurred', blurred);
   });
-  document.getElementById('blurBtn').textContent = blurred ? 'Reveal Code' : 'Blur Logic';
+  document.getElementById('blurBtn').textContent = blurred ? '👁 Show Logic' : '👁 Blur Logic';
 }
 
 // ── BUILD EXAMPLE BUTTONS ─────────────────────────────────────────────────────

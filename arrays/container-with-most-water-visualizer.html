@@ -1,0 +1,874 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>#11 Container With Most Water — DSA Visualizer</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Sora:wght@300;400;600;700;800&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #0d0f14; --surface: #13161d; --surface2: #1a1e28;
+      --surface3: #212638; --border: rgba(255,255,255,0.07);
+      --border-mid: rgba(255,255,255,0.12);
+      --text: #e8eaf0; --text-muted: #6b7280; --text-dim: #3d4251;
+      --accent: #7c6ef5; --green: #34d399; --amber: #fbbf24;
+      --blue: #60a5fa; --red: #f87171; --orange: #fb923c;
+      --purple: #c084fc; --teal: #2dd4bf; --cyan: #22d3ee;
+      --mono: 'JetBrains Mono', monospace;
+      --sans: 'Sora', sans-serif;
+    }
+    html { scroll-behavior: smooth; }
+    body {
+      background: var(--bg); color: var(--text);
+      font-family: var(--sans); font-size: 15px; line-height: 1.6;
+      min-height: 100vh; overflow-x: hidden;
+    }
+    body::before {
+      content: ''; position: fixed; inset: 0;
+      background-image:
+        linear-gradient(rgba(124,110,245,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(124,110,245,0.03) 1px, transparent 1px);
+      background-size: 40px 40px; pointer-events: none; z-index: 0;
+    }
+    body::after {
+      content: ''; position: fixed; top: -20%; left: 50%;
+      transform: translateX(-50%);
+      width: 900px; height: 500px;
+      background: radial-gradient(ellipse, rgba(124,110,245,0.07) 0%, transparent 70%);
+      pointer-events: none; z-index: 0;
+    }
+    .page { position: relative; z-index: 1; max-width: 900px; margin: 0 auto; padding: 3rem 1.5rem 6rem; }
+
+    /* BACK LINK */
+    .back-link{display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:12px;color:var(--text-muted);text-decoration:none;padding:7px 14px 7px 10px;border-radius:8px;border:1px solid var(--border);background:var(--surface);margin-bottom:2rem;transition:all .15s}
+    .back-link:hover{color:var(--text);border-color:var(--border-mid)}
+
+    /* HERO */
+    .hero { text-align: center; margin-bottom: 3rem; animation: fadeUp .6s ease both; }
+    .problem-num { font-family: var(--mono); font-size: 13px; color: var(--text-muted); margin-bottom: .5rem; }
+    .hero h1 { font-size: clamp(1.8rem, 4vw, 2.6rem); font-weight: 800; margin-bottom: .75rem; letter-spacing: -0.5px; }
+    .hero h1 span { background: linear-gradient(135deg, var(--blue), var(--teal)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .tag-row { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; margin-top: .75rem; }
+    .tag { padding: 4px 12px; border-radius: 999px; font-size: 12px; font-family: var(--mono); font-weight: 600; border: 1px solid; }
+    .tag-medium { background: rgba(251,191,36,0.1); color: var(--amber); border-color: rgba(251,191,36,0.25); }
+    .tag-pattern { background: rgba(96,165,250,0.1); color: var(--blue); border-color: rgba(96,165,250,0.25); }
+    .tag-pill { background: rgba(255,255,255,0.05); color: var(--text-muted); border-color: var(--border); }
+
+    /* SECTION */
+    section { margin-bottom: 2.5rem; animation: fadeUp .6s ease both; }
+    section:nth-child(2) { animation-delay: .05s; }
+    section:nth-child(3) { animation-delay: .1s; }
+    section:nth-child(4) { animation-delay: .15s; }
+    section:nth-child(5) { animation-delay: .2s; }
+    section:nth-child(6) { animation-delay: .25s; }
+    section:nth-child(7) { animation-delay: .3s; }
+    section:nth-child(8) { animation-delay: .35s; }
+    .section-label {
+      font-size: 11px; font-family: var(--mono); font-weight: 700;
+      color: var(--accent); text-transform: uppercase; letter-spacing: 2px;
+      margin-bottom: 1rem;
+    }
+    .card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 14px; padding: 1.5rem;
+    }
+
+    /* PATTERN BANNER */
+    .pattern-banner {
+      background: linear-gradient(135deg, rgba(96,165,250,0.08), rgba(52,211,153,0.06));
+      border: 1px solid rgba(96,165,250,0.2); border-radius: 14px;
+      padding: 1.5rem 2rem; display: flex; gap: 2rem; flex-wrap: wrap; align-items: flex-start;
+    }
+    .pattern-name { font-size: 1.4rem; font-weight: 700; color: var(--blue); margin-bottom: .25rem; }
+    .pattern-why { color: var(--text-muted); font-size: 14px; line-height: 1.6; }
+    .related-list { margin-top: 1rem; display: flex; gap: 8px; flex-wrap: wrap; }
+    .related-chip {
+      padding: 4px 10px; background: rgba(96,165,250,0.08);
+      border: 1px solid rgba(96,165,250,0.2); border-radius: 6px;
+      font-size: 12px; color: var(--blue); font-family: var(--mono);
+    }
+
+    /* PROBLEM STATEMENT */
+    .worked-examples { display: grid; gap: 12px; margin-top: 1rem; }
+    .worked-ex {
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: 10px; padding: 1rem 1.25rem;
+    }
+    .worked-ex .label { font-size: 11px; color: var(--text-muted); font-family: var(--mono); margin-bottom: 6px; }
+    .worked-ex .io { font-family: var(--mono); font-size: 13px; }
+    .worked-ex .io .hl { color: var(--amber); }
+    .worked-ex .io .res { color: var(--green); }
+
+    /* INTUITION */
+    .hint-list { list-style: none; counter-reset: hints; display: flex; flex-direction: column; gap: 12px; }
+    .hint-list li { counter-increment: hints; display: flex; gap: 12px; align-items: flex-start; }
+    .hint-list li::before {
+      content: counter(hints); min-width: 26px; height: 26px;
+      background: rgba(96,165,250,0.12); border: 1px solid rgba(96,165,250,0.25);
+      border-radius: 50%; color: var(--blue); font-family: var(--mono); font-size: 12px;
+      font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px;
+    }
+    .key-trick {
+      margin-top: 1rem; background: rgba(52,211,153,0.07);
+      border: 1px solid rgba(52,211,153,0.2); border-radius: 10px;
+      padding: .75rem 1.25rem; font-size: 14px; color: var(--green);
+    }
+    .key-trick strong { display: block; font-size: 11px; letter-spacing: 1px; text-transform: uppercase; opacity: .7; margin-bottom: 4px; }
+
+    /* CODE BLOCK */
+    .code-wrapper { position: relative; }
+    .blur-btn {
+      position: absolute; top: 12px; right: 12px;
+      background: rgba(124,110,245,0.12); border: 1px solid rgba(124,110,245,0.25);
+      border-radius: 8px; color: var(--accent); font-size: 12px;
+      font-family: var(--mono); padding: 5px 12px; cursor: pointer;
+      transition: background .2s; z-index: 2;
+    }
+    .blur-btn:hover { background: rgba(124,110,245,0.2); }
+    pre {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 12px; padding: 1.5rem; overflow-x: auto;
+      font-family: var(--mono); font-size: 13.5px; line-height: 1.8;
+    }
+    .code-line { display: block; padding: 0 4px; border-radius: 4px; transition: background .2s; }
+    .code-line.active { background: rgba(251,191,36,0.12); border-left: 3px solid var(--amber); padding-left: 1px; }
+    .code-line.blurred { filter: blur(4px); user-select: none; }
+    .kw { color: #ff79c6; } .fn { color: #50fa7b; } .vr { color: #bd93f9; }
+    .nm { color: #f1fa8c; } .op { color: #ff79c6; } .cm { color: #6272a4; }
+    .st { color: #f1fa8c; }
+
+    /* VISUALIZER */
+    .viz-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 16px; overflow: hidden;
+    }
+    .viz-header {
+      padding: 1rem 1.5rem; border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;
+    }
+    .viz-title { font-weight: 700; font-size: 15px; }
+    .example-tabs { display: flex; gap: 6px; flex-wrap: wrap; }
+    .ex-tab {
+      padding: 5px 14px; border-radius: 8px; font-size: 12px; font-family: var(--mono);
+      cursor: pointer; border: 1px solid var(--border); background: transparent;
+      color: var(--text-muted); transition: all .2s;
+    }
+    .ex-tab.active { background: rgba(96,165,250,0.12); border-color: rgba(96,165,250,0.3); color: var(--blue); }
+
+    /* PROGRESS */
+    .progress-wrap { padding: .75rem 1.5rem; border-bottom: 1px solid var(--border); }
+    .progress-bar-bg { background: var(--surface2); border-radius: 999px; height: 6px; overflow: hidden; }
+    .progress-bar-fill { height: 100%; background: linear-gradient(90deg, var(--amber), var(--orange)); border-radius: 999px; transition: width .3s ease; }
+    .progress-info { display: flex; justify-content: space-between; font-size: 11px; font-family: var(--mono); color: var(--text-muted); margin-top: 5px; }
+
+    /* STEP DESC */
+    .step-desc {
+      padding: 1rem 1.5rem; border-bottom: 1px solid var(--border);
+      font-size: 14px; line-height: 1.6; min-height: 56px;
+    }
+    .step-desc em { color: var(--amber); font-style: normal; font-weight: 600; }
+
+    /* BAR CHART AREA */
+    .bar-area {
+      padding: 1.5rem 1.5rem 0.5rem; display: flex; flex-direction: column; align-items: center; gap: 12px;
+    }
+    .bar-chart {
+      display: flex; align-items: flex-end; gap: 4px;
+      border-bottom: 2px solid var(--border-mid);
+      padding-bottom: 4px; flex-wrap: nowrap;
+    }
+    .bar-col { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+    .bar {
+      width: 36px; border-radius: 6px 6px 0 0;
+      display: flex; align-items: flex-end; justify-content: center;
+      font-family: var(--mono); font-size: 11px; font-weight: 700;
+      padding-bottom: 4px;
+      transition: all .3s; position: relative;
+    }
+    .bar.ptr-i { background: rgba(96,165,250,0.3); border: 2px solid var(--blue); color: var(--blue); }
+    .bar.ptr-j { background: rgba(251,191,36,0.3); border: 2px solid var(--amber); color: var(--amber); }
+    .bar.water { background: rgba(34,211,238,0.18); border: 2px solid rgba(34,211,238,0.4); color: var(--text-dim); }
+    .bar.normal { background: var(--surface3); border: 2px solid var(--border-mid); color: var(--text-dim); }
+    .bar.max-mark { border-color: var(--green); }
+    .bar-idx { font-size: 10px; font-family: var(--mono); color: var(--text-dim); }
+    .bar-ptr {
+      font-size: 11px; font-family: var(--mono); font-weight: 700;
+      padding: 2px 7px; border-radius: 5px; min-height: 20px;
+    }
+    .bar-ptr.i-ptr { color: var(--blue); background: rgba(96,165,250,0.12); border: 1px solid rgba(96,165,250,0.25); }
+    .bar-ptr.j-ptr { color: var(--amber); background: rgba(251,191,36,0.12); border: 1px solid rgba(251,191,36,0.25); }
+    .bar-ptr.empty { visibility: hidden; }
+
+    /* WATER FILL overlay */
+    .water-overlay {
+      position: absolute; bottom: 0; left: -2px; right: -2px;
+      border-radius: 0 0 4px 4px;
+      background: rgba(34,211,238,0.22);
+      border-top: 2px solid rgba(34,211,238,0.5);
+      pointer-events: none; transition: height .3s;
+    }
+
+    /* VARS PANEL */
+    .vars-panel {
+      display: flex; gap: 12px; flex-wrap: wrap; justify-content: center;
+      padding: 0.5rem 1.5rem 1.25rem;
+    }
+    .var-chip {
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: 10px; padding: 8px 14px; font-family: var(--mono);
+      font-size: 13px; text-align: center;
+    }
+    .var-chip .vname { color: var(--text-muted); font-size: 11px; margin-bottom: 2px; }
+    .var-chip .vval { font-weight: 700; font-size: 16px; }
+    .var-chip.highlight .vval { color: var(--amber); }
+    .var-chip.new-max .vval { color: var(--green); }
+    .result-badge {
+      display: inline-block; padding: 6px 16px; border-radius: 999px;
+      font-family: var(--mono); font-weight: 700; font-size: 14px;
+      background: rgba(52,211,153,0.12); border: 1px solid rgba(52,211,153,0.3); color: var(--green);
+    }
+    .result-badge.hidden { visibility: hidden; }
+
+    /* LOG */
+    .log-area {
+      margin: 0 1.5rem 1.25rem; background: var(--surface2);
+      border: 1px solid var(--border); border-radius: 10px;
+      padding: .75rem 1rem; font-family: var(--mono); font-size: 12px;
+      color: var(--text-muted); min-height: 64px; max-height: 120px; overflow-y: auto;
+    }
+    .log-line { line-height: 1.7; }
+    .log-line.hl { color: var(--text); }
+    .log-line.hl-green { color: var(--green); }
+    .log-line.hl-amber { color: var(--amber); }
+
+    /* CONTROLS */
+    .controls {
+      padding: 1rem 1.5rem; border-top: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: center; gap: 10px; flex-wrap: wrap;
+    }
+    .ctrl-btn {
+      padding: 8px 20px; border-radius: 10px; border: 1px solid var(--border-mid);
+      background: var(--surface2); color: var(--text); font-family: var(--mono); font-size: 13px;
+      cursor: pointer; transition: all .2s;
+    }
+    .ctrl-btn:hover { background: var(--surface3); }
+    .ctrl-btn:disabled { opacity: .35; cursor: default; }
+    .ctrl-btn.play { background: rgba(52,211,153,0.12); border-color: rgba(52,211,153,0.3); color: var(--green); font-weight: 700; }
+    .ctrl-btn.play:hover { background: rgba(52,211,153,0.2); }
+    .ctrl-btn.play.playing { background: rgba(251,191,36,0.12); border-color: rgba(251,191,36,0.3); color: var(--amber); }
+    .speed-wrap { display: flex; align-items: center; gap: 6px; font-size: 12px; font-family: var(--mono); color: var(--text-muted); }
+    .speed-select {
+      background: var(--surface2); border: 1px solid var(--border-mid);
+      color: var(--text); font-family: var(--mono); font-size: 12px;
+      border-radius: 7px; padding: 5px 8px; cursor: pointer;
+    }
+
+    /* GOTCHAS */
+    .gotcha-list { display: flex; flex-direction: column; gap: 12px; }
+    .gotcha-item {
+      background: var(--surface2); border: 1px solid rgba(248,113,113,0.15);
+      border-left: 3px solid var(--red); border-radius: 0 10px 10px 0;
+      padding: .75rem 1.25rem;
+    }
+    .gotcha-item .gotcha-title { font-weight: 700; color: var(--red); margin-bottom: 4px; font-size: 14px; }
+    .gotcha-item p { font-size: 13px; color: var(--text-muted); line-height: 1.6; }
+
+    /* TRADEOFFS */
+    .tradeoff-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    @media (max-width: 560px) { .tradeoff-grid { grid-template-columns: 1fr; } }
+    .tradeoff-item {
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: 10px; padding: 1rem 1.25rem;
+    }
+    .tradeoff-item .ti-label { font-size: 11px; font-family: var(--mono); color: var(--text-muted); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 1px; }
+    .tradeoff-item p { font-size: 13px; line-height: 1.6; }
+
+    /* COMPLEXITY */
+    .complexity-table { width: 100%; border-collapse: collapse; font-family: var(--mono); font-size: 13px; }
+    .complexity-table th, .complexity-table td {
+      padding: 10px 16px; text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+    .complexity-table th { color: var(--text-muted); font-size: 11px; text-transform: uppercase; letter-spacing: 1px; }
+    .complexity-table td:last-child { color: var(--green); font-weight: 700; }
+    .mnemonic {
+      margin-top: 1.25rem; background: rgba(124,110,245,0.07);
+      border: 1px solid rgba(124,110,245,0.2); border-radius: 10px;
+      padding: 1rem 1.25rem;
+    }
+    .mnemonic .m-label { font-size: 11px; font-family: var(--mono); color: var(--accent); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; }
+    .mnemonic p { font-size: 14px; line-height: 1.6; }
+    .takeaways { margin-top: 1rem; display: flex; flex-direction: column; gap: 8px; }
+    .takeaway {
+      padding: 8px 14px; background: var(--surface2);
+      border: 1px solid var(--border); border-radius: 8px;
+      font-size: 13px; font-family: var(--mono); color: var(--text-muted);
+    }
+    .takeaway::before { content: '→ '; color: var(--accent); }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes pulse {
+      0%   { transform: scale(1); }
+      50%  { transform: scale(1.05); }
+      100% { transform: scale(1); }
+    }
+
+    @media (max-width: 600px) {
+      .bar { width: 26px; font-size: 9px; }
+      .bar-chart { gap: 2px; }
+    }
+  </style>
+</head>
+<body>
+<div class="page">
+  <a class="back-link" href="../index.html">← DSA Hub</a>
+
+  <!-- HERO -->
+  <div class="hero">
+    <div class="problem-num">#11</div>
+    <h1><span>Container With Most Water</span></h1>
+    <div class="tag-row">
+      <span class="tag tag-medium">Medium</span>
+      <span class="tag tag-pattern">Two Pointers</span>
+      <span class="tag tag-pill">Greedy</span>
+      <span class="tag tag-pill">O(n) Time</span>
+      <span class="tag tag-pill">O(1) Space</span>
+    </div>
+  </div>
+
+  <!-- 1. PATTERN BANNER -->
+  <section>
+    <div class="section-label">Pattern</div>
+    <div class="pattern-banner">
+      <div>
+        <div class="pattern-name">Two Pointers — Shrink From Wider</div>
+        <div class="pattern-why">
+          The widest container is always the starting candidate — it maximises the width factor.
+          From there, the only hope of beating it is finding a taller pair. The shorter wall is the
+          bottleneck; moving the taller wall inward can only make things worse (same height limit,
+          less width). So always discard the shorter wall. This greedy choice is safe — you never
+          skip a potentially better answer.
+        </div>
+        <div class="related-list">
+          <span class="related-chip">#42 Trapping Rain Water</span>
+          <span class="related-chip">#167 Two Sum II</span>
+          <span class="related-chip">#15 3Sum</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 2. PROBLEM STATEMENT -->
+  <section>
+    <div class="section-label">Problem</div>
+    <div class="card">
+      <p style="margin-bottom:1rem;">Given an integer array <code style="color:var(--blue)">height</code> of length <em>n</em>, there are <em>n</em> vertical lines where the <em>i</em>-th line has height <code style="color:var(--amber)">height[i]</code>. Find two lines that, together with the x-axis, form a container that holds the most water. Return the maximum amount of water.</p>
+      <p style="color:var(--text-muted);font-size:14px;margin-bottom:1rem;"><strong style="color:var(--text)">Analogy:</strong> Imagine a row of fence posts of different heights. You're choosing two posts to stretch a tarp between them. The water held = the shorter post's height × the distance between them. Start with the widest possible span. You can only beat it by finding a taller shorter-post — so always replace the shorter post first.</p>
+      <div class="worked-examples">
+        <div class="worked-ex">
+          <div class="label">Example 1 — classic case</div>
+          <div class="io">height = <span class="hl">[1,8,6,2,5,4,8,3,7]</span> → <span class="res">49</span> &nbsp;<span style="color:var(--text-dim)">// lines at i=1 (h=8) and j=8 (h=7): min(8,7)×7 = 49</span></div>
+        </div>
+        <div class="worked-ex">
+          <div class="label">Example 2 — only two lines</div>
+          <div class="io">height = <span class="hl">[1, 1]</span> → <span class="res">1</span> &nbsp;<span style="color:var(--text-dim)">// min(1,1)×1 = 1</span></div>
+        </div>
+        <div class="worked-ex">
+          <div class="label">Example 3 — tallest walls not the answer</div>
+          <div class="io">height = <span class="hl">[4, 3, 2, 1, 4]</span> → <span class="res">16</span> &nbsp;<span style="color:var(--text-dim)">// lines at i=0 (h=4) and j=4 (h=4): min(4,4)×4 = 16</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3. INTUITION + HINTS -->
+  <section>
+    <div class="section-label">Intuition &amp; Hints</div>
+    <div class="card">
+      <ul class="hint-list">
+        <li><strong>Brute force:</strong> Try every pair (i, j). Area = <code>min(h[i], h[j]) × (j–i)</code>. Track max. O(n²) — works, but ignores how area changes as pointers move.</li>
+        <li><strong>Key observation:</strong> Area is constrained by <em>two factors</em>: width and the shorter wall. Start at maximum width (i=0, j=n-1). Moving inward always reduces width — the only way to compensate is with a taller short wall.</li>
+        <li><strong>Greedy move:</strong> If <code>height[i] &lt; height[j]</code>, moving <code>j</code> inward can't help — the area is already limited by the left wall. But moving <code>i</code> inward <em>might</em> find a taller wall. So always move the shorter pointer.</li>
+        <li><strong>Why greedy is safe:</strong> When you discard pointer <code>i</code>, you're discarding all pairs <code>(i, j-1), (i, j-2)…</code> — every one of them has smaller width AND is still bounded by <code>height[i]</code>. None can beat the current area.</li>
+      </ul>
+      <div class="key-trick">
+        <strong>Key Insight</strong>
+        Moving the shorter wall is the only move that keeps hope alive. Moving the taller wall guarantees a worse or equal outcome (less width, same height limit).
+      </div>
+    </div>
+  </section>
+
+  <!-- 4. CODE BLOCK -->
+  <section>
+    <div class="section-label">Your Code</div>
+    <div class="code-wrapper">
+      <button class="blur-btn" id="blurBtn" onclick="toggleBlur()">👁 Show Logic</button>
+      <pre id="codeBlock"><code
+><span class="code-line" id="line-1"><span class="kw">var</span> <span class="fn">maxArea</span> = <span class="kw">function</span> (<span class="vr">height</span>) {</span>
+<span class="code-line" id="line-2">    <span class="kw">let</span> <span class="vr">i</span> = <span class="nm">0</span>;</span>
+<span class="code-line" id="line-3">    <span class="kw">let</span> <span class="vr">j</span> = <span class="vr">height</span>.<span class="fn">length</span> - <span class="nm">1</span></span>
+<span class="code-line" id="line-4">    <span class="kw">let</span> <span class="vr">max</span> = <span class="nm">0</span></span>
+<span class="code-line blurred" id="line-5">    <span class="kw">while</span> (<span class="vr">i</span> <span class="op">&lt;</span> <span class="vr">j</span>) {</span>
+<span class="code-line blurred" id="line-6">        <span class="kw">let</span> <span class="vr">h</span> = <span class="fn">Math</span>.<span class="fn">min</span>(<span class="vr">height</span>[<span class="vr">i</span>], <span class="vr">height</span>[<span class="vr">j</span>])</span>
+<span class="code-line blurred" id="line-7">        <span class="kw">let</span> <span class="vr">area</span> = <span class="vr">h</span> <span class="op">*</span> (<span class="vr">j</span> <span class="op">-</span> <span class="vr">i</span>);</span>
+<span class="code-line blurred" id="line-8">        <span class="vr">max</span> = <span class="fn">Math</span>.<span class="fn">max</span>(<span class="vr">area</span>, <span class="vr">max</span>)</span>
+<span class="code-line blurred" id="line-9">        <span class="kw">if</span> (<span class="vr">height</span>[<span class="vr">i</span>] <span class="op">&lt;</span> <span class="vr">height</span>[<span class="vr">j</span>]) {</span>
+<span class="code-line blurred" id="line-10">            <span class="vr">i</span>++</span>
+<span class="code-line blurred" id="line-11">        } <span class="kw">else</span> {</span>
+<span class="code-line blurred" id="line-12">            <span class="vr">j</span>--</span>
+<span class="code-line" id="line-13">        }</span>
+<span class="code-line" id="line-14">    }</span>
+<span class="code-line" id="line-15">    <span class="kw">return</span> <span class="vr">max</span></span>
+<span class="code-line" id="line-16">};</span>
+</code></pre>
+    </div>
+  </section>
+
+  <!-- 5. INTERACTIVE VISUALIZER -->
+  <section>
+    <div class="section-label">Interactive Visualizer</div>
+    <div class="viz-card">
+      <div class="viz-header">
+        <div class="viz-title">Step-by-step dry run</div>
+        <div class="example-tabs" id="exTabs"></div>
+      </div>
+      <div class="progress-wrap">
+        <div class="progress-bar-bg"><div class="progress-bar-fill" id="progBar" style="width:0%"></div></div>
+        <div class="progress-info"><span id="progLabel">Step 0 / 0</span><span id="phaseLabel">—</span></div>
+      </div>
+      <div class="step-desc" id="stepDesc">Select an example to begin.</div>
+      <div class="bar-area" id="barArea"></div>
+      <div class="vars-panel" id="varsPanel"></div>
+      <div class="log-area" id="logArea"></div>
+      <div class="controls">
+        <button class="ctrl-btn" id="prevBtn" onclick="prev()" disabled>← Prev</button>
+        <button class="ctrl-btn play" id="playBtn" onclick="togglePlay()">▶ Play</button>
+        <button class="ctrl-btn" id="nextBtn" onclick="next()" disabled>Next →</button>
+        <button class="ctrl-btn" id="resetBtn" onclick="resetEx()">↺ Reset</button>
+        <div class="speed-wrap">
+          Speed:
+          <select class="speed-select" id="speedSel">
+            <option value="900">Slow</option>
+            <option value="500" selected>Normal</option>
+            <option value="250">Fast</option>
+          </select>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 6. GOTCHAS -->
+  <section>
+    <div class="section-label">Gotchas &amp; Common Pitfalls</div>
+    <div class="gotcha-list">
+      <div class="gotcha-item">
+        <div class="gotcha-title">Moving the taller wall, not the shorter one</div>
+        <p>The most common mistake. If you move the taller wall inward, you get less width AND the bottleneck height stays the same (still limited by the shorter wall). You can only gain by moving the shorter wall — it's the only variable that can improve.</p>
+      </div>
+      <div class="gotcha-item">
+        <div class="gotcha-title">Forgetting equal heights</div>
+        <p>When <code>height[i] === height[j]</code>, the code falls into the <code>else</code> branch and decrements <code>j</code>. That's fine — either pointer can be moved when they're equal (both sides are the bottleneck). Some solutions handle this as a third branch; your solution's <code>else</code> is correct.</p>
+      </div>
+      <div class="gotcha-item">
+        <div class="gotcha-title">Confusing area formula: it's min height × width, not sum</div>
+        <p>Water fills to the brim of the shorter wall. The area is <code>Math.min(height[i], height[j]) × (j - i)</code>. A common slip is using <code>height[i] * height[j]</code> or adding heights instead of multiplying by width.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 7. TRADE-OFFS -->
+  <section>
+    <div class="section-label">Trade-offs &amp; Alternatives</div>
+    <div class="tradeoff-grid">
+      <div class="tradeoff-item">
+        <div class="ti-label">Two Pointers (used)</div>
+        <p>O(n) time, O(1) space. Optimal. The greedy insight — always move the shorter pointer — is the key that makes this work. Provably correct and a classic interview pattern.</p>
+      </div>
+      <div class="tradeoff-item">
+        <div class="ti-label">Brute Force (not used)</div>
+        <p>O(n²) time, O(1) space. Try every pair. Correct but unacceptable at scale — with n=100,000 lines, that's 5 billion pairs. Always rejected in interviews.</p>
+      </div>
+      <div class="tradeoff-item">
+        <div class="ti-label">Why not Divide &amp; Conquer?</div>
+        <p>The optimal pair can straddle the midpoint, making divide-and-conquer harder to implement correctly and only getting to O(n log n). No benefit over the linear two-pointer pass.</p>
+      </div>
+      <div class="tradeoff-item">
+        <div class="ti-label">Note: unlike #42 Trapping Rain Water</div>
+        <p>#42 fills <em>every</em> gap, requiring prefix/suffix max arrays or a more involved two-pointer. This problem is simpler: one container, two walls, greedy one-pass suffices.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 8. COMPLEXITY + MEMORY HOOKS -->
+  <section>
+    <div class="section-label">Complexity &amp; Memory Hooks</div>
+    <div class="card">
+      <table class="complexity-table">
+        <thead><tr><th>Metric</th><th>Value</th><th>Why</th></tr></thead>
+        <tbody>
+          <tr><td>Time</td><td>O(n)</td><td>Each pointer moves inward at most n times total</td></tr>
+          <tr><td>Space</td><td>O(1)</td><td>Only i, j, h, area, max — no extra structures</td></tr>
+        </tbody>
+      </table>
+      <div class="mnemonic">
+        <div class="m-label">ELI5 Mnemonic</div>
+        <p>"Start wide, then ditch the shorter fence post. The wide span already maximises width — only a taller short-side can beat it."</p>
+      </div>
+      <div class="takeaways">
+        <div class="takeaway">Area = min(h[i], h[j]) × (j – i) — the shorter wall is always the ceiling</div>
+        <div class="takeaway">Move the shorter pointer — moving the taller one can never improve area</div>
+        <div class="takeaway">This is the greedy proof: every skipped pair is provably ≤ the current max</div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script>
+// ─── EXAMPLES ────────────────────────────────────────────────────────────────
+const EXAMPLES = [
+  { label:"Ex 1", height:[1,8,6,2,5,4,8,3,7] },
+  { label:"Ex 2", height:[4,3,2,1,4] },
+  { label:"Ex 3", height:[1,2,4,3] },
+  { label:"Edge: 2", height:[1,1] },
+  { label:"Edge: desc", height:[6,5,4,3,2,1] },
+];
+
+// ─── STEP BUILDER ─────────────────────────────────────────────────────────────
+function buildSteps(height) {
+  const steps = [];
+  const n = height.length;
+
+  // INIT
+  steps.push({
+    desc: `Initialize: <em>i = 0</em>, <em>j = ${n-1}</em>, <em>max = 0</em>. Pointers start at the widest possible span.`,
+    log: [
+      { t: `maxArea([${height}])`, h: false },
+      { t: `i=0, j=${n-1}, max=0`, h: true }
+    ],
+    vPhase: "init", activeLines: [2,3,4],
+    i: 0, j: n-1, h: null, area: null, max: 0, newMax: false
+  });
+
+  let i = 0, j = n - 1, max = 0;
+
+  while (i < j) {
+    const h = Math.min(height[i], height[j]);
+    const area = h * (j - i);
+
+    // compute h
+    steps.push({
+      desc: `<em>While i &lt; j</em> (${i} &lt; ${j}): compute <em>h = Math.min(height[${i}], height[${j}]) = Math.min(${height[i]}, ${height[j]}) = ${h}</em>.`,
+      log: [
+        { t: `→ i=${i}, j=${j}`, h: false },
+        { t: `h = min(${height[i]}, ${height[j]}) = ${h}`, h: true }
+      ],
+      vPhase: "compute h", activeLines: [5,6],
+      i, j, h, area: null, max, newMax: false
+    });
+
+    // compute area
+    steps.push({
+      desc: `Compute <em>area = h × (j - i) = ${h} × (${j} - ${i}) = ${h} × ${j-i} = ${area}</em>.`,
+      log: [
+        { t: `area = ${h} × ${j-i} = ${area}`, h: true }
+      ],
+      vPhase: "compute area", activeLines: [7],
+      i, j, h, area, max, newMax: false
+    });
+
+    // update max
+    const newMax = area > max;
+    if (newMax) max = area;
+    steps.push({
+      desc: newMax
+        ? `<em>New max!</em> area ${area} &gt; previous max ${max - area + (area > (max - (newMax ? area : 0)) ? 0 : 0)} — update <em>max = ${max}</em>.`
+        : `area ${area} ≤ max ${max} — no update. max stays <em>${max}</em>.`,
+      log: [
+        { t: `max = Math.max(${area}, ${newMax ? max - area + area : max}) = ${max}`, h: newMax }
+      ],
+      vPhase: newMax ? "new max!" : "update max", activeLines: [8],
+      i, j, h, area, max, newMax
+    });
+
+    // move pointer
+    if (height[i] < height[j]) {
+      steps.push({
+        desc: `<em>height[i]=${height[i]} &lt; height[j]=${height[j]}</em> — left wall is shorter (the bottleneck). Move <em>i++</em> to find a taller left wall.`,
+        log: [
+          { t: `height[${i}]=${height[i]} < height[${j}]=${height[j]}`, h: false },
+          { t: `→ i++ (${i} → ${i+1})`, h: true }
+        ],
+        vPhase: "move i", activeLines: [9,10],
+        i, j, h, area, max, newMax: false, moving: 'i'
+      });
+      i++;
+    } else {
+      const reason = height[i] === height[j] ? `height[i]=${height[i]} === height[j]=${height[j]}` : `height[i]=${height[i]} >= height[j]=${height[j]}`;
+      steps.push({
+        desc: `<em>${reason}</em> — right wall is shorter (or equal). Move <em>j--</em> to find a taller right wall.`,
+        log: [
+          { t: reason, h: false },
+          { t: `→ j-- (${j} → ${j-1})`, h: true }
+        ],
+        vPhase: "move j", activeLines: [11,12],
+        i, j, h, area, max, newMax: false, moving: 'j'
+      });
+      j--;
+    }
+  }
+
+  // done
+  steps.push({
+    desc: `<em>i = ${i}</em> is no longer &lt; <em>j = ${j}</em> — loop ends. Return <em>max = ${max}</em>.`,
+    log: [
+      { t: `i=${i} >= j=${j}, exit loop`, h: false },
+      { t: `return ${max}`, h: true }
+    ],
+    vPhase: "done", activeLines: [15],
+    i, j, h: null, area: null, max, newMax: false
+  });
+
+  return steps;
+}
+
+// ─── ENGINE ───────────────────────────────────────────────────────────────────
+let steps = [], cursor = 0, playing = false, timer = null, currentEx = null;
+
+function loadExample(idx) {
+  if (playing) stopPlay();
+  currentEx = idx;
+  const ex = EXAMPLES[idx];
+  steps = buildSteps(ex.height);
+  cursor = 0;
+  document.querySelectorAll('.ex-tab').forEach((t, i) => t.classList.toggle('active', i === idx));
+  document.getElementById('nextBtn').disabled = false;
+  document.getElementById('prevBtn').disabled = true;
+  renderStep();
+}
+
+function renderStep() {
+  if (!steps.length) return;
+  const s = steps[cursor];
+  const ex = EXAMPLES[currentEx];
+  const height = ex.height;
+  const n = height.length;
+
+  // progress
+  const pct = steps.length > 1 ? (cursor / (steps.length - 1)) * 100 : 100;
+  document.getElementById('progBar').style.width = pct + '%';
+  document.getElementById('progLabel').textContent = `Step ${cursor + 1} / ${steps.length}`;
+  document.getElementById('phaseLabel').textContent = s.vPhase || '—';
+
+  // step desc
+  document.getElementById('stepDesc').innerHTML = s.desc;
+
+  // highlight code lines
+  document.querySelectorAll('.code-line').forEach(el => el.classList.remove('active'));
+  if (s.activeLines) {
+    s.activeLines.forEach(ln => {
+      const el = document.getElementById('line-' + ln);
+      if (el) el.classList.add('active');
+    });
+  }
+
+  // BAR CHART
+  const BAR_MAX_PX = 120;
+  const maxH = Math.max(...height);
+  const barArea = document.getElementById('barArea');
+
+  // determine water level for current container
+  let waterH = null, waterLeft = null, waterRight = null;
+  if (s.i !== undefined && s.j !== undefined && s.h !== null && s.area !== null) {
+    waterH = s.h;
+    waterLeft = s.i;
+    waterRight = s.j;
+  }
+
+  const ptrRow = document.createElement('div');
+  ptrRow.style.cssText = 'display:flex;gap:4px;align-items:flex-end;';
+
+  const chart = document.createElement('div');
+  chart.className = 'bar-chart';
+
+  const idxRow = document.createElement('div');
+  idxRow.style.cssText = 'display:flex;gap:4px;';
+
+  barArea.innerHTML = '';
+
+  // Build each bar column
+  const barCols = height.map((hVal, k) => {
+    const px = Math.max(16, Math.round((hVal / maxH) * BAR_MAX_PX));
+    const isI = k === s.i;
+    const isJ = k === s.j;
+    const inWater = waterLeft !== null && k > waterLeft && k < waterRight;
+
+    let cls = 'bar normal';
+    if (isI) cls = 'bar ptr-i';
+    else if (isJ) cls = 'bar ptr-j';
+    else if (inWater) cls = 'bar water';
+
+    const bar = document.createElement('div');
+    bar.className = cls;
+    bar.style.height = px + 'px';
+    bar.textContent = hVal;
+
+    // water fill overlay
+    if (inWater && waterH !== null) {
+      const waterPx = Math.round((waterH / maxH) * BAR_MAX_PX);
+      const overlay = document.createElement('div');
+      overlay.className = 'water-overlay';
+      overlay.style.height = Math.min(waterPx, px) + 'px';
+      bar.appendChild(overlay);
+    }
+
+    return bar;
+  });
+
+  // top pointer row
+  const topRow = document.createElement('div');
+  topRow.style.cssText = 'display:flex;gap:4px;justify-content:center;';
+
+  height.forEach((_, k) => {
+    const isI = k === s.i;
+    const isJ = k === s.j;
+    const span = document.createElement('span');
+    span.className = 'bar-ptr ' + (isI ? 'i-ptr' : isJ ? 'j-ptr' : 'empty');
+    span.style.width = '36px';
+    span.style.textAlign = 'center';
+    if (isI) span.textContent = 'i';
+    else if (isJ) span.textContent = 'j';
+    else span.textContent = '.';
+    topRow.appendChild(span);
+  });
+
+  barCols.forEach(b => chart.appendChild(b));
+
+  const botRow = document.createElement('div');
+  botRow.style.cssText = 'display:flex;gap:4px;justify-content:center;';
+  height.forEach((_, k) => {
+    const span = document.createElement('span');
+    span.className = 'bar-idx';
+    span.style.width = '36px';
+    span.style.textAlign = 'center';
+    span.textContent = k;
+    botRow.appendChild(span);
+  });
+
+  barArea.appendChild(topRow);
+  barArea.appendChild(chart);
+  barArea.appendChild(botRow);
+
+  // VARS PANEL
+  const vp = document.getElementById('varsPanel');
+  vp.innerHTML = '';
+  const vars = [
+    { name: 'i', val: s.i ?? '—' },
+    { name: 'j', val: s.j ?? '—' },
+    { name: 'h', val: s.h !== null && s.h !== undefined ? s.h : '—' },
+    { name: 'area', val: s.area !== null && s.area !== undefined ? s.area : '—' },
+    { name: 'max', val: s.max ?? '—' },
+  ];
+  vars.forEach(v => {
+    const chip = document.createElement('div');
+    chip.className = 'var-chip' + (v.name === 'max' && s.newMax ? ' new-max' : '') + (v.name === 'area' && s.area !== null ? ' highlight' : '');
+    chip.innerHTML = `<div class="vname">${v.name}</div><div class="vval">${v.val}</div>`;
+    vp.appendChild(chip);
+  });
+
+  if (s.vPhase === 'done') {
+    const badge = document.createElement('div');
+    badge.className = 'var-chip new-max';
+    badge.innerHTML = `<div class="vname">result</div><div class="vval">${s.max}</div>`;
+    vp.appendChild(badge);
+  }
+
+  // LOG
+  const la = document.getElementById('logArea');
+  la.innerHTML = '';
+  if (s.log) {
+    s.log.forEach(line => {
+      const d = document.createElement('div');
+      d.className = 'log-line' + (line.h ? (s.newMax ? ' hl-green' : ' hl') : '');
+      d.textContent = line.t;
+      la.appendChild(d);
+    });
+  }
+
+  // buttons
+  document.getElementById('prevBtn').disabled = cursor === 0;
+  document.getElementById('nextBtn').disabled = cursor === steps.length - 1;
+}
+
+function next() {
+  if (cursor < steps.length - 1) { cursor++; renderStep(); }
+}
+function prev() {
+  if (cursor > 0) { cursor--; renderStep(); }
+}
+function resetEx() {
+  if (playing) stopPlay();
+  cursor = 0;
+  renderStep();
+}
+function togglePlay() {
+  playing ? stopPlay() : startPlay();
+}
+function startPlay() {
+  playing = true;
+  document.getElementById('playBtn').textContent = '⏸ Pause';
+  document.getElementById('playBtn').classList.add('playing');
+  tick();
+}
+function stopPlay() {
+  playing = false;
+  clearTimeout(timer);
+  document.getElementById('playBtn').textContent = '▶ Play';
+  document.getElementById('playBtn').classList.remove('playing');
+}
+function tick() {
+  if (!playing) return;
+  if (cursor >= steps.length - 1) { stopPlay(); return; }
+  next();
+  const speed = parseInt(document.getElementById('speedSel').value);
+  timer = setTimeout(tick, speed);
+}
+
+// blur toggle
+let blurred = true;
+const BLUR_LINES = [5,6,7,8,9,10,11,12];
+function toggleBlur() {
+  blurred = !blurred;
+  BLUR_LINES.forEach(n => {
+    const el = document.getElementById('line-' + n);
+    if (el) el.classList.toggle('blurred', blurred);
+  });
+  document.getElementById('blurBtn').textContent = blurred ? '👁 Show Logic' : '👁 Blur Logic';
+}
+
+// keyboard nav
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight') next();
+  if (e.key === 'ArrowLeft') prev();
+});
+
+// build tabs + load first
+(function init() {
+  const container = document.getElementById('exTabs');
+  EXAMPLES.forEach((ex, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'ex-tab';
+    btn.textContent = ex.label;
+    btn.onclick = () => loadExample(i);
+    container.appendChild(btn);
+  });
+  loadExample(0);
+})();
+</script>
+</body>
+</html>

@@ -387,6 +387,7 @@
     .card[data-c="cyan"]:hover    { border-color: rgba(34,211,238,0.4); }
     .card[data-c="emerald"]:hover { border-color: rgba(16,185,129,0.4); }
     .card[data-c="amber"]:hover   { border-color: rgba(251,191,36,0.4); }
+    .card[data-c="red"]:hover     { border-color: rgba(248,113,113,0.4); }
 
     .card-tree {
       padding: 22px 22px 0;
@@ -642,9 +643,9 @@
       Step-by-step visualizers for classic DSA problems — problem statement, hints, approach, code, dry-run animation, multiple examples, and edge cases. All in one place.
     </p>
     <div class="stats">
-      <div class="stat"><span class="stat-num">23</span><span class="stat-label">Problems</span></div>
+      <div class="stat"><span class="stat-num">29</span><span class="stat-label">Problems</span></div>
       <div class="stat-sep"></div>
-      <div class="stat"><span class="stat-num">2</span><span class="stat-label">Tree Types</span></div>
+      <div class="stat"><span class="stat-num">5</span><span class="stat-label">Categories</span></div>
       <div class="stat-sep"></div>
       <div class="stat"><span class="stat-num">Multi</span><span class="stat-label">Examples Each</span></div>
       <div class="stat-sep"></div>
@@ -711,8 +712,8 @@
   <div class="topics-row" id="topics-row">
     <button class="topic-tab active" data-topic="trees"><span class="tab-icon">🌳</span>Binary Tree<span class="tab-badge" id="badge-trees">11</span></button>
     <button class="topic-tab" data-topic="bst"><span class="tab-icon">🌲</span>Binary Search Tree<span class="tab-badge" id="badge-bst">5</span></button>
-    <button class="topic-tab" data-topic="arrays"><span class="tab-icon">📦</span>Arrays<span class="tab-badge" id="badge-arrays">1</span></button>
-    <button class="topic-tab" data-topic="strings"><span class="tab-icon">🔤</span>Strings<span class="tab-badge" id="badge-strings">6</span></button>
+    <button class="topic-tab" data-topic="arrays"><span class="tab-icon">📦</span>Arrays<span class="tab-badge" id="badge-arrays">5</span></button>
+    <button class="topic-tab" data-topic="strings"><span class="tab-icon">🔤</span>Strings<span class="tab-badge" id="badge-strings">7</span></button>
     <button class="topic-tab" data-topic="hashmap"><span class="tab-icon">🗂️</span>HashMap<span class="tab-badge" id="badge-hashmap">0</span></button>
     <button class="topic-tab" data-topic="bsearch"><span class="tab-icon">🔎</span>Binary Search<span class="tab-badge" id="badge-bsearch">1</span></button>
     <button class="topic-tab" data-topic="graph"><span class="tab-icon">🕸️</span>Graphs<span class="tab-badge" id="badge-graph">0</span></button>
@@ -759,7 +760,7 @@
     </div>
   </div>
 
-  <footer><p>Built with vanilla HTML · CSS · JS &nbsp;·&nbsp; No frameworks &nbsp;·&nbsp; 23 problems · Multiple examples each</p></footer>
+  <footer><p>Built with vanilla HTML · CSS · JS &nbsp;·&nbsp; No frameworks &nbsp;·&nbsp; 29 problems · Multiple examples each</p></footer>
 
 </div>
 
@@ -972,7 +973,52 @@ const TOPICS = {
       pattern:"Two Pointers — Read / Write", patternColor:"#34d399", patternBg:"rgba(52,211,153,0.1)",
       desc:"Watch <code>k</code> anchor the write head while <code>i</code> scans ahead — when <code>arr[i] > arr[k]</code>, a new unique is found and written in-place.",
       pills:["O(n)","O(1) space","Two Pointers","In-place"],
-      kw:"remove duplicates sorted array two pointers in-place write head"
+      kw:"remove duplicates sorted array two pointers in-place write head",
+      svg:`<svg viewBox="0 0 300 130"><g font-family="'JetBrains Mono',monospace" font-size="15" font-weight="700"><rect x="20" y="35" width="34" height="34" rx="5" fill="rgba(52,211,153,0.15)" stroke="var(--green)" stroke-width="1.5"/><text x="29" y="57" fill="var(--green)">1</text><rect x="62" y="35" width="34" height="34" rx="5" fill="rgba(52,211,153,0.15)" stroke="var(--green)" stroke-width="1.5"/><text x="71" y="57" fill="var(--green)">1</text><rect x="104" y="35" width="34" height="34" rx="5" fill="rgba(52,211,153,0.15)" stroke="var(--green)" stroke-width="1.5"/><text x="113" y="57" fill="var(--green)">2</text><rect x="146" y="35" width="34" height="34" rx="5" fill="rgba(61,66,81,0.3)" stroke="var(--border-mid)" stroke-width="1.5"/><text x="155" y="57" fill="var(--text-muted)">3</text><rect x="188" y="35" width="34" height="34" rx="5" fill="rgba(61,66,81,0.3)" stroke="var(--border-mid)" stroke-width="1.5"/><text x="197" y="57" fill="var(--text-muted)">3</text><rect x="230" y="35" width="34" height="34" rx="5" fill="rgba(61,66,81,0.3)" stroke="var(--border-mid)" stroke-width="1.5"/><text x="239" y="57" fill="var(--text-muted)">4</text></g><text x="20" y="96" font-family="'JetBrains Mono',monospace" font-size="10" fill="var(--green)">k</text><path d="M 37 100 L 37 110" stroke="var(--green)" stroke-width="1.5"/><text x="104" y="96" font-family="'JetBrains Mono',monospace" font-size="10" fill="var(--amber)">i</text><path d="M 121 100 L 121 110" stroke="var(--amber)" stroke-width="1.5"/><text x="10" y="125" font-family="'JetBrains Mono',monospace" font-size="9" fill="var(--text-muted)">write head stays · scan moves right</text></svg>`
+    },
+    {
+      num:"#167", title:"Two Sum II — Input Array Is Sorted", href:"arrays/two-sum-ii-visualizer.html",
+      color:"green", tagColor:"var(--green)",
+      btnStyle:"background:rgba(52,211,153,0.12);color:var(--green);border:1px solid rgba(52,211,153,0.25)",
+      diff:"easy", steps:"10+",
+      pattern:"Two Pointers — Converging Inward", patternColor:"#34d399", patternBg:"rgba(52,211,153,0.1)",
+      desc:"Place <em>i</em> at the smallest and <em>j</em> at the largest. Sum too big → <code>j--</code>, too small → <code>i++</code>. The sorted order guarantees convergence in O(n) with O(1) space.",
+      pills:["O(n)","O(1) space","Two Pointers","Sorted Array"],
+      kw:"two sum sorted array two pointers converging inward 1-indexed",
+      svg:`<svg viewBox="0 0 300 130"><g font-family="'JetBrains Mono',monospace" font-size="15" font-weight="700"><rect x="20" y="35" width="34" height="34" rx="5" fill="rgba(96,165,250,0.15)" stroke="var(--blue)" stroke-width="2"/><text x="29" y="57" fill="var(--blue)">2</text><rect x="62" y="35" width="34" height="34" rx="5" fill="rgba(61,66,81,0.3)" stroke="var(--border-mid)" stroke-width="1.5"/><text x="71" y="57" fill="var(--text-muted)">7</text><rect x="104" y="35" width="34" height="34" rx="5" fill="rgba(61,66,81,0.3)" stroke="var(--border-mid)" stroke-width="1.5"/><text x="113" y="57" fill="var(--text-muted)">11</text><rect x="146" y="35" width="34" height="34" rx="5" fill="rgba(61,66,81,0.3)" stroke="var(--border-mid)" stroke-width="1.5"/><text x="155" y="57" fill="var(--text-muted)">15</text><rect x="230" y="35" width="34" height="34" rx="5" fill="rgba(251,191,36,0.15)" stroke="var(--amber)" stroke-width="2"/><text x="236" y="57" fill="var(--amber)">17</text></g><text x="20" y="96" font-family="'JetBrains Mono',monospace" font-size="10" fill="var(--blue)">i→</text><path d="M 37 100 L 37 110" stroke="var(--blue)" stroke-width="1.5"/><text x="222" y="96" font-family="'JetBrains Mono',monospace" font-size="10" fill="var(--amber)">←j</text><path d="M 247 100 L 247 110" stroke="var(--amber)" stroke-width="1.5"/><path d="M 54 52 Q 145 20 230 52" fill="none" stroke="var(--green)" stroke-width="1.5" stroke-dasharray="4"/><text x="120" y="18" font-family="'JetBrains Mono',monospace" font-size="9" fill="var(--green)">converging inward</text></svg>`
+    },
+    {
+      num:"#11", title:"Container With Most Water", href:"arrays/container-with-most-water-visualizer.html",
+      color:"blue", tagColor:"var(--blue)",
+      btnStyle:"background:rgba(96,165,250,0.12);color:var(--blue);border:1px solid rgba(96,165,250,0.25)",
+      diff:"medium", steps:"15+",
+      pattern:"Two Pointers — Shrink From Wider", patternColor:"#60a5fa", patternBg:"rgba(96,165,250,0.1)",
+      desc:"Start at max width with <em>i</em> and <em>j</em> at both ends. Always move the <em>shorter</em> wall inward — it's the only move that can find a larger container.",
+      pills:["O(n)","O(1) space","Two Pointers","Greedy"],
+      kw:"container most water two pointers greedy shrink shorter wall area max",
+      svg:`<svg viewBox="0 0 300 130"><g font-family="'JetBrains Mono',monospace" font-size="13" font-weight="700"><rect x="10" y="55" width="28" height="44" rx="4" fill="rgba(61,66,81,0.25)" stroke="var(--border-mid)"/><text x="18" y="80" fill="var(--text-muted)">1</text><rect x="46" y="15" width="28" height="84" rx="4" fill="rgba(96,165,250,0.18)" stroke="var(--blue)" stroke-width="2"/><text x="54" y="57" fill="var(--blue)">8</text><rect x="82" y="35" width="28" height="64" rx="4" fill="rgba(34,211,238,0.12)" stroke="rgba(34,211,238,0.35)" stroke-width="1.5"/><text x="90" y="70" fill="var(--teal)">6</text><rect x="118" y="75" width="28" height="24" rx="4" fill="rgba(61,66,81,0.25)" stroke="var(--border-mid)"/><text x="126" y="90" fill="var(--text-muted)">2</text><rect x="154" y="55" width="28" height="44" rx="4" fill="rgba(34,211,238,0.12)" stroke="rgba(34,211,238,0.35)" stroke-width="1.5"/><text x="162" y="80" fill="var(--teal)">5</text><rect x="190" y="35" width="28" height="64" rx="4" fill="rgba(34,211,238,0.12)" stroke="rgba(34,211,238,0.35)" stroke-width="1.5"/><text x="198" y="70" fill="var(--teal)">4</text><rect x="226" y="15" width="28" height="84" rx="4" fill="rgba(251,191,36,0.18)" stroke="var(--amber)" stroke-width="2"/><text x="234" y="57" fill="var(--amber)">8</text><rect x="262" y="45" width="28" height="54" rx="4" fill="rgba(61,66,81,0.25)" stroke="var(--border-mid)"/><text x="270" y="75" fill="var(--text-muted)">7</text></g><text x="46" y="112" font-family="'JetBrains Mono',monospace" font-size="9" fill="var(--blue)">i</text><text x="226" y="112" font-family="'JetBrains Mono',monospace" font-size="9" fill="var(--amber)">j</text><path d="M 60 100 L 240 100" fill="none" stroke="var(--green)" stroke-width="1.5" stroke-dasharray="3"/><text x="120" y="122" font-family="'JetBrains Mono',monospace" font-size="9" fill="var(--green)">area = 49</text></svg>`
+    },
+    {
+      num:"#15", title:"3Sum", href:"arrays/three-sum-visualizer.html",
+      color:"amber", tagColor:"var(--amber)",
+      btnStyle:"background:rgba(251,191,36,0.12);color:var(--amber);border:1px solid rgba(251,191,36,0.25)",
+      diff:"medium", steps:"25+",
+      pattern:"Sort + Nested Two Pointers", patternColor:"#fbbf24", patternBg:"rgba(251,191,36,0.1)",
+      desc:"Sort first, then fix <em>target</em> and converge <em>i</em>→←<em>j</em> inward. Skip duplicate targets and duplicate <em>i</em> values after each match — dedup is the tricky bit.",
+      pills:["O(n²)","O(1) space","Two Pointers","Deduplication"],
+      kw:"3sum three sum sort two pointers target deduplication triplets",
+      svg:`<svg viewBox="0 0 300 130"><g font-family="'JetBrains Mono',monospace" font-size="14" font-weight="700"><rect x="10" y="35" width="32" height="32" rx="5" fill="rgba(248,113,113,0.12)" stroke="var(--red)" stroke-width="1.5"/><text x="19" y="56" fill="var(--red)">-4</text><rect x="52" y="35" width="32" height="32" rx="5" fill="rgba(251,191,36,0.15)" stroke="var(--amber)" stroke-width="2"/><text x="60" y="56" fill="var(--amber)">-1</text><rect x="94" y="35" width="32" height="32" rx="5" fill="rgba(96,165,250,0.15)" stroke="var(--blue)" stroke-width="2"/><text x="102" y="56" fill="var(--blue)">-1</text><rect x="136" y="35" width="32" height="32" rx="5" fill="rgba(61,66,81,0.3)" stroke="var(--border-mid)" stroke-width="1.5"/><text x="145" y="56" fill="var(--text-muted)">0</text><rect x="178" y="35" width="32" height="32" rx="5" fill="rgba(61,66,81,0.3)" stroke="var(--border-mid)" stroke-width="1.5"/><text x="187" y="56" fill="var(--text-muted)">1</text><rect x="220" y="35" width="32" height="32" rx="5" fill="rgba(248,113,113,0.12)" stroke="var(--red)" stroke-width="1.5"/><text x="229" y="56" fill="var(--red)">2</text></g><text x="52" y="85" font-family="'JetBrains Mono',monospace" font-size="9" fill="var(--amber)">T</text><path d="M 68 89 L 68 98" stroke="var(--amber)" stroke-width="1.5"/><text x="94" y="85" font-family="'JetBrains Mono',monospace" font-size="9" fill="var(--blue)">i→</text><path d="M 110 89 L 110 98" stroke="var(--blue)" stroke-width="1.5"/><text x="218" y="85" font-family="'JetBrains Mono',monospace" font-size="9" fill="var(--red)">←j</text><path d="M 236 89 L 236 98" stroke="var(--red)" stroke-width="1.5"/><path d="M 116 51 Q 165 18 230 51" fill="none" stroke="var(--green)" stroke-width="1.5" stroke-dasharray="4"/><text x="152" y="14" font-family="'JetBrains Mono',monospace" font-size="8" fill="var(--green)">sum=0 ✓</text><text x="2" y="118" font-family="'JetBrains Mono',monospace" font-size="8" fill="var(--text-muted)">T fixed · i+j converge · skip dups</text></svg>`
+    },
+    {
+      num:"#42", title:"Trapping Rain Water", href:"arrays/trapping-rain-water-visualizer.html",
+      color:"red", tagColor:"var(--red)",
+      btnStyle:"background:rgba(248,113,113,0.12);color:var(--red);border:1px solid rgba(248,113,113,0.25)",
+      diff:"hard", steps:"30+",
+      pattern:"DP Prefix Arrays — maxLeft + maxRight", patternColor:"#2dd4bf", patternBg:"rgba(34,211,238,0.1)",
+      desc:"One bidirectional loop fills <em>maxLeft[]</em> (left max) and <em>maxRight[]</em> (right max) simultaneously. Second pass: <code>min(maxLeft[z], maxRight[z]) − height[z]</code> gives water at each bar.",
+      pills:["O(n)","O(n) space","DP","Prefix Arrays"],
+      kw:"trapping rain water prefix arrays maxLeft maxRight dp dynamic programming elevation map",
+      svg:`<svg viewBox="0 0 300 130"><g font-family="'JetBrains Mono',monospace"><rect x="10" y="82" width="22" height="18" rx="3" fill="rgba(33,38,56,0.8)" stroke="rgba(255,255,255,0.1)" stroke-width="1.5"/><rect x="36" y="62" width="22" height="38" rx="3" fill="rgba(33,38,56,0.8)" stroke="rgba(96,165,250,0.5)" stroke-width="1.5"/><rect x="62" y="62" width="22" height="18" rx="3" fill="rgba(34,211,238,0.3)" stroke="rgba(34,211,238,0.6)" stroke-width="1"/><rect x="62" y="80" width="22" height="0" rx="0" fill="none"/><rect x="88" y="42" width="22" height="58" rx="3" fill="rgba(33,38,56,0.8)" stroke="rgba(96,165,250,0.5)" stroke-width="1.5"/><rect x="114" y="62" width="22" height="18" rx="3" fill="rgba(33,38,56,0.8)" stroke="rgba(255,255,255,0.1)" stroke-width="1.5"/><rect x="114" y="62" width="22" height="18" rx="3" fill="rgba(34,211,238,0.25)" stroke="rgba(34,211,238,0.5)" stroke-width="1"/><rect x="140" y="72" width="22" height="28" rx="3" fill="rgba(33,38,56,0.8)" stroke="rgba(255,255,255,0.1)" stroke-width="1.5"/><rect x="140" y="62" width="22" height="10" rx="3" fill="rgba(34,211,238,0.25)" stroke="rgba(34,211,238,0.5)" stroke-width="1"/><rect x="166" y="22" width="22" height="78" rx="3" fill="rgba(33,38,56,0.8)" stroke="rgba(251,191,36,0.5)" stroke-width="1.5"/><text x="47" y="90" text-anchor="middle" font-size="11" font-weight="700" fill="rgba(96,165,250,0.8)">1</text><text x="99" y="70" text-anchor="middle" font-size="11" font-weight="700" fill="rgba(96,165,250,0.8)">2</text><text x="177" y="50" text-anchor="middle" font-size="11" font-weight="700" fill="rgba(251,191,36,0.9)">3</text></g><path d="M 47 62 L 99 42" fill="none" stroke="rgba(96,165,250,0.4)" stroke-width="1.5" stroke-dasharray="4"/><path d="M 177 22 L 99 42" fill="none" stroke="rgba(251,191,36,0.4)" stroke-width="1.5" stroke-dasharray="4"/><text x="8" y="120" font-family="'JetBrains Mono',monospace" font-size="8" fill="rgba(34,211,238,0.8)">water = min(maxL, maxR) − height</text></svg>`
     }
   ] },
   strings: { label:"Strings",             icon:"🔤", color:"var(--rose)",   badgeStyle:"background:rgba(244,114,182,0.1);color:var(--rose);border:1px solid rgba(244,114,182,0.2)",  description:"Sliding Window · Two Pointer · Anagram · Palindrome",            problems:[
@@ -1041,6 +1087,17 @@ const TOPICS = {
         pills:["O(N)","HashMap","Frequency Count"],
         kw:"valid anagram hashmap frequency counting dictionary",
         svg:`<svg viewBox="0 0 300 130"><g font-family="'JetBrains Mono',monospace" font-size="16" font-weight="700"><rect x="40" y="20" width="220" height="40" rx="6" fill="rgba(45,212,191,0.1)" stroke="var(--teal)"/><text x="60" y="45" fill="var(--teal)">a:3</text><text x="110" y="45" fill="var(--teal)">n:1</text><text x="160" y="45" fill="var(--teal)">g:1</text><text x="210" y="45" fill="var(--teal)">r:1</text></g><g font-family="'JetBrains Mono',monospace" font-size="14" font-weight="700"><rect x="80" y="80" width="24" height="24" rx="4" fill="rgba(61,66,81,0.2)" stroke="var(--border-mid)"/><text x="86" y="97" fill="var(--text-dim)">r</text><rect x="110" y="80" width="24" height="24" rx="4" fill="rgba(61,66,81,0.2)" stroke="var(--border-mid)"/><text x="116" y="97" fill="var(--text-dim)">a</text><rect x="140" y="80" width="24" height="24" rx="4" fill="rgba(45,212,191,0.15)" stroke="var(--teal)"/><text x="146" y="97" fill="var(--teal)">t</text></g><path d="M 152 75 L 152 65" stroke="var(--red)" stroke-width="2" marker-end="url(#arrowRed)"/><defs><marker id="arrowRed" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="var(--red)"/></marker></defs></svg>`
+      },
+      {
+        num:"#49", title:"Group Anagrams", href:"strings/group-anagrams-visualizer.html",
+        color:"purple", tagColor:"var(--purple)",
+        btnStyle:"background:rgba(124,110,245,0.12);color:var(--purple);border:1px solid rgba(124,110,245,0.25)",
+        diff:"medium", steps:"20+",
+        pattern:"Frequency-Array as HashMap Key", patternColor:"#7c6ef5", patternBg:"rgba(124,110,245,0.1)",
+        desc:"Build a 26-slot frequency array per string, serialize it with '#' separators into a collision-free key, then bucket strings that share identical fingerprints.",
+        pills:["O(n·k)","HashMap","Frequency Array","Canonical Key"],
+        kw:"group anagrams frequency array hashmap canonical key fingerprint bucket medium",
+        svg:`<svg viewBox="0 0 300 130"><g font-family="'JetBrains Mono',monospace" font-size="12" font-weight="700"><rect x="10" y="10" width="80" height="25" rx="4" fill="rgba(124,110,245,0.12)" stroke="rgba(124,110,245,0.4)"/><text x="50" y="27" text-anchor="middle" fill="#7c6ef5">eat→tea→ate</text><rect x="10" y="45" width="55" height="25" rx="4" fill="rgba(52,211,153,0.1)" stroke="rgba(52,211,153,0.35)"/><text x="37" y="62" text-anchor="middle" fill="#34d399">tan→nat</text><rect x="10" y="80" width="40" height="25" rx="4" fill="rgba(251,191,36,0.1)" stroke="rgba(251,191,36,0.35)"/><text x="30" y="97" text-anchor="middle" fill="#fbbf24">bat</text></g><g font-family="'JetBrains Mono',monospace" font-size="9"><text x="110" y="23" fill="#546e7a">#1#0#0#0#1#0..#1</text><text x="110" y="58" fill="#546e7a">#0#0#0#0#0#0..#1</text><text x="110" y="93" fill="#546e7a">#1#1#0#0#0#0..#1</text></g><line x1="105" y1="22" x2="105" y2="90" stroke="rgba(255,255,255,0.06)" stroke-width="1"/></svg>`
       }
   ] },
   hashmap: { label:"HashMap / HashSet",   icon:"🗂️", color:"var(--amber)",  badgeStyle:"background:rgba(251,191,36,0.1);color:var(--amber);border:1px solid rgba(251,191,36,0.2)",  description:"Frequency Count · Lookup · Two Sum patterns",                    problems:[] },

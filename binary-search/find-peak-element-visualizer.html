@@ -40,6 +40,8 @@ a { color: var(--accent); text-decoration: none; }
 a:hover { text-decoration: underline; }
 
 /* ── Layout ─────────────────────────────── */
+.back-link{display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:12px;color:var(--text-muted);text-decoration:none;padding:7px 14px 7px 10px;border-radius:8px;border:1px solid var(--border);background:var(--surface);margin-bottom:2rem;transition:all .15s}
+.back-link:hover{color:var(--text);border-color:var(--border-mid)}
 .page { max-width: 960px; margin: 0 auto; padding: 40px 20px 80px; }
 .section { margin-bottom: 48px; opacity: 0; animation: fadeUp 0.5s forwards; }
 .section:nth-child(1) { animation-delay: 0.05s; }
@@ -394,6 +396,7 @@ a:hover { text-decoration: underline; }
 </head>
 <body>
 <div class="page">
+  <a href="../index.html" class="back-link">← DSA Hub</a>
 
   <!-- 1. Pattern Banner -->
   <div class="section">
@@ -928,7 +931,7 @@ function toggleBlur() {
     btn.innerHTML = '👁 Show Logic';
   } else {
     btn.classList.add('on');
-    btn.innerHTML = '👁 Hide Logic';
+    btn.innerHTML = '👁 Blur Logic';
   }
 }
 
