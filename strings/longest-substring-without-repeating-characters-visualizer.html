@@ -1,0 +1,689 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>#3 Longest Substring Without Repeating Characters — DSA X-Ray</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Sora:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0d0f14; --surface: #13161d; --surface2: #1a1e28;
+  --surface3: #212638; --border: rgba(255,255,255,0.07);
+  --border-mid: rgba(255,255,255,0.12);
+  --text: #e8eaf0; --text-muted: #6b7280; --text-dim: #3d4251;
+  --accent: #7c6ef5; --green: #34d399; --amber: #fbbf24;
+  --blue: #60a5fa; --red: #f87171; --orange: #fb923c;
+  --mono: 'JetBrains Mono', monospace; --sans: 'Sora', sans-serif;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:100vh;overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(124,110,245,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(124,110,245,0.03) 1px,transparent 1px);background-size:40px 40px;pointer-events:none;z-index:0}
+.wrap{max-width:900px;margin:0 auto;padding:32px 20px 80px;position:relative;z-index:1}
+
+/* FADE UP */
+@keyframes fadeUp{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
+.fade{animation:fadeUp .5s ease both}
+.d1{animation-delay:.05s}.d2{animation-delay:.1s}.d3{animation-delay:.15s}
+.d4{animation-delay:.2s}.d5{animation-delay:.25s}.d6{animation-delay:.3s}
+.d7{animation-delay:.35s}.d8{animation-delay:.4s}
+
+/* NAV */
+.nav{display:flex;align-items:center;gap:12px;margin-bottom:36px}
+.nav a{color:var(--text-muted);text-decoration:none;font-size:13px;font-family:var(--mono)}
+.nav a:hover{color:var(--text)}
+.nav-sep{color:var(--text-dim)}
+.diff-badge{padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;font-family:var(--mono);letter-spacing:.04em}
+.diff-medium{background:rgba(251,191,36,0.12);color:var(--amber);border:1px solid rgba(251,191,36,0.25)}
+
+/* PATTERN BANNER */
+.pattern-banner{background:linear-gradient(135deg,rgba(96,165,250,0.08),rgba(124,110,245,0.05));border:1px solid rgba(96,165,250,0.2);border-radius:14px;padding:20px 24px;margin-bottom:28px}
+.pattern-label{font-size:11px;font-family:var(--mono);color:var(--blue);letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px}
+.pattern-name{font-size:22px;font-weight:700;color:var(--text);margin-bottom:8px}
+.pattern-why{font-size:14px;color:var(--text-muted);line-height:1.6;margin-bottom:14px}
+.pattern-related{display:flex;gap:8px;flex-wrap:wrap}
+.pill{padding:4px 12px;border-radius:20px;font-size:12px;font-family:var(--mono);font-weight:500}
+.pill-blue{background:rgba(96,165,250,0.1);color:var(--blue);border:1px solid rgba(96,165,250,0.2)}
+.pill-amber{background:rgba(251,191,36,0.1);color:var(--amber);border:1px solid rgba(251,191,36,0.2)}
+.pill-green{background:rgba(52,211,153,0.1);color:var(--green);border:1px solid rgba(52,211,153,0.2)}
+.pill-purple{background:rgba(124,110,245,0.1);color:var(--accent);border:1px solid rgba(124,110,245,0.2)}
+.pill-orange{background:rgba(251,146,60,0.1);color:var(--orange);border:1px solid rgba(251,146,60,0.2)}
+
+/* SECTION */
+.section{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:28px;margin-bottom:24px}
+.section-title{font-size:13px;font-family:var(--mono);color:var(--text-muted);letter-spacing:.08em;text-transform:uppercase;margin-bottom:18px;display:flex;align-items:center;gap:8px}
+.section-title::after{content:'';flex:1;height:1px;background:var(--border)}
+h1{font-size:28px;font-weight:700;line-height:1.3;margin-bottom:10px}
+.problem-analogy{background:var(--surface2);border-left:3px solid var(--blue);border-radius:0 10px 10px 0;padding:14px 18px;font-size:14px;color:var(--text-muted);line-height:1.7;margin:16px 0}
+.worked-examples{display:grid;gap:10px;margin-top:14px}
+.worked-ex{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:14px 18px;font-size:13px;font-family:var(--mono)}
+.worked-ex .we-label{color:var(--text-muted);margin-bottom:4px}
+.worked-ex .we-val{color:var(--text)}
+.we-ans{color:var(--green);font-weight:700}
+
+/* HINTS */
+.hint-list{list-style:none;display:grid;gap:10px}
+.hint-list li{display:flex;gap:12px;font-size:14px;line-height:1.7;color:var(--text-muted)}
+.hint-num{background:var(--surface2);border:1px solid var(--border-mid);border-radius:6px;width:24px;height:24px;display:flex;align-items:center;justify-content:center;font-size:11px;font-family:var(--mono);color:var(--accent);flex-shrink:0;margin-top:2px}
+.key-trick{background:rgba(251,191,36,0.07);border:1px solid rgba(251,191,36,0.2);border-radius:10px;padding:14px 18px;margin-top:16px;font-size:14px;color:var(--amber);line-height:1.6}
+
+/* CODE BLOCK */
+.code-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.code-toggle{background:var(--surface2);border:1px solid var(--border-mid);border-radius:8px;padding:5px 14px;font-size:12px;font-family:var(--mono);color:var(--text-muted);cursor:pointer;transition:.2s}
+.code-toggle:hover{color:var(--text);border-color:var(--accent)}
+.code-wrap{border-radius:12px;overflow:hidden;border:1px solid var(--border)}
+pre{background:#0a0c11;padding:20px;overflow-x:auto;font-family:var(--mono);font-size:13.5px;line-height:1.9}
+.code-line{display:block;padding:0 4px;border-radius:4px;transition:background .2s}
+.code-line.active-line{background:rgba(251,191,36,0.12);border-left:2px solid var(--amber);padding-left:6px}
+.code-blurred .blur-target{filter:blur(4px);transition:filter .3s;user-select:none}
+.kw{color:#c792ea}.fn{color:#82aaff}.str{color:#c3e88d}
+.num-lit{color:#f78c6c}.cm{color:#546e7a;font-style:italic}
+.var{color:#eeffff}.op{color:#89ddff}.prop{color:#ffcb6b}
+
+/* VISUALIZER */
+.vis-controls{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:20px}
+.btn{padding:8px 18px;border-radius:8px;font-size:13px;font-family:var(--mono);cursor:pointer;border:1px solid var(--border-mid);background:var(--surface2);color:var(--text-muted);transition:.2s}
+.btn:hover{border-color:var(--accent);color:var(--text)}
+.btn-primary{background:rgba(251,191,36,0.1);border-color:rgba(251,191,36,0.3);color:var(--amber)}
+.btn-primary:hover{background:rgba(251,191,36,0.18)}
+.example-select{background:var(--surface2);border:1px solid var(--border-mid);border-radius:8px;padding:7px 12px;font-size:13px;font-family:var(--mono);color:var(--text);cursor:pointer;outline:none}
+.example-select:focus{border-color:var(--accent)}
+.progress-bar-wrap{height:4px;background:var(--surface2);border-radius:4px;margin-bottom:18px;overflow:hidden}
+.progress-bar{height:100%;background:linear-gradient(90deg,var(--amber),var(--orange));border-radius:4px;transition:width .3s}
+
+/* STEP INFO */
+.step-info{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:18px}
+.step-desc{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:14px 18px;font-size:14px;line-height:1.7;color:var(--text-muted);grid-column:1/-1}
+.step-desc em{color:var(--amber);font-style:normal;font-family:var(--mono)}
+.var-panel{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:14px 18px}
+.var-panel-title{font-size:11px;font-family:var(--mono);color:var(--text-dim);letter-spacing:.06em;text-transform:uppercase;margin-bottom:10px}
+.var-row{display:flex;justify-content:space-between;align-items:center;padding:4px 0;border-bottom:1px solid var(--border);font-size:13px}
+.var-row:last-child{border:none}
+.var-name{font-family:var(--mono);color:var(--text-muted)}
+.var-val{font-family:var(--mono);color:var(--amber);font-weight:600}
+.var-val.green{color:var(--green)}
+.var-val.blue{color:var(--blue)}
+.var-val.red{color:var(--red)}
+
+/* STRING VIS */
+.string-vis{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:20px 18px;margin-bottom:12px}
+.string-cells{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:12px;align-items:flex-end}
+.cell-group{display:flex;flex-direction:column;align-items:center;gap:4px}
+.cell{width:38px;height:38px;display:flex;align-items:center;justify-content:center;border-radius:8px;font-size:16px;font-family:var(--mono);font-weight:700;border:1px solid var(--border-mid);background:var(--surface3);color:var(--text-muted);transition:all .25s;position:relative}
+.cell.in-window{background:rgba(96,165,250,0.12);border-color:rgba(96,165,250,0.3);color:var(--blue)}
+.cell.ptr-i{background:rgba(52,211,153,0.15);border-color:rgba(52,211,153,0.4);color:var(--green)}
+.cell.ptr-j-active{background:rgba(251,191,36,0.15);border-color:rgba(251,191,36,0.4);color:var(--amber)}
+.cell.conflict{background:rgba(248,113,113,0.15);border-color:rgba(248,113,113,0.4);color:var(--red)}
+.cell.done-cell{background:rgba(52,211,153,0.1);border-color:rgba(52,211,153,0.3);color:var(--green)}
+.cell-idx{font-size:10px;font-family:var(--mono);color:var(--text-dim)}
+.ptr-label{font-size:11px;font-family:var(--mono);font-weight:700;height:16px;display:flex;align-items:center;justify-content:center}
+.ptr-i-lbl{color:var(--green)}
+.ptr-j-lbl{color:var(--amber)}
+.ptr-ij-lbl{color:#a78bfa}
+
+/* HASH VIS */
+.hash-vis{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:16px 18px;margin-bottom:12px}
+.hash-title{font-size:11px;font-family:var(--mono);color:var(--text-dim);letter-spacing:.06em;text-transform:uppercase;margin-bottom:12px}
+.hash-entries{display:flex;gap:6px;flex-wrap:wrap;min-height:38px;align-items:center}
+.hash-entry{display:flex;align-items:center;gap:0;border-radius:8px;overflow:hidden;border:1px solid rgba(96,165,250,0.25);font-family:var(--mono);font-size:12px;animation:popIn .2s ease}
+@keyframes popIn{from{transform:scale(0.8);opacity:0}to{transform:scale(1);opacity:1}}
+.hash-key{background:rgba(96,165,250,0.15);color:var(--blue);padding:6px 10px;font-weight:700}
+.hash-val{background:rgba(96,165,250,0.06);color:var(--text-muted);padding:6px 8px}
+.hash-empty{color:var(--text-dim);font-size:13px;font-family:var(--mono)}
+
+/* LOG */
+.exec-log{background:#080a0e;border:1px solid var(--border);border-radius:10px;padding:14px 18px;font-size:12px;font-family:var(--mono);max-height:130px;overflow-y:auto;line-height:1.8}
+.log-line{color:var(--text-muted)}
+.log-line.hl{color:var(--text)}
+
+/* GOTCHAS / TRADEOFFS / COMPLEXITY */
+.gotcha-list{list-style:none;display:grid;gap:12px}
+.gotcha-list li{display:flex;gap:12px;font-size:14px;line-height:1.7;color:var(--text-muted);padding:14px;background:var(--surface2);border-radius:10px;border-left:3px solid var(--red)}
+.gotcha-icon{font-size:18px;flex-shrink:0}
+.tradeoff-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.tradeoff-card{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:16px}
+.tradeoff-card h4{font-size:13px;font-family:var(--mono);color:var(--accent);margin-bottom:8px}
+.tradeoff-card p{font-size:13px;color:var(--text-muted);line-height:1.6}
+.complexity-table{width:100%;border-collapse:collapse;font-size:13px;font-family:var(--mono);margin-bottom:18px}
+.complexity-table th{text-align:left;padding:10px 14px;color:var(--text-muted);font-weight:500;border-bottom:1px solid var(--border);font-size:11px;letter-spacing:.06em}
+.complexity-table td{padding:10px 14px;border-bottom:1px solid var(--border);color:var(--text)}
+.complexity-table td:nth-child(2){color:var(--amber);font-weight:700}
+.complexity-table tr:last-child td{border:none}
+.mnemonic{background:rgba(124,110,245,0.08);border:1px solid rgba(124,110,245,0.2);border-radius:10px;padding:16px 20px;font-size:14px;line-height:1.7;color:var(--text-muted);margin-top:14px}
+.mnemonic strong{color:var(--accent)}
+.takeaways{display:grid;gap:8px;margin-top:14px}
+.takeaway{background:var(--surface2);border-left:2px solid var(--green);border-radius:0 8px 8px 0;padding:10px 14px;font-size:13px;color:var(--text-muted);font-family:var(--mono)}
+
+/* STEP COUNTER */
+.step-counter{font-size:12px;font-family:var(--mono);color:var(--text-dim);margin-left:auto}
+@media(max-width:600px){
+  .step-info{grid-template-columns:1fr}
+  .tradeoff-grid{grid-template-columns:1fr}
+  .cell{width:32px;height:32px;font-size:13px}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- NAV -->
+  <nav class="nav fade d1">
+    <a href="../index.html">← DSA X-Ray</a>
+    <span class="nav-sep">/</span>
+    <a href="#">Strings</a>
+    <span class="nav-sep">/</span>
+    <span style="color:var(--text)">#3 Longest Substring Without Repeating Characters</span>
+    <span class="diff-badge diff-medium" style="margin-left:auto">Medium</span>
+  </nav>
+
+  <!-- 1. PATTERN BANNER -->
+  <div class="pattern-banner fade d1">
+    <div class="pattern-label">Pattern</div>
+    <div class="pattern-name">Sliding Window + HashMap</div>
+    <div class="pattern-why">
+      You need to track a contiguous range of characters with no duplicates. A fixed two-pointer window that <strong>expands when safe</strong> and <strong>shrinks when a conflict appears</strong> handles this in a single O(n) pass — the hash map is the memory that tells you which side to shrink from.
+    </div>
+    <div class="pattern-related">
+      <span class="pill pill-blue">Related: #76 Minimum Window Substring</span>
+      <span class="pill pill-amber">Related: #159 Fruit Into Baskets</span>
+      <span class="pill pill-green">Related: #567 Permutation in String</span>
+    </div>
+  </div>
+
+  <!-- 2. PROBLEM STATEMENT -->
+  <div class="section fade d2">
+    <div class="section-title">Problem Statement</div>
+    <h1>Longest Substring Without Repeating Characters</h1>
+    <p style="font-size:15px;color:var(--text-muted);line-height:1.7;margin-top:10px">
+      Given a string <code style="color:var(--amber);font-family:var(--mono)">s</code>, return the length of the longest substring that contains no repeating characters.
+    </p>
+    <div class="problem-analogy">
+      Think of a sliding magnifying glass over the string. You keep extending it rightward as long as each new character is unique inside the glass. The moment you see a repeat, you slide the left edge forward — just enough to evict the duplicate — then keep going. Track the widest the glass ever got.
+    </div>
+    <div class="worked-examples">
+      <div class="worked-ex">
+        <div class="we-label">Example 1 &nbsp;|&nbsp; General case</div>
+        <div class="we-val">s = "abcabcbb" → <span class="we-ans">3</span> &nbsp;<span style="color:var(--text-dim)">// "abc"</span></div>
+      </div>
+      <div class="worked-ex">
+        <div class="we-label">Example 2 &nbsp;|&nbsp; All duplicates</div>
+        <div class="we-val">s = "bbbbb" → <span class="we-ans">1</span> &nbsp;<span style="color:var(--text-dim)">// "b"</span></div>
+      </div>
+      <div class="worked-ex">
+        <div class="we-label">Example 3 &nbsp;|&nbsp; Mixed</div>
+        <div class="we-val">s = "pwwkew" → <span class="we-ans">3</span> &nbsp;<span style="color:var(--text-dim)">// "wke"</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. INTUITION + HINTS -->
+  <div class="section fade d3">
+    <div class="section-title">Intuition &amp; Hints</div>
+    <ul class="hint-list">
+      <li><span class="hint-num">1</span><span><strong style="color:var(--text)">Brute force:</strong> Try every substring O(n²), check each for uniqueness O(n) — total O(n³). Too slow.</span></li>
+      <li><span class="hint-num">2</span><span><strong style="color:var(--text)">Better:</strong> Sliding window. Two pointers <code style="color:var(--amber);font-family:var(--mono)">i</code> (left) and <code style="color:var(--amber);font-family:var(--mono)">j</code> (right) maintain a candidate window. Only need to know: is <code style="color:var(--amber);font-family:var(--mono)">s[j]</code> already in the window?</span></li>
+      <li><span class="hint-num">3</span><span><strong style="color:var(--text)">Key insight:</strong> Use a hash set/map for O(1) membership tests. If <code style="color:var(--amber);font-family:var(--mono)">s[j]</code> is new → add it, expand right, update max. If it's already there → evict <code style="color:var(--amber);font-family:var(--mono)">s[i]</code>, shrink left. Do <em>not</em> advance <code style="color:var(--amber);font-family:var(--mono)">j</code> yet — check again next iteration.</span></li>
+      <li><span class="hint-num">4</span><span><strong style="color:var(--text)">Why shrink one step at a time?</strong> We might need to remove several characters from the left before the duplicate is gone. Each removal checks: "is the conflict resolved?" before moving right again.</span></li>
+    </ul>
+    <div class="key-trick">
+      ★ Key trick: the <code style="font-family:var(--mono)">else</code> branch shrinks the window from the <em>left</em> without moving <code style="font-family:var(--mono)">j</code>. On the next loop iteration the <code style="font-family:var(--mono)">if</code> check runs again at the same <code style="font-family:var(--mono)">j</code> — only expanding once the conflict is fully resolved.
+    </div>
+  </div>
+
+  <!-- 4. CODE BLOCK -->
+  <div class="section fade d4">
+    <div class="section-title">Code</div>
+    <div class="code-header">
+      <span style="font-size:13px;color:var(--text-muted);font-family:var(--mono)">Your exact solution</span>
+      <button class="code-toggle" id="blurToggle" onclick="toggleBlur()">Reveal Code</button>
+    </div>
+    <div class="code-wrap">
+      <pre id="codeBlock" class="code-blurred"><code><span class="code-line" id="cl0"><span class="kw">var</span> <span class="fn">lengthOfLongestSubstring</span> <span class="op">=</span> <span class="kw">function</span> (<span class="var">s</span>) <span class="op">{</span></span>
+<span class="code-line" id="cl1">    <span class="kw">let</span> <span class="var">i</span> <span class="op">=</span> <span class="num-lit">0</span><span class="op">;</span></span>
+<span class="code-line" id="cl2">    <span class="kw">let</span> <span class="var">j</span> <span class="op">=</span> <span class="num-lit">0</span><span class="op">;</span></span>
+<span class="code-line" id="cl3">    <span class="kw">let</span> <span class="var">max</span> <span class="op">=</span> <span class="num-lit">0</span><span class="op">;</span></span>
+<span class="code-line" id="cl4">    <span class="kw">let</span> <span class="var">hash</span> <span class="op">=</span> <span class="op">{}</span></span>
+<span class="code-line" id="cl5">    <span class="kw">while</span> (<span class="var">j</span> <span class="op">&lt;</span> <span class="var">s</span><span class="op">.</span><span class="prop">length</span>) <span class="op">{</span></span>
+<span class="code-line blur-target" id="cl6">        <span class="kw">if</span> (<span class="op">!</span><span class="var">hash</span>[<span class="var">s</span>[<span class="var">j</span>]]) <span class="op">{</span></span>
+<span class="code-line blur-target" id="cl7">            <span class="var">hash</span>[<span class="var">s</span>[<span class="var">j</span>]] <span class="op">=</span> <span class="num-lit">1</span></span>
+<span class="code-line blur-target" id="cl8">            <span class="var">max</span> <span class="op">=</span> <span class="fn">Math</span><span class="op">.</span><span class="fn">max</span>(<span class="var">max</span><span class="op">,</span> <span class="var">j</span> <span class="op">-</span> <span class="var">i</span> <span class="op">+</span> <span class="num-lit">1</span>)</span>
+<span class="code-line blur-target" id="cl9">            <span class="var">j</span><span class="op">++</span></span>
+<span class="code-line" id="cl10">        <span class="op">}</span> <span class="kw">else</span> <span class="op">{</span></span>
+<span class="code-line blur-target" id="cl11">            <span class="kw">delete</span> <span class="var">hash</span>[<span class="var">s</span>[<span class="var">i</span>]]</span>
+<span class="code-line blur-target" id="cl12">            <span class="var">i</span><span class="op">++;</span></span>
+<span class="code-line" id="cl13">        <span class="op">}</span></span>
+<span class="code-line" id="cl14">    <span class="op">}</span></span>
+<span class="code-line" id="cl15">    <span class="kw">return</span> <span class="var">max</span></span>
+<span class="code-line" id="cl16"><span class="op">};</span></span></code></pre>
+    </div>
+  </div>
+
+  <!-- 5. INTERACTIVE VISUALIZER -->
+  <div class="section fade d5">
+    <div class="section-title">Interactive Visualizer</div>
+
+    <div class="vis-controls">
+      <select class="example-select" id="exampleSelect" onchange="loadExample()">
+        <option value="0">Example 1: "abcabcbb" → 3</option>
+        <option value="1">Example 2: "bbbbb" → 1</option>
+        <option value="2">Example 3: "pwwkew" → 3</option>
+        <option value="3">Example 4: "" → 0 (edge: empty)</option>
+        <option value="4">Example 5: "abcde" → 5 (no repeats)</option>
+      </select>
+      <button class="btn" onclick="prevStep()">← Prev</button>
+      <button class="btn btn-primary" onclick="nextStep()">Next →</button>
+      <button class="btn" onclick="resetVis()">Reset</button>
+      <button class="btn" id="playBtn" onclick="togglePlay()">▶ Play</button>
+      <span class="step-counter" id="stepCounter">Step 0 / 0</span>
+    </div>
+
+    <div class="progress-bar-wrap"><div class="progress-bar" id="progressBar" style="width:0%"></div></div>
+
+    <!-- Step description -->
+    <div class="step-info">
+      <div class="step-desc" id="stepDesc">Press Next to begin stepping through the algorithm.</div>
+    </div>
+
+    <!-- String visualization -->
+    <div class="string-vis">
+      <div style="font-size:11px;font-family:var(--mono);color:var(--text-dim);text-transform:uppercase;letter-spacing:.06em;margin-bottom:12px">String — Sliding Window</div>
+      <div class="string-cells" id="stringCells"></div>
+    </div>
+
+    <!-- Hash table -->
+    <div class="hash-vis">
+      <div class="hash-title">hash{} — current window characters</div>
+      <div class="hash-entries" id="hashEntries"><span class="hash-empty">empty</span></div>
+    </div>
+
+    <!-- Variable panel + log -->
+    <div class="step-info">
+      <div class="var-panel">
+        <div class="var-panel-title">Variables</div>
+        <div class="var-row"><span class="var-name">i</span><span class="var-val green" id="vI">0</span></div>
+        <div class="var-row"><span class="var-name">j</span><span class="var-val amber" id="vJ">0</span></div>
+        <div class="var-row"><span class="var-name">max</span><span class="var-val blue" id="vMax">0</span></div>
+        <div class="var-row"><span class="var-name">j - i + 1</span><span class="var-val" id="vWin" style="color:var(--text-muted)">—</span></div>
+        <div class="var-row"><span class="var-name">result</span><span class="var-val" id="vResult" style="color:var(--text-muted)">—</span></div>
+      </div>
+      <div class="exec-log" id="execLog">
+        <div class="log-line" style="color:var(--text-dim)">// Execution log will appear here</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 6. GOTCHAS -->
+  <div class="section fade d6">
+    <div class="section-title">Gotchas &amp; Common Pitfalls</div>
+    <ul class="gotcha-list">
+      <li>
+        <span class="gotcha-icon">⚠️</span>
+        <div>
+          <strong style="color:var(--text)">Advancing j during conflict.</strong><br>
+          When <code style="font-family:var(--mono);color:var(--amber)">s[j]</code> is already in hash, you must NOT move <code style="font-family:var(--mono);color:var(--amber)">j</code> — only evict <code style="font-family:var(--mono);color:var(--amber)">s[i]</code> and move <code style="font-family:var(--mono);color:var(--amber)">i</code> forward. The same <code style="font-family:var(--mono);color:var(--amber)">j</code> gets re-evaluated on the next iteration. Skipping this leads to missed evictions and wrong window size.
+        </div>
+      </li>
+      <li>
+        <span class="gotcha-icon">⚠️</span>
+        <div>
+          <strong style="color:var(--text)">Empty string edge case.</strong><br>
+          When <code style="font-family:var(--mono);color:var(--amber)">s = ""</code>, the while loop never runs and <code style="font-family:var(--mono);color:var(--amber)">max</code> stays 0. This happens to be correct — but make sure you're not assuming a non-empty string anywhere else in your reasoning.
+        </div>
+      </li>
+      <li>
+        <span class="gotcha-icon">⚠️</span>
+        <div>
+          <strong style="color:var(--text)">truthy check vs explicit undefined.</strong><br>
+          <code style="font-family:var(--mono);color:var(--amber)">!hash[s[j]]</code> treats both <code style="font-family:var(--mono);color:var(--amber)">undefined</code> and <code style="font-family:var(--mono);color:var(--amber)">0</code> as "not present". Since values are always set to 1 and deleted (never set to 0), this works — but using a Set with <code style="font-family:var(--mono);color:var(--amber)">has()</code> is semantically cleaner.
+        </div>
+      </li>
+    </ul>
+  </div>
+
+  <!-- 7. TRADE-OFFS -->
+  <div class="section fade d7">
+    <div class="section-title">Trade-offs &amp; Alternatives</div>
+    <div class="tradeoff-grid">
+      <div class="tradeoff-card">
+        <h4>This approach: Delete-based Shrink</h4>
+        <p>Remove one character from left per iteration until conflict is resolved. Simple to reason about. O(n) total — each character is added and deleted at most once. But may take multiple iterations per conflict.</p>
+      </div>
+      <div class="tradeoff-card">
+        <h4>Alternative: Index-store Jump</h4>
+        <p>Store <em>last seen index</em> of each character in the map. When a conflict is found, jump <code style="font-family:var(--mono)">i</code> directly past the previous occurrence: <code style="font-family:var(--mono)">i = map[s[j]] + 1</code>. Fewer iterations, same O(n) but constant factor improvement.</p>
+      </div>
+      <div class="tradeoff-card">
+        <h4>Why not a Set?</h4>
+        <p>A Set works identically here — <code style="font-family:var(--mono)">has()</code> / <code style="font-family:var(--mono)">add()</code> / <code style="font-family:var(--mono)">delete()</code>. The object-as-map approach is equivalent but the Set version is more idiomatic for membership-only tracking.</p>
+      </div>
+      <div class="tradeoff-card">
+        <h4>ASCII-only: int[128] array</h4>
+        <p>If the input is constrained to ASCII (common in interviews), a fixed-size <code style="font-family:var(--mono)">int[128]</code> array with char-code indexing avoids hash overhead entirely. O(1) lookup, cache-friendly, but doesn't generalize to Unicode.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- 8. COMPLEXITY + MEMORY HOOKS -->
+  <div class="section fade d8">
+    <div class="section-title">Complexity &amp; Memory Hooks</div>
+    <table class="complexity-table">
+      <tr><th>Metric</th><th>Value</th><th>Reason</th></tr>
+      <tr><td>Time</td><td>O(n)</td><td>Each character is inserted into and deleted from the hash at most once across the entire run.</td></tr>
+      <tr><td>Space</td><td>O(min(n, α))</td><td>Hash holds at most the window size, bounded by the alphabet size α (e.g. 26 for lowercase letters).</td></tr>
+    </table>
+    <div class="mnemonic">
+      <strong>ELI5 Mnemonic:</strong> "Expand until you hit a copy, then evict from the left until it's gone — the widest gap you ever held is your answer."
+    </div>
+    <div class="takeaways">
+      <div class="takeaway">// j only moves forward on success — never during a conflict. i evicts one at a time.</div>
+      <div class="takeaway">// Every character is added once and removed at most once → O(n) total operations.</div>
+      <div class="takeaway">// The window [i..j] is always a valid substring with no duplicates — invariant maintained at all times.</div>
+    </div>
+  </div>
+
+</div><!-- /wrap -->
+
+<script>
+// ─── EXAMPLES ───────────────────────────────────────────────────────────────
+const EXAMPLES = [
+  { s: "abcabcbb",  label: '"abcabcbb"' },
+  { s: "bbbbb",     label: '"bbbbb"' },
+  { s: "pwwkew",   label: '"pwwkew"' },
+  { s: "",          label: '"" (empty)' },
+  { s: "abcde",    label: '"abcde"' },
+];
+
+// ─── STEP GENERATOR ─────────────────────────────────────────────────────────
+function generateSteps(s) {
+  const steps = [];
+
+  // Step 0: init
+  steps.push({
+    desc: `Initialize: <em>i=0</em>, <em>j=0</em>, <em>max=0</em>, <em>hash={}</em>. Begin sliding window over <em>"${s || '(empty)'}"</em>.`,
+    log: [
+      { t: `Input: "${s}"`, h: false },
+      { t: `let i=0, j=0, max=0, hash={}`, h: true },
+      { t: `Enter while loop: j < ${s.length}?`, h: false },
+    ],
+    vPhase: "init",
+    vI: 0, vJ: 0, vMax: 0, vHash: {},
+    vResult: s.length === 0 ? 0 : "—",
+    activeLine: [1, 2, 3, 4],
+  });
+
+  if (s.length === 0) {
+    steps.push({
+      desc: `<em>j=0</em> is not less than <em>s.length=0</em> — loop never runs. Return <em>max=0</em>.`,
+      log: [
+        { t: `j=0 < s.length=0? → false`, h: true },
+        { t: `return max = 0`, h: false },
+      ],
+      vPhase: "done",
+      vI: 0, vJ: 0, vMax: 0, vHash: {},
+      vResult: 0,
+      activeLine: [5, 15],
+    });
+    return steps;
+  }
+
+  let i = 0, j = 0, max = 0;
+  let hash = {};
+
+  while (j < s.length) {
+    if (!hash[s[j]]) {
+      hash[s[j]] = 1;
+      const newLen = j - i + 1;
+      const prevMax = max;
+      max = Math.max(max, newLen);
+      const updated = max > prevMax;
+      steps.push({
+        desc: `<em>s[${j}]='${s[j]}'</em> not in hash — add it. Window [<em>${i}</em>..<em>${j}</em>], length <em>${newLen}</em>.${updated ? ` New max → <em>${max}</em>! ★` : ` max stays <em>${max}</em>.`} Advance j → <em>${j + 1}</em>.`,
+        log: [
+          { t: `while j=${j} < ${s.length}: ✓`, h: false },
+          { t: `s[${j}]='${s[j]}' → !hash['${s[j]}'] = true`, h: true },
+          { t: `hash['${s[j]}'] = 1`, h: false },
+          { t: `max = Math.max(${prevMax}, ${j}-${i}+1) = ${max}`, h: updated },
+          { t: `j++ → ${j + 1}`, h: false },
+        ],
+        vPhase: "expand",
+        vI: i, vJ: j, vMax: max, vHash: { ...hash },
+        vResult: "—",
+        activeLine: [5, 6, 7, 8, 9],
+        newMax: updated,
+      });
+      j++;
+    } else {
+      const removed = s[i];
+      delete hash[s[i]];
+      steps.push({
+        desc: `<em>s[${j}]='${s[j]}'</em> already in hash — conflict! Remove <em>s[${i}]='${removed}'</em> from hash, shrink left: i → <em>${i + 1}</em>. Don't move j yet.`,
+        log: [
+          { t: `while j=${j} < ${s.length}: ✓`, h: false },
+          { t: `s[${j}]='${s[j]}' → !hash['${s[j]}'] = false`, h: true },
+          { t: `else: delete hash['${removed}'] (s[i=${i}])`, h: true },
+          { t: `i++ → ${i + 1}`, h: false },
+        ],
+        vPhase: "shrink",
+        vI: i + 1, vJ: j, vMax: max, vHash: { ...hash },
+        vResult: "—",
+        activeLine: [5, 6, 10, 11, 12],
+        conflictChar: s[j], evictChar: removed, evictIdx: i,
+      });
+      i++;
+    }
+  }
+
+  steps.push({
+    desc: `Loop complete: <em>j=${j}</em> reached end of string (length <em>${s.length}</em>). Return <em>max=${max}</em>.`,
+    log: [
+      { t: `while j=${j} < ${s.length}? → false`, h: true },
+      { t: `return max = ${max}`, h: true },
+    ],
+    vPhase: "done",
+    vI: i, vJ: j, vMax: max, vHash: { ...hash },
+    vResult: max,
+    activeLine: [5, 15],
+  });
+
+  return steps;
+}
+
+// ─── STATE ───────────────────────────────────────────────────────────────────
+let steps = [];
+let currentStep = 0;
+let playTimer = null;
+let currentInput = "";
+
+function loadExample() {
+  const idx = +document.getElementById("exampleSelect").value;
+  const ex = EXAMPLES[idx];
+  currentInput = ex.s;
+  steps = generateSteps(currentInput);
+  currentStep = 0;
+  clearPlay();
+  renderStep(0);
+  buildStringCells(currentInput);
+}
+
+// ─── RENDER ──────────────────────────────────────────────────────────────────
+function buildStringCells(s) {
+  const container = document.getElementById("stringCells");
+  if (!s) {
+    container.innerHTML = '<span style="color:var(--text-dim);font-family:var(--mono);font-size:13px">(empty string)</span>';
+    return;
+  }
+  container.innerHTML = s.split("").map((ch, idx) =>
+    `<div class="cell-group">
+      <div class="ptr-label" id="ptr-${idx}"></div>
+      <div class="cell" id="cell-${idx}">${ch}</div>
+      <div class="cell-idx">${idx}</div>
+    </div>`
+  ).join("");
+}
+
+function renderStep(si) {
+  const st = steps[si];
+  if (!st) return;
+
+  // Progress
+  document.getElementById("progressBar").style.width = (si / (steps.length - 1) * 100) + "%";
+  document.getElementById("stepCounter").textContent = `Step ${si} / ${steps.length - 1}`;
+
+  // Description
+  document.getElementById("stepDesc").innerHTML = st.desc;
+
+  // Variables
+  document.getElementById("vI").textContent = st.vI;
+  document.getElementById("vJ").textContent = st.vJ < currentInput.length ? st.vJ : st.vJ + " (end)";
+  document.getElementById("vMax").textContent = st.vMax;
+  const winLen = (st.vPhase !== "done" && currentInput.length > 0) ? (st.vJ - st.vI + 1) : "—";
+  document.getElementById("vWin").textContent = winLen;
+  const resEl = document.getElementById("vResult");
+  if (st.vResult === "—") {
+    resEl.textContent = "—"; resEl.style.color = "var(--text-muted)";
+  } else {
+    resEl.textContent = st.vResult; resEl.style.color = "var(--green)";
+  }
+
+  // String cells
+  if (currentInput) {
+    currentInput.split("").forEach((_, idx) => {
+      const cell = document.getElementById(`cell-${idx}`);
+      const ptrEl = document.getElementById(`ptr-${idx}`);
+      if (!cell) return;
+      cell.className = "cell";
+      ptrEl.textContent = "";
+      ptrEl.className = "ptr-label";
+
+      if (st.vPhase === "done") {
+        cell.classList.add("done-cell");
+        return;
+      }
+      const iPos = st.vI, jPos = st.vJ;
+      const inWin = idx >= iPos && idx <= jPos;
+
+      if (idx === iPos && idx === jPos) {
+        if (st.vPhase === "shrink" && idx === st.evictIdx) {
+          cell.classList.add("conflict");
+          ptrEl.textContent = "i"; ptrEl.className = "ptr-label ptr-i-lbl";
+        } else {
+          cell.classList.add("ptr-j-active");
+          ptrEl.textContent = "i=j"; ptrEl.className = "ptr-label ptr-ij-lbl";
+        }
+      } else if (idx === jPos && st.vPhase !== "init") {
+        if (st.vPhase === "shrink") {
+          cell.classList.add("conflict");
+          ptrEl.textContent = "j"; ptrEl.className = "ptr-label" + (idx === jPos ? " ptr-j-lbl" : "");
+        } else {
+          cell.classList.add("ptr-j-active");
+          ptrEl.textContent = "j"; ptrEl.className = "ptr-label ptr-j-lbl";
+        }
+      } else if (idx === iPos) {
+        cell.classList.add("ptr-i");
+        ptrEl.textContent = "i"; ptrEl.className = "ptr-label ptr-i-lbl";
+      } else if (inWin && st.vPhase !== "init") {
+        cell.classList.add("in-window");
+      }
+    });
+  }
+
+  // Hash
+  renderHash(st.vHash);
+
+  // Log
+  const logEl = document.getElementById("execLog");
+  logEl.innerHTML = st.log.map(l =>
+    `<div class="log-line${l.h ? " hl" : ""}">${l.t}</div>`
+  ).join("");
+
+  // Code highlight
+  for (let k = 0; k <= 16; k++) {
+    const el = document.getElementById(`cl${k}`);
+    if (el) el.classList.remove("active-line");
+  }
+  if (st.activeLine) {
+    st.activeLine.forEach(k => {
+      const el = document.getElementById(`cl${k}`);
+      if (el) el.classList.add("active-line");
+    });
+  }
+}
+
+function renderHash(hashObj) {
+  const el = document.getElementById("hashEntries");
+  const keys = Object.keys(hashObj);
+  if (!keys.length) {
+    el.innerHTML = '<span class="hash-empty">empty {}</span>';
+    return;
+  }
+  el.innerHTML = keys.map(k =>
+    `<div class="hash-entry"><span class="hash-key">'${k}'</span><span class="hash-val">:&nbsp;${hashObj[k]}</span></div>`
+  ).join("");
+}
+
+// ─── CONTROLS ────────────────────────────────────────────────────────────────
+function nextStep() {
+  if (currentStep < steps.length - 1) {
+    currentStep++;
+    renderStep(currentStep);
+  }
+}
+function prevStep() {
+  if (currentStep > 0) {
+    currentStep--;
+    renderStep(currentStep);
+  }
+}
+function resetVis() {
+  currentStep = 0;
+  clearPlay();
+  renderStep(0);
+}
+function togglePlay() {
+  if (playTimer) {
+    clearPlay();
+  } else {
+    document.getElementById("playBtn").textContent = "⏸ Pause";
+    playTimer = setInterval(() => {
+      if (currentStep < steps.length - 1) {
+        currentStep++;
+        renderStep(currentStep);
+      } else {
+        clearPlay();
+      }
+    }, 900);
+  }
+}
+function clearPlay() {
+  if (playTimer) { clearInterval(playTimer); playTimer = null; }
+  document.getElementById("playBtn").textContent = "▶ Play";
+}
+
+// ─── KEYBOARD ────────────────────────────────────────────────────────────────
+document.addEventListener("keydown", e => {
+  if (e.target.tagName === "SELECT" || e.target.tagName === "INPUT") return;
+  if (e.key === "ArrowRight") nextStep();
+  if (e.key === "ArrowLeft") prevStep();
+});
+
+// ─── BLUR TOGGLE ─────────────────────────────────────────────────────────────
+let isBlurred = true;
+function toggleBlur() {
+  isBlurred = !isBlurred;
+  const block = document.getElementById("codeBlock");
+  const btn = document.getElementById("blurToggle");
+  if (isBlurred) {
+    block.classList.add("code-blurred");
+    btn.textContent = "Reveal Code";
+  } else {
+    block.classList.remove("code-blurred");
+    btn.textContent = "Blur Code";
+  }
+}
+
+// ─── INIT ────────────────────────────────────────────────────────────────────
+loadExample();
+</script>
+</body>
+</html>

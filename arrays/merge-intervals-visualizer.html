@@ -1,0 +1,781 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>#56 · Merge Intervals</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Sora:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --bg:#0d0f14;--surface:#13161d;--surface2:#1a1e28;
+  --surface3:#212638;--border:rgba(255,255,255,0.07);
+  --border-mid:rgba(255,255,255,0.12);
+  --text:#e8eaf0;--text-muted:#6b7280;--text-dim:#3d4251;
+  --accent:#7c6ef5;--green:#34d399;--amber:#fbbf24;
+  --blue:#60a5fa;--red:#f87171;--orange:#fb923c;
+  --mono:'JetBrains Mono',monospace;
+  --sans:'Sora',sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:100vh}
+body::before{
+  content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+  background-image:linear-gradient(rgba(124,110,245,.03) 1px,transparent 1px),
+                   linear-gradient(90deg,rgba(124,110,245,.03) 1px,transparent 1px);
+  background-size:40px 40px;
+}
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+.container{max-width:920px;margin:0 auto;padding:28px 16px;position:relative;z-index:1}
+section{animation:fadeUp .5s ease both;margin-bottom:32px}
+section:nth-child(1){animation-delay:.05s}section:nth-child(2){animation-delay:.10s}
+section:nth-child(3){animation-delay:.15s}section:nth-child(4){animation-delay:.20s}
+section:nth-child(5){animation-delay:.25s}section:nth-child(6){animation-delay:.30s}
+section:nth-child(7){animation-delay:.35s}section:nth-child(8){animation-delay:.40s}
+
+/* Pattern Banner */
+.pattern-banner{
+  background:linear-gradient(135deg,rgba(124,110,245,.12),rgba(96,165,250,.07));
+  border:1px solid rgba(124,110,245,.22);border-radius:14px;padding:20px 24px;
+}
+.pattern-tag{
+  display:inline-block;background:rgba(124,110,245,.18);border:1px solid rgba(124,110,245,.38);
+  color:var(--accent);font-size:11px;font-weight:700;letter-spacing:.09em;
+  text-transform:uppercase;padding:4px 12px;border-radius:100px;margin-bottom:10px;
+  font-family:var(--mono);
+}
+.pattern-why{color:var(--text);font-size:15px;font-weight:500;line-height:1.6;margin-bottom:8px}
+.pattern-related{color:var(--text-muted);font-size:13px}
+.pattern-related strong{color:var(--blue)}
+
+/* Section header */
+.section-header{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+.section-num{
+  background:rgba(124,110,245,.14);border:1px solid rgba(124,110,245,.28);
+  color:var(--accent);font-family:var(--mono);font-size:11px;font-weight:700;
+  width:26px;height:26px;border-radius:6px;display:flex;align-items:center;justify-content:center;flex-shrink:0;
+}
+.section-title{font-size:16px;font-weight:700;color:var(--text)}
+
+/* Cards */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px}
+
+/* Problem statement */
+.prob-analogy{
+  background:rgba(96,165,250,.06);border:1px solid rgba(96,165,250,.14);
+  border-radius:10px;padding:14px;margin:12px 0;font-size:14px;color:var(--blue);line-height:1.6;
+}
+.prob-examples{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;margin-top:12px}
+.prob-example{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px}
+.prob-example-label{font-size:11px;color:var(--text-muted);margin-bottom:6px;font-family:var(--mono);text-transform:uppercase;letter-spacing:.05em}
+.prob-example-val{font-size:12px;color:var(--text);font-family:var(--mono);line-height:1.7}
+
+/* Hints */
+.hint-list{list-style:none;display:flex;flex-direction:column;gap:8px}
+.hint-list li{
+  display:flex;gap:10px;padding:11px 14px;background:var(--surface2);
+  border-radius:8px;border-left:3px solid var(--border);font-size:14px;line-height:1.6;
+}
+.hint-list li:nth-child(1){border-left-color:var(--accent)}
+.hint-list li:nth-child(2){border-left-color:var(--amber)}
+.hint-list li:nth-child(3){border-left-color:var(--green)}
+.hint-num{color:var(--text-muted);font-family:var(--mono);font-size:12px;flex-shrink:0;padding-top:2px}
+.key-trick{
+  background:rgba(251,191,36,.07);border:1px solid rgba(251,191,36,.18);
+  border-radius:8px;padding:13px 16px;margin-top:12px;font-size:14px;
+  color:var(--amber);line-height:1.6;
+}
+.key-trick code{font-family:var(--mono);background:rgba(251,191,36,.12);padding:1px 5px;border-radius:4px}
+
+/* Code block */
+.code-wrapper{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden}
+.code-header{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:10px 16px;border-bottom:1px solid var(--border);background:var(--surface2);
+}
+.code-filename{font-family:var(--mono);font-size:12px;color:var(--text-muted)}
+.blur-toggle{
+  background:rgba(124,110,245,.14);border:1px solid rgba(124,110,245,.24);
+  color:var(--accent);font-size:12px;font-family:var(--mono);
+  padding:5px 12px;border-radius:6px;cursor:pointer;transition:all .2s;
+}
+.blur-toggle:hover{background:rgba(124,110,245,.25)}
+pre{margin:0;overflow-x:auto;padding:10px 0}
+.code-line{
+  display:flex;min-height:22px;padding:1px 16px;transition:background .25s;
+  border-left:2px solid transparent;
+}
+.code-line.active{background:rgba(251,191,36,.07);border-left-color:var(--amber)}
+.line-num{
+  color:var(--text-dim);font-family:var(--mono);font-size:13px;
+  min-width:28px;user-select:none;flex-shrink:0;padding-top:2px;line-height:1.6;
+}
+.line-code{font-family:var(--mono);font-size:13px;color:var(--text);white-space:pre;padding-top:2px;line-height:1.6;transition:filter .3s}
+.code-line.blurred .line-code{filter:blur(4px)}
+.code-line.blurred:hover .line-code{filter:none}
+/* syntax */
+.kw{color:#c792ea}.fn{color:#82aaff}.num{color:#f78c6c}
+.op{color:#89ddff}.prop{color:#f07178}
+
+/* Visualizer */
+.viz-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden}
+.viz-header{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:12px 16px;border-bottom:1px solid var(--border);background:var(--surface2);
+  flex-wrap:wrap;gap:8px;
+}
+.viz-title{font-size:13px;font-weight:600;color:var(--text-muted)}
+.example-tabs{display:flex;gap:4px;flex-wrap:wrap}
+.example-tab{
+  background:var(--surface3);border:1px solid var(--border);
+  color:var(--text-muted);font-size:11px;font-family:var(--mono);
+  padding:4px 10px;border-radius:6px;cursor:pointer;transition:all .2s;
+}
+.example-tab.active{
+  background:rgba(124,110,245,.18);border-color:rgba(124,110,245,.38);color:var(--accent);
+}
+.viz-body{padding:20px}
+
+/* Progress */
+.progress-track{height:3px;background:var(--surface3);border-radius:100px;margin-bottom:16px}
+.progress-fill{
+  height:100%;border-radius:100px;
+  background:linear-gradient(90deg,var(--amber),var(--orange));
+  transition:width .3s ease;
+}
+
+/* Step desc */
+.step-desc{
+  background:var(--surface2);border:1px solid var(--border);
+  border-radius:8px;padding:12px 16px;margin-bottom:14px;
+  font-size:14px;line-height:1.65;min-height:46px;
+}
+.step-desc em{color:var(--amber);font-style:normal;font-weight:600}
+
+/* Interval visualization */
+#interval-vis{margin-bottom:14px}
+.vis-label{
+  font-size:10px;font-family:var(--mono);color:var(--text-muted);
+  text-transform:uppercase;letter-spacing:.08em;margin:10px 0 6px;
+}
+.vis-label.green{color:var(--green)}
+.iv-row{display:flex;align-items:center;gap:8px;margin-bottom:4px}
+.iv-label{
+  font-family:var(--mono);font-size:10px;color:var(--text-muted);
+  width:50px;text-align:right;flex-shrink:0;line-height:1;
+}
+.iv-track{
+  position:relative;height:30px;flex:1;
+  background:var(--surface2);border-radius:6px;border:1px solid var(--border);
+  overflow:hidden;
+}
+.iv-bar{
+  position:absolute;top:3px;height:24px;border-radius:5px;border:1.5px solid;
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--mono);font-size:10px;white-space:nowrap;
+  transition:all .38s cubic-bezier(.4,0,.2,1);
+  min-width:28px;overflow:hidden;
+}
+.iv-axis{
+  position:relative;height:18px;margin-left:58px;
+  border-top:1px solid var(--border-mid);margin-bottom:2px;
+}
+.iv-tick{
+  position:absolute;transform:translateX(-50%);
+  font-family:var(--mono);font-size:9px;color:var(--text-dim);padding-top:2px;
+}
+.iv-tick::before{
+  content:'';position:absolute;top:-3px;left:50%;transform:translateX(-50%);
+  width:1px;height:3px;background:var(--border-mid);
+}
+
+/* Variable panel */
+.var-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:8px;margin-bottom:12px}
+.var-cell{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:10px 12px}
+.var-name{font-size:10px;color:var(--text-muted);font-family:var(--mono);margin-bottom:4px}
+.var-val{font-size:15px;font-weight:700;font-family:var(--mono);color:var(--text)}
+.var-val.amber{color:var(--amber)}.var-val.green{color:var(--green)}.var-val.blue{color:var(--blue)}
+
+/* Exec log */
+.exec-log{
+  background:var(--surface2);border:1px solid var(--border);
+  border-radius:8px;padding:9px 14px;max-height:88px;overflow-y:auto;margin-bottom:14px;
+}
+.log-entry,.log-hi{font-family:var(--mono);font-size:11px;padding:1px 0}
+.log-entry{color:var(--text-muted)}.log-hi{color:var(--amber)}
+
+/* Controls */
+.controls{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.btn{
+  background:var(--surface2);border:1px solid var(--border-mid);
+  color:var(--text);font-family:var(--sans);font-size:13px;font-weight:500;
+  padding:8px 18px;border-radius:8px;cursor:pointer;transition:all .2s;
+}
+.btn:hover{background:var(--surface3)}
+.btn-p{background:rgba(124,110,245,.16);border-color:rgba(124,110,245,.32);color:var(--accent)}
+.btn-p:hover{background:rgba(124,110,245,.26)}
+.btn-play{background:rgba(251,191,36,.12);border-color:rgba(251,191,36,.28);color:var(--amber)}
+.btn-play.on{background:rgba(248,113,113,.12);border-color:rgba(248,113,113,.28);color:var(--red)}
+.step-ctr{font-family:var(--mono);font-size:12px;color:var(--text-muted);margin-left:auto}
+
+/* Gotchas */
+.gotcha-list{display:flex;flex-direction:column;gap:10px}
+.gotcha-item{
+  display:flex;gap:12px;padding:14px;background:var(--surface2);
+  border-radius:8px;border-left:3px solid var(--red);
+}
+.gotcha-icon{font-size:16px;flex-shrink:0;padding-top:1px}
+.gotcha-text{font-size:14px;line-height:1.65}
+.gotcha-text strong{color:var(--text)}
+.gotcha-text code{font-family:var(--mono);background:rgba(248,113,113,.1);padding:1px 5px;border-radius:3px;color:var(--red);font-size:12px}
+
+/* Trade-offs */
+.tradeoff{
+  padding:13px 16px;background:var(--surface2);border-radius:8px;
+  border-left:3px solid var(--blue);margin-bottom:10px;font-size:14px;line-height:1.65;
+}
+.tradeoff:last-child{margin-bottom:0}
+.tradeoff strong{color:var(--text)}
+.tradeoff code{font-family:var(--mono);background:rgba(96,165,250,.1);padding:1px 5px;border-radius:3px;color:var(--blue);font-size:12px}
+
+/* Complexity */
+.complexity-table{width:100%;border-collapse:collapse}
+.complexity-table th,.complexity-table td{
+  padding:10px 14px;text-align:left;border-bottom:1px solid var(--border);font-size:13px;
+}
+.complexity-table th{color:var(--text-muted);font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:.06em}
+.complexity-table td:nth-child(2){font-family:var(--mono);color:var(--green);font-weight:700}
+.complexity-table td:nth-child(3){font-family:var(--mono);color:var(--blue);font-weight:700}
+.complexity-table tr:last-child td{border-bottom:none}
+.mnemonic{
+  background:rgba(124,110,245,.07);border:1px solid rgba(124,110,245,.18);
+  border-radius:8px;padding:14px 16px;margin-top:14px;
+}
+.mnemonic-label{font-size:10px;color:var(--accent);text-transform:uppercase;letter-spacing:.09em;margin-bottom:6px;font-family:var(--mono)}
+.mnemonic-text{font-size:14px;color:var(--text);line-height:1.65}
+.takeaways{display:flex;flex-direction:column;gap:6px;margin-top:12px}
+.takeaway{
+  background:var(--surface2);border-radius:6px;padding:9px 14px;
+  font-size:13px;color:var(--text-muted);border-left:2px solid var(--accent);line-height:1.55;
+}
+.takeaway strong{color:var(--text)}
+
+@media(max-width:580px){
+  .var-grid{grid-template-columns:1fr 1fr}
+  .controls{justify-content:center}
+  .step-ctr{margin-left:0;width:100%;text-align:center}
+  .prob-examples{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+<div class="container">
+
+<!-- 1. Pattern Banner -->
+<section>
+  <div class="pattern-banner">
+    <div class="pattern-tag">Sorting + Greedy</div>
+    <p class="pattern-why">Sort intervals by start, then greedily merge each one into the running tail of the result — no need to look back further than one step.</p>
+    <p class="pattern-related">Related: <strong>#57 Insert Interval</strong> · <strong>#252 Meeting Rooms</strong> · <strong>#253 Meeting Rooms II</strong></p>
+  </div>
+</section>
+
+<!-- 2. Problem Statement -->
+<section>
+  <div class="section-header">
+    <div class="section-num">2</div>
+    <div class="section-title">Problem Statement — #56 Merge Intervals</div>
+  </div>
+  <div class="card">
+    <p style="font-size:14px;line-height:1.8">
+      Given an array of <code style="font-family:var(--mono);color:var(--blue)">intervals</code> where
+      <code style="font-family:var(--mono);color:var(--blue)">intervals[i] = [start<sub>i</sub>, end<sub>i</sub>]</code>,
+      merge all <strong>overlapping intervals</strong> and return an array of the non-overlapping intervals that cover all the input intervals.
+    </p>
+    <div class="prob-analogy">
+      Think of it like a busy schedule: if a meeting runs 9–11am and another starts at 10am and ends at 12pm, you're blocked 9am–12pm.
+      The goal is to collapse all your overlapping blocks into clean, continuous busy windows.
+    </div>
+    <div class="prob-examples">
+      <div class="prob-example">
+        <div class="prob-example-label">Standard overlap</div>
+        <div class="prob-example-val">[[1,3],[2,6],[8,10],[15,18]]<br>→ [[1,6],[8,10],[15,18]]</div>
+      </div>
+      <div class="prob-example">
+        <div class="prob-example-label">Touching intervals</div>
+        <div class="prob-example-val">[[1,4],[4,5]]<br>→ [[1,5]]</div>
+      </div>
+      <div class="prob-example">
+        <div class="prob-example-label">Contained interval</div>
+        <div class="prob-example-val">[[1,10],[2,3],[4,6]]<br>→ [[1,10]]</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 3. Intuition + Hints -->
+<section>
+  <div class="section-header">
+    <div class="section-num">3</div>
+    <div class="section-title">Intuition + Hints</div>
+  </div>
+  <div class="card">
+    <ul class="hint-list">
+      <li>
+        <span class="hint-num">1</span>
+        <span><strong>Brute force O(n²):</strong> Compare every pair of intervals. Too slow. Can we reduce comparisons?</span>
+      </li>
+      <li>
+        <span class="hint-num">2</span>
+        <span><strong>Key insight:</strong> If intervals are sorted by start, a new interval can only overlap with the <em>last merged interval</em>. No need to scan backwards — one comparison suffices.</span>
+      </li>
+      <li>
+        <span class="hint-num">3</span>
+        <span><strong>Optimal O(n log n):</strong> Sort once, then do one linear pass. Track the tail of the result with <code style="font-family:var(--mono)">lastIndex</code> to write back in-place into <code style="font-family:var(--mono)">ans</code>.</span>
+      </li>
+    </ul>
+    <div class="key-trick">
+      ★ Key trick: The overlap check is <code>ans[lastIndex][1] &gt;= arr[i][0]</code>. When true, take
+      <code>Math.max</code> of the two ends — this handles the "contained interval" case for free (where B is inside A, we keep A's end).
+    </div>
+  </div>
+</section>
+
+<!-- 4. Code Block -->
+<section>
+  <div class="section-header">
+    <div class="section-num">4</div>
+    <div class="section-title">Solution Code</div>
+  </div>
+  <div class="code-wrapper">
+    <div class="code-header">
+      <span class="code-filename">merge.js</span>
+      <button class="blur-toggle" id="blur-btn" onclick="toggleBlur()">Reveal Code</button>
+    </div>
+    <pre id="code-pre">
+<div class="code-line" data-line="1"><span class="line-num">1</span><span class="line-code"><span class="kw">var</span> <span class="fn">merge</span> = <span class="kw">function</span>(intervals) {</span></div>
+<div class="code-line blurred" data-line="2"><span class="line-num">2</span><span class="line-code">    <span class="kw">const</span> arr = intervals.<span class="fn">sort</span>((a, b) => a[<span class="num">0</span>] - b[<span class="num">0</span>])</span></div>
+<div class="code-line" data-line="3"><span class="line-num">3</span><span class="line-code">    <span class="kw">let</span> lastIndex = <span class="num">0</span>;</span></div>
+<div class="code-line" data-line="4"><span class="line-num">4</span><span class="line-code">    <span class="kw">let</span> ans = [arr[<span class="num">0</span>]]</span></div>
+<div class="code-line blurred" data-line="5"><span class="line-num">5</span><span class="line-code">    <span class="kw">for</span>(<span class="kw">let</span> i = <span class="num">1</span>; i &lt; arr.<span class="prop">length</span>; i++){</span></div>
+<div class="code-line blurred" data-line="6"><span class="line-num">6</span><span class="line-code">        <span class="kw">if</span>(ans[lastIndex][<span class="num">1</span>] &gt;= arr[i][<span class="num">0</span>]) {</span></div>
+<div class="code-line blurred" data-line="7"><span class="line-num">7</span><span class="line-code">            ans[lastIndex][<span class="num">1</span>] = Math.<span class="fn">max</span>(ans[lastIndex][<span class="num">1</span>], arr[i][<span class="num">1</span>])</span></div>
+<div class="code-line" data-line="8"><span class="line-num">8</span><span class="line-code">        } <span class="kw">else</span> {</span></div>
+<div class="code-line blurred" data-line="9"><span class="line-num">9</span><span class="line-code">            lastIndex++;</span></div>
+<div class="code-line blurred" data-line="10"><span class="line-num">10</span><span class="line-code">            ans[lastIndex] = arr[i]</span></div>
+<div class="code-line" data-line="11"><span class="line-num">11</span><span class="line-code">        }</span></div>
+<div class="code-line" data-line="12"><span class="line-num">12</span><span class="line-code">    }</span></div>
+<div class="code-line" data-line="13"><span class="line-num">13</span><span class="line-code">    <span class="kw">return</span> ans</span></div>
+<div class="code-line" data-line="14"><span class="line-num">14</span><span class="line-code">};</span></div>
+    </pre>
+  </div>
+</section>
+
+<!-- 5. Visualizer -->
+<section>
+  <div class="section-header">
+    <div class="section-num">5</div>
+    <div class="section-title">Interactive Visualizer</div>
+  </div>
+  <div class="viz-card">
+    <div class="viz-header">
+      <span class="viz-title">Step through the algorithm</span>
+      <div class="example-tabs" id="example-tabs"></div>
+    </div>
+    <div class="viz-body">
+      <div class="progress-track"><div class="progress-fill" id="progress-bar" style="width:0%"></div></div>
+      <div class="step-desc" id="step-desc">Select an example and press <strong>Next →</strong> or <strong>Play</strong></div>
+
+      <div id="interval-vis"></div>
+
+      <div class="var-grid">
+        <div class="var-cell">
+          <div class="var-name">lastIndex</div>
+          <div class="var-val amber" id="var-li">—</div>
+        </div>
+        <div class="var-cell">
+          <div class="var-name">i (current)</div>
+          <div class="var-val blue" id="var-i">—</div>
+        </div>
+        <div class="var-cell">
+          <div class="var-name">phase</div>
+          <div class="var-val" id="var-phase">—</div>
+        </div>
+        <div class="var-cell">
+          <div class="var-name">result / action</div>
+          <div class="var-val green" id="var-result">—</div>
+        </div>
+      </div>
+
+      <div class="exec-log" id="exec-log"><div class="log-entry">Execution log will appear here...</div></div>
+
+      <div class="controls">
+        <button class="btn" onclick="reset()">↺ Reset</button>
+        <button class="btn btn-p" onclick="prev()">← Prev</button>
+        <button class="btn btn-p" onclick="next()">Next →</button>
+        <button class="btn btn-play" id="play-btn" onclick="togglePlay()">▶ Play</button>
+        <span class="step-ctr" id="step-ctr">Step — / —</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 6. Gotchas -->
+<section>
+  <div class="section-header">
+    <div class="section-num">6</div>
+    <div class="section-title">Gotchas &amp; Common Pitfalls</div>
+  </div>
+  <div class="card">
+    <ul class="gotcha-list">
+      <li class="gotcha-item">
+        <span class="gotcha-icon">⚠</span>
+        <div class="gotcha-text">
+          <strong>Forgetting Math.max on the end.</strong> If interval B is fully <em>contained inside</em> interval A
+          (e.g. A=[1,10], B=[2,3]), naively assigning <code>arr[i][1]</code> would shrink the merged interval.
+          Always use <code>Math.max(ans[lastIndex][1], arr[i][1])</code>.
+        </div>
+      </li>
+      <li class="gotcha-item">
+        <span class="gotcha-icon">⚠</span>
+        <div class="gotcha-text">
+          <strong>Using &gt; instead of &gt;= for the overlap check.</strong> Intervals that share an endpoint
+          (e.g. [1,4] and [4,5]) <em>do</em> overlap. The condition must be <code>ans[lastIndex][1] &gt;= arr[i][0]</code>
+          to catch the "touching" case.
+        </div>
+      </li>
+      <li class="gotcha-item">
+        <span class="gotcha-icon">⚠</span>
+        <div class="gotcha-text">
+          <strong>Mutating the input.</strong> <code>Array.prototype.sort()</code> sorts in-place.
+          If the caller relies on the original order, clone first: <code>[...intervals].sort(...)</code>.
+          Always ask in an interview whether mutation is acceptable.
+        </div>
+      </li>
+    </ul>
+  </div>
+</section>
+
+<!-- 7. Trade-offs / Alternatives -->
+<section>
+  <div class="section-header">
+    <div class="section-num">7</div>
+    <div class="section-title">Trade-offs / Alternatives</div>
+  </div>
+  <div class="card">
+    <div class="tradeoff">
+      <strong>Why not a stack?</strong> A stack-based solution works and is idiomatic, but it's equivalent — you push/pop based on the same overlap check. Using an <code>ans</code> array with a <code>lastIndex</code> pointer achieves the same O(1) tail access without any extra data structure overhead.
+    </div>
+    <div class="tradeoff">
+      <strong>Why can't we do better than O(n log n)?</strong> The sort dominates. The merge pass itself is O(n). There is no known O(n) algorithm for unsorted input — you fundamentally need the ordering to guarantee that overlapping intervals are adjacent.
+    </div>
+    <div class="tradeoff">
+      <strong>True in-place?</strong> This solution builds a new <code>ans</code> array, so space is O(n) for the output. You can overwrite the input array in-place (pointer into the same array), reducing auxiliary space to O(1) excluding output — but it makes the code harder to read and is rarely asked.
+    </div>
+  </div>
+</section>
+
+<!-- 8. Complexity + Memory Hooks -->
+<section>
+  <div class="section-header">
+    <div class="section-num">8</div>
+    <div class="section-title">Complexity + Memory Hooks</div>
+  </div>
+  <div class="card">
+    <table class="complexity-table">
+      <thead>
+        <tr><th>Case</th><th>Time</th><th>Space</th><th>Note</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>All cases</td><td>O(n log n)</td><td>O(n)</td><td>Sort dominates; output holds up to n intervals</td></tr>
+        <tr><td>Everything merges</td><td>O(n log n)</td><td>O(1)*</td><td>*Excluding output — single interval in ans</td></tr>
+        <tr><td>Nothing merges</td><td>O(n log n)</td><td>O(n)</td><td>Every interval becomes its own entry in ans</td></tr>
+      </tbody>
+    </table>
+    <div class="mnemonic">
+      <div class="mnemonic-label">ELI5 Mnemonic</div>
+      <div class="mnemonic-text">"Sort the meetings by start time. Walk through them — if the next starts before the current block ends, extend the block; otherwise, start a new block."</div>
+    </div>
+    <div class="takeaways">
+      <div class="takeaway"><strong>Sort first</strong> — makes it so you only ever need to compare with the last result, turning O(n²) into O(n).</div>
+      <div class="takeaway"><strong>Math.max on the end</strong> — the one-liner that handles both "extending" and "contained" cases simultaneously.</div>
+      <div class="takeaway"><strong>lastIndex pointer</strong> — avoids a separate stack; write directly into ans without extra allocations.</div>
+    </div>
+  </div>
+</section>
+
+</div>
+
+<script>
+const EXAMPLES = [
+  { label:'E1', intervals:[[1,3],[2,6],[8,10],[15,18]], desc:'Standard overlaps' },
+  { label:'E2', intervals:[[1,4],[4,5]], desc:'Touching intervals (>=)' },
+  { label:'E3', intervals:[[1,10],[2,3],[4,6],[9,12]], desc:'Contained + extend' },
+  { label:'E4', intervals:[[5,10]], desc:'Single interval (edge)' },
+  { label:'E5', intervals:[[1,3],[2,6],[8,10],[8,15],[15,18]], desc:'Chain merge' }
+];
+
+let exIdx=0, stepIdx=0, steps=[], playing=false, timer=null, blurred=true;
+let scaleMin=0, scaleMax=1;
+
+function setScale(arr){
+  const vals=arr.flat();
+  scaleMin=Math.min(...vals);
+  scaleMax=Math.max(...vals);
+}
+function toL(v){
+  const range=scaleMax-scaleMin||1;
+  const pad=range*0.06||0.6;
+  return((v-scaleMin+pad)/(range+2*pad)*100).toFixed(2)+'%';
+}
+function toW(s,e){
+  const range=scaleMax-scaleMin||1;
+  const pad=range*0.06||0.6;
+  return Math.max(((e-s)/(range+2*pad)*100),3).toFixed(2)+'%';
+}
+
+function generateSteps(intervals){
+  const res=[];
+  const orig=intervals.map(x=>[...x]);
+
+  // Step 0: initial
+  res.push({
+    desc:'Starting with the <em>original intervals</em>. The first step is to sort by start value.',
+    log:[{t:`Input: ${JSON.stringify(orig)}`,h:false}],
+    vPhase:'Initial',vResult:'—',
+    displayArr:orig,ans:[],li:-1,ci:-1,activeLine:null
+  });
+
+  const arr=intervals.map(x=>[...x]).sort((a,b)=>a[0]-b[0]);
+
+  // Step 1: sort
+  res.push({
+    desc:'<em>Sort intervals by start value</em>. After sorting, any overlapping intervals are guaranteed to be adjacent.',
+    log:[
+      {t:`intervals.sort((a,b) => a[0] - b[0])`,h:false},
+      {t:`→ ${JSON.stringify(arr)}`,h:true}
+    ],
+    vPhase:'Sort',vResult:'—',
+    displayArr:arr.map(x=>[...x]),ans:[],li:-1,ci:-1,activeLine:2
+  });
+
+  // Step 2: init
+  let li=0;
+  let ans=[[...arr[0]]];
+  res.push({
+    desc:`Initialize <em>ans = [[${arr[0]}]]</em>. Set <em>lastIndex = 0</em>. Begin loop at i = 1.`,
+    log:[
+      {t:`ans = [[${arr[0]}]]`,h:true},
+      {t:`lastIndex = 0`,h:true}
+    ],
+    vPhase:'Init',vResult:'—',
+    displayArr:arr.map(x=>[...x]),ans:ans.map(x=>[...x]),li:0,ci:-1,activeLine:3
+  });
+
+  for(let i=1;i<arr.length;i++){
+    const prevEnd=ans[li][1];
+    const currStart=arr[i][0];
+    const over=prevEnd>=currStart;
+
+    // check step
+    res.push({
+      desc:`i=${i}: Is <em>ans[${li}][1] = ${prevEnd}</em> ≥ <em>arr[${i}][0] = ${currStart}</em>? → <em>${over?'✓ YES — overlap, merge!':'✗ NO — gap, append new'}</em>`,
+      log:[
+        {t:`i=${i}  arr[${i}]=[${arr[i]}]`,h:false},
+        {t:`ans[${li}][1]=${prevEnd} >= arr[${i}][0]=${currStart} → ${over}`,h:true}
+      ],
+      vPhase:over?'Overlap':'No Overlap',vResult:over?'merge':'add new',
+      displayArr:arr.map(x=>[...x]),ans:ans.map(x=>[...x]),
+      li,ci:i,over,checking:true,activeLine:6
+    });
+
+    if(over){
+      const oldEnd=ans[li][1];
+      const newEnd=Math.max(oldEnd,arr[i][1]);
+      ans[li][1]=newEnd;
+      res.push({
+        desc:`Merge: <em>ans[${li}][1] = max(${oldEnd}, ${arr[i][1]}) = ${newEnd}</em>${newEnd===oldEnd?' — interval was contained, end unchanged.':'.'}`,
+        log:[{t:`ans[${li}][1] = max(${oldEnd}, ${arr[i][1]}) = ${newEnd}`,h:true}],
+        vPhase:'Merging',vResult:`[${ans[li]}]`,
+        displayArr:arr.map(x=>[...x]),ans:ans.map(x=>[...x]),
+        li,ci:i,merging:true,activeLine:7
+      });
+    }else{
+      li++;
+      ans[li]=[...arr[i]];
+      res.push({
+        desc:`No overlap — <em>lastIndex++</em> → ${li}, push <em>[${arr[i]}]</em> as a new entry in ans.`,
+        log:[
+          {t:`lastIndex++ → ${li}`,h:false},
+          {t:`ans[${li}] = [${arr[i]}]`,h:true}
+        ],
+        vPhase:'Append',vResult:`[${arr[i]}]`,
+        displayArr:arr.map(x=>[...x]),ans:ans.map(x=>[...x]),
+        li,ci:i,activeLine:9
+      });
+    }
+  }
+
+  // done
+  res.push({
+    desc:`<em>Done!</em> Return <em>ans = ${JSON.stringify(ans)}</em>. All intervals merged.`,
+    log:[
+      {t:`return ans`,h:false},
+      {t:`→ ${JSON.stringify(ans)}`,h:true}
+    ],
+    vPhase:'Complete',vResult:JSON.stringify(ans),
+    displayArr:arr.map(x=>[...x]),ans:ans.map(x=>[...x]),
+    li,ci:-1,done:true,activeLine:13
+  });
+
+  return res;
+}
+
+function renderVis(step){
+  const{displayArr,ans,li,ci,over,checking,merging,done}=step;
+  let html='';
+
+  // Sorted intervals
+  const label=step.displayArr===step.displayArr&&steps[stepIdx]===steps[0]?'Original Intervals':'Sorted Intervals (arr)';
+  html+=`<div class="vis-label">${stepIdx===0?'Original Intervals (unsorted)':'Sorted Intervals (arr)'}</div>`;
+
+  displayArr.forEach((iv,idx)=>{
+    const[s,e]=iv;
+    let bg='var(--surface3)',bc='var(--border-mid)',tc='var(--text-muted)';
+
+    if(done){
+      bg='rgba(52,211,153,.08)';bc='rgba(52,211,153,.2)';tc='rgba(52,211,153,.6)';
+    } else if(idx===ci){
+      if(checking&&over===true||merging){
+        bg='rgba(251,191,36,.18)';bc='var(--amber)';tc='var(--amber)';
+      } else if(checking&&over===false){
+        bg='rgba(248,113,113,.14)';bc='var(--red)';tc='var(--red)';
+      } else {
+        bg='rgba(124,110,245,.14)';bc='var(--accent)';tc='var(--accent)';
+      }
+    } else if(ci>0&&idx<ci){
+      bg='rgba(52,211,153,.07)';bc='rgba(52,211,153,.18)';tc='rgba(52,211,153,.5)';
+    }
+
+    html+=`<div class="iv-row">
+      <div class="iv-label">arr[${idx}]</div>
+      <div class="iv-track">
+        <div class="iv-bar" style="left:${toL(s)};width:${toW(s,e)};background:${bg};border-color:${bc};color:${tc};">[${s},${e}]</div>
+      </div>
+    </div>`;
+  });
+
+  // Axis ticks
+  const ticks=[...new Set(displayArr.flat())].sort((a,b)=>a-b);
+  html+='<div class="iv-axis">';
+  ticks.forEach(v=>{
+    html+=`<div class="iv-tick" style="left:${toL(v)}"><span>${v}</span></div>`;
+  });
+  html+='</div>';
+
+  // Answer array
+  if(ans&&ans.length>0){
+    html+='<div class="vis-label green">Result (ans)</div>';
+    ans.forEach((iv,idx)=>{
+      const[s,e]=iv;
+      const isLast=idx===li;
+      const bright=done||isLast?'.25':'.12';
+      const bbc=done||isLast?'var(--green)':'rgba(52,211,153,.4)';
+      html+=`<div class="iv-row">
+        <div class="iv-label">ans[${idx}]</div>
+        <div class="iv-track">
+          <div class="iv-bar" style="left:${toL(s)};width:${toW(s,e)};background:rgba(52,211,153,${bright});border-color:${bbc};color:var(--green);">[${s},${e}]</div>
+        </div>
+      </div>`;
+    });
+  }
+
+  document.getElementById('interval-vis').innerHTML=html;
+}
+
+function renderStep(step){
+  renderVis(step);
+  document.getElementById('step-desc').innerHTML=step.desc;
+  document.getElementById('exec-log').innerHTML=step.log.map(l=>`<div class="${l.h?'log-hi':'log-entry'}">${l.t}</div>`).join('');
+  document.getElementById('var-li').textContent=step.li===-1?'—':step.li;
+  document.getElementById('var-i').textContent=step.ci===-1?'—':step.ci;
+  document.getElementById('var-phase').textContent=step.vPhase;
+  document.getElementById('var-result').textContent=step.vResult;
+
+  document.querySelectorAll('.code-line').forEach(el=>el.classList.remove('active'));
+  if(step.activeLine){
+    const el=document.querySelector(`.code-line[data-line="${step.activeLine}"]`);
+    if(el)el.classList.add('active');
+  }
+
+  const pct=steps.length<=1?0:(stepIdx/(steps.length-1)*100);
+  document.getElementById('progress-bar').style.width=pct+'%';
+  document.getElementById('step-ctr').textContent=`Step ${stepIdx+1} / ${steps.length}`;
+}
+
+function loadExample(idx){
+  exIdx=idx;stepIdx=0;
+  const ex=EXAMPLES[idx];
+  setScale(ex.intervals.map(x=>[...x]).sort((a,b)=>a[0]-b[0]));
+  steps=generateSteps(ex.intervals.map(x=>[...x]));
+  document.querySelectorAll('.example-tab').forEach((t,i)=>t.classList.toggle('active',i===idx));
+  if(playing)stopPlay();
+  renderStep(steps[0]);
+}
+
+function next(){
+  if(stepIdx<steps.length-1){stepIdx++;renderStep(steps[stepIdx]);}
+  else stopPlay();
+}
+function prev(){if(stepIdx>0){stepIdx--;renderStep(steps[stepIdx]);}}
+function reset(){stopPlay();stepIdx=0;renderStep(steps[0]);}
+
+function togglePlay(){
+  if(playing){stopPlay();}
+  else{
+    playing=true;
+    document.getElementById('play-btn').textContent='⏸ Pause';
+    document.getElementById('play-btn').classList.add('on');
+    timer=setInterval(()=>{
+      if(stepIdx<steps.length-1)next();
+      else stopPlay();
+    },1000);
+  }
+}
+function stopPlay(){
+  playing=false;clearInterval(timer);
+  document.getElementById('play-btn').textContent='▶ Play';
+  document.getElementById('play-btn').classList.remove('on');
+}
+
+const BLUR_LINES=[2,5,6,7,9,10];
+function toggleBlur(){
+  blurred=!blurred;
+  BLUR_LINES.forEach(ln=>{
+    const el=document.querySelector(`.code-line[data-line="${ln}"]`);
+    if(el)el.classList.toggle('blurred',blurred);
+  });
+  document.getElementById('blur-btn').textContent=blurred?'Reveal Code':'Blur Code';
+}
+
+// Build example tabs
+const tabsEl=document.getElementById('example-tabs');
+EXAMPLES.forEach((ex,i)=>{
+  const btn=document.createElement('button');
+  btn.className='example-tab'+(i===0?' active':'');
+  btn.title=ex.desc;
+  btn.textContent=ex.label;
+  btn.onclick=()=>loadExample(i);
+  tabsEl.appendChild(btn);
+});
+
+// Keyboard
+document.addEventListener('keydown',e=>{
+  if(e.key==='ArrowRight')next();
+  else if(e.key==='ArrowLeft')prev();
+  else if(e.key===' '){e.preventDefault();togglePlay();}
+});
+
+loadExample(0);
+</script>
+</body>
+</html>

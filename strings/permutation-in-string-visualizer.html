@@ -1,0 +1,771 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>#567 Permutation in String — DSA X-Ray</title>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Sora:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0d0f14; --surface: #13161d; --surface2: #1a1e28;
+      --surface3: #212638; --border: rgba(255,255,255,0.07);
+      --border-mid: rgba(255,255,255,0.12);
+      --text: #e8eaf0; --text-muted: #6b7280; --text-dim: #3d4251;
+      --accent: #7c6ef5; --green: #34d399; --amber: #fbbf24;
+      --blue: #60a5fa; --red: #f87171; --orange: #fb923c;
+      --mono: 'JetBrains Mono', monospace;
+      --sans: 'Sora', sans-serif;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: var(--bg); color: var(--text); font-family: var(--sans); line-height: 1.6; }
+    body::before {
+      content: '';
+      position: fixed; inset: 0; pointer-events: none; z-index: 0;
+      background-image:
+        linear-gradient(rgba(124,110,245,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(124,110,245,0.03) 1px, transparent 1px);
+      background-size: 40px 40px;
+    }
+    .container { max-width: 920px; margin: 0 auto; padding: 0 20px 60px; position: relative; z-index: 1; }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .section { animation: fadeUp 0.5s ease both; }
+    .section:nth-child(1) { animation-delay: 0.05s; }
+    .section:nth-child(2) { animation-delay: 0.1s; }
+    .section:nth-child(3) { animation-delay: 0.15s; }
+    .section:nth-child(4) { animation-delay: 0.2s; }
+    .section:nth-child(5) { animation-delay: 0.25s; }
+    .section:nth-child(6) { animation-delay: 0.3s; }
+    .section:nth-child(7) { animation-delay: 0.35s; }
+    .section:nth-child(8) { animation-delay: 0.4s; }
+
+    /* ── Header ── */
+    header { padding: 48px 0 32px; border-bottom: 1px solid var(--border); margin-bottom: 40px; }
+    header h1 { font-size: 28px; font-weight: 700; }
+    .badge { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; font-family: var(--mono); text-transform: uppercase; margin-right: 8px; }
+    .badge-medium { background: rgba(251,191,36,0.15); color: var(--amber); border: 1px solid rgba(251,191,36,0.3); }
+    .badge-accent  { background: rgba(124,110,245,0.12); color: var(--accent); border: 1px solid rgba(124,110,245,0.25); }
+    .pills { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 10px; }
+    .pill { background: var(--surface2); border: 1px solid var(--border); border-radius: 20px; padding: 3px 10px; font-size: 11px; color: var(--text-muted); }
+    .back-link { display: inline-flex; align-items: center; gap: 6px; color: var(--text-muted); font-size: 13px; text-decoration: none; margin-bottom: 20px; transition: color 0.2s; }
+    .back-link:hover { color: var(--text); }
+
+    /* ── Cards ── */
+    .card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 24px; margin-bottom: 24px; }
+    .card-title { font-size: 13px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+    .card-title::before { content: ''; display: block; width: 3px; height: 14px; background: var(--accent); border-radius: 2px; }
+
+    /* ── Pattern banner ── */
+    .pattern-banner { background: linear-gradient(135deg, rgba(124,110,245,0.08), rgba(96,165,250,0.04)); border: 1px solid rgba(124,110,245,0.2); border-radius: 12px; padding: 20px 24px; margin-bottom: 24px; }
+    .pattern-name { font-size: 20px; font-weight: 700; color: var(--accent); margin-bottom: 6px; }
+    .pattern-why  { font-size: 14px; color: var(--text-muted); margin-bottom: 14px; line-height: 1.6; }
+    .related-problems { display: flex; gap: 8px; flex-wrap: wrap; }
+    .related-pill { background: var(--surface2); border: 1px solid var(--border); border-radius: 20px; padding: 4px 12px; font-size: 12px; color: var(--text-muted); }
+
+    /* ── Problem statement ── */
+    .problem-text { font-size: 15px; color: var(--text); line-height: 1.7; margin-bottom: 14px; }
+    .analogy { background: var(--surface2); border-left: 3px solid var(--accent); border-radius: 0 8px 8px 0; padding: 12px 16px; font-size: 14px; color: var(--text-muted); font-style: italic; margin-bottom: 18px; }
+    .worked-examples { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; }
+    .worked-ex { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 14px; }
+    .worked-ex-label { font-size: 11px; color: var(--text-muted); font-family: var(--mono); text-transform: uppercase; margin-bottom: 8px; }
+    .worked-ex-io { font-family: var(--mono); font-size: 13px; color: var(--text); line-height: 1.6; }
+    .worked-ex-result { margin-top: 8px; font-size: 12px; font-weight: 600; }
+    .result-true  { color: var(--green); }
+    .result-false { color: var(--red); }
+
+    /* ── Intuition ── */
+    .hint-list { list-style: none; }
+    .hint-list li { padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 14px; color: var(--text-muted); display: flex; gap: 12px; }
+    .hint-list li:last-child { border-bottom: none; }
+    .hint-num { color: var(--accent); font-family: var(--mono); font-weight: 700; min-width: 24px; }
+    .key-trick { background: rgba(251,191,36,0.07); border: 1px solid rgba(251,191,36,0.2); border-radius: 8px; padding: 12px 16px; margin-top: 14px; font-size: 14px; color: var(--amber); }
+
+    /* ── Code block ── */
+    .code-toggle { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+    .blur-btn { background: var(--surface2); border: 1px solid var(--border-mid); border-radius: 8px; padding: 6px 14px; font-size: 12px; color: var(--text-muted); cursor: pointer; font-family: var(--sans); transition: all 0.2s; }
+    .blur-btn:hover { border-color: var(--accent); color: var(--text); }
+    .code-wrap { background: var(--surface2); border-radius: 8px; padding: 20px; overflow-x: auto; }
+    .code-wrap pre { font-family: var(--mono); font-size: 13px; line-height: 1.8; }
+    .blur-line { transition: filter 0.3s; }
+    .blurred .blur-line { filter: blur(5px); user-select: none; }
+    .kw { color: #c792ea; } .fn { color: #82aaff; } .str { color: #c3e88d; }
+    .num { color: #f78c6c; } .cmt { color: #546e7a; font-style: italic; }
+    .var { color: var(--text); } .op { color: #89ddff; }
+    .code-line { display: block; padding: 2px 4px; border-radius: 4px; transition: background 0.2s; }
+    .code-line.active { background: rgba(251,191,36,0.12); border-left: 2px solid var(--amber); padding-left: 10px; }
+
+    /* ── Visualizer ── */
+    .example-selector { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px; }
+    .ex-btn { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 6px 13px; font-size: 11px; color: var(--text-muted); cursor: pointer; font-family: var(--mono); transition: all 0.2s; }
+    .ex-btn:hover { border-color: var(--accent); }
+    .ex-btn.active { background: rgba(124,110,245,0.12); border-color: var(--accent); color: var(--text); }
+
+    .str-section { background: var(--surface2); border-radius: 8px; padding: 14px; margin-bottom: 10px; }
+    .str-section-label { font-size: 10px; font-family: var(--mono); color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 10px; }
+    .cells { display: flex; gap: 4px; flex-wrap: wrap; }
+    .cell {
+      width: 38px; height: 38px; border-radius: 8px;
+      background: var(--surface3); border: 1px solid var(--border);
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      font-family: var(--mono); font-size: 15px; font-weight: 600; color: var(--text);
+      transition: all 0.25s; position: relative;
+    }
+    .cell .idx { font-size: 9px; color: var(--text-dim); position: absolute; bottom: 2px; right: 4px; }
+    .cell.s1-cell    { background: rgba(124,110,245,0.1);  border-color: rgba(124,110,245,0.3); color: var(--accent); }
+    .cell.win-cell   { background: rgba(251,191,36,0.12);  border-color: rgba(251,191,36,0.45); color: var(--amber); }
+    .cell.match-cell { background: rgba(52,211,153,0.14);  border-color: rgba(52,211,153,0.5);  color: var(--green); }
+    .cell.rem-cell   { background: rgba(248,113,113,0.14); border-color: rgba(248,113,113,0.5); color: var(--red); }
+    .cell.add-cell   { background: rgba(52,211,153,0.14);  border-color: rgba(52,211,153,0.5);  color: var(--green); }
+    .cell.init-cell  { background: rgba(96,165,250,0.08);  border-color: rgba(96,165,250,0.25); color: var(--blue); }
+
+    /* pointer row */
+    .ptr-row { display: flex; gap: 4px; margin-top: 6px; min-height: 18px; }
+    .ptr-lbl { width: 38px; text-align: center; font-size: 10px; font-family: var(--mono); }
+    .ptr-i   { color: var(--blue); }
+    .ptr-j   { color: var(--orange); }
+
+    /* hash compare */
+    .hash-compare { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 12px; }
+    .hash-box { background: var(--surface2); border-radius: 8px; padding: 12px; }
+    .hash-box-title { font-size: 10px; font-family: var(--mono); color: var(--text-muted); text-transform: uppercase; margin-bottom: 8px; }
+    .hash-cells { display: flex; flex-wrap: wrap; gap: 4px; }
+    .hc { background: var(--surface3); border: 1px solid var(--border); border-radius: 6px; padding: 4px 7px; font-family: var(--mono); font-size: 12px; display: flex; flex-direction: column; align-items: center; min-width: 34px; transition: all 0.2s; }
+    .hc .hc-ch  { color: var(--text-muted); font-size: 10px; }
+    .hc .hc-val { color: var(--text); font-weight: 700; font-size: 14px; }
+    .hc.hc-zero { opacity: 0.25; }
+    .hc.hc-match { background: rgba(52,211,153,0.1);  border-color: rgba(52,211,153,0.35); }
+    .hc.hc-diff  { background: rgba(248,113,113,0.1); border-color: rgba(248,113,113,0.35); }
+    .hc.hc-pat   { background: rgba(124,110,245,0.1); border-color: rgba(124,110,245,0.3); }
+
+    .match-ind { text-align: center; margin-top: 10px; font-family: var(--mono); font-size: 13px; font-weight: 600; padding: 8px; border-radius: 8px; }
+    .match-yes     { background: rgba(52,211,153,0.1);  color: var(--green); border: 1px solid rgba(52,211,153,0.3); }
+    .match-no      { background: rgba(248,113,113,0.08); color: var(--red);   border: 1px solid rgba(248,113,113,0.2); }
+    .match-pending { background: var(--surface2); color: var(--text-muted); border: 1px solid var(--border); }
+
+    /* var panel */
+    .var-panel { display: flex; gap: 10px; flex-wrap: wrap; margin: 14px 0; }
+    .var-chip { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 7px 13px; font-family: var(--mono); }
+    .vc-name { font-size: 10px; color: var(--text-muted); }
+    .vc-val  { font-size: 14px; color: var(--text); font-weight: 700; }
+
+    /* step desc */
+    .step-desc { background: var(--surface2); border: 1px solid var(--border-mid); border-radius: 8px; padding: 12px 16px; font-size: 14px; color: var(--text); min-height: 46px; margin-bottom: 10px; }
+    .step-desc em { color: var(--amber); font-style: normal; font-weight: 600; }
+    .phase-badge { display: inline-block; padding: 2px 7px; border-radius: 4px; font-size: 10px; font-weight: 700; font-family: var(--mono); text-transform: uppercase; margin-right: 8px; }
+    .ph-init    { background: rgba(96,165,250,0.15);  color: var(--blue); }
+    .ph-compare { background: rgba(251,191,36,0.15);  color: var(--amber); }
+    .ph-slide   { background: rgba(124,110,245,0.15); color: var(--accent); }
+    .ph-done    { background: rgba(52,211,153,0.15);  color: var(--green); }
+
+    /* log */
+    .exec-log { background: var(--surface2); border-radius: 8px; padding: 12px; font-family: var(--mono); font-size: 12px; max-height: 110px; overflow-y: auto; }
+    .log-line { padding: 2px 0; color: var(--text-muted); border-bottom: 1px solid var(--border); }
+    .log-line:last-child { border-bottom: none; }
+    .log-line.hl { color: var(--text); }
+    .log-tag { color: var(--accent); margin-right: 6px; }
+
+    /* progress */
+    .progress-wrap { background: var(--surface2); border-radius: 4px; height: 4px; margin-bottom: 14px; }
+    .progress-bar  { height: 4px; border-radius: 4px; background: linear-gradient(90deg, var(--amber), var(--orange)); transition: width 0.3s ease; }
+
+    /* controls */
+    .controls { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+    .ctrl-btn { background: var(--surface2); border: 1px solid var(--border-mid); border-radius: 8px; padding: 8px 18px; font-size: 13px; font-weight: 600; color: var(--text-muted); cursor: pointer; font-family: var(--sans); transition: all 0.2s; }
+    .ctrl-btn:hover:not(:disabled) { border-color: var(--accent); color: var(--text); }
+    .ctrl-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+    .ctrl-btn.primary { background: rgba(124,110,245,0.12); border-color: var(--accent); color: var(--text); }
+    .step-counter { font-family: var(--mono); font-size: 12px; color: var(--text-muted); margin-left: auto; }
+
+    /* gotchas / trade-offs */
+    .gotcha-list { list-style: none; }
+    .gotcha-list li { padding: 12px 0; border-bottom: 1px solid var(--border); font-size: 14px; color: var(--text-muted); display: flex; gap: 12px; }
+    .gotcha-list li:last-child { border-bottom: none; }
+    .gotcha-icon { color: var(--red); min-width: 20px; font-size: 16px; }
+    .tradeoff-item { background: var(--surface2); border-radius: 8px; padding: 14px; margin-bottom: 10px; }
+    .tradeoff-label { font-size: 11px; font-family: var(--mono); color: var(--accent); text-transform: uppercase; margin-bottom: 6px; }
+    .tradeoff-text  { font-size: 14px; color: var(--text-muted); }
+    code { color: var(--accent); background: var(--surface3); padding: 1px 5px; border-radius: 4px; font-family: var(--mono); font-size: 0.9em; }
+
+    /* complexity */
+    .complexity-table { width: 100%; border-collapse: collapse; margin-bottom: 16px; }
+    .complexity-table th { text-align: left; padding: 10px 14px; background: var(--surface2); font-size: 12px; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; }
+    .complexity-table td { padding: 10px 14px; border-top: 1px solid var(--border); font-size: 14px; font-family: var(--mono); }
+    .complexity-table td:first-child { color: var(--text-muted); }
+    .complexity-table td:nth-child(2) { color: var(--green); font-weight: 700; }
+    .complexity-table td:last-child { color: var(--text-muted); font-size: 12px; font-family: var(--sans); }
+    .mnemonic { background: linear-gradient(135deg, rgba(124,110,245,0.07), rgba(96,165,250,0.04)); border: 1px solid rgba(124,110,245,0.2); border-radius: 10px; padding: 14px 18px; margin-bottom: 14px; }
+    .mnemonic-text { font-size: 15px; font-weight: 600; color: var(--text); margin-bottom: 8px; }
+    .takeaways { list-style: none; }
+    .takeaways li { font-size: 13px; color: var(--text-muted); padding: 4px 0 4px 16px; position: relative; }
+    .takeaways li::before { content: '→'; position: absolute; left: 0; color: var(--accent); }
+
+    @media (max-width: 600px) {
+      .hash-compare { grid-template-columns: 1fr; }
+      .worked-examples { grid-template-columns: 1fr; }
+      header h1 { font-size: 22px; }
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+
+  <!-- ── Header ───────────────────────────────────────────── -->
+  <header class="section">
+    <a href="../index.html" class="back-link">← Back to DSA Hub</a>
+    <div style="margin-bottom:10px;">
+      <span class="badge badge-medium">Medium</span>
+      <span class="badge badge-accent">Sliding Window</span>
+    </div>
+    <h1><span style="color:var(--text-muted);font-weight:400">#567</span> Permutation in String</h1>
+    <div class="pills">
+      <span class="pill">Sliding Window</span>
+      <span class="pill">Fixed Window</span>
+      <span class="pill">Frequency Array</span>
+      <span class="pill">String</span>
+    </div>
+  </header>
+
+  <!-- ── 1. Pattern Banner ─────────────────────────────────── -->
+  <div class="section pattern-banner">
+    <div class="pattern-name">Fixed-Size Sliding Window + Frequency Array</div>
+    <div class="pattern-why">A permutation has the same characters in the same counts — just rearranged. So instead of generating all permutations, maintain a 26-slot frequency array for the current window and compare it against s1's frequency array. Since the window size is fixed (= s1.length), sliding is O(1): remove the leftmost char, add the rightmost.</div>
+    <div class="related-problems">
+      <span class="related-pill">#438 Find All Anagrams in a String</span>
+      <span class="related-pill">#76 Minimum Window Substring</span>
+      <span class="related-pill">#3 Longest Substring Without Repeating</span>
+    </div>
+  </div>
+
+  <!-- ── 2. Problem Statement ──────────────────────────────── -->
+  <div class="section card">
+    <div class="card-title">Problem Statement</div>
+    <p class="problem-text">Given two strings <code>s1</code> and <code>s2</code>, return <strong>true</strong> if s2 contains a permutation of s1, or <strong>false</strong> otherwise. In other words, one of s1's permutations must be a contiguous substring of s2.</p>
+    <div class="analogy">"Imagine s1 is a handful of scrabble tiles. Slide that exact same set of tiles along s2 one step at a time — if any window of s2 uses the exact same tiles (regardless of order), return true."</div>
+    <div class="worked-examples">
+      <div class="worked-ex">
+        <div class="worked-ex-label">Example 1</div>
+        <div class="worked-ex-io">s1 = "ab"<br>s2 = "eidb<strong style="color:var(--amber)">ao</strong>oo"</div>
+        <div class="worked-ex-result result-true">✓ true — window "ao" matches {a:1,b:0}?... wait: "ba" at index 3-4</div>
+      </div>
+      <div class="worked-ex">
+        <div class="worked-ex-label">Example 2</div>
+        <div class="worked-ex-io">s1 = "ab"<br>s2 = "eidboaoo"</div>
+        <div class="worked-ex-result result-false">✗ false — 'a' and 'b' never appear adjacent</div>
+      </div>
+      <div class="worked-ex">
+        <div class="worked-ex-label">Edge: single char</div>
+        <div class="worked-ex-io">s1 = "a"<br>s2 = "a"</div>
+        <div class="worked-ex-result result-true">✓ true — window size 1, exact match</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── 3. Intuition + Hints ──────────────────────────────── -->
+  <div class="section card">
+    <div class="card-title">Intuition + Hints</div>
+    <ul class="hint-list">
+      <li><span class="hint-num">1</span><span>Brute force: generate all permutations of s1, check if any is a substring of s2. O(k! · n) — catastrophically slow even for k=10.</span></li>
+      <li><span class="hint-num">2</span><span>Key insight: two strings are permutations of each other if and only if they have the exact same character frequency distribution.</span></li>
+      <li><span class="hint-num">3</span><span>So the question becomes: does any window of size <code>s1.length</code> in s2 have the same frequency map as s1? Fixed window → classic sliding window.</span></li>
+      <li><span class="hint-num">4</span><span>Initialize both frequency arrays for the first window, then slide: decrement the leaving char, increment the arriving char. O(1) per slide.</span></li>
+      <li><span class="hint-num">5</span><span>Compare the two 26-element arrays once per window position — that's O(26) = O(1). Total: O(n) time, O(1) space.</span></li>
+    </ul>
+    <div class="key-trick">Key Trick: <code>charCodeAt(k) - 'a'.charCodeAt(0)</code> maps any lowercase letter to index [0, 25]. A 26-slot int array is a perfect, collision-free hash for lowercase ASCII strings.</div>
+  </div>
+
+  <!-- ── 4. Code Block ─────────────────────────────────────── -->
+  <div class="section card">
+    <div class="card-title">Solution Code</div>
+    <div class="code-toggle">
+      <span style="font-size:12px;color:var(--text-muted)">Active Recall mode — blur hides core logic. Active line is highlighted during visualization.</span>
+      <button class="blur-btn" id="blurToggle" onclick="toggleBlur()">Reveal Code</button>
+    </div>
+    <div class="code-wrap blurred" id="codeBlock">
+      <pre><span class="code-line" data-line="1"><span class="cmt">/**</span></span>
+<span class="code-line" data-line="2"><span class="cmt"> * @param {string} s1</span></span>
+<span class="code-line" data-line="3"><span class="cmt"> * @param {string} s2</span></span>
+<span class="code-line" data-line="4"><span class="cmt"> * @return {boolean}</span></span>
+<span class="code-line" data-line="5"><span class="cmt"> */</span></span>
+<span class="code-line" data-line="6"><span class="kw">var</span> <span class="fn">checkInclusion</span> <span class="op">=</span> <span class="kw">function</span>(<span class="var">s1</span>, <span class="var">s2</span>) {</span>
+<span class="code-line blur-line" data-line="7">    <span class="kw">let</span> <span class="var">window</span> <span class="op">=</span> <span class="var">s1</span>.<span class="var">length</span></span>
+<span class="code-line blur-line" data-line="8">    <span class="kw">let</span> <span class="var">hashW</span> <span class="op">=</span> <span class="kw">new</span> <span class="fn">Array</span>(<span class="num">26</span>).<span class="fn">fill</span>(<span class="num">0</span>)</span>
+<span class="code-line blur-line" data-line="9">    <span class="kw">let</span> <span class="var">hashM</span> <span class="op">=</span> <span class="kw">new</span> <span class="fn">Array</span>(<span class="num">26</span>).<span class="fn">fill</span>(<span class="num">0</span>)</span>
+<span class="code-line blur-line" data-line="10">    <span class="kw">for</span> (<span class="kw">let</span> <span class="var">k</span> <span class="op">=</span> <span class="num">0</span>; <span class="var">k</span> <span class="op">&lt;</span> <span class="var">window</span>; <span class="var">k</span><span class="op">++</span>) {</span>
+<span class="code-line blur-line" data-line="11">        <span class="kw">let</span> <span class="var">indexM</span> <span class="op">=</span> <span class="var">s1</span>.<span class="fn">charCodeAt</span>(<span class="var">k</span>) <span class="op">-</span> <span class="str">'a'</span>.<span class="fn">charCodeAt</span>(<span class="num">0</span>)</span>
+<span class="code-line blur-line" data-line="12">        <span class="kw">let</span> <span class="var">indexW</span> <span class="op">=</span> <span class="var">s2</span>.<span class="fn">charCodeAt</span>(<span class="var">k</span>) <span class="op">-</span> <span class="str">'a'</span>.<span class="fn">charCodeAt</span>(<span class="num">0</span>)</span>
+<span class="code-line blur-line" data-line="13">        <span class="var">hashM</span>[<span class="var">indexM</span>] <span class="op">+=</span> <span class="num">1</span></span>
+<span class="code-line blur-line" data-line="14">        <span class="var">hashW</span>[<span class="var">indexW</span>] <span class="op">+=</span> <span class="num">1</span></span>
+<span class="code-line blur-line" data-line="15">    }</span>
+<span class="code-line blur-line" data-line="16">    <span class="kw">let</span> <span class="var">i</span> <span class="op">=</span> <span class="num">0</span></span>
+<span class="code-line blur-line" data-line="17">    <span class="kw">let</span> <span class="var">j</span> <span class="op">=</span> <span class="var">s1</span>.<span class="var">length</span> <span class="op">-</span> <span class="num">1</span></span>
+<span class="code-line blur-line" data-line="18">    <span class="kw">while</span> (<span class="var">j</span> <span class="op">&lt;</span> <span class="var">s2</span>.<span class="var">length</span>) {</span>
+<span class="code-line blur-line" data-line="19">        <span class="kw">if</span> (<span class="fn">isSameHash</span>(<span class="var">hashW</span>, <span class="var">hashM</span>)) {</span>
+<span class="code-line blur-line" data-line="20">            <span class="kw">return</span> <span class="kw">true</span></span>
+<span class="code-line blur-line" data-line="21">        } <span class="kw">else</span> {</span>
+<span class="code-line blur-line" data-line="22">            <span class="var">hashW</span>[<span class="var">s2</span>.<span class="fn">charCodeAt</span>(<span class="var">i</span>) <span class="op">-</span> <span class="str">'a'</span>.<span class="fn">charCodeAt</span>(<span class="num">0</span>)] <span class="op">-=</span> <span class="num">1</span></span>
+<span class="code-line blur-line" data-line="23">            <span class="var">i</span><span class="op">++</span></span>
+<span class="code-line blur-line" data-line="24">            <span class="var">j</span><span class="op">++</span></span>
+<span class="code-line blur-line" data-line="25">            <span class="var">hashW</span>[<span class="var">s2</span>.<span class="fn">charCodeAt</span>(<span class="var">j</span>) <span class="op">-</span> <span class="str">'a'</span>.<span class="fn">charCodeAt</span>(<span class="num">0</span>)] <span class="op">+=</span> <span class="num">1</span></span>
+<span class="code-line blur-line" data-line="26">        }</span>
+<span class="code-line blur-line" data-line="27">    }</span>
+<span class="code-line blur-line" data-line="28">    <span class="kw">return</span> <span class="kw">false</span></span>
+<span class="code-line" data-line="29">}</span>
+<span class="code-line" data-line="30"></span>
+<span class="code-line" data-line="31"><span class="kw">function</span> <span class="fn">isSameHash</span>(<span class="var">hash1</span>, <span class="var">hash2</span>) {</span>
+<span class="code-line blur-line" data-line="32">    <span class="kw">let</span> <span class="var">hashS1</span> <span class="op">=</span> <span class="str">''</span></span>
+<span class="code-line blur-line" data-line="33">    <span class="kw">let</span> <span class="var">hashS2</span> <span class="op">=</span> <span class="str">''</span></span>
+<span class="code-line blur-line" data-line="34">    <span class="kw">for</span> (<span class="kw">let</span> <span class="var">i</span> <span class="op">=</span> <span class="num">0</span>; <span class="var">i</span> <span class="op">&lt;</span> <span class="num">26</span>; <span class="var">i</span><span class="op">++</span>) {</span>
+<span class="code-line blur-line" data-line="35">        <span class="var">hashS1</span> <span class="op">+=</span> <span class="str">'#'</span> <span class="op">+</span> <span class="var">hash1</span>[<span class="var">i</span>]</span>
+<span class="code-line blur-line" data-line="36">        <span class="var">hashS2</span> <span class="op">+=</span> <span class="str">'#'</span> <span class="op">+</span> <span class="var">hash2</span>[<span class="var">i</span>]</span>
+<span class="code-line blur-line" data-line="37">    }</span>
+<span class="code-line blur-line" data-line="38">    <span class="kw">return</span> <span class="var">hashS1</span> <span class="op">==</span> <span class="var">hashS2</span></span>
+<span class="code-line" data-line="39">}</span></pre>
+    </div>
+  </div>
+
+  <!-- ── 5. Interactive Visualizer ────────────────────────── -->
+  <div class="section card">
+    <div class="card-title">Interactive Visualizer</div>
+
+    <div class="example-selector" id="exSelector">
+      <button class="ex-btn active" onclick="selectEx(0)">Ex 1: "ab" / "eidbaooo" → true</button>
+      <button class="ex-btn" onclick="selectEx(1)">Ex 2: "ab" / "eidboaoo" → false</button>
+      <button class="ex-btn" onclick="selectEx(2)">Ex 3: "abc" / "bbbca" → true</button>
+      <button class="ex-btn" onclick="selectEx(3)">Ex 4: "a" / "a" → true</button>
+      <button class="ex-btn" onclick="selectEx(4)">Ex 5: "adc" / "dcda" → true</button>
+    </div>
+
+    <!-- s1 -->
+    <div class="str-section">
+      <div class="str-section-label">s1 — pattern to find permutation of</div>
+      <div class="cells" id="s1Cells"></div>
+    </div>
+
+    <!-- s2 -->
+    <div class="str-section">
+      <div class="str-section-label">s2 — string to search in</div>
+      <div class="cells" id="s2Cells"></div>
+      <div class="ptr-row" id="ptrRow"></div>
+    </div>
+
+    <!-- Hash comparison -->
+    <div class="hash-compare">
+      <div class="hash-box">
+        <div class="hash-box-title">hashW — current window in s2</div>
+        <div class="hash-cells" id="hashWCells"></div>
+      </div>
+      <div class="hash-box">
+        <div class="hash-box-title">hashM — s1 pattern frequency</div>
+        <div class="hash-cells" id="hashMCells"></div>
+      </div>
+    </div>
+
+    <div class="match-ind match-pending" id="matchInd">—</div>
+
+    <!-- Variable panel -->
+    <div class="var-panel">
+      <div class="var-chip"><div class="vc-name">i</div><div class="vc-val" id="varI">—</div></div>
+      <div class="var-chip"><div class="vc-name">j</div><div class="vc-val" id="varJ">—</div></div>
+      <div class="var-chip"><div class="vc-name">window</div><div class="vc-val" id="varW">—</div></div>
+      <div class="var-chip"><div class="vc-name">phase</div><div class="vc-val" id="varPhase">—</div></div>
+      <div class="var-chip"><div class="vc-name">result</div><div class="vc-val" id="varResult">—</div></div>
+    </div>
+
+    <!-- Progress -->
+    <div class="progress-wrap">
+      <div class="progress-bar" id="progBar" style="width:0%"></div>
+    </div>
+
+    <!-- Step desc -->
+    <div class="step-desc" id="stepDesc">Select an example and press Next → or Play</div>
+
+    <!-- Exec log -->
+    <div class="exec-log" id="execLog">
+      <div class="log-line"><span class="log-tag">▷</span>Ready</div>
+    </div>
+
+    <!-- Controls -->
+    <div class="controls" style="margin-top:14px;">
+      <button class="ctrl-btn" id="btnReset" onclick="doReset()">↺ Reset</button>
+      <button class="ctrl-btn" id="btnPrev"  onclick="doPrev()" disabled>← Prev</button>
+      <button class="ctrl-btn primary" id="btnNext" onclick="doNext()">Next →</button>
+      <button class="ctrl-btn" id="btnPlay" onclick="togglePlay()">▶ Play</button>
+      <span class="step-counter" id="stepCtr">0 / 0</span>
+    </div>
+    <p style="font-size:11px;color:var(--text-dim);margin-top:8px;">Keyboard: ← → to step, Space to play/pause</p>
+  </div>
+
+  <!-- ── 6. Gotchas ────────────────────────────────────────── -->
+  <div class="section card">
+    <div class="card-title">Gotchas &amp; Common Pitfalls</div>
+    <ul class="gotcha-list">
+      <li>
+        <span class="gotcha-icon">⚠</span>
+        <span><strong style="color:var(--text)">Out-of-bounds slide:</strong> When <code>j = s2.length - 1</code> and no match, the code does <code>j++</code> then reads <code>s2.charCodeAt(j)</code> at an invalid index. In JavaScript this returns <code>NaN</code>, so <code>hashW[NaN] += 1</code> writes to a named property and doesn't corrupt the array — but it's a latent bug. Safer: add a <code>if (j + 1 &lt; s2.length)</code> guard before sliding.</span>
+      </li>
+      <li>
+        <span class="gotcha-icon">⚠</span>
+        <span><strong style="color:var(--text)">j initialization:</strong> <code>j</code> starts at <code>s1.length - 1</code>, not <code>s1.length</code>. The first window is <code>[0, s1.length-1]</code> — zero-indexed and fully populated before any comparison. Getting this wrong shifts every window by one.</span>
+      </li>
+      <li>
+        <span class="gotcha-icon">⚠</span>
+        <span><strong style="color:var(--text)">Shadowing the global <code>window</code>:</strong> The variable name <code>window</code> shadows the browser's global <code>Window</code> object. It works here because the global is never accessed, but in a larger codebase or interview context it's worth flagging. Consider <code>winSize</code> or <code>k</code> instead.</span>
+      </li>
+    </ul>
+  </div>
+
+  <!-- ── 7. Trade-offs ─────────────────────────────────────── -->
+  <div class="section card">
+    <div class="card-title">Trade-offs &amp; Alternatives</div>
+    <div class="tradeoff-item">
+      <div class="tradeoff-label">Why not sort each window?</div>
+      <div class="tradeoff-text">Sorting a window of size k costs O(k log k). Doing that for each of the O(n) windows = O(nk log k) total. Frequency array comparison is O(26) = O(1) per window → O(n) total. The frequency array wins decisively for larger alphabets too if you cap the alphabet size.</div>
+    </div>
+    <div class="tradeoff-item">
+      <div class="tradeoff-label">Stringification vs element-wise compare in isSameHash</div>
+      <div class="tradeoff-text">The solution concatenates arrays into strings (<code>'#' + hash[i]</code>) and compares strings. This is technically O(26) string allocations per call. An element-wise <code>for</code> loop with early exit is faster in practice because it can short-circuit. Both are O(1) asymptotically since the alphabet is bounded.</div>
+    </div>
+    <div class="tradeoff-item">
+      <div class="tradeoff-label">Could use a "match counter" optimization</div>
+      <div class="tradeoff-text">An alternative approach (common in #438) tracks how many of the 26 character counts currently match between the two arrays. Only update that counter when sliding. This reduces the per-window comparison from O(26) to O(1), though both are effectively constant.</div>
+    </div>
+  </div>
+
+  <!-- ── 8. Complexity ─────────────────────────────────────── -->
+  <div class="section card">
+    <div class="card-title">Complexity + Memory Hooks</div>
+    <table class="complexity-table">
+      <thead><tr><th>Metric</th><th>Value</th><th>Reason</th></tr></thead>
+      <tbody>
+        <tr><td>Time</td><td>O(n)</td><td>One pass over s2 (n = s2.length); O(26) = O(1) comparison per step</td></tr>
+        <tr><td>Space</td><td>O(1)</td><td>Two fixed-size arrays of 26 integers — alphabet-bounded</td></tr>
+        <tr><td>Init</td><td>O(k)</td><td>k = s1.length; building the first window</td></tr>
+      </tbody>
+    </table>
+    <div class="mnemonic">
+      <div class="mnemonic-text">"Slide a same-size window, keep a frequency tally — matching tallies = permutation."</div>
+    </div>
+    <ul class="takeaways">
+      <li>Permutation ≡ same frequency profile — you never need to enumerate all arrangements.</li>
+      <li>Fixed window size is the signal to use the fixed sliding window pattern.</li>
+      <li>A 26-int array is O(1) space <em>and</em> O(1) comparison for any lowercase-only problem.</li>
+    </ul>
+  </div>
+
+</div>
+
+<script>
+// ── Examples ──────────────────────────────────────────────────────────────
+const EXAMPLES = [
+  { s1: 'ab',  s2: 'eidbaooo' },
+  { s1: 'ab',  s2: 'eidboaoo' },
+  { s1: 'abc', s2: 'bbbca'    },
+  { s1: 'a',   s2: 'a'        },
+  { s1: 'adc', s2: 'dcda'     },
+];
+
+// ── Step Generator ────────────────────────────────────────────────────────
+function sameHashFn(h1, h2) {
+  let s1 = '', s2 = '';
+  for (let i = 0; i < 26; i++) { s1 += '#' + h1[i]; s2 += '#' + h2[i]; }
+  return s1 === s2;
+}
+
+function genSteps(s1, s2) {
+  const steps = [];
+  const win = s1.length;
+  const hashW = new Array(26).fill(0);
+  const hashM = new Array(26).fill(0);
+
+  // Step 0: declare variables
+  steps.push({
+    phase: 'init', line: 7,
+    desc: `Declare: <em>window = ${win}</em>, hashW and hashM initialized to zeros (26 slots each).`,
+    log: [{ t: `window = s1.length = ${win}`, h: false }, { t: `hashW = hashM = Array(26).fill(0)`, h: false }],
+    i: 0, j: win - 1, k: -1,
+    hashW: [...hashW], hashM: [...hashM], match: null, rem: null, add: null
+  });
+
+  // Init loop
+  for (let k = 0; k < win; k++) {
+    const idxM = s1.charCodeAt(k) - 97;
+    const idxW = s2.charCodeAt(k) - 97;
+    hashM[idxM]++;
+    hashW[idxW]++;
+    steps.push({
+      phase: 'init', line: 13,
+      desc: `Init k=<em>${k}</em>: s1[${k}]='<em>${s1[k]}</em>' → hashM[${idxM}]=${hashM[idxM]} &nbsp;|&nbsp; s2[${k}]='<em>${s2[k]}</em>' → hashW[${idxW}]=${hashW[idxW]}`,
+      log: [
+        { t: `s1[${k}]='${s1[k]}' → hashM[${idxM}]=${hashM[idxM]}`, h: true },
+        { t: `s2[${k}]='${s2[k]}' → hashW[${idxW}]=${hashW[idxW]}`, h: false }
+      ],
+      i: 0, j: win - 1, k,
+      hashW: [...hashW], hashM: [...hashM], match: null, rem: null, add: null
+    });
+  }
+
+  let i = 0, j = win - 1;
+
+  // Sliding phase
+  while (j < s2.length) {
+    const same = sameHashFn(hashW, hashM);
+
+    steps.push({
+      phase: 'compare', line: 19,
+      desc: same
+        ? `Window s2[${i}..${j}] = "<em>${s2.slice(i, j + 1)}</em>" — <em>isSameHash → true</em>! Permutation found.`
+        : `Window s2[${i}..${j}] = "<em>${s2.slice(i, j + 1)}</em>" — isSameHash → false. Slide right.`,
+      log: [{ t: same ? `✓ isSameHash(hashW, hashM) = true → return true` : `✗ isSameHash(hashW, hashM) = false → slide`, h: true }],
+      i, j,
+      hashW: [...hashW], hashM: [...hashM], match: same, rem: null, add: null
+    });
+
+    if (same) break;
+
+    const remChar = s2[i];
+    hashW[s2.charCodeAt(i) - 97]--;
+    i++;
+    j++;
+
+    if (j < s2.length) {
+      const addChar = s2[j];
+      hashW[s2.charCodeAt(j) - 97]++;
+      steps.push({
+        phase: 'slide', line: 22,
+        desc: `Slide: remove '<em>${remChar}</em>' (left), i=${i} &nbsp;|&nbsp; add '<em>${addChar}</em>' (right), j=${j}`,
+        log: [
+          { t: `hashW['${remChar}'] -= 1`, h: true },
+          { t: `i++ → ${i}, j++ → ${j}`, h: false },
+          { t: `hashW['${addChar}'] += 1`, h: false }
+        ],
+        i, j,
+        hashW: [...hashW], hashM: [...hashM], match: null, rem: remChar, add: addChar
+      });
+    } else {
+      steps.push({
+        phase: 'slide', line: 27,
+        desc: `Slide: removed '<em>${remChar}</em>'. j=${j} ≥ s2.length — while loop exits.`,
+        log: [{ t: `j=${j} >= s2.length=${s2.length} → loop exits`, h: true }],
+        i, j,
+        hashW: [...hashW], hashM: [...hashM], match: null, rem: remChar, add: null
+      });
+    }
+  }
+
+  const found = steps.some(s => s.match === true);
+  steps.push({
+    phase: 'done', line: found ? 20 : 28,
+    desc: found ? `Return <em>true</em> — a permutation of s1 exists in s2.` : `Return <em>false</em> — no permutation found.`,
+    log: [{ t: `return ${found}`, h: true }],
+    i, j,
+    hashW: [...hashW], hashM: [...hashM], match: found, rem: null, add: null
+  });
+
+  return steps;
+}
+
+// ── Helpers ───────────────────────────────────────────────────────────────
+function relevantChars(s1, s2) {
+  return [...new Set([...s1, ...s2])].sort();
+}
+
+// ── Render ────────────────────────────────────────────────────────────────
+function renderS1(s1) {
+  document.getElementById('s1Cells').innerHTML =
+    [...s1].map((c, i) =>
+      `<div class="cell s1-cell">${c}<span class="idx">${i}</span></div>`
+    ).join('');
+}
+
+function renderS2(s2, step) {
+  const win = EXAMPLES[curEx].s1.length;
+  const { i, j, phase, match, rem, add } = step;
+
+  document.getElementById('s2Cells').innerHTML = [...s2].map((c, idx) => {
+    let cls = 'cell';
+    if (phase === 'init') {
+      // highlight cells being initialized (0..win-1)
+      if (idx < win) {
+        cls = step.k !== undefined && step.k >= 0 && idx <= step.k ? 'cell init-cell' : 'cell';
+        if (step.k >= 0 && idx === step.k) cls = 'cell add-cell';
+      }
+    } else {
+      if (idx >= i && idx <= j && j < s2.length) {
+        cls = match === true ? 'cell match-cell' : 'cell win-cell';
+      }
+      if (rem !== null && idx === i - 1) cls = 'cell rem-cell';
+      if (add !== null && idx === j)     cls = 'cell add-cell';
+    }
+    return `<div class="${cls}">${c}<span class="idx">${idx}</span></div>`;
+  }).join('');
+
+  // pointer row
+  document.getElementById('ptrRow').innerHTML = [...s2].map((_, idx) => {
+    if (phase !== 'init') {
+      if (idx === i) return `<div class="ptr-lbl ptr-i" style="width:38px;margin:0 2px;">i</div>`;
+      if (idx === j && j < s2.length) return `<div class="ptr-lbl ptr-j" style="width:38px;margin:0 2px;">j</div>`;
+    }
+    return `<div class="ptr-lbl" style="width:38px;margin:0 2px;"></div>`;
+  }).join('');
+}
+
+function renderHash(hashW, hashM, chars) {
+  document.getElementById('hashWCells').innerHTML = chars.map(c => {
+    const idx = c.charCodeAt(0) - 97;
+    const wv = hashW[idx], mv = hashM[idx];
+    let cls = 'hc';
+    if (wv === 0 && mv === 0) cls += ' hc-zero';
+    else if (wv === mv) cls += ' hc-match';
+    else cls += ' hc-diff';
+    return `<div class="${cls}"><span class="hc-ch">${c}</span><span class="hc-val">${wv}</span></div>`;
+  }).join('');
+
+  document.getElementById('hashMCells').innerHTML = chars.map(c => {
+    const idx = c.charCodeAt(0) - 97;
+    const mv = hashM[idx];
+    let cls = 'hc' + (mv === 0 ? ' hc-zero' : ' hc-pat');
+    return `<div class="${cls}"><span class="hc-ch">${c}</span><span class="hc-val">${mv}</span></div>`;
+  }).join('');
+}
+
+function renderMatchInd(step) {
+  const el = document.getElementById('matchInd');
+  if (step.phase === 'init') {
+    el.className = 'match-ind match-pending';
+    el.textContent = 'Initializing...';
+  } else if (step.phase === 'slide') {
+    el.className = 'match-ind match-pending';
+    el.textContent = 'Sliding window...';
+  } else if (step.match === true) {
+    el.className = 'match-ind match-yes';
+    el.textContent = '✓ isSameHash → true';
+  } else if (step.match === false && step.phase === 'compare') {
+    el.className = 'match-ind match-no';
+    el.textContent = '✗ isSameHash → false';
+  } else if (step.phase === 'done') {
+    el.className = step.match ? 'match-ind match-yes' : 'match-ind match-no';
+    el.textContent = step.match ? '✓ return true' : '✗ return false';
+  } else {
+    el.className = 'match-ind match-pending';
+    el.textContent = '—';
+  }
+}
+
+function renderStep(idx) {
+  const step = steps[idx];
+  if (!step) return;
+
+  const { s1, s2 } = EXAMPLES[curEx];
+  const chars = relevantChars(s1, s2);
+
+  renderS2(s2, step);
+  renderHash(step.hashW, step.hashM, chars);
+  renderMatchInd(step);
+
+  document.getElementById('varI').textContent = step.i;
+  document.getElementById('varJ').textContent = step.j >= s2.length ? `${step.j} (OOB)` : step.j;
+  document.getElementById('varW').textContent = s1.length;
+  document.getElementById('varPhase').textContent = step.phase;
+  document.getElementById('varResult').textContent =
+    step.phase === 'done' ? String(step.match) : '—';
+
+  document.getElementById('stepDesc').innerHTML =
+    `<span class="phase-badge ph-${step.phase}">${step.phase}</span>${step.desc}`;
+
+  const pct = steps.length > 1 ? (idx / (steps.length - 1)) * 100 : 100;
+  document.getElementById('progBar').style.width = pct + '%';
+  document.getElementById('stepCtr').textContent = `${idx + 1} / ${steps.length}`;
+
+  // code highlight
+  document.querySelectorAll('.code-line').forEach(l => l.classList.remove('active'));
+  const al = document.querySelector(`.code-line[data-line="${step.line}"]`);
+  if (al) al.classList.add('active');
+
+  // log
+  if (step.log) step.log.forEach(e => logHist.push(e));
+  const logEl = document.getElementById('execLog');
+  logEl.innerHTML = logHist.slice(-20).map(e =>
+    `<div class="log-line ${e.h ? 'hl' : ''}"><span class="log-tag">▷</span>${e.t}</div>`
+  ).join('');
+  logEl.scrollTop = logEl.scrollHeight;
+
+  document.getElementById('btnPrev').disabled = idx === 0;
+  document.getElementById('btnNext').disabled = idx === steps.length - 1;
+}
+
+// ── Controls ──────────────────────────────────────────────────────────────
+let curEx = 0, steps = [], stepIdx = -1, logHist = [], playTimer = null, playing = false;
+
+function doNext() {
+  if (stepIdx < steps.length - 1) { stepIdx++; renderStep(stepIdx); }
+  else stopPlay();
+}
+function doPrev() {
+  if (stepIdx > 0) {
+    stepIdx--;
+    logHist = [];
+    for (let i = 0; i <= stepIdx; i++)
+      if (steps[i].log) steps[i].log.forEach(e => logHist.push(e));
+    renderStep(stepIdx);
+  }
+}
+function doReset() {
+  stopPlay();
+  stepIdx = 0;
+  logHist = [];
+  if (steps[0]?.log) steps[0].log.forEach(e => logHist.push(e));
+  renderStep(0);
+}
+function togglePlay() {
+  playing ? stopPlay() : startPlay();
+}
+function startPlay() {
+  if (stepIdx >= steps.length - 1) { stepIdx = 0; logHist = []; }
+  playing = true;
+  document.getElementById('btnPlay').textContent = '⏸ Pause';
+  playTimer = setInterval(() => {
+    if (stepIdx < steps.length - 1) doNext();
+    else stopPlay();
+  }, 750);
+}
+function stopPlay() {
+  playing = false;
+  clearInterval(playTimer);
+  document.getElementById('btnPlay').textContent = '▶ Play';
+}
+
+function selectEx(idx) {
+  stopPlay();
+  curEx = idx;
+  document.querySelectorAll('.ex-btn').forEach((b, i) => b.classList.toggle('active', i === idx));
+  const { s1, s2 } = EXAMPLES[idx];
+  steps = genSteps(s1, s2);
+  stepIdx = 0;
+  logHist = [];
+  renderS1(s1);
+  if (steps[0]?.log) steps[0].log.forEach(e => logHist.push(e));
+  renderStep(0);
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight') doNext();
+  if (e.key === 'ArrowLeft')  doPrev();
+  if (e.key === ' ') { e.preventDefault(); togglePlay(); }
+});
+
+// blur toggle
+let isBlurred = true;
+function toggleBlur() {
+  isBlurred = !isBlurred;
+  document.getElementById('codeBlock').classList.toggle('blurred', isBlurred);
+  document.getElementById('blurToggle').textContent = isBlurred ? 'Reveal Code' : 'Blur Code';
+}
+
+// ── Init ──────────────────────────────────────────────────────────────────
+selectEx(0);
+</script>
+</body>
+</html>
